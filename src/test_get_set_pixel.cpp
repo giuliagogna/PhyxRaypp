@@ -4,6 +4,8 @@ import HDRImage;
 import Color;
 import auxiliary_functions;
 
+using namespace test;
+
 int main() {
 
     HDRImage img(6, 10);

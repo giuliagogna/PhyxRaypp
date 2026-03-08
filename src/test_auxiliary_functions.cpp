@@ -2,6 +2,8 @@
 import auxiliary_functions;
 import std;
 
+using namespace test;
+
 int main() {
 
     // Test are_close
