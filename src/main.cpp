@@ -11,14 +11,14 @@ int main(int argc, char **argv) {
     int y=10;
 
     Color pixel_0 = img.get_pixel(x, y);
-    std::println("Colore del pixel [{}{}] predefinito: {}", x, y, pixel_0.to_string());
+    std::println("Colore del pixel [{}{}] predefinito: {}", x, y, pixel_0);
 
     Color c(0.2, 0.4, 6.9);
-    std::println("Colore c: {}", c.to_string());
+    std::println("Colore c: {}", c);
 
     img.set_pixel(x, y, c);
     Color pixel_1 = img.get_pixel(x, y);
-    std::println("Nuovo colore del pixel [{}{}]: {}", x, y, pixel_1.to_string());
+    std::println("Nuovo colore del pixel [{}{}]: {}", x, y, pixel_1);
 
 
 
