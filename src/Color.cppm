@@ -4,34 +4,23 @@ export module Color;
 import std;
 
 export struct Color {
-    float r = 0.f, g = 0.f, b = 0.f;
-    
-    // If assert is not used, I'll just avoid rewriting it
-//    constexpr Color(float red, float green, float blue) : r(red), g(green), b(blue) {
-//        
-//        // I would ask Color members to be defined positive if they represent my data set.
-//        // However, I'm not sure if in intermediate calculations
-//        // every Color object would behave as well.
-//        // Anyway, it gives overhead so I'll probably leave this commented...
-//        
-//        //assert(red >= 0.f &&  green >= 0.f && blue >= 0.f && "Illegal color");
-//    };
+    float r{0.f}, g{0.f}, b {0.f};
 
-    //sum
+    // Sum
     constexpr Color& operator+=(const Color& other) {
         r += other.r;
         g += other.g;
         b += other.b;
         return *this;
     }
-    //sum
+    // Sum
     friend constexpr Color operator+(Color lvalue, const Color& rvalue) {
         lvalue += rvalue;
         return lvalue;
     }
 
 
-    // difference
+    // Difference
     constexpr Color& operator-=(const Color& other) {
         r -= other.r;
         g -= other.g;
@@ -39,7 +28,7 @@ export struct Color {
         return *this;
     }
 
-    // difference
+    // Difference
     friend constexpr Color operator-(Color lvalue, const Color& rvalue) {
         lvalue -= rvalue;
         return lvalue;
@@ -47,9 +36,9 @@ export struct Color {
 
 
     // Commutative and distributive because
-    // it's commutative and ditributive component-wise.
+    // It's commutative and ditributive component-wise.
 
-    // component-wise product
+    // Component-wise product
     constexpr Color& operator*=(const Color& other) {
         r *= other.r;
         g *= other.g;
@@ -57,14 +46,14 @@ export struct Color {
         return *this;
     }
 
-    // component-wise product
+    // Component-wise product
     friend constexpr Color operator*(Color lvalue, const Color& rvalue) {
         lvalue *= rvalue;
         return lvalue;
     }
 
 
-    // product with scalar (float)
+    // Product with scalar (float)
     constexpr Color& operator*=(const float scalar) {
         r *= scalar;
         g *= scalar;
@@ -72,13 +61,13 @@ export struct Color {
         return *this;
     }
 
-    // product with scalar (float)
+    // Product with scalar (float)
     friend constexpr Color operator*(Color lvalue, const float scalar) {
         lvalue *= scalar;
         return lvalue;
     }
 
-    // product with scalar (float)
+    // Product with scalar (float)
     friend constexpr Color operator*(const float scalar, Color rvalue) {
         rvalue *= scalar;
         return rvalue;
@@ -88,7 +77,7 @@ export struct Color {
     // I'll probabliy leave the native /=0 float check to avoid overhead.
     // I'll probably never use it actually.
 
-    // division component-wise (not really interesting)
+    // Division component-wise (not really interesting)
     constexpr Color& operator/=(const Color& other) {
         //assert(other.r != 0.f && other.g != 0.f && other.b != 0.f && "Illegal component-wise division")
         r /= other.r;
@@ -97,7 +86,7 @@ export struct Color {
         return *this;
     }
 
-    // division component-wise (not really interesting)
+    // Division component-wise (not really interesting)
     friend constexpr Color operator/(Color lvalue, const Color& rvalue) {
         lvalue /= rvalue;
         return lvalue;
@@ -106,7 +95,7 @@ export struct Color {
 
     // I'll probabliy leave the native /=0 float check to avoid overhead.
 
-    // division by scalar (float)
+    // Division by scalar (float)
     constexpr Color& operator/=(const float scalar) {
         //assert(scalar != 0.f && "Illegal scalar division")
         float inverse = 1.f / scalar;
@@ -116,14 +105,14 @@ export struct Color {
         return *this;
     }
 
-    // division by scalar (float)
+    // Division by scalar (float)
     friend constexpr Color operator/(Color lvalue, const float scalar) {
         lvalue /= scalar;
         return lvalue;
     }
 
 
-    // modern C++ formatting for I/O and other buffers
+    // Modern C++ formatting for I/O and other buffers
     auto format(const Color& c, std::format_context& ctx) const {
         return std::format_to(ctx.out(), "{:.3f}, {:.3f}, {:.3f}", c.r, c.g, c.b);
     }

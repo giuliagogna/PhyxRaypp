@@ -1,8 +1,10 @@
 #include <cassert>
 import auxiliary_functions;
 import std;
+import TestUtils;
 
 using namespace test;
+using namespace aux;
 
 int main() {
 

@@ -3,8 +3,10 @@ import std;
 import HDRImage;
 import Color;
 import auxiliary_functions;
+import TestUtils;
 
 using namespace test;
+using namespace aux;
 
 int main() {
 
