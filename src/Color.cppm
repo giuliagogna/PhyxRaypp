@@ -1,7 +1,7 @@
 module;
-#include <assert.h>
 export module Color;
 import std;
+import auxiliary_functions;
 
 export struct Color {
     float r{0.f}, g{0.f}, b {0.f};
@@ -109,6 +109,14 @@ export struct Color {
     friend constexpr Color operator/(Color lvalue, const float scalar) {
         lvalue /= scalar;
         return lvalue;
+    }
+
+
+    // Checks if two colors are close (uses are_close from auxiliary_functions)
+    bool is_close(const Color& other) const {
+        return aux::are_close(r, other.r) &&
+               aux::are_close(g, other.g) &&
+               aux::are_close(b, other.b);
     }
 
 

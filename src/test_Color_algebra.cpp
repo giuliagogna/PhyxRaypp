@@ -31,7 +31,7 @@ int main() {
     // Sum
     C = A; C += B;
     check("operator+=", validate(C, {A.r + B.r, A.g + B.g, A.b + B.b}));
-    
+
     check("operator+", validate(A + B, {A.r + B.r, A.g + B.g, A.b + B.b}));
 
     // Subtraction
