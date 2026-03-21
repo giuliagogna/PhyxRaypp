@@ -14,7 +14,7 @@ export namespace test {
     };
 
     // Convert error code to string for error messages
-    std::string_view error_to_string(MathErrorCode error) {
+    std::string error_to_string(MathErrorCode error) {
         switch (error) {
             case MathErrorCode::InvalidValue: return "Invalid Value";
             case MathErrorCode::WrongResult: return "Wrong Result";
@@ -28,7 +28,7 @@ export namespace test {
     };
 
     // Convert format error code to string for error messages
-    std::string_view error_to_string(FormatErrorCode error) {
+    std::string error_to_string(FormatErrorCode error) {
         switch (error) {
             case FormatErrorCode::FormatFault: return "Format Fault";
             default: return "Unknown Format Error";
@@ -36,14 +36,14 @@ export namespace test {
     }
 
     // Float validation
-    auto validate(float actual, float expected) -> std::expected<void, MathErrorCode> {
+    std::expected<void, MathErrorCode> validate(float actual, float expected) {
         if (!std::isfinite(actual)) return std::unexpected(MathErrorCode::InvalidValue);
         if (!are_close(actual, expected)) return std::unexpected(MathErrorCode::WrongResult);
         return {}; // Success (default)
     }
 
     // Color validation
-    auto validate(const Color& actual, const Color& expected) -> std::expected<void, MathErrorCode> {
+    std::expected<void, MathErrorCode> validate(const Color& actual, const Color& expected) {
         if (!std::isfinite(actual.r) || !std::isfinite(actual.g) || !std::isfinite(actual.b)) {
             return std::unexpected(MathErrorCode::InvalidValue);
         }
@@ -58,7 +58,7 @@ export namespace test {
     }
 
     // Formatting validation
-    auto validate(std::string_view actual, std::string_view expected) -> std::expected<void, FormatErrorCode> {
+    std::expected<void, FormatErrorCode> validate(std::string_view actual, std::string_view expected) {
         if (actual != expected) {
             return std::unexpected(FormatErrorCode::FormatFault);
         }

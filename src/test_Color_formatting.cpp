@@ -10,9 +10,9 @@ using namespace aux;
 int main() {
 
     int passed_tests{0}, failed_tests{0};
-    auto check = [&](std::string_view test_name, auto validation_result) {
+    auto check = [&](std::string test_name, auto validation_result) {
         if (!validation_result) {
-            std::string_view error_msg = error_to_string(validation_result.error());
+            std::string error_msg = error_to_string(validation_result.error());
             std::println("Test failed: {} - {}", test_name, error_msg);
             failed_tests++;
         } else {
