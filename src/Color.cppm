@@ -125,6 +125,13 @@ export struct Color {
         return std::format_to(ctx.out(), "{:.3f}, {:.3f}, {:.3f}", c.r, c.g, c.b);
     }
 
+
+    // Luminosity function: now implemented quickly (callable with .luminosity() on a color)
+    // GG: Once the test_Color file is created, test this function
+    [[nodiscard]] float luminosity() const {
+        return (std::max({r, g, b}) + std::min({r, g, b})) / 2.0;
+    }
+
 };
 
 export template <>

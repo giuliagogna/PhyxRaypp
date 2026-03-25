@@ -1,8 +1,8 @@
 module;
 // C-style macros (like assert) must be included in the global module fragment
 #include <cassert>
-#include <cstdint> // includes uint8_t, uint32_t
 #include <fstream>
+#include <cmath>
 
 export module HDRImage;
 
@@ -278,19 +278,6 @@ export struct HDRImage {
 
         HDRImage img(width, height);
 
-        // RP: I readapt the loop fo the new _read_float method that returns an std::expected value
-//        for (int y = height - 1; y >= 0; --y) { // RP: why is the loop following this flow?
-//            for (int x = 0; x < width; ++x) {
-//                // Read the three color channels for the current pixel
-//                float r = _read_float(stream, endianness);
-//                float g = _read_float(stream, endianness);
-//                float b = _read_float(stream, endianness);
-//
-//                // Color the pixel
-//                img.set_pixel(x, y, Color(r, g, b));
-//            }
-//        }
-
         for (int y = height - 1; y >= 0; --y) {
             for (int x = 0; x < width; ++x) {
                 auto r_res = _read_float(stream, endianness);
@@ -306,23 +293,15 @@ export struct HDRImage {
             }
         }
 
-        // 1. Consumiamo eventuali spazi bianchi o newline finali (\n, \r, ' ')
-stream >> std::ws;
+        // Consume final white spaces or end of line characters (\n, \r, ' ')
+        stream >> std::ws;
 
-// 2. Proviamo a sbirciare il prossimo carattere
-if (!stream.eof()) {
-    // Se peek() vede qualcosa che NON è la fine del file, 
-    // significa che c'è della "ciccia" binaria extra.
-    return std::unexpected(InvalidPfmFileFormat{"Unexpected data after reading all pixels."});
-}
-
-//        // Final check on the streaming: if there was a streaming error at step 1, the streaming raises the
-//        // red light and the for loop continues fast filling all the pixels with 0 (default value for _read_float)
-//        // At the end .good() checks if the red light was on and if so raises an error
-//        // This ensures maximum performance and safety
-//        if (!stream.good()) {
-//            return std::unexpected(InvalidPfmFileFormat{"Error in reading binary data: corrupted file."});
-//        }
+        // Try to read the next character
+        if (!stream.eof()) {
+            // If the file is not at the end return this error.
+            // GG: I don't like this being an error, would like to make it a warning
+            return std::unexpected(InvalidPfmFileFormat{"Unexpected data after reading all pixels."});
+        }
 
         // Returned the finished image
         return img;
@@ -424,6 +403,43 @@ if (!stream.eof()) {
 
         // Return void to signal complete success
         return {};
+    }
+
+    // Computes the average luminosity of the picture according to Shirley & Morley (2003) algorithm
+    [[nodiscard]] float average_luminosity(float delta = 1e-10) const {
+
+        float cumsum = 0.0;
+        unsigned int length = pixels.size();
+
+        for (unsigned int i = 0; i < length; i++) {
+            cumsum += log10(pixels[i].luminosity() + delta);
+        }
+
+        return pow(10,cumsum / float(length));
+    }
+
+    // Normalization of the image to adapt to the environment average luminosity
+    void normalize_image(float factor, std::optional<float> luminosity = std::nullopt) {
+
+        // If luminosity does not have a float value (is null), calculate it with the average_luminosity function
+        float actual_luminosity = luminosity.value_or(average_luminosity());
+
+       for (unsigned int i = 0; i < pixels.size(); i++) {
+           pixels[i] = pixels[i] * (factor / actual_luminosity);
+       }
+
+    }
+
+    // Applies the correction for the brightest spots (avoids saturation)
+    void clamp_image() {
+
+        auto clamp_val = [](float x) { return x / (1.0f + x); };
+
+        for (unsigned int i = 0; i < pixels.size(); i++) {
+            pixels[i].r = clamp_val(pixels[i].r);
+            pixels[i].g = clamp_val(pixels[i].g);
+            pixels[i].b = clamp_val(pixels[i].b);
+        }
     }
 
 
