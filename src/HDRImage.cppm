@@ -24,8 +24,8 @@ export struct HDRImage {
     // =========================================================================
     // DATA MEMBERS
     // =========================================================================
-    int width = 0;   // default value
-    int height = 0;  // default value
+    int width{};   // default value
+    int height{};  // default value
     std::vector<Color> pixels{}; // default value: empty vector
 
     // =========================================================================
@@ -33,15 +33,20 @@ export struct HDRImage {
     // =========================================================================
 
     // Default constructor: creates a valid empty image 0x0
-    HDRImage() = default;
+    //HDRImage() = default;  // RP: don't need to be explicitly defaulted, the compiler will generate it for us.
 
     // "Manual" constructor: creates an image of requested dimensions with pixels initialized to 0.
-    HDRImage(int w, int h) : width(w), height(h), pixels(w * h, Color(0.0f, 0.0f, 0.0f)) {}
+    HDRImage(int w, int h) : width(w), height(h), pixels(w * h, Color(0.0f, 0.0f, 0.0f)) {
+        // Control if the dimensions are valid: if not throw an exception
+        if (w <= 0 || h <= 0) {
+            throw std::invalid_argument("Image dimensions must be greater than zero.");
+        }
+    }
 
     // Note: constructor from file is delegated to the static function read_pfm_file that reads a pfm file and returns
     // an HDRImage with its content. This allows the safe construction with expected value
 
-    ~HDRImage() = default;
+    // ~HDRImage() = default;  // RP: don't need to be explicitly defaulted, the compiler will generate it for us.
 
     // =========================================================================
     // PIXEL ACCESS & GEOMETRY
@@ -49,7 +54,7 @@ export struct HDRImage {
 
     // Checks the validity of pixel coordinates.
     // Marked 'const' because it does not modify the image state.
-    // [[nodiscard]] raises a warning if I call _valid_coordinates without saving its output in a variable
+    // [[nodiscard]] raises a warning if I call _valid_coordinates without saving its output in a variable    RP: very cool!
     [[nodiscard]] bool _valid_coordinates(const int x, const int y) const {
         return (x >= 0 && x < width && y >= 0 && y < height);
     }
@@ -86,7 +91,7 @@ export struct HDRImage {
         bool is_native_little = (std::endian::native == std::endian::little);
 
         if (is_file_little != is_native_little) {
-            return std::byteswap(raw_bytes);
+            return std::byteswap(raw_bytes);    // efficiently swaps the byte order of the 32-bit integer
         }
 
         return raw_bytes;
@@ -97,61 +102,92 @@ export struct HDRImage {
     // =========================================================================
 
     // Reads a sequence of 4 bytes from a binary stream and converts it to a float.
-    // Here I do not use expectation values because this function will be used in a massive for loop
-    // and it would slow it down a lot
-    // I will perform a check at the end of the function that reads the pfm
-    static float _read_float(std::istream& stream, Endianness file_endianness) {
-        uint32_t raw_bytes = 0.0f; // default value if the reading fails
+    // GG: Here I do not use expectation values because this function will be used in a massive for loop
+    //     and it would slow it down a lot
+    //     I will perform a check at the end of the function that reads the pfm
 
-        // Note: when we use uint32_t the type is an integer representation with 32 bit (exactly 4 bytes).
-        // The fact that we extract exactly 4 bytes from the stream is ensured by sizeof(raw_bytes) that is the
-        // size of a uint32_t, that is 4.
+    // RP: It's massive but it's done just once. We should avoid overhead just for raytracing calculations,
+    //     but for reading a file that is done just once we can afford to have a more robust function that checks the errors with expected values.
 
-        // Control if the reading of the file fails
+//    static float _read_float(std::istream& stream, Endianness file_endianness) {
+//        // uint32_t raw_bytes = 0.0f; // default value if the reading fails     // RP: nosense. I can just declare it 0 without conversion from float.
+//        uint32_t raw_bytes{}; // devault value will be 0 (representation on 0.0f in bits is 0x00000000, that is also 0 in uint32_t)
+//
+//        // Note: when we use uint32_t the type is an integer representation with 32 bit (exactly 4 bytes).
+//        // The fact that we extract exactly 4 bytes from the stream is ensured by sizeof(raw_bytes) that is the
+//        // size of a uint32_t, that is 4.
+//
+//        // Control if the reading of the file fails
+//        stream.read(reinterpret_cast<char*>(&raw_bytes), sizeof(raw_bytes)); // reinterpret_cast<char*>(&raw_bytes) tells the compiler to treat the address of raw_bytes as a pointer to char (byte)
+//
+//        // stream.read copies the sequence of 4 bytes exactly as it is in the RAM memory
+//        // we need to swap the bytes if the endianness of the file differs from the native endianness
+//        // because then we use bit_cast<float>(raw_bytes) that takes those 4 bytes and tells the OS to
+//        // convert them to float. bit_cast does not know about the endianness of the file we are taking the
+//        // bytes from, and will interpret them with the native endianness of the system: so we need to write
+//        // the bytes in the order expected by the native endianness before interpreting them to float
+//
+//        raw_bytes = _swap_if_needed(raw_bytes, file_endianness);
+//
+//        return std::bit_cast<float>(raw_bytes);
+//    }
+
+    // Reads a sequence of 4 bytes from a binary stream and converts it to a float.
+    // This function is designed to be robust against various file format issues, such as truncated files or invalid data.
+    static std::expected<float, InvalidPfmFileFormat> _read_float(std::istream& stream, Endianness file_endianness) {
+        uint32_t raw_bytes{};
+
+        // Reading 4 bytes from the stream into raw_bytes.
         stream.read(reinterpret_cast<char*>(&raw_bytes), sizeof(raw_bytes));
 
-        // stream.read copies the sequence of 4 bytes exactly as it is in the RAM memory
-        // we need to swap the bytes if the endianness of the file differs from the native endianness
-        // because then we use bit_cast<float>(raw_bytes) that takes those 4 bytes and tells the OS to
-        // convert them to float. bit_cast does not know about the endianness of the file we are taking the
-        // bytes from, and will interpret them with the native endianness of the system: so we need to write
-        // the bytes in the order expected by the native endianness before interpreting them to float
+        // catches file faults and end of file.
+        if (stream.fail()) {
+            if (stream.gcount() > 0 && stream.gcount() < 4) {
+                return std::unexpected(InvalidPfmFileFormat{"Truncated file: expected 4 bytes for a float but only read " + 
+                                       std::to_string(stream.gcount()) + " bytes."});
+            }
+            return std::unexpected(InvalidPfmFileFormat{"Reading error: unable to read 4 bytes for a float."});
+        }
 
+        // Endianness handling
         raw_bytes = _swap_if_needed(raw_bytes, file_endianness);
 
+        // Interpret raw bites with corrrect endianness as a float and return it
         return std::bit_cast<float>(raw_bytes);
     }
 
-    // Extracts a string from the stream up to a newline '\n', handling '\r' gracefully.
+
+    // Reads a line in the header, skipping comments (lines starting with #) and empty lines.
     static std::expected<std::string, InvalidPfmFileFormat> _read_line(std::istream& stream) {
         std::string result;
+        
+        // read till we find a line that is not a comment (starting with #) and not empty (for example an extra newline)
+        while (std::getline(stream, result)) {
+            // remove carriage return \r
+            if (!result.empty() && result.ends_with('\r')) {
+                result.pop_back();
+            }
 
-        // getline uses '\n' as default stop character: it reads each character and attaches it to
-        // the string until '\n' is reached.
-        // getline reads '\n' but it does not include it in the string.
-        // If getline does not encounter '\n' at the end of the line (example end of file) the string is still valid
-        // and rises 'endofbit'
-        // If getline encounters an empty line, that only contains '\n', it extracts '\n' but it does not attach it to
-        // the string end it returns an empty string without raising errors (the extraction was successful)
-        // If getline does not encounter a line (for example tries to read the fifth line in a file that
-        // has four lines, it fails and raises error).
+            // if the line starts with # it is a comment and we skip it (flexibility)
+            if (!result.empty() && result.starts_with('#')) {
+                continue;
+            }
 
-        if (!std::getline(stream, result)) {
-            return std::unexpected(InvalidPfmFileFormat{"Impossible to read line."});
+            // if the line is empty we skip it (for example an extra newline) (flexibility)
+            if (result.empty()) {
+                continue;
+            }
+
+            return result;
         }
 
-        // If the file is downloaded on Windows, the line returns with the character '\r' followed by '\n'.
-        // getline reads '\r' and includes it in the string, but we are not interested in that: pop_back eliminates the
-        // last character, so our line does not contain any '\r'
-
-        if (result.ends_with('\r')) {
-            result.pop_back();
-        }
-
-        return result;
+        return std::unexpected(InvalidPfmFileFormat{"Impossible to read line."});
     }
 
-    // Converts the endianness line to the correspondent Endianness type checking the sign
+    // Converts the endianness line to the correspondent Endianness type checking the sign.
+    // At this point the file is not binary yet, we are still reading the header that is in ASCII, so there is no need to read float
+    // values with _read_float.
+
     static std::expected<Endianness, InvalidPfmFileFormat> _parse_endianness(const std::string& line) {
         std::istringstream stream(line);
         float value;
@@ -172,9 +208,10 @@ export struct HDRImage {
         }
     }
 
+    // Parses the image dimensions from the size line, ensuring correct format and valid values.
     static std::expected<std::pair<int, int>, InvalidPfmFileFormat> _parse_img_size(const std::string& line) {
         std::istringstream stream(line);
-        int parsed_width, parsed_height;
+        int parsed_width{}, parsed_height{};
 
         // stream >> extracts the first value, skips the spacing and extracts the second value
         // the fact that stream >> skips the spaces is useful because our values may be separated ny more than one
@@ -208,16 +245,22 @@ export struct HDRImage {
         return std::make_pair(parsed_width, parsed_height);
     }
 
-    // Reads a PFM from stream
+    /////////////////////////////////////////////////////////////////////////
+    // READING A PFM FILE
+    /////////////////////////////////////////////////////////////////////////
+
+    // Reads a PFM from stream. Handles the entire reading process, including format validation, dimension parsing, endianness handling, and pixel data extraction.
+    // Errors are propagated using std::expected, allowing the caller to handle them gracefully.
     static std::expected<HDRImage, InvalidPfmFileFormat> read_pfm_file(std::istream& stream) {
         auto format = _read_line(stream);
-        if (!format.has_value()) {
+        if (!format.has_value()) { // if the line that should contain the format cannot be read, return the error
             return std::unexpected(format.error());
-        };
+        }
         if (format.value() != "PF") {
             return std::unexpected(InvalidPfmFileFormat{"Non valid format. Expected 'PF' read " + format.value()});
         }
 
+        // Image size line
         auto size_line = _read_line(stream);
         if (!size_line.has_value()) return std::unexpected(size_line.error());
         auto size_res = _parse_img_size(size_line.value());
@@ -225,6 +268,7 @@ export struct HDRImage {
         int width = size_res.value().first;
         int height = size_res.value().second;
 
+        // Endianness line
         auto endian_line_res = _read_line(stream);
         if (!endian_line_res.has_value()) return std::unexpected(endian_line_res.error());
         auto endian_res = _parse_endianness(endian_line_res.value());
@@ -234,25 +278,51 @@ export struct HDRImage {
 
         HDRImage img(width, height);
 
+        // RP: I readapt the loop fo the new _read_float method that returns an std::expected value
+//        for (int y = height - 1; y >= 0; --y) { // RP: why is the loop following this flow?
+//            for (int x = 0; x < width; ++x) {
+//                // Read the three color channels for the current pixel
+//                float r = _read_float(stream, endianness);
+//                float g = _read_float(stream, endianness);
+//                float b = _read_float(stream, endianness);
+//
+//                // Color the pixel
+//                img.set_pixel(x, y, Color(r, g, b));
+//            }
+//        }
+
         for (int y = height - 1; y >= 0; --y) {
             for (int x = 0; x < width; ++x) {
-                // Read the three color channels for the current pixel
-                float r = _read_float(stream, endianness);
-                float g = _read_float(stream, endianness);
-                float b = _read_float(stream, endianness);
+                auto r_res = _read_float(stream, endianness);
+                if (!r_res.has_value()) return std::unexpected(r_res.error());
 
-                // Color the pixel
-                img.set_pixel(x, y, Color(r, g, b));
+                auto g_res = _read_float(stream, endianness);
+                if (!g_res.has_value()) return std::unexpected(g_res.error());
+
+                auto b_res = _read_float(stream, endianness);
+                if (!b_res.has_value()) return std::unexpected(b_res.error());
+
+                img.set_pixel(x, y, Color(r_res.value(), g_res.value(), b_res.value()));
             }
         }
 
-        // Final check on the streaming: if there was a streaming error at step 1, the streaming raises the
-        // red light and the for loop continues fast filling all the pixels with 0 (default value for _read_float)
-        // At the end .good() checks if the red light was on and if so raises an error
-        // This ensures maximum performance and safety
-        if (!stream.good()) {
-            return std::unexpected(InvalidPfmFileFormat{"Error in reading binary data: corrupted file."});
-        }
+        // 1. Consumiamo eventuali spazi bianchi o newline finali (\n, \r, ' ')
+stream >> std::ws;
+
+// 2. Proviamo a sbirciare il prossimo carattere
+if (!stream.eof()) {
+    // Se peek() vede qualcosa che NON è la fine del file, 
+    // significa che c'è della "ciccia" binaria extra.
+    return std::unexpected(InvalidPfmFileFormat{"Unexpected data after reading all pixels."});
+}
+
+//        // Final check on the streaming: if there was a streaming error at step 1, the streaming raises the
+//        // red light and the for loop continues fast filling all the pixels with 0 (default value for _read_float)
+//        // At the end .good() checks if the red light was on and if so raises an error
+//        // This ensures maximum performance and safety
+//        if (!stream.good()) {
+//            return std::unexpected(InvalidPfmFileFormat{"Error in reading binary data: corrupted file."});
+//        }
 
         // Returned the finished image
         return img;
@@ -272,9 +342,6 @@ export struct HDRImage {
         // here read_pfm_file is the function written above that accepts a stream and not a string
         return read_pfm_file(stream_res.value());
     }
-
-
-
 
     // =========================================================================
     // WRITING TO STREAM
@@ -337,7 +404,8 @@ export struct HDRImage {
         return {};
     }
 
-    // Writes a pfm directly on file
+    // Provide file name and endianness, and this function will handle the entire writing process, including file opening,
+    // header writing, pixel data streaming, and error handling with detailed messages.
     [[nodiscard]] std::expected<void, std::string> write_pfm_file(const std::string& filename, Endianness file_endianness) const {
 
         auto stream_res = aux::open_output_file(filename);

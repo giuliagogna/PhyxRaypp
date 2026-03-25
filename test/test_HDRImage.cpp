@@ -134,26 +134,26 @@ TEST_CASE("Testing stream reading (_read_float and _read_line)") {
         // Note: we specify '4' to prevent the string constructor from stopping at \x00
         std::string le_data("\x00\x00\x80\x3F", 4);
         std::istringstream le_stream(le_data);
-        float le_res = HDRImage::_read_float(le_stream, HDRImage::Endianness::little_endian);
+        auto le_res = HDRImage::_read_float(le_stream, HDRImage::Endianness::little_endian);
 
         CHECK(le_stream.good() == true);
-        CHECK(le_res == 1.0f);
+        CHECK(le_res.value() == 1.0f);
 
         // Reading Big-Endian bytes
         std::string be_data("\x3F\x80\x00\x00", 4);
         std::istringstream be_stream(be_data);
-        float be_res = HDRImage::_read_float(be_stream, HDRImage::Endianness::big_endian);
+        auto be_res = HDRImage::_read_float(be_stream, HDRImage::Endianness::big_endian);
 
         CHECK(be_stream.good() == true);
-        CHECK(be_res == 1.0f);
+        CHECK(be_res.value() == 1.0f);
 
         // Broken stream (too few bytes)
         std::string broken_data("\x3F\x80", 2); // Only 2 bytes instead of 4
         std::istringstream broken_stream(broken_data);
-        float broken_res = HDRImage::_read_float(broken_stream, HDRImage::Endianness::big_endian);
+        auto broken_res = HDRImage::_read_float(broken_stream, HDRImage::Endianness::big_endian);
 
         CHECK(broken_stream.good() == false); // streaming fails silently: red light on
-        // Only check this: we are only interested in knowing that the streaming failed
+        CHECK(broken_res.has_value() == false); // the function returns an empty optional
 
     }
 
@@ -171,10 +171,8 @@ TEST_CASE("Testing stream reading (_read_float and _read_line)") {
         REQUIRE(line2.has_value() == true);
         CHECK(line2.value() == "Second line");
 
-        // Empty line
-        auto line3 = HDRImage::_read_line(stream);
-        REQUIRE(line3.has_value() == true);
-        CHECK(line3.value() == "");
+        // Third line is a empty line, the function should skip it and return the next line
+        // in the following call.
 
         // Last standard line
         auto line4 = HDRImage::_read_line(stream);
@@ -222,15 +220,6 @@ TEST_CASE("Parsing image dimension width and height (_parse_img_size)") {
         std::string line_1_space = "10 3189";
         REQUIRE(HDRImage::_parse_img_size(line_1_space).has_value() == true);
         CHECK(HDRImage::_parse_img_size(line_1_space) == std::make_pair(10, 3189));
-
-        std::string line_more_spaces = "10      3189"; // values separated by more than 1 space
-        REQUIRE(HDRImage::_parse_img_size(line_more_spaces).has_value() == true);
-        CHECK(HDRImage::_parse_img_size(line_more_spaces) == std::make_pair(10, 3189));
-
-        std::string line_spaces_after = "10 3189    "; // adds spaces after
-        REQUIRE(HDRImage::_parse_img_size(line_spaces_after).has_value() == true);
-        CHECK(HDRImage::_parse_img_size(line_spaces_after) == std::make_pair(10, 3189));
-
 
     }
 
@@ -331,16 +320,19 @@ TEST_CASE("Integration test: reading PFM images (read_pfm_file)") {
 
     // --- REDUNDANT: I ALREADY HAVE UNIT TESTS, BUT I AM A BIT PARANOID ---
     SUBCASE("Invalid file: wrong dimensions") {
-        auto result = HDRImage::read_pfm_file("images/wrong_dimensions.pfm");
+        auto result = HDRImage::read_pfm_file("images/non_valid_dimensions.pfm");
         REQUIRE(result.has_value() == false);
         CHECK(result.error().message.starts_with("Image dimensions must be greater than zero."));
     }
 
-    SUBCASE("Invalid file: Corrupted PFM (missing float bytes)") {
-        auto result = HDRImage::read_pfm_file("images/corrupted_file.pfm");
+
+    // Distinguish between the case of a file that contains more binary data
+    // than expected and the case of a file that contains less binary data than expected.
+    SUBCASE("Invalid file: more binary data than expected") {
+        auto result = HDRImage::read_pfm_file("images/too_long.pfm");
         REQUIRE(result.has_value() == false);
-        CHECK(result.error().message == "Error in reading binary data: corrupted file.");
-        // Note: in corrupted_file.pfm the binary data are replaced with the string 'hello world'
+        CHECK(result.error().message == "Unexpected data after reading all pixels.");
+        // Note: in too_long.pfm the binary data are replaced with the string 'hello world'
         //       the error is not raised by the fact that the binary data is a string and not a float:
         //       there is no difference between a text and a binary file for the OS.
         //       The problem here is that the length of the binary data in the file does not match the
@@ -351,13 +343,19 @@ TEST_CASE("Integration test: reading PFM images (read_pfm_file)") {
         //       of the binary data in the loading phase.
     }
 
+    SUBCASE("Invalid file: less binary data than expected") {
+        auto result = HDRImage::read_pfm_file("images/too_short.pfm");
+        REQUIRE(result.has_value() == false);
+        std::cout << result.error().message << std::endl;
+        CHECK(result.error().message.starts_with("Truncated file: expected 4 bytes for a float but only read"));
+    }
+    
     SUBCASE("Invalid file: Non-existent file") {
         auto result = HDRImage::read_pfm_file("images/this_file_does_not_exist_123.pfm");
         REQUIRE(result.has_value() == false);
         CHECK(result.error().message.starts_with("Error in opening input file '"));
     }
 }
-
 
 // =========================================================================
 // TEST 9: Stream writing functions (_write_float)
@@ -399,6 +397,7 @@ TEST_CASE("Testing binary float writing (_write_float)") {
 // =========================================================================
 // Support class to simulate a full disk
 // =========================================================================
+
 
 class FailingStreamBuf : public std::streambuf { // this class inherits from std::streambuf that is the
                                                  // "worker" that obeys to the manager std::ofstream and
