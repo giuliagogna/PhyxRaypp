@@ -426,5 +426,15 @@ if (!stream.eof()) {
         return {};
     }
 
-
+    // =========================================================================
+    // WRITING TO PNG. STB_IMAGE_WRITE BASED
+    // =========================================================================
+    
+    // Writes a PNG file from the HDR image data.
+    [[nodiscard]] std::expected<void, std::string> write_png_file(const std::string& filename) const {
+        // Implementation for writing PNG files would go here.
+        // This is a placeholder to indicate where PNG writing logic would be implemented.
+        return std::unexpected("PNG writing not implemented yet.");
+    }
+    
 };

@@ -27,7 +27,6 @@ export struct Color {
         b -= other.b;
         return *this;
     }
-
     // Difference
     friend constexpr Color operator-(Color lvalue, const Color& rvalue) {
         lvalue -= rvalue;
