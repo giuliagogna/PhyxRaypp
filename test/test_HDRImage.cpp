@@ -1,6 +1,6 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
-#include <cstdint> // includes uint8_t, uint32_t
+
 
 // Included libraries to simulate full disk to check the errors in writing files
 #include <streambuf>
@@ -9,6 +9,7 @@
 import std;
 import HDRImage;
 import Color;
+import auxiliary_functions;
 
 // =========================================================================
 // TEST 1: Coordinates validation
@@ -328,25 +329,16 @@ TEST_CASE("Integration test: reading PFM images (read_pfm_file)") {
 
     // Distinguish between the case of a file that contains more binary data
     // than expected and the case of a file that contains less binary data than expected.
+    // GG: Here try to make it a warning and not an error (like in the corresponding function in HDRImage.cppm)
     SUBCASE("Invalid file: more binary data than expected") {
         auto result = HDRImage::read_pfm_file("images/too_long.pfm");
         REQUIRE(result.has_value() == false);
         CHECK(result.error().message == "Unexpected data after reading all pixels.");
-        // Note: in too_long.pfm the binary data are replaced with the string 'hello world'
-        //       the error is not raised by the fact that the binary data is a string and not a float:
-        //       there is no difference between a text and a binary file for the OS.
-        //       The problem here is that the length of the binary data in the file does not match the
-        //       the dimensions declared in the header and the stream fails.
-        //       If a file contains the exact header of a PFM file and then a text which binary
-        //       representation matches exactly the one declared in the header, the user will
-        //       get a noisy image but that is his business, there is no way to check the content
-        //       of the binary data in the loading phase.
     }
 
     SUBCASE("Invalid file: less binary data than expected") {
         auto result = HDRImage::read_pfm_file("images/too_short.pfm");
         REQUIRE(result.has_value() == false);
-        std::cout << result.error().message << std::endl;
         CHECK(result.error().message.starts_with("Truncated file: expected 4 bytes for a float but only read"));
     }
     
@@ -540,5 +532,146 @@ TEST_CASE("Testing write_pfm_file against hardcoded reference bytes") {
 
         // Now this error arises
         CHECK(write_res.error() == "Error in writing pixel colors. Memory full or disconnected.");
+    }
+}
+
+
+// =========================================================================
+// TEST 11: Image average luminosity (average_luminosity)
+// =========================================================================
+
+TEST_CASE("Testing average_luminosity that calculates average luminosity of an HDR image") {
+
+    HDRImage img(2, 1);
+    img.set_pixel(0, 0, Color(  5.0,   10.0,   15.0));  // Luminosity: 10.0
+    img.set_pixel(1, 0, Color(500.0, 1000.0, 1500.0));  // Luminosity: 1000.0
+
+    SUBCASE("Wrong method argument: invalid Color::luminosity_... method passed") {
+        REQUIRE(img.average_luminosity(1.0, "invalid_method").has_value() == false);
+        CHECK(img.average_luminosity(1.0, "invalid_method").error().starts_with("Invalid luminosity type. Expected 'mid_range', 'arithmetic_mean' or 'bt709'.") );
+    }
+
+    SUBCASE("Negative luminosity in a pixel") {
+        img.set_pixel(0, 0, Color(-5.0, 1.0, 2.0)); // Luminosity is negative because of the negative red component
+
+        REQUIRE(img.average_luminosity(1.0, "mid_range").has_value() == false);
+        CHECK(img.average_luminosity(1.0, "mid_range").error().starts_with("Negative luminosity value encountered"));
+    }
+
+    SUBCASE("Average luminosity passing delta=0.0") {
+
+        img.set_pixel(0, 0, Color(  5.0,   10.0,   15.0));  // Luminosity: 10.0
+        REQUIRE(img.average_luminosity(0.0, "mid_range").has_value() == false);
+        CHECK(img.average_luminosity(0.0, "mid_range").error().starts_with("Delta value must be greater than zero to avoid logarithm of zero or negative numbers."));
+    }
+
+    SUBCASE("Average luminosity passing delta=10.0 to a black image") {
+
+        // RP: Img has been modified in the previous tests!!! Need to reset to a dark image
+        // Using img as it is: default constructor initializes all pixels to 0: luminosity of each pixel is 0.0;
+        // Passing delta = 10.0 the expected result 10.0
+        // - first pixel: log10(0.0 + 10.0) = 1.0
+        // - second pixel: log10(0.0 + 10.0) = 1.0
+        // - average_luminosity result = 10^{(1.0 + 1.0)/2.0} = 10^(1.0) = 10.0
+        img.set_pixel(0, 0, Color(0.0, 0.0, 0.0));
+        img.set_pixel(1, 0, Color(0.0, 0.0, 0.0));
+        REQUIRE(img.average_luminosity(10.0, "mid_range").has_value());
+        CHECK(aux::are_close(10.0, img.average_luminosity(10.0, "mid_range").value()));
+    }
+}
+
+// =========================================================================
+// TEST 12: Image normalization (normalize_image)
+// =========================================================================
+
+TEST_CASE("Test normalization of the image (normalize_image)") {
+    HDRImage img(2, 1);
+
+    SUBCASE("Normalize passing the luminosity") {
+
+        img.set_pixel(0, 0, Color(  5.0,   10.0,   15.0));
+        img.set_pixel(1, 0, Color(500.0, 1000.0, 1500.0));
+
+        img.normalize_image(1000.0, 100.0);
+
+        CHECK(img.get_pixel(0, 0).is_close(Color{50.0, 100.0, 150.0}));
+        CHECK(img.get_pixel(1, 0).is_close(Color{5000.0, 10000.0, 15000.0}));
+
+    }
+
+    SUBCASE("Normalize not passing the luminosity") {
+
+        img.set_pixel(0, 0, Color(0.0, 0.0, 0.0));
+        img.set_pixel(1, 0, Color(0.0, 0.0, 0.0));
+
+        img.normalize_image(1000.0, "mid_range", 1.0f);
+
+        CHECK(img.get_pixel(0, 0).is_close(Color{0.0, 0.0, 0.0}));
+        CHECK(img.get_pixel(1, 0).is_close(Color{0.0, 0.0, 0.0}));
+
+    }
+
+}
+
+// =========================================================================
+// TEST 13: Clamping images (clamp_image)
+// =========================================================================
+
+TEST_CASE("Testing image clamping (clamp_image)") {
+    
+    HDRImage img(2,1);
+
+    SUBCASE("Clamping with default parameters (clamping on [0, 1) interval)") {
+        img.set_pixel(0, 0, Color(1.0, 3.0, 7.0));
+        img.set_pixel(1, 0, Color(9.0, 15.0, 19.0));
+
+        img.clamp_image(); // default clamping is on [0, 1) interval
+
+        CHECK(img.get_pixel(0, 0).is_close(Color{0.5, 0.75, 0.875}));
+        CHECK(img.get_pixel(1, 0).is_close(Color{0.9, 0.9375, 0.95}));
+    }
+
+    SUBCASE("Clamping with custom parameters (clamping on [0, 10) interval)") {
+        img.set_pixel(0, 0, Color(1.0f, 3.0f, 7.0f));
+        img.set_pixel(1, 0, Color(9.0f, 15.0f, 19.0f));
+
+        img.clamp_image(10.0); // clamping on [0, 10) interval
+
+        CHECK(img.get_pixel(0, 0).is_close(Color{1.0f * 10.0f / 11.0f, 3.0f * 10.0f / 13.0f, 7.0f * 10.0f / 17.0f}));
+        CHECK(img.get_pixel(1, 0).is_close(Color{9.0f * 10.0f / 19.0f, 15.0f * 10.0f / 25.0f, 19.0f * 10.0f / 29.0f}));
+    }
+}
+
+TEST_CASE("Gamma correction of the image.") {
+    HDRImage img(2, 1);
+
+    SUBCASE("Invalid gamma value (gamma <= 0), uniform") {
+        REQUIRE(img.apply_gamma_correction(0.0001).has_value() == false);
+        CHECK(img.apply_gamma_correction(0.0001).error().starts_with("Gamma value must be greater than zero."));
+    }
+
+    SUBCASE("Invalid gamma value (gamma <= 0), different for each channel") {
+        REQUIRE(img.apply_gamma_correction(1.0f, 0.0f, 2.0f).has_value() == false);
+        CHECK(img.apply_gamma_correction(1.0f, 0.0f, 2.0f).error().starts_with("Gamma value for green channel must be greater than zero."));
+    }
+
+    SUBCASE("Gamma correction with gamma=2.0, uniform") {
+        img.set_pixel(0, 0, Color(0.25f, 0.5f, 0.75f));
+        img.set_pixel(1, 0, Color(1.0f, 1.5f, 2.0f));
+
+        img.apply_gamma_correction(2.0f);
+
+        CHECK(img.get_pixel(0, 0).is_close(Color{0.5f, 0.70710678f, 0.8660254f}));
+        CHECK(img.get_pixel(1, 0).is_close(Color{1.0f, 1.22474487f, 1.41421356f}));
+    }
+
+    SUBCASE("Gamma correction with different gamma values for each channel") {
+        img.set_pixel(0, 0, Color(0.25f, 0.5f, 0.75f));
+        img.set_pixel(1, 0, Color(1.0f, 1.5f, 2.0f));
+
+        img.apply_gamma_correction(2.0f, 3.0f, 4.0f);
+
+        CHECK(img.get_pixel(0, 0).is_close(Color{0.5f, 0.79370053f, 0.93060486f}));
+        CHECK(img.get_pixel(1, 0).is_close(Color{1.0f, 1.14471424f, 1.18920712f}));
     }
 }

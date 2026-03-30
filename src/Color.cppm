@@ -92,7 +92,7 @@ export struct Color {
     }
 
 
-    // I'll probabliy leave the native /=0 float check to avoid overhead.
+    // Using the native /=0 float check to avoid overhead.
 
     // Division by scalar (float)
     constexpr Color& operator/=(const float scalar) {
@@ -112,20 +112,37 @@ export struct Color {
 
 
     // Checks if two colors are close (uses are_close from auxiliary_functions)
-    bool is_close(const Color& other) const {
-        return aux::are_close(r, other.r) &&
-               aux::are_close(g, other.g) &&
-               aux::are_close(b, other.b);
+    bool is_close(const Color& other, float epsilon = 1e-6f) const {
+        return aux::are_close(r, other.r, epsilon) &&
+               aux::are_close(g, other.g, epsilon) &&
+               aux::are_close(b, other.b, epsilon);
     }
 
+    // =========================================================================
+    // LUMINOSITY FUNCTIONS
+    // =========================================================================
 
-    // Modern C++ formatting for I/O and other buffers
-    auto format(const Color& c, std::format_context& ctx) const {
-        return std::format_to(ctx.out(), "{:.3f}, {:.3f}, {:.3f}", c.r, c.g, c.b);
+    // Pixel luminosity
+    
+    /// Mid-range luminosity: (max(r, g, b) + min(r, g, b)) / 2
+    [[nodiscard]] float luminosity_mid_range() const {
+        return (std::max({r, g, b}) + std::min({r, g, b})) / 2.0;
     }
+
+    /// Arithmetic mean luminosity: (r + g + b) / 3
+    [[nodiscard]] float luminosity_arithmetic_mean() const {
+        return (r + g + b) / 3.0;
+    }
+
+    /// BT.709 luminosity: 0.2126 * r + 0.7152 * g + 0.0722 * b
+    [[nodiscard]] float luminosity_bt709() const {
+        return 0.2126f * r + 0.7152f * g + 0.0722f * b;
+    }   
 
 };
 
+
+// Custom formatter for Color to enable std::format support.
 export template <>
 struct std::formatter<Color> {
     std::formatter<float> float_fmt;

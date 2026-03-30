@@ -1,8 +1,8 @@
 module;
 // C-style macros (like assert) must be included in the global module fragment
 #include <cassert>
-#include <cstdint> // includes uint8_t, uint32_t
 #include <fstream>
+#include <cmath>
 
 export module HDRImage;
 
@@ -11,9 +11,19 @@ import Color;
 import auxiliary_functions; // contains open_input_file used in read_pfm_image
 
 
+
+// RP: What if whe just use strings as error values instead of defining a custom struct for the error?
+//     Pros: simpler code, no need to define a custom struct for the error, can use std::format to create detailed error messages on the fly.
+//     For example: in HDRImage::average_luminosity there could be an invalid method atgument or an empty image. I would not say these
+//     error type are the same since they are different errors. In fact, the type I choose is std::expected<float, std::string>.
+
 export struct InvalidPfmFileFormat {
     std::string message;
 };
+
+//export struct InvalidMethodArgument {
+//    std::string message;
+//};
 
 export struct HDRImage {
     // =========================================================================
@@ -278,19 +288,6 @@ export struct HDRImage {
 
         HDRImage img(width, height);
 
-        // RP: I readapt the loop fo the new _read_float method that returns an std::expected value
-//        for (int y = height - 1; y >= 0; --y) { // RP: why is the loop following this flow?
-//            for (int x = 0; x < width; ++x) {
-//                // Read the three color channels for the current pixel
-//                float r = _read_float(stream, endianness);
-//                float g = _read_float(stream, endianness);
-//                float b = _read_float(stream, endianness);
-//
-//                // Color the pixel
-//                img.set_pixel(x, y, Color(r, g, b));
-//            }
-//        }
-
         for (int y = height - 1; y >= 0; --y) {
             for (int x = 0; x < width; ++x) {
                 auto r_res = _read_float(stream, endianness);
@@ -306,23 +303,15 @@ export struct HDRImage {
             }
         }
 
-        // 1. Consumiamo eventuali spazi bianchi o newline finali (\n, \r, ' ')
-stream >> std::ws;
+        // Consume final white spaces or end of line characters (\n, \r, ' ')
+        stream >> std::ws;
 
-// 2. Proviamo a sbirciare il prossimo carattere
-if (!stream.eof()) {
-    // Se peek() vede qualcosa che NON è la fine del file, 
-    // significa che c'è della "ciccia" binaria extra.
-    return std::unexpected(InvalidPfmFileFormat{"Unexpected data after reading all pixels."});
-}
-
-//        // Final check on the streaming: if there was a streaming error at step 1, the streaming raises the
-//        // red light and the for loop continues fast filling all the pixels with 0 (default value for _read_float)
-//        // At the end .good() checks if the red light was on and if so raises an error
-//        // This ensures maximum performance and safety
-//        if (!stream.good()) {
-//            return std::unexpected(InvalidPfmFileFormat{"Error in reading binary data: corrupted file."});
-//        }
+        // Try to read the next character
+        if (!stream.eof()) {
+            // If the file is not at the end return this error.
+            // GG: I don't like this being an error, would like to make it a warning
+            return std::unexpected(InvalidPfmFileFormat{"Unexpected data after reading all pixels."});
+        }
 
         // Returned the finished image
         return img;
@@ -437,4 +426,153 @@ if (!stream.eof()) {
         return std::unexpected("PNG writing not implemented yet.");
     }
     
+    // Computes the average luminosity of the picture according to Shirley & Morley (2003) algorithm
+    // RP: I'm passing from log10 to log2 which is more direct. Since these two logarithms differ by a constant factor log2(10), the final result is the same.
+    //     pf: log2(x) = log10(x) / log10(2) => sum log2(x) = sum log10(x) / log10(2) => 10^(sum log10(x) / N) = 2^(sum log2(x) / N)
+    [[nodiscard]] std::expected<float, std::string> average_luminosity(float delta = 1e-10, std::string luminosity_type = "bt709") const {
+
+        float cumsum = 0.0f;
+
+        float tollerance = 1e-6f; // tolerance for checking if the luminosity value is negative
+        int length = pixels.size();
+        if (!length) {
+            return std::unexpected("Cannot compute average luminosity of an empty image.");
+        }
+        if (delta < tollerance) {
+            return std::unexpected("Delta value must be greater than zero to avoid logarithm of zero or negative numbers. Received: " + std::to_string(delta));
+        }
+
+        float current_pixel_luminosity{};
+
+        // Code duplication, I know, but I don't want to check which is the method via string each time...
+        if (luminosity_type == "mid_range") {
+            for (auto& pixel : pixels) {
+                current_pixel_luminosity = pixel.luminosity_mid_range();
+                if (current_pixel_luminosity < -tollerance) {
+                    return std::unexpected("Negative luminosity value encountered in mid_range method. Luminosity values must be non-negative. Check the pixel values in the image.");
+                }
+                cumsum += log2(current_pixel_luminosity + delta);
+            }
+        } else if (luminosity_type == "arithmetic_mean") {
+            for (auto& pixel : pixels) {
+                current_pixel_luminosity = pixel.luminosity_arithmetic_mean();
+                if (current_pixel_luminosity < -tollerance) {
+                    return std::unexpected("Negative luminosity value encountered in arithmetic_mean method. Luminosity values must be non-negative. Check the pixel values in the image.");
+                }
+                cumsum += log2(current_pixel_luminosity + delta);
+            }
+        } else if (luminosity_type == "bt709") {
+            for (auto& pixel : pixels) {
+                current_pixel_luminosity = pixel.luminosity_bt709();
+                if (current_pixel_luminosity < -tollerance) {
+                    return std::unexpected("Negative luminosity value encountered in bt709 method. Luminosity values must be non-negative. Check the pixel values in the image.");
+                }
+                cumsum += log2(current_pixel_luminosity + delta);
+            }
+        } else {
+            return std::unexpected("Invalid luminosity type. Expected 'mid_range', 'arithmetic_mean' or 'bt709'. Received: " + luminosity_type);
+        }
+
+        return pow(2.0f, cumsum / length);
+    }
+
+    // Linear renormalization of the image luminosity using a manual value
+    std::expected<void, std::string> normalize_image(float normalization, float luminosity) {
+        
+        if (luminosity <= 0.0f) {
+            return std::unexpected("Luminosity value must be greater than zero to perform normalization. Received: " + std::to_string(luminosity));
+        }
+
+        float normalization_factor = normalization / luminosity;
+
+        // exploit iterators
+        for (auto& pixel : pixels) {
+            // exploit scalar multiplication operator Color::operator*(float)
+            pixel = pixel * normalization_factor;
+        }
+
+        return {};
+    }
+
+    // Linear renormalization of the image luminosity by auto-calculating average luminosity
+    std::expected<void, std::string> normalize_image(float normalization, std::string luminosity_type = "bt709", float delta = 1e-10f) {
+
+        // Collects the luminosity value via auto-calculation
+        auto luminosity_res = average_luminosity(delta, luminosity_type);
+        if (!luminosity_res.has_value()) {
+            return std::unexpected("Failed to compute average luminosity for normalization: " + luminosity_res.error());
+        }
+
+        // Call the standard method (avoid code duplication)
+        return normalize_image(normalization, luminosity_res.value());
+    }
+
+    // RP: I just put a denominator shift value as a parameter since this compress the values
+    //     in the range [0, 1) but my wanted normalization could be greater
+
+    
+    /// Non-linear compression of the image luminosity with a simple function that does not require to compute
+    /// the average luminosity of the image and that is applied directly on the pixel values. The function is 
+    /// factor * x / (factor + x) where x is the value of each color component of each pixel. 
+    /// The image is then compressed in the range [0, factor) and the compression is stronger for higher values.
+    std::expected<void, std::string> clamp_image(float factor = 1.0f) {
+        
+
+        // RP: not consistent, we never usaed lambdas around the code
+//        auto clamp_val = [](float x) { return x / (1.0f + x); };
+//
+//        for (unsigned int i = 0; i < pixels.size(); i++) {
+//            pixels[i].r = clamp_val(pixels[i].r);
+//            pixels[i].g = clamp_val(pixels[i].g);
+//            pixels[i].b = clamp_val(pixels[i].b);
+//        }
+
+        Color denominator_shift(factor, factor, factor);
+
+        for (auto& pixel : pixels) {
+            // Exploitation of component-wise division operator Color::operator/(Color)
+            (pixel /= (denominator_shift + pixel)) *= factor;
+        }
+
+        return{};
+    }
+
+    /// Applies gamma correction to the image with a simple power function that does not require to compute
+    /// the average luminosity of the image and that is applied directly on the pixel values.
+    std::expected<void, std::string> apply_gamma_correction(float gamma) {
+        if (gamma <= 0.001f) {
+            return std::unexpected("Gamma value must be greater than zero. Received: " + std::to_string(gamma));
+        }
+
+        float inverse_gamma = 1.0f / gamma;
+
+        for (auto& pixel : pixels) {
+            pixel.r = pow(pixel.r, inverse_gamma);
+            pixel.g = pow(pixel.g, inverse_gamma);
+            pixel.b = pow(pixel.b, inverse_gamma);
+        }
+        return {};
+    }
+    
+    /// Overloeading of the apply_gamma_correction function to allow different gamma values for each color channel.
+    std::expected<void, std::string> apply_gamma_correction(float gamma_r, float gamma_g, float gamma_b) {
+
+        
+        if (gamma_r <= 0.001f) {
+            return std::unexpected("Gamma value for red channel must be greater than zero. Received: " + std::to_string(gamma_r));
+        }
+        if (gamma_g <= 0.001f) {
+            return std::unexpected("Gamma value for green channel must be greater than zero. Received: " + std::to_string(gamma_g));
+        }
+        if (gamma_b <= 0.001f) {
+            return std::unexpected("Gamma value for blue channel must be greater than zero. Received: " + std::to_string(gamma_b));
+        }
+
+        for (auto& pixel : pixels) {
+            pixel.r = pow(pixel.r, 1.0f / gamma_r);
+            pixel.g = pow(pixel.g, 1.0f / gamma_g);
+            pixel.b = pow(pixel.b, 1.0f / gamma_b);
+        }
+        return {};
+    }
 };
