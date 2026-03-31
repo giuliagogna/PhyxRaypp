@@ -30,6 +30,7 @@ TEST_CASE("Testing algebraic operations on Color")
 {
     Color c1{0.2f, 0.4f, 0.6f};
     Color c2{0.1f, 0.3f, 0.5f};
+    float scalar = 2.0f;
 
     // Test addition
 
@@ -73,22 +74,22 @@ TEST_CASE("Testing algebraic operations on Color")
     // Test scalar multiplication
     
     c3 = c1;
-    c3 *= 2.0f;
-    CHECK(aux::are_close(c1.r * 2.0f, c3.r, 1e-5f));
-    CHECK(aux::are_close(c1.g * 2.0f, c3.g, 1e-5f));
-    CHECK(aux::are_close(c1.b * 2.0f, c3.b, 1e-5f));
+    c3 *= scalar;
+    CHECK(aux::are_close(c1.r * scalar, c3.r, 1e-5f));
+    CHECK(aux::are_close(c1.g * scalar, c3.g, 1e-5f));
+    CHECK(aux::are_close(c1.b * scalar, c3.b, 1e-5f));
 
-    c3 = c1 * 2.0f;
-    CHECK(aux::are_close(c1.r * 2.0f, c3.r, 1e-5f));
-    CHECK(aux::are_close(c1.g * 2.0f, c3.g, 1e-5f));
-    CHECK(aux::are_close(c1.b * 2.0f, c3.b, 1e-5f));
+    c3 = c1 * scalar;
+    CHECK(aux::are_close(c1.r * scalar, c3.r, 1e-5f));
+    CHECK(aux::are_close(c1.g * scalar, c3.g, 1e-5f));
+    CHECK(aux::are_close(c1.b * scalar, c3.b, 1e-5f));
 
-    c3 = 2.0f * c1;
-    CHECK(aux::are_close(2.0f * c1.r, c3.r, 1e-5f));
-    CHECK(aux::are_close(2.0f * c1.g, c3.g, 1e-5f));
-    CHECK(aux::are_close(2.0f * c1.b, c3.b, 1e-5f));
+    c3 = scalar * c1;
+    CHECK(aux::are_close(scalar * c1.r, c3.r, 1e-5f));
+    CHECK(aux::are_close(scalar * c1.g, c3.g, 1e-5f));
+    CHECK(aux::are_close(scalar * c1.b, c3.b, 1e-5f));
 
-    // test division
+    // Test division
     
     c3 = c1;
     c3 /= c2;
@@ -101,18 +102,18 @@ TEST_CASE("Testing algebraic operations on Color")
     CHECK(aux::are_close(c1.g / c2.g, c3.g, 1e-5f));
     CHECK(aux::are_close(c1.b / c2.b, c3.b, 1e-5f));
 
-    // check division by scalar
+    // Test division by scalar
 
     c3 = c1;
-    c3 /= 2.0f;
-    CHECK(aux::are_close(c1.r / 2.0f, c3.r, 1e-5f));
-    CHECK(aux::are_close(c1.g / 2.0f, c3.g, 1e-5f));
-    CHECK(aux::are_close(c1.b / 2.0f, c3.b, 1e-5f));
+    c3 /= scalar;
+    CHECK(aux::are_close(c1.r / scalar, c3.r, 1e-5f));
+    CHECK(aux::are_close(c1.g / scalar, c3.g, 1e-5f));
+    CHECK(aux::are_close(c1.b / scalar, c3.b, 1e-5f));
 
-    c3 = c1 / 2.0f;
-    CHECK(aux::are_close(c1.r / 2.0f, c3.r, 1e-5f));
-    CHECK(aux::are_close(c1.g / 2.0f, c3.g, 1e-5f));
-    CHECK(aux::are_close(c1.b / 2.0f, c3.b, 1e-5f));
+    c3 = c1 / scalar;
+    CHECK(aux::are_close(c1.r / scalar, c3.r, 1e-5f));
+    CHECK(aux::are_close(c1.g / scalar, c3.g, 1e-5f));
+    CHECK(aux::are_close(c1.b / scalar, c3.b, 1e-5f));
 
 }
 
@@ -153,7 +154,7 @@ TEST_CASE("Testing Color formatting (std::formatter)")
 }
 
 // =============================================================================
-// Testing Color::luminosity() method
+// Testing Color::luminosity() methods
 // =============================================================================
 
 TEST_CASE("Testing Color luminosity methods")

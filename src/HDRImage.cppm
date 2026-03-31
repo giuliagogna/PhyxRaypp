@@ -184,7 +184,6 @@ export struct HDRImage {
         return std::bit_cast<float>(raw_bytes);
     }
 
-
     // Reads a line in the header, skipping comments (lines starting with #) and empty lines.
     static std::expected<std::string, InvalidPfmFileFormat> _read_line(std::istream& stream) {
         std::string result;
@@ -475,15 +474,13 @@ export struct HDRImage {
     [[nodiscard]] std::expected<float, std::string> average_luminosity(float delta = 1e-10, std::string luminosity_type = "bt709") const {
 
         float cumsum = 0.0f;
-        float tolerance = 1e-6f; // tolerance for checking if the luminosity value is negative
+        float tolerance = 1e-6f; // tolerance for negative luminosity values that may arise from rounding errors.
 
         int length = pixels.size();
         if (!length) {
             return std::unexpected("Cannot compute average luminosity of an empty image.");
         }
-        // GG: consider that delta is default 1e-10. Default value will go always in error.
-        //     No need for tolerance here, delta does not undergo calculations and will not be rounded to negative
-        //     close to zero, by accident
+        
         if (delta <= 0.0f) {
             return std::unexpected("Delta value must be strictly greater than zero to avoid logarithm of zero or negative numbers. Received: " + std::to_string(delta));
         }
@@ -528,7 +525,6 @@ export struct HDRImage {
         return pow(2.0f, cumsum / length);
     }
 
-
     // GG: my old function for normalization does not support different luminosity calculations types
 
 //    // Normalization of the image to adapt to the environment average luminosity
@@ -550,6 +546,10 @@ export struct HDRImage {
     // GG: Honestly not a fan of implementing 2 different functions
     //     Technically not even necessary to have 3 functions to calculate luminosity, given we can stick to the
     //     one suggested by Shirley & Morley (2003)
+
+    // RP: I don't see any problem in having different functions for different luminosity types, it gives
+    //     the user more choice. It's common to have different algs in a single code and pass a string to choose which one to use.
+    //     It was cool to use std::optional but of course the overload is needed if we have different methods (the nullopt value is a problem).
 
     // Renormalization of the image luminosity using a manual value
     std::expected<void, std::string> normalize_image(float normalization, float luminosity) {
@@ -629,7 +629,7 @@ export struct HDRImage {
         return {};
     }
     
-    /// Overloeading of the apply_gamma_correction function to allow different gamma values for each color channel.
+    /// Overloading of the apply_gamma_correction function to allow different gamma values for each color channel.
     std::expected<void, std::string> apply_gamma_correction(float gamma_r, float gamma_g, float gamma_b) {
 
         
