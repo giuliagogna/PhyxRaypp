@@ -123,6 +123,8 @@ export struct Color {
     // =========================================================================
 
     // Pixel luminosity
+    // GG: overkill to implement three functions given we were given as best option the Shirley & Morley (2003)
+    //     suggestion
     
     /// Mid-range luminosity: (max(r, g, b) + min(r, g, b)) / 2
     [[nodiscard]] float luminosity_mid_range() const {

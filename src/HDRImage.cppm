@@ -3,6 +3,7 @@ module;
 #include <cassert>
 #include <fstream>
 #include <cmath>
+#include <stb/stb_image_write.h>
 
 export module HDRImage;
 
@@ -418,28 +419,56 @@ export struct HDRImage {
     // =========================================================================
     // WRITING TO PNG. STB_IMAGE_WRITE BASED
     // =========================================================================
-    
-    // Writes a PNG file from the HDR image data.
-    [[nodiscard]] std::expected<void, std::string> write_png_file(const std::string& filename) const {
-        // Implementation for writing PNG files would go here.
-        // This is a placeholder to indicate where PNG writing logic would be implemented.
-        return std::unexpected("PNG writing not implemented yet.");
+
+    // GG: not convinced about this function, wrote it quickly to have something working
+
+    [[nodiscard]] std::expected<void, std::string> write_ldr_image(const std::string& filename) const {
+        std::vector<uint8_t> image_data(width * height * 3);
+        int index = 0;
+
+        for (int y = 0; y < height; ++y) {
+            for (int x = 0; x < width; ++x) {
+                Color c = get_pixel(x, y);
+
+                // Secure clamping in case of rounding errors: if it encounters negative pixels it clamps
+                // them between 0 and 1 (if negative becomes 0, if >1 becomes 1)
+                float r = std::clamp(c.r, 0.0f, 1.0f);
+                float g = std::clamp(c.g, 0.0f, 1.0f);
+                float b = std::clamp(c.b, 0.0f, 1.0f);
+
+                image_data[index++] = static_cast<uint8_t>(std::round(c.r * 255.0f));
+                image_data[index++] = static_cast<uint8_t>(std::round(c.g * 255.0f));
+                image_data[index++] = static_cast<uint8_t>(std::round(c.b * 255.0f));
+            }
+        }
+
+        int success = stbi_write_png(filename.c_str(), width, height, 3, image_data.data(), width * 3);
+
+        if (!success) {
+            return std::unexpected(std::format("Failed to write LDR PNG image to file '{}'", filename));
+        }
+
+        return {};
     }
-    
+
+
     // Computes the average luminosity of the picture according to Shirley & Morley (2003) algorithm
-    // RP: I'm passing from log10 to log2 which is more direct. Since these two logarithms differ by a constant factor log2(10), the final result is the same.
-    //     pf: log2(x) = log10(x) / log10(2) => sum log2(x) = sum log10(x) / log10(2) => 10^(sum log10(x) / N) = 2^(sum log2(x) / N)
+    // Passing from log10 to log2 which is more direct. Since these two logarithms differ by a constant factor log2(10), the final result is the same.
+    // pf: log2(x) = log10(x) / log10(2) => sum log2(x) = sum log10(x) / log10(2) => 10^(sum log10(x) / N) = 2^(sum log2(x) / N)
     [[nodiscard]] std::expected<float, std::string> average_luminosity(float delta = 1e-10, std::string luminosity_type = "bt709") const {
 
         float cumsum = 0.0f;
+        float tolerance = 1e-6f; // tolerance for checking if the luminosity value is negative
 
-        float tollerance = 1e-6f; // tolerance for checking if the luminosity value is negative
         int length = pixels.size();
         if (!length) {
             return std::unexpected("Cannot compute average luminosity of an empty image.");
         }
-        if (delta < tollerance) {
-            return std::unexpected("Delta value must be greater than zero to avoid logarithm of zero or negative numbers. Received: " + std::to_string(delta));
+        // GG: consider that delta is default 1e-10. Default value will go always in error.
+        //     No need for tolerance here, delta does not undergo calculations and will not be rounded to negative
+        //     close to zero, by accident
+        if (delta <= 0.0f) {
+            return std::unexpected("Delta value must be strictly greater than zero to avoid logarithm of zero or negative numbers. Received: " + std::to_string(delta));
         }
 
         float current_pixel_luminosity{};
@@ -448,25 +477,31 @@ export struct HDRImage {
         if (luminosity_type == "mid_range") {
             for (auto& pixel : pixels) {
                 current_pixel_luminosity = pixel.luminosity_mid_range();
-                if (current_pixel_luminosity < -tollerance) {
+                if (current_pixel_luminosity < -tolerance) {
                     return std::unexpected("Negative luminosity value encountered in mid_range method. Luminosity values must be non-negative. Check the pixel values in the image.");
                 }
+                // If pixel is negative but greater than tolerance, set it to 0.0f: does not enter here if it entered the error
+                if (current_pixel_luminosity < 0.0f) current_pixel_luminosity = 0.0f;
                 cumsum += log2(current_pixel_luminosity + delta);
             }
         } else if (luminosity_type == "arithmetic_mean") {
             for (auto& pixel : pixels) {
                 current_pixel_luminosity = pixel.luminosity_arithmetic_mean();
-                if (current_pixel_luminosity < -tollerance) {
+                if (current_pixel_luminosity < -tolerance) {
                     return std::unexpected("Negative luminosity value encountered in arithmetic_mean method. Luminosity values must be non-negative. Check the pixel values in the image.");
                 }
+                // If pixel is negative but greater than tolerance, set it to 0.0f: does not enter here if it entered the error
+                if (current_pixel_luminosity < 0.0f) current_pixel_luminosity = 0.0f;
                 cumsum += log2(current_pixel_luminosity + delta);
             }
         } else if (luminosity_type == "bt709") {
             for (auto& pixel : pixels) {
                 current_pixel_luminosity = pixel.luminosity_bt709();
-                if (current_pixel_luminosity < -tollerance) {
+                if (current_pixel_luminosity < -tolerance) {
                     return std::unexpected("Negative luminosity value encountered in bt709 method. Luminosity values must be non-negative. Check the pixel values in the image.");
                 }
+                // If pixel is negative but greater than tolerance, set it to 0.0f: does not enter here if it entered the error
+                if (current_pixel_luminosity < 0.0f) current_pixel_luminosity = 0.0f;
                 cumsum += log2(current_pixel_luminosity + delta);
             }
         } else {
@@ -476,7 +511,30 @@ export struct HDRImage {
         return pow(2.0f, cumsum / length);
     }
 
-    // Linear renormalization of the image luminosity using a manual value
+
+    // GG: my old function for normalization does not support different luminosity calculations types
+
+//    // Normalization of the image to adapt to the environment average luminosity
+//    std::expected<void, std::string> normalize_image(float factor, std::optional<float> luminosity = std::nullopt) {
+//
+//        // If luminosity does not have a float value (is null), calculate it with the average_luminosity function
+//        float actual_luminosity = luminosity.value_or(average_luminosity());
+//
+//        if (actual_luminosity < 0.0) {
+//            return std::unexpected("Negative luminosity encountered. Received: " + std::to_string(actual_luminosity));
+//        }
+//
+//        for (unsigned int i = 0; i < pixels.size(); i++) {
+//            pixels[i] = pixels[i] * (factor / actual_luminosity);
+//        }
+//
+//    }
+
+    // GG: Honestly not a fan of implementing 2 different functions
+    //     Technically not even necessary to have 3 functions to calculate luminosity, given we can stick to the
+    //     one suggested by Shirley & Morley (2003)
+
+    // Renormalization of the image luminosity using a manual value
     std::expected<void, std::string> normalize_image(float normalization, float luminosity) {
         
         if (luminosity <= 0.0f) {
@@ -494,7 +552,7 @@ export struct HDRImage {
         return {};
     }
 
-    // Linear renormalization of the image luminosity by auto-calculating average luminosity
+    // Renormalization of the image luminosity by auto-calculating average luminosity
     std::expected<void, std::string> normalize_image(float normalization, std::string luminosity_type = "bt709", float delta = 1e-10f) {
 
         // Collects the luminosity value via auto-calculation
@@ -510,28 +568,28 @@ export struct HDRImage {
     // RP: I just put a denominator shift value as a parameter since this compress the values
     //     in the range [0, 1) but my wanted normalization could be greater
 
-    
-    /// Non-linear compression of the image luminosity with a simple function that does not require to compute
-    /// the average luminosity of the image and that is applied directly on the pixel values. The function is 
-    /// factor * x / (factor + x) where x is the value of each color component of each pixel. 
-    /// The image is then compressed in the range [0, factor) and the compression is stronger for higher values.
+    // GG: Fine on the gamma function. I do not agree on the operations on colors.
+    //     I don't like defining a color just to define the denominator this purpose and having to call a
+    //     function of class color every time, that does exactly what we do with the for loop
+    // IMPORTANT NOTE: WE NEED TO CLAMP BETWEEN 0 AND 1 NOT 0 AND AN ARBITRARY VALUE TO USE STB_WRITE_IMAGE
+
+    /// This function clamps the pixel components between 0 and 1
     std::expected<void, std::string> clamp_image(float factor = 1.0f) {
-        
 
-        // RP: not consistent, we never usaed lambdas around the code
-//        auto clamp_val = [](float x) { return x / (1.0f + x); };
-//
-//        for (unsigned int i = 0; i < pixels.size(); i++) {
-//            pixels[i].r = clamp_val(pixels[i].r);
-//            pixels[i].g = clamp_val(pixels[i].g);
-//            pixels[i].b = clamp_val(pixels[i].b);
-//        }
-
-        Color denominator_shift(factor, factor, factor);
+        if (factor <= 0.0f) {
+            return std::unexpected("Factor needs to be strictly positive. Received: " + std::to_string(factor));
+        }
 
         for (auto& pixel : pixels) {
-            // Exploitation of component-wise division operator Color::operator/(Color)
-            (pixel /= (denominator_shift + pixel)) *= factor;
+
+            if (pixel.r < 0.0f || pixel.g < 0.0f || pixel.b < 0.0f) {
+                return std::unexpected("Found negative pixel value.");
+            }
+
+            pixel.r = (factor * pixel.r) / (factor * pixel.r + 1.0f);
+            pixel.g = (factor * pixel.g) / (factor * pixel.g + 1.0f);
+            pixel.b = (factor * pixel.b) / (factor * pixel.b + 1.0f);
+
         }
 
         return{};

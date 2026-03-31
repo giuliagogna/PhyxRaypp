@@ -72,33 +72,3 @@ for _, file in ipairs(os.files("test/test_*.cpp")) do
 
         add_tests("default")
 end
-
--- ==========================================
--- 4. Test targets -- Color (old infrastructure)
--- ==========================================
---for _, file in ipairs(os.files("src/test_*.cpp")) do
---    local name = path.basename(file)
---    target(name)
---        set_kind("binary")
---        set_default(false) 
---
---        set_rundir("$(projectdir)") 
---
---        -- FIX 3: Added stb to the old tests in case they need to save images during execution
---        add_packages("stb")
---
---        if is_plat("linux") then
---            add_files("/usr/share/libc++/v1/std.cppm", { filetype = "c++.module", headeronly = true })
---        end
---
---        add_files("src/*.cppm") 
---        
---        -- Include all source files along with the specific test file being processed
---        add_files("src/*.cpp")
---        
---        -- Remove the main executable file and all tests *except* the current one
---        remove_files("src/main.cpp")
---        remove_files("src/test_*.cpp|src/" .. name .. ".cpp")
---
---        add_tests("default")
---end

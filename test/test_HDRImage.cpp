@@ -558,21 +558,25 @@ TEST_CASE("Testing average_luminosity that calculates average luminosity of an H
         CHECK(img.average_luminosity(1.0, "mid_range").error().starts_with("Negative luminosity value encountered"));
     }
 
-    SUBCASE("Average luminosity passing delta=0.0") {
+    SUBCASE("Average luminosity passing delta=0.0 or negative") {
+        // Test zero
+        auto result_zero = img.average_luminosity(0.0, "mid_range");
+        REQUIRE_FALSE(result_zero.has_value());
+        CHECK(result_zero.error().starts_with("Delta value must be strictly greater than zero to avoid logarithm of zero or negative numbers."));
 
-        img.set_pixel(0, 0, Color(  5.0,   10.0,   15.0));  // Luminosity: 10.0
-        REQUIRE(img.average_luminosity(0.0, "mid_range").has_value() == false);
-        CHECK(img.average_luminosity(0.0, "mid_range").error().starts_with("Delta value must be greater than zero to avoid logarithm of zero or negative numbers."));
+        // Test negative delta
+        auto result_neg = img.average_luminosity(-2.0, "mid_range");
+        REQUIRE_FALSE(result_neg.has_value());
+        CHECK(result_neg.error().starts_with("Delta value must be strictly greater than zero to avoid logarithm of zero or negative numbers."));
     }
 
     SUBCASE("Average luminosity passing delta=10.0 to a black image") {
 
-        // RP: Img has been modified in the previous tests!!! Need to reset to a dark image
-        // Using img as it is: default constructor initializes all pixels to 0: luminosity of each pixel is 0.0;
+        // Img has been modified in the previous tests!!! Need to reset to a dark image
         // Passing delta = 10.0 the expected result 10.0
-        // - first pixel: log10(0.0 + 10.0) = 1.0
-        // - second pixel: log10(0.0 + 10.0) = 1.0
-        // - average_luminosity result = 10^{(1.0 + 1.0)/2.0} = 10^(1.0) = 10.0
+        // - first pixel: log2(0.0 + 10.0) ≈ 3.3219
+        // - second pixel: log2(0.0 + 10.0) ≈ 3.3219
+        // - average_luminosity result = 2^{(3.3219 + 3.3219)/2.0} = 2^(3.3219) = 10.0
         img.set_pixel(0, 0, Color(0.0, 0.0, 0.0));
         img.set_pixel(1, 0, Color(0.0, 0.0, 0.0));
         REQUIRE(img.average_luminosity(10.0, "mid_range").has_value());
@@ -618,29 +622,53 @@ TEST_CASE("Test normalization of the image (normalize_image)") {
 // =========================================================================
 
 TEST_CASE("Testing image clamping (clamp_image)") {
-    
-    HDRImage img(2,1);
 
-    SUBCASE("Clamping with default parameters (clamping on [0, 1) interval)") {
-        img.set_pixel(0, 0, Color(1.0, 3.0, 7.0));
-        img.set_pixel(1, 0, Color(9.0, 15.0, 19.0));
+    HDRImage img(2, 1);
+    img.set_pixel(0, 0, Color(1.0f, 3.0f, 7.0f));
+    img.set_pixel(1, 0, Color(9.0f, 15.0f, 19.0f));
 
-        img.clamp_image(); // default clamping is on [0, 1) interval
+    SUBCASE("Default clamping with factor 1.0") {
+        auto result = img.clamp_image();
 
-        CHECK(img.get_pixel(0, 0).is_close(Color{0.5, 0.75, 0.875}));
-        CHECK(img.get_pixel(1, 0).is_close(Color{0.9, 0.9375, 0.95}));
+        REQUIRE(result.has_value());
+        CHECK(img.get_pixel(0, 0).is_close(Color{0.5f, 0.75f, 0.875f}));
+        CHECK(img.get_pixel(1, 0).is_close(Color{0.9f, 0.9375f, 0.95f}));
     }
 
-    SUBCASE("Clamping with custom parameters (clamping on [0, 10) interval)") {
-        img.set_pixel(0, 0, Color(1.0f, 3.0f, 7.0f));
-        img.set_pixel(1, 0, Color(9.0f, 15.0f, 19.0f));
+    SUBCASE("Clamping with custom factor (0.5)") {
+        auto result = img.clamp_image(0.5f);
 
-        img.clamp_image(10.0); // clamping on [0, 10) interval
+        CHECK(result.has_value());
 
-        CHECK(img.get_pixel(0, 0).is_close(Color{1.0f * 10.0f / 11.0f, 3.0f * 10.0f / 13.0f, 7.0f * 10.0f / 17.0f}));
-        CHECK(img.get_pixel(1, 0).is_close(Color{9.0f * 10.0f / 19.0f, 15.0f * 10.0f / 25.0f, 19.0f * 10.0f / 29.0f}));
+        // R: 0.5 / 1.5, G: 1.5 / 2.5, B: 3.5 / 4.5
+        CHECK(img.get_pixel(0, 0).is_close(Color{0.5f/1.5f, 1.5f/2.5f, 3.5/4.5}));
+        // R: 4.5 / 5.5, G: 7.5 / 8.5, B: 9.5 / 10.5
+        CHECK(img.get_pixel(1, 0).is_close(Color{4.5f/5.5f, 7.5f/8.5f, 9.5f/10.5f}));
+    }
+
+    SUBCASE("Invalid factor (<= 0)") {
+        auto result0 = img.clamp_image(0.0f);
+        CHECK_FALSE(result0.has_value());
+        CHECK(result0.error().starts_with("Factor needs to be strictly positive. Received: "));
+
+        auto result1 = img.clamp_image(-1.0f);
+        CHECK_FALSE(result1.has_value());
+        CHECK(result0.error().starts_with("Factor needs to be strictly positive. Received: "));
+    }
+
+    SUBCASE("Negative pixel values") {
+        img.set_pixel(0, 0, Color(-1.0f, 3.0f, 7.0f));
+        auto result = img.clamp_image();
+        CHECK_FALSE(result.has_value());
+        CHECK(result.error() == ("Found negative pixel value."));
     }
 }
+
+
+// =========================================================================
+// TEST 14: Testing gamma correction (apply_gamma_correction)
+// =========================================================================
+
 
 TEST_CASE("Gamma correction of the image.") {
     HDRImage img(2, 1);
@@ -673,5 +701,49 @@ TEST_CASE("Gamma correction of the image.") {
 
         CHECK(img.get_pixel(0, 0).is_close(Color{0.5f, 0.79370053f, 0.93060486f}));
         CHECK(img.get_pixel(1, 0).is_close(Color{1.0f, 1.14471424f, 1.18920712f}));
+    }
+}
+
+
+// =========================================================================
+// TEST 15: Integration test LDR image writing (write_ldr_image)
+// =========================================================================
+TEST_CASE("Integration test: writing LDR PNG images (write_ldr_image)") {
+
+    HDRImage img(4, 2);
+
+    // Row 0: Normal colors in range [0.0, 1.0]
+    img.set_pixel(0, 0, Color(0.0f, 0.0f, 0.0f));    // Black
+    img.set_pixel(1, 0, Color(1.0f, 1.0f, 1.0f));    // White
+    img.set_pixel(2, 0, Color(0.5f, 0.5f, 0.5f));    // Grey
+    img.set_pixel(3, 0, Color(0.1f, 0.2f, 0.3f));    // Mixed color
+
+    // Row 1: Out of range colors to test internal clamping
+    img.set_pixel(0, 1, Color(-1.0f, 0.0f, 0.0f));   // Negative value (becomes 0)
+    img.set_pixel(1, 1, Color(2.0f, 0.0f, 0.0f));    // >1.0 rosso (becomes 255)
+    img.set_pixel(2, 1, Color(0.0f, 5.0f, 0.0f));    // >1.0 verde
+    img.set_pixel(3, 1, Color(0.0f, 0.0f, 10.0f));   // >1.0 blu
+
+    SUBCASE("Successfully writing a PNG file to disk") {
+
+        std::string filename = "test/test_output_ldr.png";
+        auto result = img.write_ldr_image(filename);
+
+        REQUIRE(result.has_value() == true);
+        // File exists
+        REQUIRE(std::filesystem::exists(filename) == true);
+        // File is not empty
+        REQUIRE(std::filesystem::file_size(filename) > 0);
+
+        // Remove file: if you want to see this flabbergasting image just comment the following line
+        std::filesystem::remove(filename);
+    }
+
+    SUBCASE("Handling file writing errors (Invalid Path)") {
+
+        auto result = img.write_ldr_image("non_existent_directory/impossibile.png");
+
+        REQUIRE(result.has_value() == false);
+        CHECK(result.error().starts_with("Failed to write LDR PNG image to file"));
     }
 }
