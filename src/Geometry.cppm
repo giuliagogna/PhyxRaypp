@@ -70,4 +70,10 @@ template<typename L, R, Res> Res _scalar_divide (L left, R scalar) {
     };
 }
 
-tem
+struct HomMatrix {
+    // Homogeneous 4x4 matrix
+    std::array<int, 16> mat = {1, 0, 0, 0,
+                               0, 1, 0, 0,
+                               0, 0, 1, 0,
+                               0, 0, 0, 1};
+};
