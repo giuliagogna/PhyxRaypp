@@ -23,10 +23,23 @@ import std;
 
 export namespace aux {
 
+    // =========================================================
     // Checks if two numerical values are close
+    // =========================================================
+
     bool are_close(float x, float y, float tolerance=1e-5f) {
         return std::abs(x - y) <= tolerance;
         
+    }
+
+    // ===================================================================
+    // Checks if two objects with three coordinates x, y and z are close
+    // ===================================================================
+    template<typename T>
+    bool are_xyz_close(const T& a, const T& b, float epsilon = 1e-5f) {
+        return aux::are_close(a.x, b.x, epsilon) &&
+               aux::are_close(a.y, b.y, epsilon) &&
+               aux::are_close(a.z, b.z, epsilon);
     }
 
     // =========================================================
@@ -58,4 +71,5 @@ export namespace aux {
 
         return stream;
     }
+
 }

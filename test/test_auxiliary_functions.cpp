@@ -129,3 +129,35 @@ TEST_CASE("Opening output files securely (open_output_file)") {
         CHECK(result.error() == std::format("Error in opening output file '{}'", fake_filename));
     }
 }
+
+// =========================================================================
+// TEST 4: Testing if two 3D objects are close (are_xyz_close)
+// =========================================================================
+
+// Dummy struct used strictly for testing the template without importing Geometry
+struct DummyXYZ {
+    float x, y, z;
+};
+
+TEST_CASE("Similarity between 3D objects (are_xyz_close)") {
+
+    DummyXYZ obj1{1.0f, 2.0f, 3.0f};
+
+    SUBCASE("The two objects are identical or close within tolerance") {
+        DummyXYZ obj2{1.0f, 2.0f, 3.0f};
+        DummyXYZ obj3{1.000001f, 1.999999f, 3.0f};
+
+        CHECK(aux::are_xyz_close(obj1, obj2) == true);
+        CHECK(aux::are_xyz_close(obj1, obj3, 1e-5f) == true);
+    }
+
+    SUBCASE("The two objects differ in at least one coordinate") {
+        DummyXYZ diff_x{1.1f, 2.0f, 3.0f};
+        DummyXYZ diff_y{1.0f, 2.1f, 3.0f};
+        DummyXYZ diff_z{1.0f, 2.0f, 3.1f};
+
+        CHECK(aux::are_xyz_close(obj1, diff_x, 1e-5f) == false);
+        CHECK(aux::are_xyz_close(obj1, diff_y, 1e-5f) == false);
+        CHECK(aux::are_xyz_close(obj1, diff_z, 1e-5f) == false);
+    }
+}
