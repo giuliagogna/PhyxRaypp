@@ -206,9 +206,9 @@ TEST_CASE("Test 6: Dot Products") {
 }
 
 // =============================================================================
-// TEST 7: Object Conversions
+// TEST 7: Object Conversions and Normalization
 // =============================================================================
-TEST_CASE("Test 7: Object Conversions (to_vec, to_norm)") {
+TEST_CASE("Test 7: Object Conversions and Normalization (to_vec, to_norm, normalize)") {
     SUBCASE("Point::to_vec") {
         Point p(1.0f, 2.0f, 3.0f);
         Vec v = p.to_vec();
@@ -222,5 +222,33 @@ TEST_CASE("Test 7: Object Conversions (to_vec, to_norm)") {
 
         // Expected normalized values: x=3/5=0.6, y=4/5=0.8, z=0
         CHECK(aux::are_xyz_close(n, Norm(0.6f, 0.8f, 0.0f)));
+    }
+
+    SUBCASE("Vec::normalize") {
+        // A vector of length 5
+        Vec v(3.0f, 4.0f, 0.0f);
+        Vec normalized_v = v.normalize();
+
+        // Must return a Vec (not a Norm) with length 1
+        CHECK(aux::are_xyz_close(normalized_v, Vec(0.6f, 0.8f, 0.0f)));
+    }
+}
+
+// =============================================================================
+// TEST 8: Length and Squared Length (norm, norm2)
+// =============================================================================
+TEST_CASE("Test 8: Length and Squared Length") {
+    SUBCASE("Vec::norm and Vec::norm2") {
+        Vec v(3.0f, 4.0f, 5.0f); // Length should be 5
+
+        CHECK(aux::are_close(v.norm(), 7.07106781f));
+        CHECK(aux::are_close(v.norm2(), 50.0f));
+    }
+
+    SUBCASE("Norm::norm and Norm::norm2") {
+        Norm n(0.6f, 0.8f, 0.0f); // Length should be exactly 1
+
+        CHECK(aux::are_close(n.norm(), 1.0f));
+        CHECK(aux::are_close(n.norm2(), 1.0f));
     }
 }

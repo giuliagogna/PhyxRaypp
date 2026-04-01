@@ -27,11 +27,20 @@ import std;
 // GG: need to define in this order for dependencies (Vec needs Norm, Point needs Vec)
 export struct Norm {
     float x{0.0f}, y{0.0f}, z{0.0f};
+
+    // Access length of Norm object
+    float norm() const;
+    float norm2() const;
 };
 
 export struct Vec {
     float x{0.0f}, y{0.0f}, z{0.0f};
-    Norm to_norm() const;
+    Norm to_norm() const; // takes a Vec and returns a Norm
+    Vec normalize() const; // takes a Vec, normalizes it and returns a Vec
+
+    // Access length and length square
+    float norm() const;
+    float norm2() const;
 };
 
 export struct Point {
@@ -49,11 +58,19 @@ export struct HomMatrix {
 };
 
 
-// Functions used in conv_to_string: not exported (module linkage)
+
+
+// ================================================
+// Functions used in conv_to_string
+// ================================================
 const char* _get_name(const Point&) { return "Point"; }
 const char* _get_name(const Vec&)   { return "Vec"; }
 const char* _get_name(const Norm&)  { return "Norm"; }
 
+
+// ================================================
+// ALGEBRA TEMPLATE FUNCTIONS
+// ================================================
 
 template<typename L, typename R, typename Res> Res _sum (const L& left, const R& right) {
     return Res{
@@ -119,14 +136,43 @@ template<typename Curr, typename Res> Res _same (const Curr& left) {
     };
 }
 
-template<typename Curr, typename Res> Res _norm (const Curr& left) {
+// ================================================
+// Methods to compute length in Vec and Norm
+// ================================================
+
+// GG: Added calculation of norm squared
+// (it's much faster to calculate than norm: avoid calculation of norm squared trough a sqrt and then ^2)
+template<typename Curr> float _norm2 (const Curr& left) {
+    return left.x * left.x + left.y * left.y + left.z * left.z;
+}
+
+template<typename Curr> float _norm (const Curr& left) {
     return std::sqrt(left.x * left.x + left.y * left.y + left.z * left.z);
 
 }
 
+// ======================================================
+// Methods to compute and access length in Vec and Norm
+// ======================================================
 
-// These are methods: need to be defined outside export{} (moved them above)
-// GG: needed to add these methods to the objects first
+float Vec::norm() const { return _norm<Vec>(*this); }
+float Vec::norm2() const { return _norm2<Vec>(*this); }
+
+float Norm::norm() const { return _norm<Norm>(*this); }
+float Norm::norm2() const { return _norm2<Norm>(*this); }
+
+// GG: I also want a method that takes a Vec and returns a Vec of length 1 (if we need to sum, we can
+// 2 Vecs, not a Vec and a Norm)
+Vec Vec::normalize() const {
+    float length = this->norm(); // GG: Use method instead of function
+    return _scalar_divide<Vec, float, Vec>(*this, length);
+}
+
+
+// ================================================
+// Point to vec , Vec to Norm
+// ================================================
+
 Vec Point::to_vec() const {
     return _same<Point, Vec>(*this);
 }
@@ -135,10 +181,15 @@ Norm Vec::to_norm() const {
     // GG: Vec does not have a norm method to invoke: use norm function defined above
     // GG: used _scalar_divide template function (operator / or * return a Vec, I want Norm)
 
-    float length = _norm<Vec, float>(*this);
+    float length = this->norm(); // GG: Use method instead of function
     return _scalar_divide<Vec, float, Norm>(*this, length);
 }
 
+
+
+// ================================================
+// EXPORT
+// ================================================
 
 export {
 
