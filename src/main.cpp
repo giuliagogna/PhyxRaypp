@@ -17,6 +17,9 @@
 
 import std;
 import HDRImage;
+import Geometry;
+import Color;
+import auxiliary_functions;
 
 
 struct Parameters {
