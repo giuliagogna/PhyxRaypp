@@ -21,10 +21,11 @@ module;
 
 export module Geometry;
 
+import auxiliary_functions;
 import std;
 
 
-// GG: need to define in this order for dependencies (Vec needs Normal, Point needs Vec)
+// Defined in this order for dependency purpuse (Vec needs Normal, Point needs Vec)
 export struct Normal {
     float x{0.0f}, y{0.0f}, z{0.0f};
 
@@ -33,6 +34,9 @@ export struct Normal {
     float norm2() const;
 
     Normal normalize(); // normalizes the Normal object
+
+    // GG: Check if two normals are close enough: written as a method as suggested in the lecture slides
+    bool is_close(const Normal& other, float epsilon = 1e-5f) const;
 };
 
 export struct Vec {
@@ -43,129 +47,46 @@ export struct Vec {
     // Compute length and length square
     float norm() const;
     float norm2() const;
+
+    // GG: Check if two vectors are close enough: written as a method as suggested in the lecture slides
+    bool is_close(const Vec& other, float epsilon = 1e-5f) const;
 };
 
 export struct Point {
     float x{0.0}, y{0.0}, z{0.0};
-    Vec to_vec() const; // 
+    Vec to_vec() const;
+
+    // GG: Check if two Points are close enough: written as a method as suggested in the lecture slides
+    bool is_close(const Point& other, float epsilon = 1e-5f) const;
 };
 
 
 // Homogeneous 4x4 Matrix;
 export struct HomMatrix {
-
+    // GG: This is only the basic object that stores a 4x4 Homogeneous Matrix (inverse matrix
+    // and consistency checks will be implemented inside Transformation struct)
     std::array<float, 16> mat = {1.0f, 0.0f, 0.0f, 0.0f,
                                  0.0f, 1.0f, 0.0f, 0.0f,
                                  0.0f, 0.0f, 1.0f, 0.0f,
                                  0.0f, 0.0f, 0.0f, 1.0f};
 
-    std::array<float, 16> invmat = {1.0f, 0.0f, 0.0f, 0.0f,
-                                    0.0f, 1.0f, 0.0f, 0.0f,
-                                    0.0f, 0.0f, 1.0f, 0.0f,
-                                    0.0f, 0.0f, 0.0f, 1.0f};
-    
-    bool isConsistent();    // Verifies if invmat is the inverse of mat
+    // GG: checks if two matrixes are equal
+    bool is_close(const HomMatrix& other, float epsilon = 1e-5f) const;
 };
 
+// GG: Transformation (Semantic concept with inverse)
+export struct Transformation {
+    HomMatrix m;
+    HomMatrix invmat;
 
-// ================================================
-// Functions used in conv_to_string
-// ================================================
+    bool is_consistent() const;
 
-// RP: It's more user-dependent if it wants to put a type label on what it's doing.
-//     It can put in the context window something like print("Point: {}", point).
-//const char* _get_name(const Point&) { return "Point"; }
-//const char* _get_name(const Vec&)   { return "Vec"; }
-//const char* _get_name(const Normal&)  { return "Normal"; }
-
-
-// ================================================
-// std::formatter struct for Point, Vec, Normal and HomMatrix
-// ================================================
-
-// Formatting via context and custom formatter to enable std::format support for Point, Vec and Normal (and HomMatrix)
-// For example, std::stirng s = std::format("Point({:.2f})", Point{1.0f, 2.0f, 3.0f}) will produce the string "Point(1.00, 2.00, 3.00)"
-export template <>
-struct std::formatter<Point> {
-    std::formatter<float> float_fmt;
-
-    constexpr auto parse(std::format_parse_context& ctx) {
-        return float_fmt.parse(ctx);
-    }
-
-    auto format(const Point& p, std::format_context& ctx) const {
-        auto it = ctx.out();        
-        it = float_fmt.format(p.x, ctx);
-        it = std::format_to(it, " ");
-        ctx.advance_to(it); 
-        it = float_fmt.format(p.y, ctx);
-        it = std::format_to(it, " ");
-        ctx.advance_to(it);
-        return float_fmt.format(p.z, ctx);
-    }
-};
-
-export template <>
-struct std::formatter<Vec> {
-    std::formatter<float> float_fmt;
-
-    constexpr auto parse(std::format_parse_context& ctx) {
-        return float_fmt.parse(ctx);
-    }
-
-    auto format(const Vec& v, std::format_context& ctx) const {
-        auto it = ctx.out();        
-        it = float_fmt.format(v.x, ctx);
-        it = std::format_to(it, " ");
-        ctx.advance_to(it); 
-        it = float_fmt.format(v.y, ctx);
-        it = std::format_to(it, " ");
-        ctx.advance_to(it);
-        return float_fmt.format(v.z, ctx);
-    }
-};
-
-export template <>
-struct std::formatter<Normal> {
-    std::formatter<float> float_fmt;
-
-    constexpr auto parse(std::format_parse_context& ctx) {
-        return float_fmt.parse(ctx);
-    }
-
-    auto format(const Normal& n, std::format_context& ctx) const {
-        auto it = ctx.out();        
-        it = float_fmt.format(n.x, ctx);
-        it = std::format_to(it, " ");
-        ctx.advance_to(it); 
-        it = float_fmt.format(n.y, ctx);
-        it = std::format_to(it, " ");
-        ctx.advance_to(it);
-        return float_fmt.format(n.z, ctx);
-    }
-};
-
-export template <>
-struct std::formatter<HomMatrix> {
-    std::formatter<float> float_fmt;
-
-    constexpr auto parse(std::format_parse_context& ctx) {
-        return float_fmt.parse(ctx);
-    }
-
-    auto format(const HomMatrix& M, std::format_context& ctx) const {
-        auto it = ctx.out();
-        for (int i = 0; i < 16; ++i) {
-            it = float_fmt.format(M.mat[i], ctx);
-            if ((i + 1) % 4 == 0) {
-                it = std::format_to(it, "\n");
-            } else {
-                it = std::format_to(it, " ");
-            }
-            ctx.advance_to(it);
-        }
-        return it;
-    }
+    // Method to apply the inverse transformation
+    // GG: Note that when we apply transformation to a Point or Vec we use the direct matrix.
+    //     As pointed out in lecture, we often want to apply the inverse transformation: to do so
+    //     we implement a method that simply switches the two matrixes, so that now the inverse is
+    //     the direct and vice-versa
+    Transformation inverse() const;
 };
 
 
@@ -197,7 +118,7 @@ template<typename L, typename R, typename Res> Res _negate (const L& left) {
     };
 }
 
-template<typename L, typename R, typename Res> Res _dot_product (const L& left, const R& right) {
+template<typename L, typename R, typename Res> Res _elementwise_product (const L& left, const R& right) {
     return Res{
         left.x * right.x,
         left.y * right.y,
@@ -237,83 +158,6 @@ template<typename Curr, typename Res> Res _same (const Curr& left) {
     };
 }
 
-// ================================================
-// Methods to compute length in Vec and Normal
-// ================================================
-
-// RP: I remove the "_" since I think this will be used out of the struct as well
-
-// GG: Added calculation of norm squared
-// (it's much faster to calculate than norm: avoid calculation of norm squared trough a sqrt and then ^2)
-template<typename Curr> float norm2 (const Curr& left) {
-    return left.x * left.x + left.y * left.y + left.z * left.z;
-}
-
-template<typename Curr> float norm (const Curr& left) {
-    return std::sqrt(left.x * left.x + left.y * left.y + left.z * left.z);
-}
-
-// ======================================================
-// Methods to compute and access length in Vec and Normal
-// ======================================================
-
-float Vec::norm() const { return norm<Vec>(*this); }
-float Vec::norm2() const { return norm2<Vec>(*this); }
-
-float Normal::norm() const { return norm<Normal>(*this); }
-float Normal::norm2() const { return norm2<Normal>(*this); }
-
-// GG: I also want a method that takes a Vec and returns a Vec of length 1 (if we need to sum, we can
-// 2 Vecs, not a Vec and a Normal)
-
-// RP: I feel this is like the same problem of not having Vec + Point -> Vec. If we normalize something
-//     For this purpose we have the Vec::to_norm. I'll leave this method but I'm not sure it's safe to use.
-
-// RP: I feel it's faster to don't store the norm in a variable and then pass
-//     by copy. We just pass the method as argument. However, it's possible that the compiler
-//     optimizes the code putting the variable in a register so it could generare just the same binary code.
-//     I actaully prefer the version without the variable since it's readable anc it's just one line :-)
-
-//Vec Vec::normalize() const {
-//    float length = this->norm(); // GG: Use method instead of function
-//    return _scalar_divide<Vec, float, Vec>(*this, length);
-//}
-
-/// Return a normalized Vec (a Vec with the same direction but length 1)
-Vec Vec::normalize() const {
-    return _scalar_divide<Vec, float, Vec>(*this, this->norm());
-}
-
-
-// RP: I prefer this to be a non-const method, following the lecture guidelines.
-
-/// Renormalize a Normal which is not guaranteed to be of length 1 (rounding, ecc.)
-Normal Normal::normalize() {
-    return _scalar_divide<Normal, float, Normal>(*this, this->norm());
-}
-
-
-// ================================================
-// Point to vec , Vec to Normal
-// ================================================
-
-// Returns a Vec with the same components as the Point (but different type)
-Vec Point::to_vec() const {
-    return _same<Point, Vec>(*this);
-}
-
-// Returns a Normal with the same direction as the Vec
-Normal Vec::to_norm() const {
-    // GG: Vec does not have a norm method to invoke: use norm function defined above
-    // GG: used _scalar_divide template function (operator / or * return a Vec, I want Normal)
-
-//    float length = this->norm(); // GG: Use method instead of function
-//    return _scalar_divide<Vec, float, Normal>(*this, length);
-
-    return _scalar_divide<Vec, float, Normal>(*this, this->norm());
-}
-
-
 
 // ================================================
 // OPERATORS OVERLOAD
@@ -321,13 +165,17 @@ Normal Vec::to_norm() const {
 
 export {
 
+    // ================================================
+    // OPERATIONS ON FUNDAMENTAL OBJECTS
+    // ================================================
+
     // Sums
     /// Point += Vec -> Point
     Point& operator+= (Point& p, const Vec& v) {
         p = _sum<Point, Vec, Point>(p, v);
         return p;
     }
-
+    /// Point + Vec -> Point
     Point operator+ (const Point& p, const Vec& v) {
         return _sum<Point, Vec, Point>(p, v);
     }
@@ -348,12 +196,12 @@ export {
 
     // Differences
 
-    /// Point - Vec -> Point
+    /// Point-=Vec -> Point
     Point& operator-= (Point& p, const Vec& v) {
         p = _difference<Point, Vec, Point>(p, v);
         return p;
     }
-
+    /// Point - Vec -> Point
     Point operator- (const Point& p, const Vec& v) {
         return _difference<Point, Vec, Point>(p, v);
     }
@@ -368,13 +216,6 @@ export {
     Vec operator- (const Vec& v, const Vec& other) {
         return _difference<Vec, Vec, Vec>(v, other);
     }
-
-    // GG: It does not make sense mathematically to do Vec - Point
-    // (cannot subtract a position from a direction while it does make sense to subtract a direction (Vec) from a position
-    // and return a new direction (Vec))
-    //Point operator- (const Vec& v, const Point& p) {
-    //    return _difference<Vec, Point, Point>(v, p);
-    //}
 
     /// Point - Point -> Vec
     Vec operator- (const Point& p, const Point& other) {
@@ -395,6 +236,8 @@ export {
 
     // Scalar products
 
+    // GG: Why commented?
+
 //    /// Point * scalar -> Point
 //    Point operator*= (Point& p, float scalar) {
 //        // GG: Need to assign the result to the calling object
@@ -410,46 +253,81 @@ export {
 //        return _scalar_multiply<Point, float, Point>(p, scalar);
 //    }
 
-    /// Vec * scalar -> Vec
+    /// Vec*=scalar -> Vec
     Vec& operator*= (Vec& v, float scalar) {
         // GG: Need to assign the result to the calling object
         v = _scalar_multiply<Vec, float, Vec>(v, scalar);
         return v;
     }
-
     /// Vec * scalar -> Vec
     Vec operator* (const Vec& v, float scalar) {
         return _scalar_multiply<Vec, float, Vec>(v, scalar);
     }
-
     /// Scalar * Vec -> Vec
     Vec operator* (float scalar, const Vec& v) {
         return _scalar_multiply<Vec, float, Vec>(v, scalar);
     }
 
-    // Dot products
+    ///Normal * scalar -> Vec
+    Vec operator* (const Normal& n, float scalar) {
+        return _scalar_multiply<Normal, float, Vec>(n, scalar);
+    }
+    /// Scalar * Normal -> Vec
+    Vec operator* (float scalar, const Normal& n) {
+        return _scalar_multiply<Normal, float, Vec>(n, scalar);
+    }
 
-    // GG: It does not make sense to do the scalar product between a Point and a Normal (direction)
-    // Dot products are used to find the projections of a direction (a Vec or Normal) on another or the angle
-    // between them, so it does not make sense to try to make the dot product between a position and a direction
-    //float operator* (const Point& p, const Normal& n) {
-    //    auto res = _dot_product<Point, Normal, Vec>(p, n);
-    //    return res.x + res.y + res.z;
+    // Scalar division
+
+    /// Scalar division between a Vec and a scalar
+    Vec& operator/= (Vec& v, float scalar) {
+        v = _scalar_divide<Vec, float, Vec>(v, scalar);
+        return v;
+    }
+
+    /// Scalar division between a Vec and a scalar
+    Vec operator/ (const Vec& v, float scalar) {
+        return _scalar_divide<Vec, float, Vec>(v, scalar);
+    }
+
+    // GG: Note that if you divide a Normal for a scalar it is not a normal anymore
+    //     becomes a vector
+    /// Scalar division between a Normal and a scalar
+    //Normal& operator/= (Normal& n, float scalar) {
+    //    n = _scalar_divide<Normal, float, Normal>(n, scalar);
+    //    return n;
     //}
+    /// Scalar division between a Normal and a scalar
+    Vec operator/ (const Normal& n, float scalar) {
+        return _scalar_divide<Normal, float, Vec>(n, scalar);
+    }
+
+    // needed for homogeneous division in Point operator* (const HomMatrix& M, const Point& p)
+    /// Scalar division between a Point and a scalar
+    Point operator/ (const Point& p, float scalar) {
+        return _scalar_divide<Point, float, Point>(p, scalar);
+    }
+
+    // Dot products
 
     /// Dot product between two Vec
     float operator* (const Vec& v, const Vec& other) {
-        auto res = _dot_product<Vec, Vec, Vec>(v, other);
+        auto res = _elementwise_product<Vec, Vec, Vec>(v, other);
         return res.x + res.y + res.z;
     }
     /// Dot products between a Vec and a Normal
     float operator* (const Vec& v, const Normal& n) {
-        auto res = _dot_product<Vec, Normal, Vec>(v, n);
+        auto res = _elementwise_product<Vec, Normal, Vec>(v, n);
+        return res.x + res.y + res.z;
+    }
+    ///Dot products between a Normal and a Vec
+    float operator* (const Normal& n, const Vec& v) {
+        auto res = _elementwise_product<Normal, Vec, Vec>(n, v);
         return res.x + res.y + res.z;
     }
     /// Dot product between two Normal
     float operator* (const Normal& v, const Normal& n) {
-        auto res = _dot_product<Normal, Normal, Vec>(v, n);
+        auto res = _elementwise_product<Normal, Normal, Vec>(v, n);
         return res.x + res.y + res.z;
     }
 
@@ -475,36 +353,6 @@ export {
         return _cross_product<Normal, Normal, Vec>(n, other);
     }
 
-    // Scalar division
-
-    /// Scalar division between a Vec and a scalar
-    Vec& operator/= (Vec& v, float scalar) {
-        v = _scalar_divide<Vec, float, Vec>(v, scalar);
-        return v;
-    }
-
-    /// Scalar division between a Vec and a scalar
-    Vec operator/ (const Vec& v, float scalar) {
-        return _scalar_divide<Vec, float, Vec>(v, scalar);
-    }
-
-    /// Scalar division between a Normal and a scalar
-    Normal& operator/= (Normal& n, float scalar) {
-        n = _scalar_divide<Normal, float, Normal>(n, scalar);
-        return n;
-    }
-
-    /// Scalar division between a Normal and a scalar
-    Normal operator/ (const Normal& n, float scalar) {
-        return _scalar_divide<Normal, float, Normal>(n, scalar);
-    }
-
-    // needed for homogeneous division in Point operator* (const HomMatrix& M, const Point& p)
-    /// Scalar division between a Point and a scalar
-    Point operator/ (const Point& p, float scalar) {
-        return _scalar_divide<Point, float, Point>(p, scalar);
-    }
-
     // Matrix multiplication
 
     // Homogeneous matrix multiplication with Point, Vec and Normal (returns a Point, Vec or Normal with the same type of the first argument)
@@ -522,9 +370,11 @@ export {
         float w = M.mat[12] * px + M.mat[13] * py + M.mat[14] * pz + M.mat[15];
 
         // RP: Is w==1.f likely to happen after all the roundings and stuff? I'll leave this commented then we will see.
-//        if (w==1.f) {
-//            return res;
-//        }
+        // GG: yes it is possible since the basic transformations we are going to use are affine transformations (which
+        // last row is going to be exactly 0.0 0.0 0.0 1.0)
+        if (w==1.f) {
+            return res;
+        }
         
         return res / w; // homogeneous division
     }
@@ -537,18 +387,12 @@ export {
         };
     }
 
-    // Traspose of the inverse of the homogeneous matrix is used to transform normals
-    Normal operator* (const HomMatrix& M, const Normal& n) {
-        return Normal{
-            M.invmat[0] * n.x + M.invmat[4] * n.y + M.invmat[8] * n.z,
-            M.invmat[1] * n.x + M.invmat[5] * n.y + M.invmat[9] * n.z,
-            M.invmat[2] * n.x + M.invmat[6] * n.y + M.invmat[10] * n.z
-        };
-    }
-
     // RP: seems that this is optimized by the compiler.
     HomMatrix operator*(const HomMatrix& M1, const HomMatrix& M2) {
         HomMatrix res;
+        // GG: Note that res is initialized as the identity, so to use += in the loop
+        //     we must first zero all its elements
+        res.mat.fill(0.0f);
         for (int i = 0; i < 4; ++i) {
             for (int k = 0; k < 4; ++k) {
                 float s = M1.mat[i * 4 + k];
@@ -560,33 +404,317 @@ export {
         return res;
     }
 
-    // Conversion to string
-    // Point, Vec, Normal
 
-    // RP: Note that in this way we can no more use the context {} to print a Vec.
-    // If we want to print a Vec with 2 decimal places we cannot use {:.2f} as context,
-    // but we have to access each components, which is basically like not having any printing function at all.
-//    template<typename Obj> std::string conv_to_string(const Obj &obj) {
-//        return std::format("{}({:.2f}, {:.2f}, {:.2f})",
-//                           _get_name(obj), obj.x, obj.y, obj.z);
-//    }
-//
-//    // Matrix
-//    std::string conv_to_string(HomMatrix M) {
-//
-//        return std::format(
-//            "HomMatrix(\n"
-//            "  [{:.2f}, {:.2f}, {:.2f}, {:.2f}]\n"
-//            "  [{:.2f}, {:.2f}, {:.2f}, {:.2f}]\n"
-//            "  [{:.2f}, {:.2f}, {:.2f}, {:.2f}]\n"
-//            "  [{:.2f}, {:.2f}, {:.2f}, {:.2f}]\n"
-//            ")",
-//            M.mat[0], M.mat[1], M.mat[2], M.mat[3],
-//            M.mat[4], M.mat[5], M.mat[6], M.mat[7],
-//            M.mat[8], M.mat[9], M.mat[10], M.mat[11],
-//            M.mat[12], M.mat[13], M.mat[14], M.mat[15]
-//        );
-//
-//    }
+    // ================================================
+    // OPERATIONS ON TRANSFORMATIONS
+    // ================================================
 
+    /// Transformation composition
+    // GG: This implements the composition of two transformations: result is a transformation object with
+    //     the direct transformation and its inverse
+    Transformation operator*(const Transformation& T1, const Transformation& T2) {
+        return Transformation{
+            T1.m * T2.m,            // Direct transformation multiplies in order
+            T2.invmat * T1.invmat   // Inverse transformation multiplies switched
+        };
+    }
+
+    /// Transformation of a Point
+    Point operator*(const Transformation& T, const Point& p) {
+        return T.m * p;
+    }
+
+    /// Transformation of a Vec
+    Vec operator*(const Transformation& T, const Vec& v) {
+        return T.m * v;
+    }
+
+    /// Transformation of a Normal
+    Normal operator* (const Transformation& T, const Normal& n) {
+        return Normal{
+            T.invmat.mat[0] * n.x + T.invmat.mat[4] * n.y + T.invmat.mat[8] * n.z,
+            T.invmat.mat[1] * n.x + T.invmat.mat[5] * n.y + T.invmat.mat[9] * n.z,
+            T.invmat.mat[2] * n.x + T.invmat.mat[6] * n.y + T.invmat.mat[10] * n.z
+        };
+    }
+
+
+
+    // ================================================
+    // TRANSFORMATION GENERATORS
+    // ================================================
+
+    // GG: Generates a translation Transformation
+    Transformation Tras(const Vec& v) {
+        Transformation t; // Starts as Identity
+        // M
+        // Sets the last column to the components of the vector
+        t.m.mat[3] = v.x;
+        t.m.mat[7] = v.y;
+        t.m.mat[11] = v.z;
+        // Inverse is just a translation by -v
+        t.invmat.mat[3] = -v.x;
+        t.invmat.mat[7] = -v.y;
+        t.invmat.mat[11] = -v.z;
+        return t;
+    }
+
+    // GG: Generates a scaling Transformation
+    Transformation Scale(const Vec& v) {
+        Transformation t; // Starts as Identity
+        // M
+        // Sets diagonal elements to components of the scaling vector
+        t.m.mat[0] = v.x;
+        t.m.mat[5] = v.y;
+        t.m.mat[10] = v.z;
+        // Inverse is just a scaling by 1/v
+        t.invmat.mat[0] = 1.0f / v.x;
+        t.invmat.mat[5] = 1.0f / v.y;
+        t.invmat.mat[10] = 1.0f / v.z;
+        return t;
+    }
+
+    // GG: Generates a rotation around the X axis
+    Transformation R_x(float angle_rad) {
+        Transformation t;
+        float c = std::cos(angle_rad);
+        float s = std::sin(angle_rad);
+        // M
+        // Already has 1 as mat[0]
+        t.m.mat[5] = c;  t.m.mat[6] = -s;
+        t.m.mat[9] = s;  t.m.mat[10] = c;
+        // Inverse of a rotation matrix is its transpose (or a rotation by -angle)
+        t.invmat.mat[5] = c;  t.invmat.mat[6] = s;
+        t.invmat.mat[9] = -s; t.invmat.mat[10] = c;
+        return t;
+    }
+
+    // GG: Generates a rotation around the Y axis
+    Transformation R_y(float angle_rad) {
+        Transformation t;
+        float c = std::cos(angle_rad);
+        float s = std::sin(angle_rad);
+        // M
+        // already has 1 in mat[5]
+        t.m.mat[0] = c;  t.m.mat[2] = s;
+        t.m.mat[8] = -s; t.m.mat[10] = c;
+        // Inverse
+        t.invmat.mat[0] = c; t.invmat.mat[2] = -s;
+        t.invmat.mat[8] = s; t.invmat.mat[10] = c;
+        return t;
+    }
+
+    // GG: Generates a rotation around the Z axis
+    Transformation R_z(float angle_rad) {
+        Transformation t;
+        float c = std::cos(angle_rad);
+        float s = std::sin(angle_rad);
+        // M
+        // already has 1 in mat[10]
+        t.m.mat[0] = c;  t.m.mat[1] = -s;
+        t.m.mat[4] = s;  t.m.mat[5] = c;
+        // Inverse
+        t.invmat.mat[0] = c;  t.invmat.mat[1] = s;
+        t.invmat.mat[4] = -s; t.invmat.mat[5] = c;
+        return t;
+    }
+
+};
+
+
+// Moved all the methods below for readability
+// ===================================================================================
+// ===================================================================================
+// METHODS
+// ===================================================================================
+// ===================================================================================
+
+// ================================================
+// Methods to compute length in Vec and Normal
+// ================================================
+
+template<typename Curr> float norm2 (const Curr& left) {
+    return left.x * left.x + left.y * left.y + left.z * left.z;
+}
+
+template<typename Curr> float norm (const Curr& left) {
+    return std::sqrt(left.x * left.x + left.y * left.y + left.z * left.z);
+}
+
+// ======================================================
+// Methods to compute and access length in Vec and Normal
+// ======================================================
+
+float Vec::norm() const { return norm<Vec>(*this); }
+float Vec::norm2() const { return norm2<Vec>(*this); }
+
+float Normal::norm() const { return norm<Normal>(*this); }
+float Normal::norm2() const { return norm2<Normal>(*this); }
+
+// GG: I also want a method that takes a Vec and returns a Vec of length 1 (if we need to sum, we can
+// 2 Vecs, not a Vec and a Normal)
+
+// RP: I feel this is like the same problem of not having Vec + Point -> Vec. If we normalize something
+//     For this purpose we have the Vec::to_norm. I'll leave this method but I'm not sure it's safe to use.
+
+//GG: regarding Vec::normalize() we definitely need to keep it alongside to_norm().
+//    Even though both return an object of length 1, in a ray tracer they serve different purposes.
+//    A Normal is strictly for surface perpendiculars (and transforms with the transverse of the matrix),
+//    while a normalized Vec is used for generic directions (like light rays) and transforms with the direct matrix.
+//    If we only use to_norm(), we'll get type errors later on when we try to add or subtract generic
+//    directions (e.g., Light direction + View direction), because we don't have an operator for Vec + Normal.
+//    I agree on the one-line implementation
+
+/// Return a normalized Vec (a Vec with the same direction but length 1)
+Vec Vec::normalize() const {
+    return _scalar_divide<Vec, float, Vec>(*this, this->norm());
+}
+
+/// Renormalize a Normal which is not guaranteed to be of length 1 (rounding, ecc.)
+Normal Normal::normalize() {
+    return _scalar_divide<Normal, float, Normal>(*this, this->norm());
+}
+
+
+// ======================================================
+// is_close methods
+// ======================================================
+
+bool Point::is_close(const Point& other, float epsilon) const {
+    return aux::are_xyz_close(*this, other, epsilon);
+}
+
+bool Vec::is_close(const Vec& other, float epsilon) const {
+    return aux::are_xyz_close(*this, other, epsilon);
+}
+
+bool Normal::is_close(const Normal& other, float epsilon) const {
+    return aux::are_xyz_close(*this, other, epsilon);
+}
+
+bool HomMatrix::is_close(const HomMatrix& other, float epsilon) const {
+    for (int i = 0; i < 16; ++i) {
+        if (!aux::are_close(mat[i], other.mat[i], epsilon)) return false;
+    }
+    return true;
+}
+
+// ================================================
+// Point to vec , Vec to Normal
+// ================================================
+
+/// Returns a Vec with the same components as the Point (but different type)
+Vec Point::to_vec() const {
+    return _same<Point, Vec>(*this);
+}
+
+/// Returns a Normal with the same direction as the Vec
+Normal Vec::to_norm() const {
+    return _scalar_divide<Vec, float, Normal>(*this, this->norm());
+}
+
+
+/// Transformation consistency
+bool Transformation::is_consistent() const {
+    // Exploit M*M multiplication
+    HomMatrix result = m * invmat;
+    HomMatrix identity; // Default is identity
+
+    return result.is_close(identity);
+}
+
+/// Inversion
+Transformation Transformation::inverse() const {
+    // Crea una nuova Transformation scambiando mat e invmat!
+    return Transformation{invmat, m};
+}
+
+// ============================================================
+// std::formatter struct for Point, Vec, Normal and HomMatrix
+// ============================================================
+
+// GG: Agreed on formatting
+// Formatting via context and custom formatter to enable std::format support for Point, Vec and Normal (and HomMatrix)
+// For example, std::stirng s = std::format("Point({:.2f})", Point{1.0f, 2.0f, 3.0f}) will produce the string "Point(1.00, 2.00, 3.00)"
+export template <>
+struct std::formatter<Point> {
+    std::formatter<float> float_fmt;
+
+    constexpr auto parse(std::format_parse_context& ctx) {
+        return float_fmt.parse(ctx);
+    }
+
+    auto format(const Point& p, std::format_context& ctx) const {
+        auto it = ctx.out();
+        it = float_fmt.format(p.x, ctx);
+        it = std::format_to(it, " ");
+        ctx.advance_to(it);
+        it = float_fmt.format(p.y, ctx);
+        it = std::format_to(it, " ");
+        ctx.advance_to(it);
+        return float_fmt.format(p.z, ctx);
+    }
+};
+
+export template <>
+struct std::formatter<Vec> {
+    std::formatter<float> float_fmt;
+
+    constexpr auto parse(std::format_parse_context& ctx) {
+        return float_fmt.parse(ctx);
+    }
+
+    auto format(const Vec& v, std::format_context& ctx) const {
+        auto it = ctx.out();
+        it = float_fmt.format(v.x, ctx);
+        it = std::format_to(it, " ");
+        ctx.advance_to(it);
+        it = float_fmt.format(v.y, ctx);
+        it = std::format_to(it, " ");
+        ctx.advance_to(it);
+        return float_fmt.format(v.z, ctx);
+    }
+};
+
+export template <>
+struct std::formatter<Normal> {
+    std::formatter<float> float_fmt;
+
+    constexpr auto parse(std::format_parse_context& ctx) {
+        return float_fmt.parse(ctx);
+    }
+
+    auto format(const Normal& n, std::format_context& ctx) const {
+        auto it = ctx.out();
+        it = float_fmt.format(n.x, ctx);
+        it = std::format_to(it, " ");
+        ctx.advance_to(it);
+        it = float_fmt.format(n.y, ctx);
+        it = std::format_to(it, " ");
+        ctx.advance_to(it);
+        return float_fmt.format(n.z, ctx);
+    }
+};
+
+export template <>
+struct std::formatter<HomMatrix> {
+    std::formatter<float> float_fmt;
+
+    constexpr auto parse(std::format_parse_context& ctx) {
+        return float_fmt.parse(ctx);
+    }
+
+    auto format(const HomMatrix& M, std::format_context& ctx) const {
+        auto it = ctx.out();
+        for (int i = 0; i < 16; ++i) {
+            it = float_fmt.format(M.mat[i], ctx);
+            if ((i + 1) % 4 == 0) {
+                it = std::format_to(it, "\n");
+            } else {
+                it = std::format_to(it, " ");
+            }
+            ctx.advance_to(it);
+        }
+        return it;
+    }
 };
