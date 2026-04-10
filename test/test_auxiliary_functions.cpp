@@ -160,4 +160,14 @@ TEST_CASE("Similarity between 3D objects (are_xyz_close)") {
         CHECK(aux::are_xyz_close(obj1, diff_y, 1e-5f) == false);
         CHECK(aux::are_xyz_close(obj1, diff_z, 1e-5f) == false);
     }
+
+    SUBCASE("Pass a different tolerance") {
+        DummyXYZ diff_x{1.1f, 2.0f, 3.0f};
+        DummyXYZ diff_y{1.0f, 2.1f, 3.0f};
+        DummyXYZ diff_z{1.0f, 2.0f, 3.1f};
+
+        CHECK(aux::are_xyz_close(obj1, diff_x, 1e-2f) == false);
+        CHECK(aux::are_xyz_close(obj1, diff_y, 1e-2f) == false);
+        CHECK(aux::are_xyz_close(obj1, diff_z, 1e-2f) == false);
+    }
 }
