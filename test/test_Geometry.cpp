@@ -22,8 +22,6 @@ import std;
 import auxiliary_functions;
 import Geometry;
 
-// GG: I do not test is_close() since it is only a wrapper of are_xyz_close() already tested in auxiliary_functions
-
 // =============================================================================
 // TEST 1: Sums (Operator + and +=)
 // =============================================================================
@@ -35,6 +33,13 @@ TEST_CASE("Test 1: Sum Operations") {
     SUBCASE("Point += Vec -> Point") {
         Point p_mut = p1;
         p_mut += v1;
+
+        // ASK TOM
+        // RP: I don't know, what if I want to change the testing points??? I need to change
+        //     everything down here. What if we just do like this:
+        //
+        //     CHECK(p_mut.is_close(Point(p1.x + v1.x, p1.y + v1.y, p1.z + v1.z))); ???
+        
         CHECK(p_mut.is_close(Point(5.0f, 7.0f, 9.0f)));
     }
 
@@ -127,7 +132,7 @@ TEST_CASE("Test 4: Scalar Multiplications") {
 
     Vec exp_sn(scalar*xn, scalar*yn, scalar*zn);
 
-// GG: These have been commented in Geometry.cppm
+// These have been commented in Geometry.cppm
 //    SUBCASE("Point *= scalar") {
 //        Point p_mut = p;
 //        p_mut *= scalar;
@@ -360,7 +365,7 @@ TEST_CASE("Test 9: Transformations") {
                          0.0f, 0.0f, 0.0f, 1.0f}};
 
         // Inverse matrix
-        T.invmat = HomMatrix{{1.0f/2.0f, 0.0f, 0.0f, -5.0f,
+        T.invm = HomMatrix{{1.0f/2.0f, 0.0f, 0.0f, -5.0f,
                               0.0f, 1.0f/3.0f, 0.0f, -6.666666f,
                               0.0f, 0.0f, 1.0f/4.0f, -7.5f,
                               0.0f, 0.0f, 0.0f, 1.0f}};
