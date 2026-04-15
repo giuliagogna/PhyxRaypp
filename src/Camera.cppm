@@ -31,10 +31,25 @@ import HDRImage;
 export struct Ray {
     Point origin;
     Vec direction;
-    float tmin{0.001f}; // Minimum t value for ray intersection (to avoid self-intersection)
+    float tmin{1e-5f}; // Minimum t value for ray intersection (to avoid self-intersection)
     float tmax{std::numeric_limits<float>::infinity()};
     int depth{0}; // Depth of the ray (number of bounces)
-}
+
+    // Methods
+    bool is_close(Ray other_ray, float tolerance = 1e-5f) const {
+        return (origin.is_close(other_ray.origin, tolerance) && direction.is_close(other_ray.direction, tolerance));
+    };
+
+    Point at(float t){
+        return origin + (direction * t);
+    }
+
+    Ray transform(Transformation trans){
+        return Ray(origin = trans * origin,
+                   direction = trans * direction
+                );
+    }
+};
 // We will need to manage trasformations
 
 export struct Camera {
