@@ -1,0 +1,74 @@
+/*
+* Copyright (c) 2026 Giulia Gogna, Riccardo Piazza.
+ *
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ * https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ */
+
+module;
+
+//#include <format>
+
+export module Camera;
+
+import auxiliary_functions;
+import std;
+import Geometry
+import Color;
+import HDRimage;
+
+// Ray struct, used for light rays. Needs to be cache-optimized.
+export struct Ray {
+    Point origin;
+    Vec direction;
+    float tmin{0.001f}; // Minimum t value for ray intersection (to avoid self-intersection)
+    float tmax{std::numeric_limits<float>::infinity()};
+    int depth{0}; // Depth of the ray (number of bounces)
+}
+// We will need to manage trasformations
+
+export struct Camera {
+
+    // The only adjustable parameters of Camera are d (screen-observer distance) and a (image aspect ratio).
+
+    Point position;
+    Vec forward; // Direction the camera is looking at
+    Vec up; // Up direction of the camera
+    Vec right; // Right direction of the camera (computed from forward and up)
+
+    // here is possible that it just works with less parameters IDK
+
+    
+    Ray fire_ray(float u, float v) const; // Generate a ray from the camera through the pixel at normalized (u, v)
+    // (0,0)------------------(1,0)
+    //   |                    |
+    //   |                    |
+    //   |                    |
+    //   |                    |
+    //   |                    |
+    // (0,0)------------------(1,0)
+}
+
+// Procedural!
+
+// Discrete map of pixels, used to store the rendered image.
+export struct ImageTracer
+{
+    Camera camera;
+    int width;
+    int height;
+
+    HDRimage framebuffer;
+    Ray fire_ray(int row, int col, float u_pixel, float v_pixel) const; // Generate a ray from the camera through the pixel at pixel coordinates (row, col) with subpixel offsets (u_pixel, v_pixel)
+    void fire_rays();
+};
