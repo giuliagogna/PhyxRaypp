@@ -45,13 +45,13 @@ export struct Ray {
     }
 
     Ray transform(const Transformation& trans){
-        return Ray(
+        return Ray{
                     .origin = trans * origin,
                     .direction = trans * direction,
                     .tmin = tmin,      
                     .tmax = tmax,      
                     .depth = depth     
-                );
+        };
     }
 };
 // We will need to manage trasformations
@@ -66,7 +66,7 @@ public:
     //Vec right; // Right direction of the camera (computed from forward and up)
     // here is possible that it just works with less parameters IDK
     float aspect_ratio; // Image aspect ratio (width/height)
-    Trasformation trans; // Camera transformation (position and orientation that will be applied to rays generated in camera space)
+    Transformation trans; // Camera transformation (position and orientation that will be applied to rays generated in camera space)
 
     virtual Ray fire_ray(float u, float v) const = 0; // Generate a ray from the camera through the pixel at normalized (u, v)
     // (1,0)------------------(1,1)
@@ -94,11 +94,11 @@ public:
 // Discrete map of pixels, used to store the rendered image.
 export struct ImageTracer
 {
-    Camera camera;
+    Camera * camera;
     int width;
     int height;
 
-    HDRimage frame;
+    HDRImage frame;
     Ray fire_ray(int row, int col, float u_pixel, float v_pixel) const; // Generate a ray from the camera through the pixel at pixel coordinates (row, col) with subpixel offsets (u_pixel, v_pixel)
     void fire_rays();
 };
