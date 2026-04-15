@@ -57,20 +57,36 @@ export struct Ray {
 // We will need to manage trasformations
 
 export struct Camera {
-
+public:
     // The only adjustable parameters of Camera are d (screen-observer distance) and a (image aspect ratio).
-
+    // RP: No need!!
+    //Point position;
+    //Vec forward; // Direction the camera is looking at
+    //Vec up; // Up direction of the camera
+    //Vec right; // Right direction of the camera (computed from forward and up)
     // here is possible that it just works with less parameters IDK
+    float aspect_ratio; // Image aspect ratio (width/height)
+    Trasformation trans; // Camera transformation (position and orientation that will be applied to rays generated in camera space)
 
-    
-    Ray fire_ray(float u, float v) const; // Generate a ray from the camera through the pixel at normalized (u, v)
-    // (0,0)------------------(1,0)
+    virtual Ray fire_ray(float u, float v) const = 0; // Generate a ray from the camera through the pixel at normalized (u, v)
+    // (1,0)------------------(1,1)
     //   |                    |
     //   |                    |
     //   |                    |
     //   |                    |
     //   |                    |
-    // (0,0)------------------(1,0)
+    // (0,0)------------------(0,1)
+};
+
+export struct OrthogonalCamera : Camera {
+public:
+    Ray fire_ray(float u, float v) const override;
+};
+
+export struct PerspectiveCamera : Camera {
+public:
+    float d; // Screen-observer distance
+    Ray fire_ray(float u, float v) const override;
 };
 
 // Procedural!
@@ -82,7 +98,20 @@ export struct ImageTracer
     int width;
     int height;
 
-    HDRImage framebuffer;
+    HDRimage frame;
     Ray fire_ray(int row, int col, float u_pixel, float v_pixel) const; // Generate a ray from the camera through the pixel at pixel coordinates (row, col) with subpixel offsets (u_pixel, v_pixel)
     void fire_rays();
 };
+
+Ray OrthogonalCamera::fire_ray(float u, float v) const {
+    // Ray origin is on the image plane at distance d from the camera position
+    Point ray_origin{-1.0f, (1.0f -2.0f * u) * aspect_ratio, 2.0f * v - 1.0f}; // Camera space origin
+    Vec ray_direction{1.0f, 0.0f, 0.0f}; // Camera space direction (orthogonal to the image plane)
+}
+
+Ray PerspectiveCamera::fire_ray(float u, float v) const {
+    // Ray origin is the camera position (0,0,0 in camera space)
+    Point ray_origin{-d, 0.0f, 0.0f}; // Camera space origin
+    Vec ray_direction{d, (1.0f - 2.0f * u) * aspect_ratio, 2.0f * v - 1.0f}; // Camera space direction (from the camera position to the pixel on the image plane)
+}
+
