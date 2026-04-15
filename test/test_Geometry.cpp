@@ -34,12 +34,6 @@ TEST_CASE("Test 1: Sum Operations") {
         Point p_mut = p1;
         p_mut += v1;
 
-        // ASK TOM
-        // RP: I don't know, what if I want to change the testing points??? I need to change
-        //     everything down here. What if we just do like this:
-        //
-        //     CHECK(p_mut.is_close(Point(p1.x + v1.x, p1.y + v1.y, p1.z + v1.z))); ???
-        
         CHECK(p_mut.is_close(Point(5.0f, 7.0f, 9.0f)));
     }
 
