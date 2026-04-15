@@ -23,28 +23,38 @@ export module Camera;
 
 import auxiliary_functions;
 import std;
-import Geometry
+import Geometry;
 import Color;
-import HDRimage;
+import HDRImage;
 
 // Ray struct, used for light rays. Needs to be cache-optimized.
 export struct Ray {
     Point origin;
     Vec direction;
-    float tmin{0.001f}; // Minimum t value for ray intersection (to avoid self-intersection)
+    float tmin{1e-5f}; // Minimum t value for ray intersection (to avoid self-intersection)
     float tmax{std::numeric_limits<float>::infinity()};
     int depth{0}; // Depth of the ray (number of bounces)
-}
+
+    // Methods
+    bool is_close(Ray other_ray, float tolerance = 1e-5f) const {
+        return (origin.is_close(other_ray.origin, tolerance) && direction.is_close(other_ray.direction, tolerance));
+    };
+
+    Point at(float t){
+        return origin + (direction * t);
+    }
+
+    Ray transform(Transformation trans){
+        return Ray(origin = trans * origin,
+                   direction = trans * direction
+                );
+    }
+};
 // We will need to manage trasformations
 
 export struct Camera {
 
     // The only adjustable parameters of Camera are d (screen-observer distance) and a (image aspect ratio).
-
-    Point position;
-    Vec forward; // Direction the camera is looking at
-    Vec up; // Up direction of the camera
-    Vec right; // Right direction of the camera (computed from forward and up)
 
     // here is possible that it just works with less parameters IDK
 
@@ -57,7 +67,7 @@ export struct Camera {
     //   |                    |
     //   |                    |
     // (0,0)------------------(1,0)
-}
+};
 
 // Procedural!
 
@@ -68,7 +78,7 @@ export struct ImageTracer
     int width;
     int height;
 
-    HDRimage framebuffer;
+    HDRImage framebuffer;
     Ray fire_ray(int row, int col, float u_pixel, float v_pixel) const; // Generate a ray from the camera through the pixel at pixel coordinates (row, col) with subpixel offsets (u_pixel, v_pixel)
     void fire_rays();
 };
