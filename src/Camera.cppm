@@ -36,18 +36,22 @@ export struct Ray {
     int depth{0}; // Depth of the ray (number of bounces)
 
     // Methods
-    bool is_close(Ray other_ray, float tolerance = 1e-5f) const {
+    bool is_close(const Ray& other_ray, float tolerance = 1e-5f) const {
         return (origin.is_close(other_ray.origin, tolerance) && direction.is_close(other_ray.direction, tolerance));
     };
 
-    Point at(float t){
+    Point at(float t) const {
         return origin + (direction * t);
     }
 
-    Ray transform(Transformation trans){
-        return Ray(origin = trans * origin,
-                   direction = trans * direction
-                );
+    Ray transform(const Transformation& trans){
+        return Ray{
+                    .origin = trans * origin,
+                    .direction = trans * direction,
+                    .tmin = tmin,      
+                    .tmax = tmax,      
+                    .depth = depth     
+        };
     }
 };
 // We will need to manage trasformations
@@ -90,7 +94,11 @@ public:
 // Discrete map of pixels, used to store the rendered image.
 export struct ImageTracer
 {
+<<<<<<< HEAD
     Camera* camera;
+=======
+    Camera * camera;
+>>>>>>> e34106b6f0aa9bd907a92bfd7f69fadd287dcd7e
     int width;
     int height;
 
