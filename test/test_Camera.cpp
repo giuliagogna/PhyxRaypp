@@ -30,9 +30,9 @@
  
  TEST_CASE("Similarity between two Ray objects (is_close())") {
 
-    Ray ray1{Point(1.0, 2.0, 3.0), Vec(5.0, 4.0, -1.0)};
-    Ray ray2{Point(1.0, 2.0, 3.0), Vec(5.0, 4.0, -1.0)};
-    Ray ray3{Point(5.0, 1.0, 4.0), Vec(3.0, 9.0, 4.0)};
+    Ray ray1{Point{1.0f, 2.0f, 3.0f}, Vec{5.0f, 4.0f, -1.0f}};
+    Ray ray2{Point{1.0f, 2.0f, 3.0f}, Vec{5.0f, 4.0f, -1.0f}};
+    Ray ray3{Point{5.0f, 1.0f, 4.0f}, Vec{3.0f, 9.0f, 4.0f}};
  
      SUBCASE("Teast with default tolerance") {
         CHECK(ray1.is_close(ray2) == true);
@@ -52,11 +52,11 @@
  
  TEST_CASE("Point of arrival after t (at())") {
 
-    Ray ray{Point(1.0, 2.0, 4.0), Vec(4.0, 2.0, 1.0)};
+    Ray ray{Point{1.0f, 2.0f, 4.0f}, Vec{4.0f, 2.0f, 1.0f}};
 
-    CHECK(ray.at(0.0).is_close(ray.origin) == true);
-    CHECK(ray.at(1.0).is_close(Point(5.0, 4.0, 5.0)) == true);
-    CHECK(ray.at(2.0).is_close(Point(9.0, 6.0, 6.0)) == true);
+    CHECK(ray.at(0.0f).is_close(ray.origin) == true);
+    CHECK(ray.at(1.0f).is_close(Point{5.0f, 4.0f, 5.0f}) == true);
+    CHECK(ray.at(2.0f).is_close(Point(9.0f, 6.0f, 6.0f)) == true);
  
  }
 
@@ -66,11 +66,11 @@
  
  TEST_CASE("Transformation of a Ray (transform())") {
 
-    Ray ray{Point(1.0, 2.0, 3.0), Vec(6.0, 5.0, 4.0)};
-    Transformation tr = Tras(Vec(10.0, 11.0, 12.0)) * R_x(M_PI/2.0f);
+    Ray ray{Point(1.0f, 2.0f, 3.0f), Vec(6.0f, 5.0f, 4.0f)};
+    Transformation tr = Tras(Vec(10.0f, 11.0f, 12.0f)) * R_x(float(M_PI/2.0f));
     Ray transformed = ray.transform(tr);
 
-    CHECK(transformed.origin.is_close(Point(11.0, 8.0, 14.0)));
-    CHECK(transformed.direction.is_close(Vec(6.0, -4.0, 5.0)));
+    CHECK(transformed.origin.is_close(Point(11.0f, 8.0f, 14.0f)));
+    CHECK(transformed.direction.is_close(Vec(6.0f, -4.0f, 5.0f)));
  
  }
