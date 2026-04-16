@@ -44,6 +44,7 @@ export struct Ray {
         return origin + (direction * t);
     }
 
+    // RP: I don't feel it's spontaneous to have it here.
     Ray transform(const Transformation& trans){
         return Ray{
                     .origin = trans * origin,
@@ -57,16 +58,11 @@ export struct Ray {
 // We will need to manage trasformations
 
 export struct Camera {
-public:
-    // The only adjustable parameters of Camera are d (screen-observer distance) and a (image aspect ratio).
-    // RP: No need!!
-    //Point position;
-    //Vec forward; // Direction the camera is looking at
-    //Vec up; // Up direction of the camera
-    //Vec right; // Right direction of the camera (computed from forward and up)
-    // here is possible that it just works with less parameters IDK
     float aspect_ratio; // Image aspect ratio (width/height)
     Transformation trans; // Camera transformation (position and orientation that will be applied to rays generated in camera space)
+
+    Camera (float aspect_ratio, const Transformation& trans)
+        : aspect_ratio(aspect_ratio), trans(trans) {} //canpt perform aggregare initialization with virtual methods!
 
     virtual Ray fire_ray(float u, float v) const = 0; // Generate a ray from the camera through the pixel at normalized (u, v)
     // (1,0)------------------(1,1)
@@ -76,15 +72,19 @@ public:
     //   |                    |
     //   |                    |
     // (0,0)------------------(0,1)
+    // always put a virtual destructor!
+    virtual ~Camera() = default;
 };
 
 export struct OrthogonalCamera : Camera {
-public:
+    OrthogonalCamera (float aspect_ratio, const Transformation& trans)
+        : Camera(aspect_ratio, trans) {}    
     Ray fire_ray(float u, float v) const override;
 };
 
 export struct PerspectiveCamera : Camera {
-public:
+    PerspectiveCamera (float aspect_ratio, float d, const Transformation& trans)
+        : Camera(aspect_ratio, trans), d(d) {}
     float d; // Screen-observer distance
     Ray fire_ray(float u, float v) const override;
 };
@@ -92,17 +92,14 @@ public:
 // Procedural!
 
 // Discrete map of pixels, used to store the rendered image.
-export struct ImageTracer
-{
-<<<<<<< HEAD
-    Camera* camera;
-=======
-    Camera * camera;
->>>>>>> e34106b6f0aa9bd907a92bfd7f69fadd287dcd7e
+export struct ImageTracer {
+    ImageTracer(Camera& camera, int width, int height)
+        : camera(camera), width(width), height(height), frame(width, height) {}
+    Camera& camera; // Reference to the camera used for ray generation
     int width;
     int height;
-
     HDRImage frame;
+
     Ray fire_ray(int row, int col, float u_pixel, float v_pixel) const; // Generate a ray from the camera through the pixel at pixel coordinates (row, col) with subpixel offsets (u_pixel, v_pixel)
     void fire_rays();
 };
@@ -111,13 +108,20 @@ Ray OrthogonalCamera::fire_ray(float u, float v) const {
     // Ray origin is on the image plane at distance d from the camera position
     Point ray_origin{-1.0f, (1.0f -2.0f * u) * aspect_ratio, 2.0f * v - 1.0f}; // Camera space origin
     Vec ray_direction{1.0f, 0.0f, 0.0f}; // Camera space direction (orthogonal to the image plane)
-    return Ray{ray_origin, ray_direction};
+    return Ray{ray_origin, ray_direction}.transform(trans);
 }
 
 Ray PerspectiveCamera::fire_ray(float u, float v) const {
     // Ray origin is the camera position (0,0,0 in camera space)
     Point ray_origin{-d, 0.0f, 0.0f}; // Camera space origin
     Vec ray_direction{d, (1.0f - 2.0f * u) * aspect_ratio, 2.0f * v - 1.0f}; // Camera space direction (from the camera position to the pixel on the image plane)
-    return Ray{ray_origin, ray_direction};
+    return Ray{ray_origin, ray_direction}.transform(trans);
+}
+
+Ray ImageTracer::fire_ray(int row, int col, float u_pixel, float v_pixel) const {
+    // Convert pixel coordinates to normalized (u,v) in [0,1]
+    float u = (col + u_pixel) / width;
+    float v = (row + v_pixel) / height;
+    return camera.fire_ray(u, v);
 }
 
