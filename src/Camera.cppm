@@ -106,7 +106,7 @@ export struct ImageTracer {
 
 Ray OrthogonalCamera::fire_ray(float u, float v) const {
     // Ray origin is on the image plane at distance d from the camera position
-    Point ray_origin{-1.0f, (1.0f -2.0f * u) * aspect_ratio, 2.0f * v - 1.0f}; // Camera space origin
+    Point ray_origin{-1.0f, (1.0f - 2.0f * u) * aspect_ratio, 2.0f * v - 1.0f}; // Camera space origin
     Vec ray_direction{1.0f, 0.0f, 0.0f}; // Camera space direction (orthogonal to the image plane)
     return Ray{ray_origin, ray_direction}.transform(trans);
 }
@@ -118,6 +118,16 @@ Ray PerspectiveCamera::fire_ray(float u, float v) const {
     return Ray{ray_origin, ray_direction}.transform(trans);
 }
 
+// RP: SUS
+//                             ___________________________________
+//                            |                                   |
+//                            |        ___________                |
+//                            |       |           |               |
+//                            |       |           |               |
+//                            |       |           |               |
+//                            |       |           |               |
+//                            |       |           |               |
+//                            |       |           |               |
 Ray ImageTracer::fire_ray(int row, int col, float u_pixel, float v_pixel) const {
     // Convert pixel coordinates to normalized (u,v) in [0,1]
     float u = (col + u_pixel) / width;
