@@ -1,0 +1,101 @@
+name: PhyxRadpp CI
+
+on:
+  push:
+    branches: [ "main", "cameras" ] # Add the branch to check or "**" to check them all
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  # ==========================================
+  # BUILD LINUX
+  # ==========================================
+  build-linux:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Install Clang and libc++ for Linux
+      - name: Install Clang and Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-18 libc++-18-dev libc++abi-18-dev clang-scan-deps-18
+
+      # Configure xmake
+      - name: Setup xmake
+        uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: latest
+
+      # Xmake will automatically download doctest and stb thanks to `add_requires`
+      - name: Configure and Build
+        run: |
+          xmake config --yes --toolchain=clang
+          xmake build
+
+      # Execute all tests contained in xmake.lua
+      - name: Run Tests
+        run: xmake test -v
+
+  # ==========================================
+  # BUILD MACOS
+  # ==========================================
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Install official LLVM via Homebrew for C++23 modules support
+      - name: Install LLVM
+        run: |
+          brew update
+          brew install llvm
+          # Add LLVM to GitHub Actions PATH to override default Apple Clang
+          echo "$(brew --prefix llvm)/bin" >> $GITHUB_PATH
+
+      # Configure xmake
+      - name: Setup xmake
+        uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: latest
+
+      # Xmake will use llvm toolchain as specified in xmake.lua for macosx
+      - name: Configure and Build
+        run: |
+          xmake config --yes
+          xmake build
+
+      # Execute all tests contained in xmake.lua
+      - name: Run Tests
+        run: xmake test -v
+
+    # ==========================================
+    # BUILD WINDOWS
+    # ==========================================
+    build-windows:
+      runs-on: windows-latest
+
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+
+        # Configure xmake
+        - name: Setup xmake
+          uses: xmake-io/github-action-setup-xmake@v1
+          with:
+            xmake-version: latest
+
+        # Visual Studio 2022 (MSVC) is already installed on windows-latest.
+        # Xmake will detect it automatically and compile C++23 modules natively.
+        - name: Configure and Build
+          run: |
+            xmake config --yes
+            xmake build
+
+        # Execute all tests contained in xmake.lua
+        - name: Run Tests
+          run: xmake test -v
