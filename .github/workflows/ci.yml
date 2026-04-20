@@ -2,9 +2,13 @@ name: PhyxRadpp CI
 
 on:
   push:
-    branches: [ "main", "cameras" ] # Add the branch to check or "**" to check them all
+    branches: [ "**" ] # Add the branch to check or "**" to check them all
   pull_request:
     branches: [ "main" ]
+
+# Force to run on Node.js 24 because 20 is being deprecated on June 2nd
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   # ==========================================
@@ -21,7 +25,7 @@ jobs:
       - name: Install Clang and Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang-18 libc++-18-dev libc++abi-18-dev clang-scan-deps-18
+          sudo apt-get install -y clang-18 libc++-18-dev libc++abi-18-dev clang-tools-18
 
       # Configure xmake
       - name: Setup xmake
