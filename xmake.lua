@@ -9,14 +9,15 @@ add_requires("doctest")
 add_requires("stb")
 
 if is_plat("linux") then
+
     set_toolchains("clang")
     set_policy("build.c++.modules.std", false)
 
-    -- Find dependencies automatically
-    if os.isfile("/usr/bin/clang-scan-deps-18") then
-        set_values("clang.scan_deps", "/usr/bin/clang-scan-deps-18")
-    else
-        set_values("clang.scan_deps", "/usr/bin/clang-scan-deps")
+    -- Looks for libraries dynamically
+    import("lib.detect.find_tool")
+    local scanner = find_tool("clang-scan-deps-18") or find_tool("clang-scan-deps")
+    if scanner then
+        set_values("clang.scan_deps", scanner.program)
     end
 
     add_cxflags("-stdlib=libc++", "-Wno-reserved-user-defined-literal", {force = true})
@@ -25,6 +26,24 @@ if is_plat("linux") then
 elseif is_plat("macosx") then
     set_toolchains("llvm")
     set_policy("build.c++.modules.std", true)
+end
+
+
+-- Utility function to find std.cppm on linux
+function add_linux_std_module()
+    import("lib.detect.find_file")
+    -- Looks for the file in all possible paths of different Linux distributions
+    local std_module = find_file("std.cppm", {
+        "/usr/share/libc++/v1",
+        "/usr/lib/llvm-18/include/c++/v1",
+        "/usr/lib/llvm-17/include/c++/v1"
+    })
+
+    if std_module then
+        add_files(std_module, { filetype = "c++.module", headeronly = true })
+    else
+        print("WARNING: std.cppm not found! You need to install libc++-dev.")
+    end
 end
 
 -- ==========================================
@@ -37,18 +56,7 @@ target("PhyxRadpp")
     add_packages("stb")
 
     if is_plat("linux") then
-        -- Looks for the files in the standard paths of the different distributions
-        local std_paths = {
-            "/usr/share/libc++/v1/std.cppm",            -- Arch Linux / Custom
-            "/usr/lib/llvm-18/include/c++/v1/std.cppm", -- Ubuntu 24.04 (Clang 18)
-            "/usr/lib/llvm-17/include/c++/v1/std.cppm"  -- Ubuntu 22.04 (Clang 17)
-        }
-        for _, p in ipairs(std_paths) do
-            if os.isfile(p) then
-                add_files(p, { filetype = "c++.module", headeronly = true })
-                break
-            end
-        end
+        add_linux_std_module()
     end
 
     add_files("src/*.cppm")
@@ -74,18 +82,8 @@ for _, file in ipairs(os.files("test/test_*.cpp")) do
         add_packages("doctest", "stb")
 
         if is_plat("linux") then
-                    local std_paths = {
-                        "/usr/share/libc++/v1/std.cppm",            -- Arch Linux / Custom
-                        "/usr/lib/llvm-18/include/c++/v1/std.cppm", -- Ubuntu 24.04 (Clang 18)
-                        "/usr/lib/llvm-17/include/c++/v1/std.cppm"  -- Ubuntu 22.04 (Clang 17)
-                    }
-                    for _, p in ipairs(std_paths) do
-                        if os.isfile(p) then
-                            add_files(p, { filetype = "c++.module", headeronly = true })
-                            break
-                        end
-                    end
-                end
+            add_linux_std_module()
+        end
 
         add_files("test/" .. name .. ".cpp")
         add_files("src/*.cppm")
