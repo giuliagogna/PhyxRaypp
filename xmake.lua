@@ -8,20 +8,42 @@ set_policy("build.c++.modules", true)
 add_requires("doctest")
 add_requires("stb")
 
+-- Variable to hold the found path so we only search ONCE
+local linux_std_path = nil
+
 if is_plat("linux") then
     set_toolchains("clang")
     set_policy("build.c++.modules.std", false)
 
-    -- Dynamically search for the scanner using known system paths without invoking 'import'
+    -- Dynamically search for the scanner using known system paths
     local scanners = {
-        "/usr/bin/clang-scan-deps-18",
-        "/usr/bin/clang-scan-deps"
+        "/usr/lib/llvm-18/bin/clang-scan-deps", -- Ubuntu direct path
+        "/usr/bin/clang-scan-deps-18",          -- Ubuntu symlink
+        "/usr/bin/clang-scan-deps"              -- Arch / General
     }
     for _, scanner in ipairs(scanners) do
         if os.isfile(scanner) then
             set_values("clang.scan_deps", scanner)
             break
         end
+    end
+
+    -- Look for std.cppm ONCE
+    local std_paths = {
+        "/usr/share/libc++/v1/std.cppm",              -- Arch Linux / Custom
+        "/usr/lib/llvm-18/share/libc++/v1/std.cppm",  -- Ubuntu 24.04 (Clang 18) -> THE FIX IS HERE
+        "/usr/lib/llvm-17/share/libc++/v1/std.cppm"   -- Ubuntu 22.04 (Clang 17)
+    }
+
+    for _, p in ipairs(std_paths) do
+        if os.isfile(p) then
+            linux_std_path = p
+            break
+        end
+    end
+
+    if not linux_std_path then
+        print("WARNING: std.cppm not found! You need to install libc++-dev.")
     end
 
     add_cxflags("-stdlib=libc++", "-Wno-reserved-user-defined-literal", {force = true})
@@ -36,24 +58,8 @@ end
 -- Utility function to find std.cppm on Linux
 -- ==========================================
 function add_linux_std_module()
-    -- Look for the file by safely iterating over known paths of different Linux distributions
-    local std_paths = {
-        "/usr/share/libc++/v1/std.cppm",            -- Arch Linux / Custom
-        "/usr/lib/llvm-18/include/c++/v1/std.cppm", -- Ubuntu 24.04 (Clang 18)
-        "/usr/lib/llvm-17/include/c++/v1/std.cppm"  -- Ubuntu 22.04 (Clang 17)
-    }
-
-    local found = false
-    for _, p in ipairs(std_paths) do
-        if os.isfile(p) then
-            add_files(p, { filetype = "c++.module", headeronly = true })
-            found = true
-            break
-        end
-    end
-
-    if not found then
-        print("WARNING: std.cppm not found! You need to install libc++-dev.")
+    if linux_std_path then
+        add_files(linux_std_path, { filetype = "c++.module", headeronly = true })
     end
 end
 
