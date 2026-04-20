@@ -24,24 +24,23 @@ export module Geometry;
 import auxiliary_functions;
 import std;
 
-
-// Defined in this order for dependency purpuse (Vec needs Normal, Point needs Vec)
+// Normalized 3D vector, used for normals (and directions???)
 export struct Normal {
     float x{0.0f}, y{0.0f}, z{0.0f};
 
-    // Compute length of Normal object
-    float norm() const;
-    float norm2() const;
+    float norm() const;  // Compute length of Normal object
+    float norm2() const; // Compute length square of Normal object
 
-    Normal normalize(); // normalizes the Normal object
+    Normal normalize(); // normalizes the Normal object (non-const)
 
-    // GG: Check if two normals are close enough: written as a method as suggested in the lecture slides
-    bool is_close(const Normal& other, float epsilon = 1e-5f) const;
+    bool is_close(const Normal& other, float epsilon = 1e-5f) const; // Check if two Normals are close enough
 };
 
+// 3D vector, used for distances (and directions???)
 export struct Vec {
     float x{0.0f}, y{0.0f}, z{0.0f};
-    Normal to_norm() const; // normalizes and returns a Normal
+
+    Normal to_norm() const; // 
     Vec normalize() const; // normalizes and returns a Vec
 
     // Compute length and length square
@@ -52,6 +51,7 @@ export struct Vec {
     bool is_close(const Vec& other, float epsilon = 1e-5f) const;
 };
 
+// 3D point, used for positions
 export struct Point {
     float x{0.0}, y{0.0}, z{0.0};
     Vec to_vec() const;
@@ -60,8 +60,7 @@ export struct Point {
     bool is_close(const Point& other, float epsilon = 1e-5f) const;
 };
 
-
-// Homogeneous 4x4 Matrix;
+// Data structure to store a 4x4 matricial like dataset, used for homogeneous transformations
 export struct HomMatrix {
     // GG: This is only the basic object that stores a 4x4 Homogeneous Matrix (inverse matrix
     // and consistency checks will be implemented inside Transformation struct)
@@ -74,10 +73,9 @@ export struct HomMatrix {
     bool is_close(const HomMatrix& other, float epsilon = 1e-5f) const;
 };
 
-// GG: Transformation (Semantic concept with inverse)
 export struct Transformation {
     HomMatrix m;
-    HomMatrix invmat;
+    HomMatrix invm;
 
     bool is_consistent() const;
 
@@ -387,11 +385,10 @@ export {
         };
     }
 
+    // ASK TOM
     // RP: seems that this is optimized by the compiler.
     HomMatrix operator*(const HomMatrix& M1, const HomMatrix& M2) {
         HomMatrix res;
-        // GG: Note that res is initialized as the identity, so to use += in the loop
-        //     we must first zero all its elements
         res.mat.fill(0.0f);
         for (int i = 0; i < 4; ++i) {
             for (int k = 0; k < 4; ++k) {
@@ -410,12 +407,10 @@ export {
     // ================================================
 
     /// Transformation composition
-    // GG: This implements the composition of two transformations: result is a transformation object with
-    //     the direct transformation and its inverse
     Transformation operator*(const Transformation& T1, const Transformation& T2) {
         return Transformation{
             T1.m * T2.m,            // Direct transformation multiplies in order
-            T2.invmat * T1.invmat   // Inverse transformation multiplies switched
+            T2.invm * T1.invm   // Inverse transformation multiplies switched
         };
     }
 
@@ -432,9 +427,9 @@ export {
     /// Transformation of a Normal
     Normal operator* (const Transformation& T, const Normal& n) {
         return Normal{
-            T.invmat.mat[0] * n.x + T.invmat.mat[4] * n.y + T.invmat.mat[8] * n.z,
-            T.invmat.mat[1] * n.x + T.invmat.mat[5] * n.y + T.invmat.mat[9] * n.z,
-            T.invmat.mat[2] * n.x + T.invmat.mat[6] * n.y + T.invmat.mat[10] * n.z
+            T.invm.mat[0] * n.x + T.invm.mat[4] * n.y + T.invm.mat[8] * n.z,
+            T.invm.mat[1] * n.x + T.invm.mat[5] * n.y + T.invm.mat[9] * n.z,
+            T.invm.mat[2] * n.x + T.invm.mat[6] * n.y + T.invm.mat[10] * n.z
         };
     }
 
@@ -444,7 +439,7 @@ export {
     // TRANSFORMATION GENERATORS
     // ================================================
 
-    // GG: Generates a translation Transformation
+    /// Generates a translation Transformation
     Transformation Tras(const Vec& v) {
         Transformation t; // Starts as Identity
         // M
@@ -453,13 +448,13 @@ export {
         t.m.mat[7] = v.y;
         t.m.mat[11] = v.z;
         // Inverse is just a translation by -v
-        t.invmat.mat[3] = -v.x;
-        t.invmat.mat[7] = -v.y;
-        t.invmat.mat[11] = -v.z;
+        t.invm.mat[3] = -v.x;
+        t.invm.mat[7] = -v.y;
+        t.invm.mat[11] = -v.z;
         return t;
     }
 
-    // GG: Generates a scaling Transformation
+    /// Generates a scaling Transformation
     Transformation Scale(const Vec& v) {
         Transformation t; // Starts as Identity
         // M
@@ -468,13 +463,15 @@ export {
         t.m.mat[5] = v.y;
         t.m.mat[10] = v.z;
         // Inverse is just a scaling by 1/v
-        t.invmat.mat[0] = 1.0f / v.x;
-        t.invmat.mat[5] = 1.0f / v.y;
-        t.invmat.mat[10] = 1.0f / v.z;
+        t.invm.mat[0] = 1.0f / v.x;
+        t.invm.mat[5] = 1.0f / v.y;
+        t.invm.mat[10] = 1.0f / v.z;
         return t;
     }
 
-    // GG: Generates a rotation around the X axis
+
+    // Euler angles rotations (intrinsic rotations around the axes of the reference system, applied in order Z, Y, X)
+    /// Generates a rotation around the X axis
     Transformation R_x(float angle_rad) {
         Transformation t;
         float c = std::cos(angle_rad);
@@ -484,12 +481,12 @@ export {
         t.m.mat[5] = c;  t.m.mat[6] = -s;
         t.m.mat[9] = s;  t.m.mat[10] = c;
         // Inverse of a rotation matrix is its transpose (or a rotation by -angle)
-        t.invmat.mat[5] = c;  t.invmat.mat[6] = s;
-        t.invmat.mat[9] = -s; t.invmat.mat[10] = c;
+        t.invm.mat[5] = c;  t.invm.mat[6] = s;
+        t.invm.mat[9] = -s; t.invm.mat[10] = c;
         return t;
     }
 
-    // GG: Generates a rotation around the Y axis
+    /// Generates a rotation around the Y axis
     Transformation R_y(float angle_rad) {
         Transformation t;
         float c = std::cos(angle_rad);
@@ -499,12 +496,12 @@ export {
         t.m.mat[0] = c;  t.m.mat[2] = s;
         t.m.mat[8] = -s; t.m.mat[10] = c;
         // Inverse
-        t.invmat.mat[0] = c; t.invmat.mat[2] = -s;
-        t.invmat.mat[8] = s; t.invmat.mat[10] = c;
+        t.invm.mat[0] = c; t.invm.mat[2] = -s;
+        t.invm.mat[8] = s; t.invm.mat[10] = c;
         return t;
     }
 
-    // GG: Generates a rotation around the Z axis
+    /// Generates a rotation around the Z axis
     Transformation R_z(float angle_rad) {
         Transformation t;
         float c = std::cos(angle_rad);
@@ -514,15 +511,14 @@ export {
         t.m.mat[0] = c;  t.m.mat[1] = -s;
         t.m.mat[4] = s;  t.m.mat[5] = c;
         // Inverse
-        t.invmat.mat[0] = c;  t.invmat.mat[1] = s;
-        t.invmat.mat[4] = -s; t.invmat.mat[5] = c;
+        t.invm.mat[0] = c;  t.invm.mat[1] = s;
+        t.invm.mat[4] = -s; t.invm.mat[5] = c;
         return t;
     }
 
+    // RP: I think we will need some (angle, axis) type rotation/reflection transformation. We will see in lectures I guess.
 };
 
-
-// Moved all the methods below for readability
 // ===================================================================================
 // ===================================================================================
 // METHODS
@@ -545,25 +541,11 @@ template<typename Curr> float norm (const Curr& left) {
 // Methods to compute and access length in Vec and Normal
 // ======================================================
 
-float Vec::norm() const { return norm<Vec>(*this); }
-float Vec::norm2() const { return norm2<Vec>(*this); }
+float Vec::norm() const { return ::norm<Vec>(*this); }
+float Vec::norm2() const { return ::norm2<Vec>(*this); }
 
-float Normal::norm() const { return norm<Normal>(*this); }
-float Normal::norm2() const { return norm2<Normal>(*this); }
-
-// GG: I also want a method that takes a Vec and returns a Vec of length 1 (if we need to sum, we can
-// 2 Vecs, not a Vec and a Normal)
-
-// RP: I feel this is like the same problem of not having Vec + Point -> Vec. If we normalize something
-//     For this purpose we have the Vec::to_norm. I'll leave this method but I'm not sure it's safe to use.
-
-//GG: regarding Vec::normalize() we definitely need to keep it alongside to_norm().
-//    Even though both return an object of length 1, in a ray tracer they serve different purposes.
-//    A Normal is strictly for surface perpendiculars (and transforms with the transverse of the matrix),
-//    while a normalized Vec is used for generic directions (like light rays) and transforms with the direct matrix.
-//    If we only use to_norm(), we'll get type errors later on when we try to add or subtract generic
-//    directions (e.g., Light direction + View direction), because we don't have an operator for Vec + Normal.
-//    I agree on the one-line implementation
+float Normal::norm() const { return ::norm<Normal>(*this); }
+float Normal::norm2() const { return ::norm2<Normal>(*this); }
 
 /// Return a normalized Vec (a Vec with the same direction but length 1)
 Vec Vec::normalize() const {
@@ -617,7 +599,7 @@ Normal Vec::to_norm() const {
 /// Transformation consistency
 bool Transformation::is_consistent() const {
     // Exploit M*M multiplication
-    HomMatrix result = m * invmat;
+    HomMatrix result = m * invm;
     HomMatrix identity; // Default is identity
 
     return result.is_close(identity);
@@ -625,15 +607,14 @@ bool Transformation::is_consistent() const {
 
 /// Inversion
 Transformation Transformation::inverse() const {
-    // Crea una nuova Transformation scambiando mat e invmat!
-    return Transformation{invmat, m};
+    // Crea una nuova Transformation scambiando mat e invm!
+    return Transformation{invm, m};
 }
 
 // ============================================================
 // std::formatter struct for Point, Vec, Normal and HomMatrix
 // ============================================================
 
-// GG: Agreed on formatting
 // Formatting via context and custom formatter to enable std::format support for Point, Vec and Normal (and HomMatrix)
 // For example, std::stirng s = std::format("Point({:.2f})", Point{1.0f, 2.0f, 3.0f}) will produce the string "Point(1.00, 2.00, 3.00)"
 export template <>
@@ -644,7 +625,7 @@ struct std::formatter<Point> {
         return float_fmt.parse(ctx);
     }
 
-    auto format(const Point& p, std::format_context& ctx) const {
+    auto format(const Point& p, auto& ctx) const {
         auto it = ctx.out();
         it = float_fmt.format(p.x, ctx);
         it = std::format_to(it, " ");
@@ -664,7 +645,7 @@ struct std::formatter<Vec> {
         return float_fmt.parse(ctx);
     }
 
-    auto format(const Vec& v, std::format_context& ctx) const {
+    auto format(const Vec& v, auto& ctx) const {
         auto it = ctx.out();
         it = float_fmt.format(v.x, ctx);
         it = std::format_to(it, " ");
@@ -684,7 +665,7 @@ struct std::formatter<Normal> {
         return float_fmt.parse(ctx);
     }
 
-    auto format(const Normal& n, std::format_context& ctx) const {
+    auto format(const Normal& n, auto& ctx) const {
         auto it = ctx.out();
         it = float_fmt.format(n.x, ctx);
         it = std::format_to(it, " ");
@@ -704,7 +685,7 @@ struct std::formatter<HomMatrix> {
         return float_fmt.parse(ctx);
     }
 
-    auto format(const HomMatrix& M, std::format_context& ctx) const {
+    auto format(const HomMatrix& M, auto& ctx) const {
         auto it = ctx.out();
         for (int i = 0; i < 16; ++i) {
             it = float_fmt.format(M.mat[i], ctx);

@@ -8,16 +8,59 @@ set_policy("build.c++.modules", true)
 add_requires("doctest")
 add_requires("stb")
 
+-- Variable to hold the found path so we only search ONCE
+local linux_std_path = nil
+
 if is_plat("linux") then
     set_toolchains("clang")
     set_policy("build.c++.modules.std", false)
-    set_values("clang.scan_deps", "/usr/bin/clang-scan-deps")
+
+    -- Dynamically search for the scanner using known system paths
+    local scanners = {
+        "/usr/lib/llvm-18/bin/clang-scan-deps", -- Ubuntu direct path
+        "/usr/bin/clang-scan-deps-18",          -- Ubuntu symlink
+        "/usr/bin/clang-scan-deps"              -- Arch / General
+    }
+    for _, scanner in ipairs(scanners) do
+        if os.isfile(scanner) then
+            set_values("clang.scan_deps", scanner)
+            break
+        end
+    end
+
+    -- Look for std.cppm ONCE
+    local std_paths = {
+        "/usr/share/libc++/v1/std.cppm",              -- Arch Linux / Custom
+        "/usr/lib/llvm-18/share/libc++/v1/std.cppm",  -- Ubuntu 24.04 (Clang 18) -> THE FIX IS HERE
+        "/usr/lib/llvm-17/share/libc++/v1/std.cppm"   -- Ubuntu 22.04 (Clang 17)
+    }
+
+    for _, p in ipairs(std_paths) do
+        if os.isfile(p) then
+            linux_std_path = p
+            break
+        end
+    end
+
+    if not linux_std_path then
+        print("WARNING: std.cppm not found! You need to install libc++-dev.")
+    end
+
     add_cxflags("-stdlib=libc++", "-Wno-reserved-user-defined-literal", {force = true})
     add_ldflags("-stdlib=libc++", {force = true})
-    
+
 elseif is_plat("macosx") then
     set_toolchains("llvm")
     set_policy("build.c++.modules.std", true)
+end
+
+-- ==========================================
+-- Utility function to find std.cppm on Linux
+-- ==========================================
+function add_linux_std_module()
+    if linux_std_path then
+        add_files(linux_std_path, { filetype = "c++.module", headeronly = true })
+    end
 end
 
 -- ==========================================
@@ -30,12 +73,11 @@ target("PhyxRadpp")
     add_packages("stb")
 
     if is_plat("linux") then
-        add_files("/usr/share/libc++/v1/std.cppm", { filetype = "c++.module", headeronly = true })
+        add_linux_std_module()
     end
 
     add_files("src/*.cppm")
     add_files("src/*.cpp")
-    -- Removed add_files("include/*.cpp") -> ensure your stb_impl.cpp is moved to the src/ directory!
 
     set_rundir("$(projectdir)") 
 
@@ -56,7 +98,7 @@ for _, file in ipairs(os.files("test/test_*.cpp")) do
         add_packages("doctest", "stb")
 
         if is_plat("linux") then
-            add_files("/usr/share/libc++/v1/std.cppm", { filetype = "c++.module", headeronly = true })
+            add_linux_std_module()
         end
 
         add_files("test/" .. name .. ".cpp")

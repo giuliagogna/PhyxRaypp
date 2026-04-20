@@ -170,7 +170,8 @@ struct std::formatter<Color> {
         return float_fmt.parse(ctx);
     }
 
-    auto format(const Color& c, std::format_context& ctx) const {
+    // GG: apparently libc++ needs the ctx type to be auto& because of its optimizations
+    auto format(const Color& c, auto& ctx) const {
         auto it = ctx.out();        
         it = float_fmt.format(c.r, ctx);
         it = std::format_to(it, " ");
