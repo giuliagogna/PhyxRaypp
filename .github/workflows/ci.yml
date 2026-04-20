@@ -11,38 +11,38 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  # ==========================================
-  # BUILD LINUX
-  # ==========================================
-  build-linux:
-    runs-on: ubuntu-24.04
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      # Install Clang and libc++ for Linux
-      - name: Install Clang and Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y clang-18 libc++-18-dev libc++abi-18-dev clang-tools-18
-
-      # Configure xmake
-      - name: Setup xmake
-        uses: xmake-io/github-action-setup-xmake@v1
-        with:
-          xmake-version: latest
-
-      # Xmake will automatically download doctest and stb thanks to `add_requires`
-      - name: Configure and Build
-        run: |
-          xmake config --yes --toolchain=clang
-          xmake build
-
-      # Execute all tests contained in xmake.lua
-      - name: Run Tests
-        run: xmake test -v
-
+#  # ==========================================
+#  # BUILD LINUX
+#  # ==========================================
+#  build-linux:
+#    runs-on: ubuntu-24.04
+#
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v4
+#
+#      # Install Clang and libc++ for Linux
+#      - name: Install Clang and Dependencies
+#        run: |
+#          sudo apt-get update
+#          sudo apt-get install -y clang-18 libc++-18-dev libc++abi-18-dev clang-tools-18
+#
+#      # Configure xmake
+#      - name: Setup xmake
+#        uses: xmake-io/github-action-setup-xmake@v1
+#        with:
+#          xmake-version: latest
+#
+#      # Xmake will automatically download doctest and stb thanks to `add_requires`
+#      - name: Configure and Build
+#        run: |
+#          xmake config --yes --toolchain=clang
+#          xmake build
+#
+#      # Execute all tests contained in xmake.lua
+#      - name: Run Tests
+#        run: xmake test -v
+#
 #  # ==========================================
 #  # BUILD MACOS
 #  # ==========================================

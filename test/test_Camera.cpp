@@ -61,7 +61,7 @@ TEST_CASE("Point of arrival after t (at())") {
 
 TEST_CASE("Transformation of a Ray (transform())") {
    Ray ray{Point(1.0f, 2.0f, 3.0f), Vec(6.0f, 5.0f, 4.0f)};
-   Transformation tr = Tras(Vec(10.0f, 11.0f, 12.0f)) * R_x(float(M_PI/2.0f));
+   Transformation tr = Tras(Vec(10.0f, 11.0f, 12.0f)) * R_x(std::numbers::pi_v<float> / 2.0f);
    Ray transformed = ray.transform(tr);
    CHECK(transformed.origin.is_close(Point(11.0f, 8.0f, 14.0f)));
    CHECK(transformed.direction.is_close(Vec(6.0f, -4.0f, 5.0f)));
