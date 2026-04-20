@@ -541,11 +541,11 @@ template<typename Curr> float norm (const Curr& left) {
 // Methods to compute and access length in Vec and Normal
 // ======================================================
 
-float Vec::norm() const { return norm<Vec>(*this); }
-float Vec::norm2() const { return norm2<Vec>(*this); }
+float Vec::norm() const { return ::norm<Vec>(*this); }
+float Vec::norm2() const { return ::norm2<Vec>(*this); }
 
-float Normal::norm() const { return norm<Normal>(*this); }
-float Normal::norm2() const { return norm2<Normal>(*this); }
+float Normal::norm() const { return ::norm<Normal>(*this); }
+float Normal::norm2() const { return ::norm2<Normal>(*this); }
 
 /// Return a normalized Vec (a Vec with the same direction but length 1)
 Vec Vec::normalize() const {
@@ -625,7 +625,7 @@ struct std::formatter<Point> {
         return float_fmt.parse(ctx);
     }
 
-    auto format(const Point& p, std::format_context& ctx) const {
+    auto format(const Point& p, auto& ctx) const {
         auto it = ctx.out();
         it = float_fmt.format(p.x, ctx);
         it = std::format_to(it, " ");
@@ -645,7 +645,7 @@ struct std::formatter<Vec> {
         return float_fmt.parse(ctx);
     }
 
-    auto format(const Vec& v, std::format_context& ctx) const {
+    auto format(const Vec& v, auto& ctx) const {
         auto it = ctx.out();
         it = float_fmt.format(v.x, ctx);
         it = std::format_to(it, " ");
@@ -665,7 +665,7 @@ struct std::formatter<Normal> {
         return float_fmt.parse(ctx);
     }
 
-    auto format(const Normal& n, std::format_context& ctx) const {
+    auto format(const Normal& n, auto& ctx) const {
         auto it = ctx.out();
         it = float_fmt.format(n.x, ctx);
         it = std::format_to(it, " ");
@@ -685,7 +685,7 @@ struct std::formatter<HomMatrix> {
         return float_fmt.parse(ctx);
     }
 
-    auto format(const HomMatrix& M, std::format_context& ctx) const {
+    auto format(const HomMatrix& M, auto& ctx) const {
         auto it = ctx.out();
         for (int i = 0; i < 16; ++i) {
             it = float_fmt.format(M.mat[i], ctx);
