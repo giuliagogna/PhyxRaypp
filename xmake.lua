@@ -11,7 +11,14 @@ add_requires("stb")
 if is_plat("linux") then
     set_toolchains("clang")
     set_policy("build.c++.modules.std", false)
-    set_values("clang.scan_deps", "/usr/bin/clang-scan-deps")
+
+    -- Find dependencies automatically
+    if os.isfile("/usr/bin/clang-scan-deps-18") then
+        set_values("clang.scan_deps", "/usr/bin/clang-scan-deps-18")
+    else
+        set_values("clang.scan_deps", "/usr/bin/clang-scan-deps")
+    end
+
     add_cxflags("-stdlib=libc++", "-Wno-reserved-user-defined-literal", {force = true})
     add_ldflags("-stdlib=libc++", {force = true})
     
@@ -30,7 +37,18 @@ target("PhyxRadpp")
     add_packages("stb")
 
     if is_plat("linux") then
-        add_files("/usr/share/libc++/v1/std.cppm", { filetype = "c++.module", headeronly = true })
+        -- Looks for the files in the standard paths of the different distributions
+        local std_paths = {
+            "/usr/share/libc++/v1/std.cppm",            -- Arch Linux / Custom
+            "/usr/lib/llvm-18/include/c++/v1/std.cppm", -- Ubuntu 24.04 (Clang 18)
+            "/usr/lib/llvm-17/include/c++/v1/std.cppm"  -- Ubuntu 22.04 (Clang 17)
+        }
+        for _, p in ipairs(std_paths) do
+            if os.isfile(p) then
+                add_files(p, { filetype = "c++.module", headeronly = true })
+                break
+            end
+        end
     end
 
     add_files("src/*.cppm")
