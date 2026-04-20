@@ -25,8 +25,12 @@ jobs:
       - name: Install Clang and Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang-18 libc++-18-dev libc++abi-18-dev clang-tools-18
-
+          sudo apt-get install -y clang libc++-dev libc++abi-dev clang-tools
+          
+          STD_CPPM=$(find /usr/lib /usr/include -name std.cppm | head -n 1)
+          sudo mkdir -p /usr/share/libc++/v1
+          sudo ln -s "$STD_CPPM" /usr/share/libc++/v1/std.cppm
+          
       # Configure xmake
       - name: Setup xmake
         uses: xmake-io/github-action-setup-xmake@v1
