@@ -74,8 +74,18 @@ for _, file in ipairs(os.files("test/test_*.cpp")) do
         add_packages("doctest", "stb")
 
         if is_plat("linux") then
-            add_files("/usr/share/libc++/v1/std.cppm", { filetype = "c++.module", headeronly = true })
-        end
+                    local std_paths = {
+                        "/usr/share/libc++/v1/std.cppm",            -- Arch Linux / Custom
+                        "/usr/lib/llvm-18/include/c++/v1/std.cppm", -- Ubuntu 24.04 (Clang 18)
+                        "/usr/lib/llvm-17/include/c++/v1/std.cppm"  -- Ubuntu 22.04 (Clang 17)
+                    }
+                    for _, p in ipairs(std_paths) do
+                        if os.isfile(p) then
+                            add_files(p, { filetype = "c++.module", headeronly = true })
+                            break
+                        end
+                    end
+                end
 
         add_files("test/" .. name .. ".cpp")
         add_files("src/*.cppm")
