@@ -9,39 +9,50 @@ add_requires("doctest")
 add_requires("stb")
 
 if is_plat("linux") then
-
     set_toolchains("clang")
     set_policy("build.c++.modules.std", false)
 
-    -- Looks for libraries dynamically
-    import("lib.detect.find_tool")
-    local scanner = find_tool("clang-scan-deps-18") or find_tool("clang-scan-deps")
-    if scanner then
-        set_values("clang.scan_deps", scanner.program)
+    -- Dynamically search for the scanner using known system paths without invoking 'import'
+    local scanners = {
+        "/usr/bin/clang-scan-deps-18",
+        "/usr/bin/clang-scan-deps"
+    }
+    for _, scanner in ipairs(scanners) do
+        if os.isfile(scanner) then
+            set_values("clang.scan_deps", scanner)
+            break
+        end
     end
 
     add_cxflags("-stdlib=libc++", "-Wno-reserved-user-defined-literal", {force = true})
     add_ldflags("-stdlib=libc++", {force = true})
-    
+
 elseif is_plat("macosx") then
     set_toolchains("llvm")
     set_policy("build.c++.modules.std", true)
 end
 
-
--- Utility function to find std.cppm on linux
+-- ==========================================
+-- Utility function to find std.cppm on Linux
+-- ==========================================
 function add_linux_std_module()
-    import("lib.detect.find_file")
-    -- Looks for the file in all possible paths of different Linux distributions
-    local std_module = find_file("std.cppm", {
-        "/usr/share/libc++/v1",
-        "/usr/lib/llvm-18/include/c++/v1",
-        "/usr/lib/llvm-17/include/c++/v1"
-    })
+    -- Look for the file by safely iterating over known paths of different Linux distributions
+    local std_paths = {
+        "/usr/share/libc++/v1/std.cppm",            -- Arch Linux / Custom
+        "/usr/lib/llvm-18/include/c++/v1/std.cppm", -- Ubuntu 24.04 (Clang 18)
+        "/usr/lib/llvm-17/include/c++/v1/std.cppm"  -- Ubuntu 22.04 (Clang 17)
+    }
 
-    if std_module then
-        add_files(std_module, { filetype = "c++.module", headeronly = true })
-    else
+    local found = false
+    for _, p in ipairs(std_paths) do
+        if os.isfile(p) then
+            add_files(p, { filetype = "c++.module", headeronly = true })
+            found = true
+            break
+        end
+    end
+
+    if not found then
         print("WARNING: std.cppm not found! You need to install libc++-dev.")
     end
 end
@@ -61,7 +72,6 @@ target("PhyxRadpp")
 
     add_files("src/*.cppm")
     add_files("src/*.cpp")
-    -- Removed add_files("include/*.cpp") -> ensure your stb_impl.cpp is moved to the src/ directory!
 
     set_rundir("$(projectdir)") 
 
