@@ -163,8 +163,8 @@ Ray ImageTracer::fire_ray(const int row, const int col, const float u_pixel, con
     const float width = static_cast<const float>(frame.width);
     const float height = static_cast<const float>(frame.height);
 
-    const float u = (static_cast<const float>(col) + u_pixel) / (width - 1.0f);
-    const float v = (static_cast<const float>(row) + v_pixel) / (height - 1.0f);
+    const float u = (static_cast<const float>(col) + u_pixel) / width;
+    const float v = 1.0f - (static_cast<const float>(row) + v_pixel) / height;
 
     return camera.fire_ray(u, v);
 }

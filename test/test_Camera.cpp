@@ -180,6 +180,5 @@ TEST_CASE("Ray generation from ImageTracer (fire_ray())") {
       Ray bottom_right_ray = tracer.fire_ray(1, 3, 1.0f, 1.0f);
       CHECK(Point(0.0f, 2.0, 1.0f).is_close(top_left_ray.at(1.0f)));
       CHECK(Point(0.0f, -2.0, -1.0f).is_close(bottom_right_ray.at(1.0f)));
-
    }
 }
