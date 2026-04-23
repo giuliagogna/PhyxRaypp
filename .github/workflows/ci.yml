@@ -3,8 +3,6 @@ name: PhyxRadpp CI
 on:
   push:
     branches: [ "**" ] # Add the branch to check or "**" to check them all
-  pull_request:
-    branches: [ "main" ]
 
 # Force to run on Node.js 24 because 20 is being deprecated on June 2nd
 env:
