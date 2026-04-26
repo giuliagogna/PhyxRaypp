@@ -56,6 +56,8 @@ export struct Point {
     float x{0.0}, y{0.0}, z{0.0};
     Vec to_vec() const;
     Normal to_norm() const;
+    float norm() const;
+    float norm2() const;
     void normalize(); // normalizes the Point object (non-const)
 
     // GG: Check if two Points are close enough: written as a method as suggested in the lecture slides
