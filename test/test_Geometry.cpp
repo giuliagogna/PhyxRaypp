@@ -97,6 +97,7 @@ TEST_CASE("Test 2: Difference Operations") {
 TEST_CASE("Test 3: Negation Operations") {
     Point p(1.0f, -2.0f, 3.0f);
     Vec v(-4.0f, 5.0f, -6.0f);
+    Normal n(1.0f, 0.0f, 0.0f);
 
     SUBCASE("Negate Vec") {
         Vec res = -v;
@@ -106,6 +107,11 @@ TEST_CASE("Test 3: Negation Operations") {
     SUBCASE("Negate Point") {
         Point res = -p;
         CHECK(res.is_close(Point(-1.0f, 2.0f, -3.0f)));
+    }
+
+    SUBCASE("Negate Normal") {
+        Normal res = -n;
+        CHECK(res.is_close(Normal(-1.0f, 0.0f, 0.0f)));
     }
 }
 
