@@ -236,9 +236,14 @@ export {
         return _negate<Point, void, Point>(p);
     }
 
+    /// -Normal -> Normal
+    Normal operator- (const Normal& n) {
+        return _negate<Normal, void, Normal>(n);
+    }
     // Scalar products
 
     // GG: Why commented?
+    // RP: prof didn't wanted in the lectures
 
 //    /// Point * scalar -> Point
 //    Point operator*= (Point& p, float scalar) {
