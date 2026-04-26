@@ -55,6 +55,10 @@ export struct Vec {
 export struct Point {
     float x{0.0}, y{0.0}, z{0.0};
     Vec to_vec() const;
+    Normal to_norm() const;
+    float norm() const;
+    float norm2() const;
+    void normalize(); // normalizes the Point object (non-const)
 
     // GG: Check if two Points are close enough: written as a method as suggested in the lecture slides
     bool is_close(const Point& other, float epsilon = 1e-5f) const;
@@ -385,20 +389,30 @@ export {
         };
     }
 
-    // ASK TOM
-    // RP: seems that this is optimized by the compiler.
-    HomMatrix operator*(const HomMatrix& M1, const HomMatrix& M2) {
-        HomMatrix res;
-        res.mat.fill(0.0f);
-        for (int i = 0; i < 4; ++i) {
-            for (int k = 0; k < 4; ++k) {
-                float s = M1.mat[i * 4 + k];
-                for (int j = 0; j < 4; ++j) {
-                    res.mat[i * 4 + j] += s * M2.mat[k * 4 + j];
-                }
-            }
-        }
-        return res;
+
+    HomMatrix operator* (const HomMatrix& M1, const HomMatrix& M2) {
+        
+        return HomMatrix{
+            M1.mat[0] * M2.mat[0] + M1.mat[1] * M2.mat[4] + M1.mat[2] * M2.mat[8] + M1.mat[3] * M2.mat[12],
+            M1.mat[0] * M2.mat[1] + M1.mat[1] * M2.mat[5] + M1.mat[2] * M2.mat[9] + M1.mat[3] * M2.mat[13],
+            M1.mat[0] * M2.mat[2] + M1.mat[1] * M2.mat[6] + M1.mat[2] * M2.mat[10] + M1.mat[3] * M2.mat[14],
+            M1.mat[0] * M2.mat[3] + M1.mat[1] * M2.mat[7] + M1.mat[2] * M2.mat[11] + M1.mat[3] * M2.mat[15],
+
+            M1.mat[4] * M2.mat[0] + M1.mat[5] * M2.mat[4] + M1.mat[6] * M2.mat[8] + M1.mat[7] * M2.mat[12],
+            M1.mat[4] * M2.mat[1] + M1.mat[5] * M2.mat[5] + M1.mat[6] * M2.mat[9] + M1.mat[7] * M2.mat[13],
+            M1.mat[4] * M2.mat[2] + M1.mat[5] * M2.mat[6] + M1.mat[6] * M2.mat[10] + M1.mat[7] * M2.mat[14],
+            M1.mat[4] * M2.mat[3] + M1.mat[5] * M2.mat[7] + M1.mat[6] * M2.mat[11] + M1.mat[7] * M2.mat[15],
+
+            M1.mat[8] * M2.mat[0] + M1.mat[9] * M2.mat[4] + M1.mat[10] * M2.mat[8] + M1.mat[11] * M2.mat[12],
+            M1.mat[8] * M2.mat[1] + M1.mat[9] * M2.mat[5] + M1.mat[10] * M2.mat[9] + M1.mat[11] * M2.mat[13],
+            M1.mat[8] * M2.mat[2] + M1.mat[9] * M2.mat[6] + M1.mat[10] * M2.mat[10] + M1.mat[11] * M2.mat[14],
+            M1.mat[8] * M2.mat[3] + M1.mat[9] * M2.mat[7] + M1.mat[10] * M2.mat[11] + M1.mat[11] * M2.mat[15],
+
+            M1.mat[12] * M2.mat[0] + M1.mat[13] * M2.mat[4] + M1.mat[14] * M2.mat[8] + M1.mat[15] * M2.mat[12],
+            M1.mat[12] * M2.mat[1] + M1.mat[13] * M2.mat[5] + M1.mat[14] * M2.mat[9] + M1.mat[15] * M2.mat[13],
+            M1.mat[12] * M2.mat[2] + M1.mat[13] * M2.mat[6] + M1.mat[14] * M2.mat[10] + M1.mat[15] * M2.mat[14],
+            M1.mat[12] * M2.mat[3] + M1.mat[13] * M2.mat[7] + M1.mat[14] * M2.mat[11] + M1.mat[15] * M2.mat[15]
+        };
     }
 
 
@@ -547,6 +561,9 @@ float Vec::norm2() const { return ::norm2<Vec>(*this); }
 float Normal::norm() const { return ::norm<Normal>(*this); }
 float Normal::norm2() const { return ::norm2<Normal>(*this); }
 
+float Point::norm() const { return ::norm<Point>(*this); }
+float Point::norm2() const { return ::norm2<Point>(*this); }
+
 /// Return a normalized Vec (a Vec with the same direction but length 1)
 Vec Vec::normalize() const {
     return _scalar_divide<Vec, float, Vec>(*this, this->norm());
@@ -557,6 +574,9 @@ Normal Normal::normalize() {
     return _scalar_divide<Normal, float, Normal>(*this, this->norm());
 }
 
+Normal Point::to_norm() const {
+    return _scalar_divide<Point, float, Normal>(*this, this->norm());
+}
 
 // ======================================================
 // is_close methods
