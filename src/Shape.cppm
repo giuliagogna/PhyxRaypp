@@ -8,16 +8,6 @@ import auxiliary_functions;
 import Color;
 import HDRImage;
 
-// GG: Potential Vec2D structure
-//export struct Vec2d {
-//    float u{0.0f}, v{0.0f};
-//
-//    [[nodiscard]] bool is_close(const Vec2d& other, float epsilon = 1e-5f) const {
-//        return aux::are_close(u, other.u, epsilon) &&
-//               aux::are_close(v, other.v, epsilon);
-//    }
-//};
-
 // ================================================
 // HIT RECORD STRUCTURE
 // ================================================
@@ -28,8 +18,8 @@ export struct HitRecord {
     Normal hit_normal; // Normal at the intersection point
     // GG: Potentially consider to implement a struct Vec2D in order to be able to implement
     // operator overload and call u and v with the name u and v and not uv.first and uv.second
-    // Vec2D params // UV coordinates at the intersection point
-    std::pair<float, float> uv; // UV coordinates at the intersection point
+    Vec2D params; // UV coordinates at the intersection point
+    //std::pair<float, float> uv; // UV coordinates at the intersection point
     float t; // Ray parameter at the intersection point
     bool is_close(const HitRecord& other, float epsilon = 1e-5f) const; // Check if two HitRecords are close enough
 };
@@ -38,8 +28,10 @@ bool HitRecord::is_close(const HitRecord& other, float epsilon) const {
     return ray.is_close(other.ray, epsilon) &&
            hit_point.is_close(other.hit_point, epsilon) &&
            hit_normal.is_close(other.hit_normal, epsilon) &&
-           aux::are_close(uv.first, other.uv.first, epsilon) &&
-           aux::are_close(uv.second, other.uv.second, epsilon) &&
+           aux::are_close(params.u, other.params.u, epsilon) &&
+           aux::are_close(params.v, other.params.v, epsilon) &&
+           //aux::are_close(uv.first, other.uv.first, epsilon) &&
+           //aux::are_close(uv.second, other.uv.second, epsilon) &&
            aux::are_close(t, other.t, epsilon);
 }
 
@@ -48,11 +40,19 @@ bool HitRecord::is_close(const HitRecord& other, float epsilon) const {
 // ======================================================
 
 export struct Shape {
+    // GG: Constructor in Shape needs to be initialized with a transformation.
+    //     The object is put into the scene in the right location: responsibility of calculations is delegated
+    //     to the object that performs them in its frame of reference
+    Shape(const Transformation& trans = Transformation{}) : trans(trans) {}
     virtual ~Shape() = default; // Virtual destructor for proper cleanup of derived classes
     virtual std::optional<HitRecord> ray_intersection(const Ray& ray) const = 0; // Pure virtual method to compute ray-shape intersection
     Transformation trans; // Transformation from the shape's local space to world space (position and orientation of the shape in the scene)
 };
 
+
+// ======================================================
+// SPHERE
+// ======================================================
 export struct Sphere : Shape {
     Point origin; // Center of the sphere // RP: this would be amazing if it was a Vec...
     float radius; // Radius of the sphere
@@ -64,7 +64,7 @@ export struct Sphere : Shape {
 
 /// Returns a HitRecord in the axis origin frame if the ray intersects the sphere, std::nullopt otherwise
 std::optional<HitRecord> Sphere::ray_intersection(const Ray& ray) const {
-    
+
     Ray ray_sphere = ray.transform(trans); // Transform the ray to the sphere reference frame (where the sphere is a unit sphere centered at the origin)
     // tradeoff: if the most of the rays intersect the sphere, it's better to compute and
     // store direction2 once instead of calling the method everytime.
@@ -138,11 +138,51 @@ export struct Plane : Shape {
 
         // Record (u, v) coordinates on the pair (Tile Pattern: represent infinite plane as composition of finite tiles)
         // - floor(-3.2) = -4
-        record.uv = {
-            local_point.x - std::floor(local_point.x),
-            local_point.y - std::floor(local_point.y)
-        };
+        record.params.u = local_point.x - std::floor(local_point.x);
+        record.params.v = local_point.y - std::floor(local_point.y);
+        //record.uv = {
+        //    local_point.x - std::floor(local_point.x),
+        //    local_point.y - std::floor(local_point.y)
+        //};
 
         return record;
     }
 };
+
+
+// ===================================================================================
+// WORLD STRUCT
+// ===================================================================================
+
+export struct World {
+    std::vector<std::shared_ptr<Shape>> shapes;
+    void add(std::shared_ptr<Shape> shape);
+    [[nodiscard]] std::optional<HitRecord> ray_intersection(const Ray& ray) const;
+};
+
+// Add a shape to the World: use shared_ptr + move pattern for optimization
+void World::add(std::shared_ptr<Shape> shape) {
+    shapes.push_back(std::move(shape));
+}
+
+[[nodiscard]] std::optional<HitRecord> World::ray_intersection(const Ray& ray) const {
+    std::optional<HitRecord> closest = std::nullopt;
+    for (const auto& shape : shapes) {
+
+        auto intersection = shape->ray_intersection(ray);
+        if (!intersection.has_value()) {
+            continue;
+        }
+
+        // If it is the first shape we hit (closest.has_value()==false)
+        // or the intersection with the new shape is closer than the intersection with the old one
+        // update closest to the intersection with the current shape
+
+        if (!closest.has_value() || intersection->t < closest->t) {
+            closest = intersection;
+        }
+    }
+
+    return closest;
+}
+

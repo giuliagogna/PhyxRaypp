@@ -24,6 +24,12 @@ export module Geometry;
 import auxiliary_functions;
 import std;
 
+// 2D vector (used in Shapes.cppm for parametrized coordinates (u, v))
+export struct Vec2D {
+    float u{0.0f}, v{0.0f};
+    bool is_close(const Vec2D& other, float epsilon = 1e-5f) const;
+};
+
 // Normalized 3D vector, used for normals (and directions???)
 export struct Normal {
     float x{0.0f}, y{0.0f}, z{0.0f};
@@ -586,6 +592,11 @@ Normal Point::to_norm() const {
 // ======================================================
 // is_close methods
 // ======================================================
+
+bool Vec2D::is_close(const Vec2D& other, float epsilon) const {
+    return aux::are_close(u, other.u, epsilon) &&
+           aux::are_close(v, other.v, epsilon);
+}
 
 bool Point::is_close(const Point& other, float epsilon) const {
     return aux::are_xyz_close(*this, other, epsilon);

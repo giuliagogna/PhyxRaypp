@@ -22,6 +22,8 @@ import std;
 import auxiliary_functions;
 import Geometry;
 
+// is_close() methods are not tested since thy are just a wrapper for aux::are_close()
+
 // =============================================================================
 // TEST 1: Sums (Operator + and +=)
 // =============================================================================

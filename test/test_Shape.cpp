@@ -41,9 +41,12 @@ TEST_CASE("TEST 1: Similarity between two HitRecord objects (is_close())") {
    Normal normal2{0.0f, 1.0f, 0.0f};
    Normal normal3{1.0f, 0.0f, 0.0f};
 
-   std::pair<float, float> uv1{0.5f, 0.5f};
-   std::pair<float, float> uv2{0.5f, 0.5f};
-   std::pair<float, float> uv3{0.1f, 0.1f};
+    Vec2D uv1{0.5f, 0.5f};
+    Vec2D uv2{0.5f, 0.5f};
+    Vec2D uv3{0.1f, 0.1f};
+   //std::pair<float, float> uv1{0.5f, 0.5f};
+   //std::pair<float, float> uv2{0.5f, 0.5f};
+   //std::pair<float, float> uv3{0.1f, 0.1f};
 
    HitRecord hit1{ray1, Point{1.0f, 2.0f, 3.0f}, normal1, uv1, 5.0f};
    HitRecord hit2{ray2, Point{1.0f, 2.0f, 3.0f}, normal2, uv2, 5.0f};
@@ -62,7 +65,7 @@ TEST_CASE("TEST 1: Similarity between two HitRecord objects (is_close())") {
 // ====================== SPHERE STRUCT TESTS ==============================
 
 TEST_CASE("TEST 2: Sphere Test Suite") {
-   SUBCASE("Correct traslation and scaling in the constructor") {
+   SUBCASE("Correct translation and scaling in the constructor") {
        Sphere sphere(Point{1.0f, 2.0f, 3.0f}, 4.0f);
        // The transformation should scale by 4 and translate by -origin
        Transformation expected = Scale(Vec{4.0f, 4.0f, 4.0f}) * Trans(Vec{-1.0f, -2.0f, -3.0f});
@@ -78,9 +81,9 @@ TEST_CASE("TEST 2: Sphere Test Suite") {
        REQUIRE(hit.has_value());
        CHECK(hit->hit_point.is_close(Point{0.0f, 0.0f, 1.0f}));
        CHECK(hit->hit_normal.is_close(Normal{0.0f, 0.0f, 1.0f}));
-       std::printf("UV coordinates: u = %f, v = %f\n", hit->uv.first, hit->uv.second);
+       std::printf("UV coordinates: u = %f, v = %f\n", hit->params.u, hit->params.v);
        //CHECK(aux::are_close(hit->uv.first, 0.0f)); 
-       CHECK(aux::are_close(hit->uv.second, 0.0f));
+       CHECK(aux::are_close(hit->params.v, 0.0f));
    }
 
    SUBCASE("Ray-sphere intersection: no intersection") {
@@ -96,15 +99,15 @@ TEST_CASE("TEST 2: Sphere Test Suite") {
        REQUIRE(hit.has_value());
        CHECK(hit->hit_point.is_close(Point{0.0f, 0.0f, -1.0f}));
        CHECK(hit->hit_normal.is_close(Normal{0.0f, 0.0f, 1.0f}));
-       std::printf("UV coordinates: u = %f, v = %f\n", hit->uv.first, hit->uv.second);
+       std::printf("UV coordinates: u = %f, v = %f\n", hit->params.u, hit->params.v);
        //CHECK(aux::are_close(hit->uv.first, 1.0f)); 
-       CHECK(aux::are_close(hit->uv.second, 1.0f));
+       CHECK(aux::are_close(hit->params.v, 1.0f));
    }
 
 
 }
 
-// ================================PLANE STRUCT TESTS=======================
+// ========================== PLANE STRUCT TESTS ===========================
 
 TEST_CASE("TEST 3: Plane - Comprehensive Test Suite") {
     // SETUP
@@ -119,12 +122,12 @@ TEST_CASE("TEST 3: Plane - Comprehensive Test Suite") {
         auto hit = plane.ray_intersection(ray);
 
         REQUIRE(hit.has_value());
-        CHECK(hit->t == doctest::Approx(1.0f));
+        CHECK(aux::are_close(hit->t, 1.0f));
         CHECK(hit->hit_point.is_close(Point{0.0f, 0.0f, 0.0f}));
         CHECK(hit->hit_normal.is_close(Normal{0.0f, 0.0f, 1.0f}));
         // GG: need to change this if we choose to implement Vec2D
-        CHECK(aux::are_close(hit->uv.first, 0.0f));
-        CHECK(aux::are_close(hit->uv.second, 0.0f));
+        CHECK(aux::are_close(hit->params.u, 0.0f));
+        CHECK(aux::are_close(hit->params.v, 0.0f));
     }
 
     SUBCASE("Intersection from below (inversion of the normal)") {
@@ -151,8 +154,8 @@ TEST_CASE("TEST 3: Plane - Comprehensive Test Suite") {
         REQUIRE(hit.has_value());
         // 1.25 - floor(1.25) = 1.25 - 1.0 = 0.25
         // 2.75 - floor(2.75) = 2.75 - 2.0 = 0.75
-        CHECK(aux::are_close(hit->uv.first, 0.25f));
-        CHECK(aux::are_close(hit->uv.second, 0.75f));
+        CHECK(aux::are_close(hit->params.u, 0.25f));
+        CHECK(aux::are_close(hit->params.v, 0.75f));
     }
 
     SUBCASE("Negative intersection coordinates") {
@@ -162,8 +165,8 @@ TEST_CASE("TEST 3: Plane - Comprehensive Test Suite") {
         REQUIRE(hit.has_value());
         // -1.25 - floor(-1.25) = -1.25 - (-2.0) = 0.75
         // -2.75 - floor(-2.75) = -2.75 - (-3.0) = 0.25
-        CHECK(aux::are_close(hit->uv.first, 0.75f));
-        CHECK(aux::are_close(hit->uv.second, 0.25f));
+        CHECK(aux::are_close(hit->params.u, 0.75f));
+        CHECK(aux::are_close(hit->params.v, 0.25f));
     }
 
 
@@ -192,5 +195,63 @@ TEST_CASE("TEST 3: Plane - Comprehensive Test Suite") {
 
         // The normal undergoes the transformation and now points towards the positive x axis
         CHECK(hit->hit_normal.is_close(Normal{1.0f, 0.0f, 0.0f}));
+    }
+}
+
+
+// ======================== WORLD STRUCT TESTS =============================
+
+TEST_CASE("World - Testing Ray Intersection and Scene Management") {
+    // SETUP: Create an empty world.
+    // doctest will reset this to empty before each SUBCASE.
+    World world;
+
+    SUBCASE("Empty World returns no intersection") {
+        // World has default initialization, empty list
+        Ray ray{Point{0.0f, 0.0f, 0.0f}, Vec{0.0f, 0.0f, 1.0f}};
+        auto hit = world.ray_intersection(ray);
+
+        CHECK_FALSE(hit.has_value());
+    }
+
+    SUBCASE("World with a single plane") {
+        // Add a plane translated to z = +2
+        world.add(std::make_shared<Plane>(Trans(Vec{0.0f, 0.0f, 2.0f})));
+
+        Ray ray{Point{1.0f, 2.0f, 0.0f}, Vec{0.0f, 0.0f, 1.0f}};
+        auto hit = world.ray_intersection(ray);
+
+        REQUIRE(hit.has_value());
+        CHECK(aux::are_close(hit->t, 2.0f));
+        CHECK(hit->hit_point.is_close(Point{1.0f, 2.0f, 2.0f}));
+    }
+
+    SUBCASE("World with multiple planes (Closest hit logic)") {
+        // Add a plane at z = +5 (Add first)
+        world.add(std::make_shared<Plane>(Trans(Vec{0.0f, 0.0f, 5.0f})));
+
+        // Add a plane at z = +2 (Add second)
+        world.add(std::make_shared<Plane>(Trans(Vec{0.0f, 0.0f, 2.0f})));
+
+        Ray ray{Point{0.0f, 0.0f, 0.0f}, Vec{0.0f, 0.0f, 1.0f}};
+        auto hit = world.ray_intersection(ray);
+
+        // The ray should hit the plane at z=2 first, ignoring the plane at z=5
+        // This proves the closest-hit algorithm works correctly.
+        REQUIRE(hit.has_value());
+        CHECK(aux::are_close(hit->t, 2.0f));
+        CHECK(hit->hit_point.is_close(Point{0.0f, 0.0f, 2.0f}));
+    }
+
+    SUBCASE("World with multiple planes but ray misses all") {
+        // Add two planes
+        world.add(std::make_shared<Plane>(Trans(Vec{0.0f, 0.0f, 5.0f})));
+        world.add(std::make_shared<Plane>(Trans(Vec{0.0f, 0.0f, 2.0f})));
+
+        // Shoot a ray parallel to the XY planes (along the X axis, starting at z=1)
+        Ray ray{Point{0.0f, 0.0f, 1.0f}, Vec{1.0f, 0.0f, 0.0f}};
+        auto hit = world.ray_intersection(ray);
+
+        CHECK_FALSE(hit.has_value());
     }
 }
