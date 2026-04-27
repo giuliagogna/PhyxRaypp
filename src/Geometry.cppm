@@ -459,7 +459,7 @@ export {
     // ================================================
 
     /// Generates a translation Transformation
-    Transformation Tras(const Vec& v) {
+    Transformation Trans(const Vec& v) {
         Transformation t; // Starts as Identity
         // M
         // Sets the last column to the components of the vector

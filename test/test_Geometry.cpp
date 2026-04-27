@@ -401,7 +401,7 @@ TEST_CASE("Test 9: Transformations") {
     Normal n(0.0f, 0.0f, 1.0f);
 
     SUBCASE("Translation") {
-        Transformation tr = Tras(Vec(2.0f, 3.0f, 4.0f));
+        Transformation tr = Trans(Vec(2.0f, 3.0f, 4.0f));
 
         CHECK(tr.is_consistent() == true);
 
@@ -451,7 +451,7 @@ TEST_CASE("Test 9: Transformations") {
     }
 
     SUBCASE("Transformation Composition and Inverse") {
-        Transformation tr = Tras(Vec(5.0f, 0.0f, 0.0f));
+        Transformation tr = Trans(Vec(5.0f, 0.0f, 0.0f));
         Transformation sc = Scale(Vec(2.0f, 2.0f, 2.0f));
 
         Transformation combined = tr * sc; // Scale THEN translate
