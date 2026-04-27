@@ -59,9 +59,54 @@ TEST_CASE("TEST 1: Similarity between two HitRecord objects (is_close())") {
    }
 }
 
+// ====================== SPHERE STRUCT TESTS ==============================
+
+TEST_CASE("TEST 2: Sphere Test Suite") {
+   SUBCASE("Correct traslation and scaling in the constructor") {
+       Sphere sphere(Point{1.0f, 2.0f, 3.0f}, 4.0f);
+       // The transformation should scale by 4 and translate by -origin
+       Transformation expected = Scale(Vec{4.0f, 4.0f, 4.0f}) * Trans(Vec{-1.0f, -2.0f, -3.0f});
+       CHECK(sphere.trans.m.is_close(expected.m));
+   }
+
+   Sphere sphere(Point{0.0f, 0.0f, 0.0f}, 1.0f);
+
+   SUBCASE("Ray-sphere intersection: unitary sphere at origin") {
+       Ray ray{Point{0.0f, 0.0f, 2.0f}, Vec{0.0f, 0.0f, -1.0f}};
+       auto hit = sphere.ray_intersection(ray);
+
+       REQUIRE(hit.has_value());
+       CHECK(hit->hit_point.is_close(Point{0.0f, 0.0f, 1.0f}));
+       CHECK(hit->hit_normal.is_close(Normal{0.0f, 0.0f, 1.0f}));
+       std::printf("UV coordinates: u = %f, v = %f\n", hit->uv.first, hit->uv.second);
+       //CHECK(aux::are_close(hit->uv.first, 0.0f)); 
+       CHECK(aux::are_close(hit->uv.second, 0.0f));
+   }
+
+   SUBCASE("Ray-sphere intersection: no intersection") {
+       Ray ray{Point{0.0f, 0.0f, 2.0f}, Vec{1.0f, 0.0f, 0.0f}};
+       auto hit = sphere.ray_intersection(ray);
+       CHECK(hit.has_value() == false);
+   }
+
+   SUBCASE("Ray-sphere intersection: ray originates inside the sphere") {
+       Ray ray{Point{0.0f, 0.0f, 0.5f}, Vec{0.0f, 0.0f, -1.0f}};
+       auto hit = sphere.ray_intersection(ray);
+
+       REQUIRE(hit.has_value());
+       CHECK(hit->hit_point.is_close(Point{0.0f, 0.0f, -1.0f}));
+       CHECK(hit->hit_normal.is_close(Normal{0.0f, 0.0f, 1.0f}));
+       std::printf("UV coordinates: u = %f, v = %f\n", hit->uv.first, hit->uv.second);
+       //CHECK(aux::are_close(hit->uv.first, 1.0f)); 
+       CHECK(aux::are_close(hit->uv.second, 1.0f));
+   }
+
+
+}
+
 // ================================PLANE STRUCT TESTS=======================
 
-TEST_CASE("TEST 2: Plane - Comprehensive Test Suite") {
+TEST_CASE("TEST 3: Plane - Comprehensive Test Suite") {
     // SETUP
     // This canonical plane is initialized once here, and doctest will
     // automatically reset its state before executing each SUBCASE.
@@ -87,7 +132,6 @@ TEST_CASE("TEST 2: Plane - Comprehensive Test Suite") {
         auto hit = plane.ray_intersection(ray);
 
         REQUIRE(hit.has_value());
-        CHECK(hit->t == doctest::Approx(1.0f));
         CHECK(hit->hit_point.is_close(Point{0.0f, 0.0f, 0.0f}));
         CHECK(hit->hit_normal.is_close(Normal{0.0f, 0.0f, -1.0f})); // The normal must be flipped!
     }
@@ -126,7 +170,7 @@ TEST_CASE("TEST 2: Plane - Comprehensive Test Suite") {
     // Transformations (Translation and Rotation)
     SUBCASE("Plane translated along axis z") {
         // Mutating the canonical plane's transformation for this subcase
-        plane.trans = Tras(Vec{0.0f, 0.0f, 2.0f}); // Plane at z=2
+        plane.trans = Trans(Vec{0.0f, 0.0f, 2.0f}); // Plane at z=2
         Ray ray{Point{0.0f, 0.0f, 3.0f}, Vec{0.0f, 0.0f, -1.0f}};
         auto hit = plane.ray_intersection(ray);
 

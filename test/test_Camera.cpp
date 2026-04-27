@@ -61,7 +61,7 @@ TEST_CASE("Point of arrival after t (at())") {
 
 TEST_CASE("Transformation of a Ray (transform())") {
    Ray ray{Point(1.0f, 2.0f, 3.0f), Vec(6.0f, 5.0f, 4.0f)};
-   Transformation tr = Tras(Vec(10.0f, 11.0f, 12.0f)) * R_x(std::numbers::pi_v<float> / 2.0f);
+   Transformation tr = Trans(Vec(10.0f, 11.0f, 12.0f)) * R_x(std::numbers::pi_v<float> / 2.0f);
    Ray transformed = ray.transform(tr);
    CHECK(transformed.origin.is_close(Point(11.0f, 8.0f, 14.0f)));
    CHECK(transformed.direction.is_close(Vec(6.0f, -4.0f, 5.0f)));
@@ -96,7 +96,7 @@ TEST_CASE("OrthogonalCamera") {
       CHECK(ray4.at(1.0f).is_close(Point{0.0f, -2.0f, 1.0f}));
    }
    SUBCASE("Transform properties") {
-      OrthogonalCamera cam(2.0f, Tras(Vec(10.0f, 20.0f, 30.0f)));
+      OrthogonalCamera cam(2.0f, Trans(Vec(10.0f, 20.0f, 30.0f)));
       CHECK(cam.fire_ray(0.0f, 0.0f).is_close(Ray{Point(9, 22, 29), Vec(1, 0, 0)}));
       CHECK(cam.fire_ray(1.0f, 0.0f).is_close(Ray{Point(9, 18, 29), Vec(1, 0, 0)}));
       CHECK(cam.fire_ray(0.0f, 1.0f).is_close(Ray{Point(9, 22, 31), Vec(1, 0, 0)}));
@@ -131,7 +131,7 @@ TEST_CASE("PerspectiveCamera") {
    }
 
    SUBCASE("Transform properties") {
-      PerspectiveCamera cam(1.0f, 0.5f, Tras(Vec(1.0f, 1.0f, 1.0f)));
+      PerspectiveCamera cam(1.0f, 0.5f, Trans(Vec(1.0f, 1.0f, 1.0f)));
       CHECK(cam.fire_ray(0.0f, 0.0f).is_close(Ray{Point(0.5f, 1.0f, 1.0f), Vec(0.5f, 1.0f, -1.0f)}));
       CHECK(cam.fire_ray(1.0f, 0.0f).is_close(Ray{Point(0.5f, 1.0f, 1.0f), Vec(0.5f, -1.0f, -1.0f)}));
       CHECK(cam.fire_ray(0.0f, 1.0f).is_close(Ray{Point(0.5f, 1.0f, 1.0f), Vec(0.5f, 1.0f, 1.0f)}));
