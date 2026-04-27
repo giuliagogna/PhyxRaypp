@@ -18,8 +18,11 @@ export struct HitRecord {
     Normal hit_normal; // Normal at the intersection point
     // GG: Potentially consider to implement a struct Vec2D in order to be able to implement
     // operator overload and call u and v with the name u and v and not uv.first and uv.second
-    Vec2D params; // UV coordinates at the intersection point
-    //std::pair<float, float> uv; // UV coordinates at the intersection point
+
+    // RP: "params" don't let you understand what they actually are IMO. "surface_params" is a blend of
+    // the name in the lectures and "params" which I agree is more coherent with our code.
+    //Vec2D params; // UV coordinates at the intersection point
+    Vec2D surface_params; // UV coordinates at the intersection point
     float t; // Ray parameter at the intersection point
     bool is_close(const HitRecord& other, float epsilon = 1e-5f) const; // Check if two HitRecords are close enough
 };
@@ -28,8 +31,8 @@ bool HitRecord::is_close(const HitRecord& other, float epsilon) const {
     return ray.is_close(other.ray, epsilon) &&
            hit_point.is_close(other.hit_point, epsilon) &&
            hit_normal.is_close(other.hit_normal, epsilon) &&
-           aux::are_close(params.u, other.params.u, epsilon) &&
-           aux::are_close(params.v, other.params.v, epsilon) &&
+           aux::are_close(surface_params.u, other.surface_params.u, epsilon) &&
+           aux::are_close(surface_params.v, other.surface_params.v, epsilon) &&
            //aux::are_close(uv.first, other.uv.first, epsilon) &&
            //aux::are_close(uv.second, other.uv.second, epsilon) &&
            aux::are_close(t, other.t, epsilon);
@@ -54,10 +57,8 @@ export struct Shape {
 // SPHERE
 // ======================================================
 export struct Sphere : Shape {
-    Point origin; // Center of the sphere // RP: this would be amazing if it was a Vec...
-    float radius; // Radius of the sphere
     Transformation trans;
-    Sphere(const Point& origin, float radius) : origin(origin), radius(radius), trans(Scale(Vec(radius, radius, radius)) * Trans(-origin.to_vec())) {} // Constructor
+    Sphere(const Point& origin, float radius) : trans(Scale(Vec(radius, radius, radius)) * Trans(-origin.to_vec())) {} // Constructor
 
     std::optional<HitRecord> ray_intersection(const Ray& ray) const override; // Override method to compute ray-sphere intersection
 };
@@ -138,8 +139,8 @@ export struct Plane : Shape {
 
         // Record (u, v) coordinates on the pair (Tile Pattern: represent infinite plane as composition of finite tiles)
         // - floor(-3.2) = -4
-        record.params.u = local_point.x - std::floor(local_point.x);
-        record.params.v = local_point.y - std::floor(local_point.y);
+        record.surface_params.u = local_point.x - std::floor(local_point.x);
+        record.surface_params.v = local_point.y - std::floor(local_point.y);
         //record.uv = {
         //    local_point.x - std::floor(local_point.x),
         //    local_point.y - std::floor(local_point.y)
@@ -155,32 +156,39 @@ export struct Plane : Shape {
 // ===================================================================================
 
 export struct World {
-    std::vector<std::shared_ptr<Shape>> shapes;
-    void add(std::shared_ptr<Shape> shape);
+    std::vector<std::unique_ptr<Shape>> shapes;
+    void add(std::unique_ptr<Shape> shape);
     [[nodiscard]] std::optional<HitRecord> ray_intersection(const Ray& ray) const;
 };
 
-// Add a shape to the World: use shared_ptr + move pattern for optimization
-void World::add(std::shared_ptr<Shape> shape) {
+// Add a shape to the World: use unique_ptr + move pattern for optimization
+void World::add(std::unique_ptr<Shape> shape) {
     shapes.push_back(std::move(shape));
 }
 
 [[nodiscard]] std::optional<HitRecord> World::ray_intersection(const Ray& ray) const {
+    // Default: no hit
     std::optional<HitRecord> closest = std::nullopt;
+
+    Ray ray_copy = ray; // At this point we just do like this, but it would be possible that
+                        // we will just pass ray as non-const reference
+    // Cicle on shapes in the scene
     for (const auto& shape : shapes) {
 
-        auto intersection = shape->ray_intersection(ray);
+        auto intersection = shape->ray_intersection(ray_copy);
         if (!intersection.has_value()) {
-            continue;
+            continue; // Skip if no intersection with the current shape
         }
 
-        // If it is the first shape we hit (closest.has_value()==false)
-        // or the intersection with the new shape is closer than the intersection with the old one
-        // update closest to the intersection with the current shape
+        
 
-        if (!closest.has_value() || intersection->t < closest->t) {
-            closest = intersection;
-        }
+        // RP: I'll change the tmax. In this way I avoid to actually generate the HitRecord object and then throw it away.
+        // In this way, if we hit we also update the closest and tmax!
+        // If we never hit a shape, there's the default nullop return
+
+        closest = intersection;
+        ray_copy.tmax = closest->t; // Update tmax to the closest hit
+
     }
 
     return closest;
