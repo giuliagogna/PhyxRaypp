@@ -57,8 +57,7 @@ export struct Shape {
 // SPHERE
 // ======================================================
 export struct Sphere : Shape {
-    Transformation trans;
-    Sphere(const Point& origin, float radius) : trans(Scale(Vec(radius, radius, radius)) * Trans(-origin.to_vec())) {} // Constructor
+    Sphere(const Point& origin, float radius) : Shape(Scale(Vec{1.0f/radius, 1.0f/radius, 1.0f/radius}) * Trans(-origin.to_vec())) {} // Constructor
 
     std::optional<HitRecord> ray_intersection(const Ray& ray) const override; // Override method to compute ray-sphere intersection
 };
@@ -172,25 +171,19 @@ void World::add(std::unique_ptr<Shape> shape) {
 
     Ray ray_copy = ray; // At this point we just do like this, but it would be possible that
                         // we will just pass ray as non-const reference
+                        // We could also directly pass ray by copy.
     // Cicle on shapes in the scene
     for (const auto& shape : shapes) {
 
-        auto intersection = shape->ray_intersection(ray_copy);
-        if (!intersection.has_value()) {
-            continue; // Skip if no intersection with the current shape
-        }
-
-        
-
-        // RP: I'll change the tmax. In this way I avoid to actually generate the HitRecord object and then throw it away.
-        // In this way, if we hit we also update the closest and tmax!
-        // If we never hit a shape, there's the default nullop return
-
-        closest = intersection;
-        ray_copy.tmax = closest->t; // Update tmax to the closest hit
-
+        if (auto intersection = shape->ray_intersection(ray_copy)){
+            closest = intersection;
+            ray_copy.tmax = closest->t; // Update tmax to the closest hit
+            // RP: I'll just change the tmax! In this way I avoid to actually generate
+            // the HitRecord object and then throw it away.
+            // If we hit we also update both closest and tmax.
+            // If we never hit a shape, there's the default std::nullopt return.
+        }        
     }
-
     return closest;
 }
 

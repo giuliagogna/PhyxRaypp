@@ -69,7 +69,7 @@ TEST_CASE("TEST 2: Sphere Test Suite") {
     SUBCASE("Correct translation and scaling in the constructor") {
        Sphere sphere(Point{1.0f, 2.0f, 3.0f}, 4.0f);
        // The transformation should scale by 4 and translate by -origin
-       Transformation expected = Scale(Vec{4.0f, 4.0f, 4.0f}) * Trans(Vec{-1.0f, -2.0f, -3.0f});
+       Transformation expected = Scale(Vec{0.25f, 0.25f, 0.25f}) * Trans(Vec{-1.0f, -2.0f, -3.0f});
        CHECK(sphere.trans.m.is_close(expected.m));
    }
 
@@ -82,28 +82,43 @@ TEST_CASE("TEST 2: Sphere Test Suite") {
        REQUIRE(hit.has_value());
        CHECK(hit->hit_point.is_close(Point{0.0f, 0.0f, 1.0f}));
        CHECK(hit->hit_normal.is_close(Normal{0.0f, 0.0f, 1.0f}));
-       std::printf("UV coordinates: u = %f, v = %f\n", hit->surface_params.u, hit->surface_params.v);
        //CHECK(aux::are_close(hit->uv.first, 0.0f)); 
        CHECK(aux::are_close(hit->surface_params.v, 0.0f));
    }
 
-   SUBCASE("Ray-sphere intersection: no intersection") {
+   SUBCASE("Unitary sphere intersection: no intersection") {
        Ray ray{Point{0.0f, 0.0f, 2.0f}, Vec{1.0f, 0.0f, 0.0f}};
        auto hit = sphere.ray_intersection(ray);
        CHECK(hit.has_value() == false);
    }
 
-   SUBCASE("Ray-sphere intersection: ray originates inside the sphere") {
+   SUBCASE("Unitary sphere intersection: ray originates inside the sphere") {
        Ray ray{Point{0.0f, 0.0f, 0.5f}, Vec{0.0f, 0.0f, -1.0f}};
        auto hit = sphere.ray_intersection(ray);
 
        REQUIRE(hit.has_value());
        CHECK(hit->hit_point.is_close(Point{0.0f, 0.0f, -1.0f}));
        CHECK(hit->hit_normal.is_close(Normal{0.0f, 0.0f, 1.0f}));
-       std::printf("UV coordinates: u = %f, v = %f\n", hit->surface_params.u, hit->surface_params.v);
        //CHECK(aux::are_close(hit->uv.first, 1.0f)); 
        CHECK(aux::are_close(hit->surface_params.v, 1.0f));
    }
+
+   Sphere sphere2(Point{1.0f, 2.0f, 3.0f}, 2.0f);
+
+   SUBCASE("Non-unitary sphere intersection") {
+        
+        std::println("{}", sphere2.trans.m.mat);
+        Ray ray{Point{1.0f, -1.0f, 3.0f}, Vec{0.0f, 1.0f, 0.0f}};
+        auto hit = sphere2.ray_intersection(ray);
+
+        REQUIRE(hit.has_value());
+        std::println("{} {}", hit->hit_point, hit->hit_normal);
+        CHECK(hit->hit_point.is_close(Point{1.0f, 0.0f, 3.0f}));
+        CHECK(hit->hit_normal.is_close(Normal{0.0f, -1.0f, 0.0f}));
+        CHECK(aux::are_close(hit->surface_params.u, 0.25f));
+        CHECK(aux::are_close(hit->surface_params.v, 0.5f));
+        CHECK(aux::are_close(hit->t, 1.0f));
+    }
 
 
 }
@@ -254,5 +269,32 @@ TEST_CASE("World - Testing Ray Intersection and Scene Management") {
         auto hit = world.ray_intersection(ray);
 
         CHECK_FALSE(hit.has_value());
+    }
+
+    SUBCASE("World with multiple spheres (Closest hit logic)") {
+        world.add(std::make_unique<Sphere>(Point{0.0f, 0.0f, 5.0f}, 2.0f));
+        world.add(std::make_unique<Sphere>(Point{0.0f, 0.0f, 2.0f}, 2.0f));
+
+        Ray ray{Point{0.0f, 0.0f, -1.0f}, Vec{0.0f, 0.0f, 1.0f}};
+        auto hit = world.ray_intersection(ray);
+        REQUIRE(hit.has_value());
+        CHECK(aux::are_close(hit->t, 1.0f));
+        CHECK(hit->hit_point.is_close(Point{0.0f, 0.0f, 0.0f}));
+        CHECK(aux::are_close(hit->surface_params.u, 0.5f));
+        CHECK(aux::are_close(hit->surface_params.v, 1.0f));
+    }
+
+    SUBCASE("World with multiple shapes (Planes and Spheres): ray lies on a plane") {
+        world.add(std::make_unique<Plane>(Trans(Vec{0.0f, 0.0f, 5.0f})));
+        world.add(std::make_unique<Sphere>(Point{0.0f, 0.0f, 2.0f}, 2.0f));
+        world.add(std::make_unique<Sphere>(Point{0.0f, 0.0f, 5.0f}, 1.0f));
+        world.add(std::make_unique<Plane>(Trans(Vec{0.0f, 0.0f, 2.0f})));
+
+        Ray ray{Point{0.0f, 0.0f, 2.0f}, Vec{1.0f, 0.0f, 0.0f}};
+        auto hit = world.ray_intersection(ray);
+        REQUIRE(hit.has_value());
+        CHECK(aux::are_close(hit->t, 2.0f));
+        CHECK(hit->hit_point.is_close(Point{2.0f, 0.0f, 2.0f}));
+        CHECK(hit->hit_normal.is_close(Normal{-1.0f, 0.0f, 0.0f}));        
     }
 }
