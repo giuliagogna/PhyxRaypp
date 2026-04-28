@@ -25,7 +25,6 @@ import Shape;
 
 
 struct Parameters {
-    std::string input_pfm_file_name = "";
     float factor = 0.2f;
     float gamma = 1.0f;
     std::string output_png_file_name = "";

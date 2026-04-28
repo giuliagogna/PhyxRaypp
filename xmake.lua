@@ -63,6 +63,10 @@ function add_linux_std_module()
     end
 end
 
+-- Optimization flags for release builds
+set_optimize("fastest")    -- -O3
+add_vectorexts("all")      -- SIMD
+
 -- ==========================================
 -- 2. Principal target (production code)
 -- ==========================================
