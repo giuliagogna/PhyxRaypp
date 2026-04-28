@@ -66,58 +66,87 @@ TEST_CASE("TEST 1: Similarity between two HitRecord objects (is_close())") {
 // ====================== SPHERE STRUCT TESTS ==============================
 
 TEST_CASE("TEST 2: Sphere Test Suite") {
-    SUBCASE("Correct translation and scaling in the constructor") {
-       Sphere sphere(Point{1.0f, 2.0f, 3.0f}, 4.0f);
-       // The transformation should scale by 4 and translate by -origin
-       Transformation expected = Scale(Vec{0.25f, 0.25f, 0.25f}) * Trans(Vec{-1.0f, -2.0f, -3.0f});
-       CHECK(sphere.trans.m.is_close(expected.m));
-   }
 
-   Sphere sphere(Point{0.0f, 0.0f, 0.0f}, 1.0f);
+    Sphere sphere;
 
-   SUBCASE("Ray-sphere intersection: unitary sphere at origin") {
-       Ray ray{Point{0.0f, 0.0f, 2.0f}, Vec{0.0f, 0.0f, -1.0f}};
-       auto hit = sphere.ray_intersection(ray);
+    // Constructor for Sphere passing the transformation
+    Transformation tr = Trans(Vec{10.0f, 0.0f, 0.0f});
+    Sphere translated_sphere(tr);
 
-       REQUIRE(hit.has_value());
-       CHECK(hit->hit_point.is_close(Point{0.0f, 0.0f, 1.0f}));
-       CHECK(hit->hit_normal.is_close(Normal{0.0f, 0.0f, 1.0f}));
-       //CHECK(aux::are_close(hit->uv.first, 0.0f)); 
-       CHECK(aux::are_close(hit->surface_params.v, 0.0f));
-   }
+    SUBCASE("Intersection from above") {
+        Ray direct_ray(Point{0.0f, 0.0f, 2.0f}, Vec{0.0f, 0.0f, -1.0f});
+        auto intersection = sphere.ray_intersection(direct_ray);
 
-   SUBCASE("Unitary sphere intersection: no intersection") {
-       Ray ray{Point{0.0f, 0.0f, 2.0f}, Vec{1.0f, 0.0f, 0.0f}};
-       auto hit = sphere.ray_intersection(ray);
-       CHECK(hit.has_value() == false);
-   }
+        REQUIRE(intersection.has_value());
 
-   SUBCASE("Unitary sphere intersection: ray originates inside the sphere") {
-       Ray ray{Point{0.0f, 0.0f, 0.5f}, Vec{0.0f, 0.0f, -1.0f}};
-       auto hit = sphere.ray_intersection(ray);
+        CHECK(intersection->hit_point.is_close(Point{0.0f, 0.0f, 1.0f}));
+        CHECK(intersection->hit_normal.is_close(Normal{0.0f, 0.0f, 1.0f}));
+        CHECK(aux::are_close(intersection->surface_params.u, 0.0f)); // atan2(0/0) = 0
+        CHECK(aux::are_close(intersection->surface_params.v, 0.0f));
+        CHECK(aux::are_close(intersection->t, 1.0f));
+    }
 
-       REQUIRE(hit.has_value());
-       CHECK(hit->hit_point.is_close(Point{0.0f, 0.0f, -1.0f}));
-       CHECK(hit->hit_normal.is_close(Normal{0.0f, 0.0f, 1.0f}));
-       //CHECK(aux::are_close(hit->uv.first, 1.0f)); 
-       CHECK(aux::are_close(hit->surface_params.v, 1.0f));
-   }
+    SUBCASE("Intersection from the front") {
+        Ray direct_ray(Point{3.0f, 0.0f, 0.0f}, Vec{-1.0f, 0.0f, 0.0f});
+        auto intersection = sphere.ray_intersection(direct_ray);
 
-   Sphere sphere2(Point{1.0f, 2.0f, 3.0f}, 2.0f);
+        REQUIRE(intersection.has_value());
 
-   SUBCASE("Non-unitary sphere intersection") {
-        
-        std::println("{}", sphere2.trans.m.mat);
-        Ray ray{Point{1.0f, -1.0f, 3.0f}, Vec{0.0f, 1.0f, 0.0f}};
-        auto hit = sphere2.ray_intersection(ray);
+        CHECK(intersection->hit_point.is_close(Point{1.0f, 0.0f, 0.0f}));
+        CHECK(intersection->hit_normal.is_close(Normal{1.0f, 0.0f, 0.0f}));
+        CHECK(aux::are_close(intersection->surface_params.u, 0.0f));
+        CHECK(aux::are_close(intersection->surface_params.v, 0.5f));
+        CHECK(aux::are_close(intersection->t, 2.0f));
+    }
 
-        REQUIRE(hit.has_value());
-        std::println("{} {}", hit->hit_point, hit->hit_normal);
-        CHECK(hit->hit_point.is_close(Point{1.0f, 0.0f, 3.0f}));
-        CHECK(hit->hit_normal.is_close(Normal{0.0f, -1.0f, 0.0f}));
-        CHECK(aux::are_close(hit->surface_params.u, 0.25f));
-        CHECK(aux::are_close(hit->surface_params.v, 0.5f));
-        CHECK(aux::are_close(hit->t, 1.0f));
+    SUBCASE("Intersection from inside") {
+        Ray direct_ray(Point{0.0f, 0.0f, 0.0f}, Vec{1.0f, 0.0f, 0.0f});
+        auto intersection = sphere.ray_intersection(direct_ray);
+
+        REQUIRE(intersection.has_value());
+
+        CHECK(intersection->hit_point.is_close(Point{1.0f, 0.0f, 0.0f}));
+        CHECK(intersection->hit_normal.is_close(Normal{-1.0f, 0.0f, 0.0f}));
+        CHECK(aux::are_close(intersection->surface_params.u, 0.0f));
+        CHECK(aux::are_close(intersection->surface_params.v, 0.5f));
+        CHECK(aux::are_close(intersection->t, 1.0f));
+    }
+
+    SUBCASE("Intersection on translated sphere Ray(Point{10.0f, 0.0f, 2.0f}, Vec{0.0f, 0.0f, -1.0f})") {
+        Ray direct_ray(Point{10.0f, 0.0f, 2.0f}, Vec{0.0f, 0.0f, -1.0f});
+        auto intersection = translated_sphere.ray_intersection(direct_ray);
+
+        REQUIRE(intersection.has_value());
+
+        CHECK(intersection->hit_point.is_close(Point{10.0f, 0.0f, 1.0f}));
+        CHECK(intersection->hit_normal.is_close(Normal{0.0f, 0.0f, 1.0f}));
+        CHECK(aux::are_close(intersection->surface_params.u, 0.0f));
+        CHECK(aux::are_close(intersection->surface_params.v, 0.0f));
+        CHECK(aux::are_close(intersection->t, 1.0f));
+    }
+
+    SUBCASE("Intersection on translated sphere Ray(Point{13.0f, 0.0f, 0.0f}, Vec{-1.0f, 0.0f, 0.0f})") {
+        Ray direct_ray(Point{13.0f, 0.0f, 0.0f}, Vec{-1.0f, 0.0f, 0.0f});
+        auto intersection = translated_sphere.ray_intersection(direct_ray);
+
+        REQUIRE(intersection.has_value());
+
+        CHECK(intersection->hit_point.is_close(Point{11.0f, 0.0f, 0.0f}));
+        CHECK(intersection->hit_normal.is_close(Normal{1.0f, 0.0f, 0.0f}));
+        CHECK(aux::are_close(intersection->surface_params.u, 0.0f));
+        CHECK(aux::are_close(intersection->surface_params.v, 0.5f));
+        CHECK(aux::are_close(intersection->t, 2.0f));
+    }
+
+    SUBCASE("CHeck no intersection with sphere") {
+        Ray direct_ray1(Point{0.0f, 0.0f, 2.0f}, Vec{0.0f, 0.0f, -1.0f});
+        auto intersection1 = translated_sphere.ray_intersection(direct_ray1);
+
+        Ray direct_ray2(Point{-10.0f, 0.0f, 2.0f}, Vec{0.0f, 0.0f, -1.0f});
+        auto intersection2 = translated_sphere.ray_intersection(direct_ray2);
+
+        CHECK_FALSE(intersection1.has_value());
+        CHECK_FALSE(intersection2.has_value());
     }
 
 
@@ -216,7 +245,6 @@ TEST_CASE("TEST 3: Plane - Comprehensive Test Suite") {
 
 
 // ======================== WORLD STRUCT TESTS =============================
-
 TEST_CASE("World - Testing Ray Intersection and Scene Management") {
     // SETUP: Create an empty world.
     // doctest will reset this to empty before each SUBCASE.
@@ -272,29 +300,30 @@ TEST_CASE("World - Testing Ray Intersection and Scene Management") {
     }
 
     SUBCASE("World with multiple spheres (Closest hit logic)") {
-        world.add(std::make_unique<Sphere>(Point{0.0f, 0.0f, 5.0f}, 2.0f));
-        world.add(std::make_unique<Sphere>(Point{0.0f, 0.0f, 2.0f}, 2.0f));
+        world.add(std::make_unique<Sphere>(Trans(Vec{0.0f, 0.0f, 5.0f}) * Scale(Vec{2.0f, 2.0f, 2.0f})));
+        world.add(std::make_unique<Sphere>(Trans(Vec{0.0f, 0.0f, 2.0f}) * Scale(Vec{2.0f, 2.0f, 2.0f})));
 
         Ray ray{Point{0.0f, 0.0f, -1.0f}, Vec{0.0f, 0.0f, 1.0f}};
         auto hit = world.ray_intersection(ray);
         REQUIRE(hit.has_value());
         CHECK(aux::are_close(hit->t, 1.0f));
         CHECK(hit->hit_point.is_close(Point{0.0f, 0.0f, 0.0f}));
-        CHECK(aux::are_close(hit->surface_params.u, 0.5f));
+        CHECK(aux::are_close(hit->surface_params.u, 0.0f));
         CHECK(aux::are_close(hit->surface_params.v, 1.0f));
     }
 
     SUBCASE("World with multiple shapes (Planes and Spheres): ray lies on a plane") {
+
         world.add(std::make_unique<Plane>(Trans(Vec{0.0f, 0.0f, 5.0f})));
-        world.add(std::make_unique<Sphere>(Point{0.0f, 0.0f, 2.0f}, 2.0f));
-        world.add(std::make_unique<Sphere>(Point{0.0f, 0.0f, 5.0f}, 1.0f));
         world.add(std::make_unique<Plane>(Trans(Vec{0.0f, 0.0f, 2.0f})));
+        // Translated and scaled sphere
+        world.add(std::make_unique<Sphere>(Trans(Vec{0.0f, 0.0f, 2.0f}) * Scale(Vec{2.0f, 2.0f, 2.0f})));
 
         Ray ray{Point{0.0f, 0.0f, 2.0f}, Vec{1.0f, 0.0f, 0.0f}};
         auto hit = world.ray_intersection(ray);
         REQUIRE(hit.has_value());
         CHECK(aux::are_close(hit->t, 2.0f));
         CHECK(hit->hit_point.is_close(Point{2.0f, 0.0f, 2.0f}));
-        CHECK(hit->hit_normal.is_close(Normal{-1.0f, 0.0f, 0.0f}));        
+        CHECK(hit->hit_normal.is_close(Normal{-1.0f, 0.0f, 0.0f}));
     }
 }

@@ -16,12 +16,7 @@ export struct HitRecord {
     Ray ray; // Ray that hit the shape
     Point hit_point; // Point of intersection
     Normal hit_normal; // Normal at the intersection point
-    // GG: Potentially consider to implement a struct Vec2D in order to be able to implement
-    // operator overload and call u and v with the name u and v and not uv.first and uv.second
 
-    // RP: "params" don't let you understand what they actually are IMO. "surface_params" is a blend of
-    // the name in the lectures and "params" which I agree is more coherent with our code.
-    //Vec2D params; // UV coordinates at the intersection point
     Vec2D surface_params; // UV coordinates at the intersection point
     float t; // Ray parameter at the intersection point
     bool is_close(const HitRecord& other, float epsilon = 1e-5f) const; // Check if two HitRecords are close enough
@@ -33,8 +28,6 @@ bool HitRecord::is_close(const HitRecord& other, float epsilon) const {
            hit_normal.is_close(other.hit_normal, epsilon) &&
            aux::are_close(surface_params.u, other.surface_params.u, epsilon) &&
            aux::are_close(surface_params.v, other.surface_params.v, epsilon) &&
-           //aux::are_close(uv.first, other.uv.first, epsilon) &&
-           //aux::are_close(uv.second, other.uv.second, epsilon) &&
            aux::are_close(t, other.t, epsilon);
 }
 
@@ -57,47 +50,80 @@ export struct Shape {
 // SPHERE
 // ======================================================
 export struct Sphere : Shape {
-    Sphere(const Point& origin, float radius) : Shape(Scale(Vec{1.0f/radius, 1.0f/radius, 1.0f/radius}) * Trans(-origin.to_vec())) {} // Constructor
-
+    using Shape::Shape; // Constructor takes in the Shape transformation
     std::optional<HitRecord> ray_intersection(const Ray& ray) const override; // Override method to compute ray-sphere intersection
 };
 
 /// Returns a HitRecord in the axis origin frame if the ray intersects the sphere, std::nullopt otherwise
 std::optional<HitRecord> Sphere::ray_intersection(const Ray& ray) const {
 
-    Ray ray_sphere = ray.transform(trans); // Transform the ray to the sphere reference frame (where the sphere is a unit sphere centered at the origin)
+    // World Space -> Local Space
+    Ray local_ray = ray.transform(trans.inverse()); // Transform the ray to the sphere reference frame (where the sphere is a unit sphere centered at the origin)
+                                                    // GG: to do so you need to use the inverse transformation!
+
+    // local_ray
+    Vec O = local_ray.origin.to_vec(); // ray origin is stored as a Vec, so it can be normalized
+                                       // (under the carpet the calculation is Point ray_origin - Point axes_origin = Vec ray_origin)
+    Vec D = local_ray.direction;
     // tradeoff: if the most of the rays intersect the sphere, it's better to compute and
     // store direction2 once instead of calling the method everytime.
-    float direction2 = ray_sphere.direction.norm2();
+    float dir2 = D.norm2();
 
-    float discriminant = std::pow(ray_sphere.direction * ray_sphere.origin.to_vec(), 2) - direction2 * (ray_sphere.origin.to_vec().norm2() - 1.0f);
+    float b_half = O * D;
+    float discriminant = (b_half * b_half) - dir2 * (O.norm2() - 1.0f);
+
     if (discriminant < 0.0f) {
         return std::nullopt; // No intersection
     }
 
     float sqrt_disc = std::sqrt(discriminant);
-    float t1 = (-ray_sphere.direction * ray_sphere.origin.to_vec() - sqrt_disc) / direction2;
-    float t2 = (-ray_sphere.direction * ray_sphere.origin.to_vec() + sqrt_disc) / direction2;
+    float t1 = (-b_half - sqrt_disc) / dir2;
+    float t2 = (-b_half + sqrt_disc) / dir2;
 
-    if (t1 > ray_sphere.tmin && t1 < ray_sphere.tmax) {
-        Point hit_point = ray.at(t1); // Exiting sphere reference frame
-        Normal hit_normal = ray_sphere.at(t1).to_norm(); // Exploiting the sphere reference frame
-        float u = std::atan2(hit_normal.y, hit_normal.x) / (2.0f * std::numbers::pi_v<float>) + 0.5f; // atan2 returns values in the range [-pi, pi], we want to map it to [0, 1]
-        float v = std::acos(hit_normal.z) / std::numbers::pi_v<float>;
-        return HitRecord{ray, hit_point, hit_normal, {u, v}, t1};
+    // Find the closest valid t
+    float first_hit_t;
 
-    } else if (t2 > ray_sphere.tmin && t2 < ray_sphere.tmax) {
-        Point hit_point = ray.at(t2);
-        Normal geom_normal = ray_sphere.at(t2).to_norm(); // To be flipped
-        float u = std::atan2(geom_normal.y, geom_normal.x) / (2.0f * std::numbers::pi_v<float>) + 0.5f; // atan2 returns values in the range [-pi, pi], we want to map it to [0, 1]
-        float v = std::acos(geom_normal.z) / std::numbers::pi_v<float>;
-        Normal hit_normal = -geom_normal; // Flipped
-        return HitRecord{ray, hit_point, hit_normal, {u, v}, t2};
+    if (t1 > local_ray.tmin && t1 < local_ray.tmax) {
+        first_hit_t = t1;
+    } else if (t2 > local_ray.tmin && t2 < local_ray.tmax) {
+        first_hit_t = t2;
     } else {
-        return std::nullopt; // No valid intersection within ray bounds
+        return std::nullopt; // Both t1 and t2 are out of bounds
     }
-}
 
+    // Local Space Geometry
+    Point local_point = local_ray.at(first_hit_t);
+
+    // Since the calculations assume to have a unit sphere centered at the origin
+    // the coordinates of the point of intersection are exactly the components of
+    // the normal to the sphere in that point
+    Normal local_normal{local_point.x, local_point.y, local_point.z};
+    if (local_point.to_vec() * D > 0.0f) {
+        local_normal = -local_normal;
+    }
+
+    // UV Coordinates MUST be calculated using the local normal.
+    // If you use the global normal, the texture won't rotate when you rotate the sphere!
+    float u = std::atan2(local_point.y, local_point.x) / (2.0f * std::numbers::pi_v<float>);
+    u = (u >= 0.0f) ? u : (u + 1.0f);
+    float v = std::acos(local_point.z) / std::numbers::pi_v<float>;
+
+    // Local Space -> World Space: report the HitRecord in the global space
+    HitRecord record;
+    record.ray = ray;
+    record.t = first_hit_t;
+    // Report point of intersection and normal in the global space
+    record.hit_point = trans * local_point;
+    // Normals transform with the transposed inverse: when operator * acts between a Transformation
+    // and a Normal it acts using the inverse transposed (see "Transformation of a Normal" in Geometry.cppm
+    // for reference).
+    // N.B.: if a scale transformation is applied the normal is no more normalized.
+    // Normalize it before return
+    record.hit_normal = (trans * local_normal).normalize();
+    record.surface_params = {u, v};
+
+    return record;
+}
 
 // ==================================
 // PLANE
@@ -140,10 +166,6 @@ export struct Plane : Shape {
         // - floor(-3.2) = -4
         record.surface_params.u = local_point.x - std::floor(local_point.x);
         record.surface_params.v = local_point.y - std::floor(local_point.y);
-        //record.uv = {
-        //    local_point.x - std::floor(local_point.x),
-        //    local_point.y - std::floor(local_point.y)
-        //};
 
         return record;
     }
@@ -157,7 +179,7 @@ export struct Plane : Shape {
 export struct World {
     std::vector<std::unique_ptr<Shape>> shapes;
     void add(std::unique_ptr<Shape> shape);
-    [[nodiscard]] std::optional<HitRecord> ray_intersection(const Ray& ray) const;
+    [[nodiscard]] std::optional<HitRecord> ray_intersection(Ray ray) const;
 };
 
 // Add a shape to the World: use unique_ptr + move pattern for optimization
@@ -165,23 +187,23 @@ void World::add(std::unique_ptr<Shape> shape) {
     shapes.push_back(std::move(shape));
 }
 
-[[nodiscard]] std::optional<HitRecord> World::ray_intersection(const Ray& ray) const {
+[[nodiscard]] std::optional<HitRecord> World::ray_intersection(Ray ray) const {
     // Default: no hit
     std::optional<HitRecord> closest = std::nullopt;
 
-    Ray ray_copy = ray; // At this point we just do like this, but it would be possible that
-                        // we will just pass ray as non-const reference
-                        // We could also directly pass ray by copy.
-    // Cicle on shapes in the scene
-    for (const auto& shape : shapes) {
+    // GG: I find passing by copy is the best way to go. Passing it by reference, the original ray gets
+    //     permanently modified making it harder to debug if tmax has changed
 
-        if (auto intersection = shape->ray_intersection(ray_copy)){
+    // Cycle on shapes in the scene
+    for (const auto& shape : shapes) {
+        if (auto intersection = shape->ray_intersection(ray)){
             closest = intersection;
-            ray_copy.tmax = closest->t; // Update tmax to the closest hit
+            ray.tmax = closest->t; // Update tmax to the closest hit
             // RP: I'll just change the tmax! In this way I avoid to actually generate
             // the HitRecord object and then throw it away.
             // If we hit we also update both closest and tmax.
             // If we never hit a shape, there's the default std::nullopt return.
+            // GG: This is great!
         }        
     }
     return closest;

@@ -111,22 +111,23 @@ int main(int argc, char* argv[]) {
         std::cerr << parse_res.error() << "\n";
         return 0; // return 0 to avoid unclear messages by xmake: if it returns an error it is a "success"
     }
-    
+
     // ====================================
     // Scene generation
     // ====================================
     World world;
     // Add shapes to the world as needed
-    world.add(std::make_unique<Sphere>(Point{ 0.5f,  0.5f,  0.5f}, 0.1f));
-    world.add(std::make_unique<Sphere>(Point{ 0.5f,  0.5f, -0.5f}, 0.1f));
-    world.add(std::make_unique<Sphere>(Point{ 0.5f, -0.5f,  0.5f}, 0.1f));
-    world.add(std::make_unique<Sphere>(Point{ 0.5f, -0.5f, -0.5f}, 0.1f));
-    world.add(std::make_unique<Sphere>(Point{-0.5f,  0.5f,  0.5f}, 0.1f));
-    world.add(std::make_unique<Sphere>(Point{-0.5f,  0.5f, -0.5f}, 0.1f));
-    world.add(std::make_unique<Sphere>(Point{-0.5f, -0.5f,  0.5f}, 0.1f));
-    world.add(std::make_unique<Sphere>(Point{-0.5f, -0.5f, -0.5f}, 0.1f));
-    world.add(std::make_unique<Sphere>(Point{ 0.0f,  0.5f,  0.0f}, 0.1f));
-    world.add(std::make_unique<Sphere>(Point{ 0.0f,  0.0f, -0.5f}, 0.1f));
+    Transformation scale_01 = Scale(Vec{0.1f, 0.1f, 0.1f});
+    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f,  0.5f,  0.5f}) * scale_01));
+    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f,  0.5f, -0.5f}) * scale_01));
+    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f, -0.5f,  0.5f}) * scale_01));
+    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f, -0.5f, -0.5f}) * scale_01));
+    world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f,  0.5f,  0.5f}) * scale_01));
+    world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f,  0.5f, -0.5f}) * scale_01));
+    world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f, -0.5f,  0.5f}) * scale_01));
+    world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f, -0.5f, -0.5f}) * scale_01));
+    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.0f,  0.5f,  0.0f}) * scale_01));
+    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.0f,  0.0f, -0.5f}) * scale_01));
 
     // ====================================
     // Image tracer setup

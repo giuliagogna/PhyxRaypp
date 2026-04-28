@@ -84,22 +84,22 @@ target("PhyxRadpp")
     -- Exclude the test files from the main target
     remove_files("src/test_*.cpp")
 
-target("demo")
-    set_kind("binary")
-    add_packages("stb")
-
-    if is_plat("linux") then
-        add_linux_std_module()
-    end
-
-    add_files("src/*.cppm")
-    add_files("src/*.cpp")
-
-    set_rundir("$(projectdir)") 
-
-    -- Exclude the test files from the demo target
-    remove_files("src/test_*.cpp")
-    remove_files("src/main.cpp")
+--target("demo")
+--    set_kind("binary")
+--    add_packages("stb")
+--
+--    if is_plat("linux") then
+--        add_linux_std_module()
+--    end
+--
+--    add_files("src/*.cppm")
+--    add_files("src/*.cpp")
+--
+--    set_rundir("$(projectdir)")
+--
+--    -- Exclude the test files from the demo target
+--    remove_files("src/test_*.cpp")
+--    remove_files("src/main.cpp")
     
 -- ==========================================
 -- 3. Test targets (new infrastructure with doctest)

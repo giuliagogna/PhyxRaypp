@@ -61,11 +61,6 @@ export struct Vec {
 export struct Point {
     float x{0.0}, y{0.0}, z{0.0};
     Vec to_vec() const;
-    Normal to_norm() const;
-    float norm() const;
-    float norm2() const;
-    void normalize(); // normalizes the Point object (non-const)
-
     // GG: Check if two Points are close enough: written as a method as suggested in the lecture slides
     bool is_close(const Point& other, float epsilon = 1e-5f) const;
 };
@@ -572,9 +567,6 @@ float Vec::norm2() const { return ::norm2<Vec>(*this); }
 float Normal::norm() const { return ::norm<Normal>(*this); }
 float Normal::norm2() const { return ::norm2<Normal>(*this); }
 
-float Point::norm() const { return ::norm<Point>(*this); }
-float Point::norm2() const { return ::norm2<Point>(*this); }
-
 /// Return a normalized Vec (a Vec with the same direction but length 1)
 Vec Vec::normalize() const {
     return _scalar_divide<Vec, float, Vec>(*this, this->norm());
@@ -583,10 +575,6 @@ Vec Vec::normalize() const {
 /// Renormalize a Normal which is not guaranteed to be of length 1 (rounding, ecc.)
 Normal Normal::normalize() {
     return _scalar_divide<Normal, float, Normal>(*this, this->norm());
-}
-
-Normal Point::to_norm() const {
-    return _scalar_divide<Point, float, Normal>(*this, this->norm());
 }
 
 // ======================================================
