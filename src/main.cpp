@@ -98,11 +98,23 @@ void run_pfm2png(const Parameters& params) {
     HDRImage img = std::move(img_res.value());
     std::cout << std::format("File \"{}\" read from disk.\n", params.input_pfm_file_name);
 
-    img.normalize_image(params.factor);
-    img.clamp_image();
-    img.apply_gamma_correction(params.gamma);
+    if(!img.normalize_image(params.factor).has_value()) {
+        std::cerr << "Error in normalizing the image: " << img.normalize_image(params.factor).error() << "\n";
+        return;
+    }
+    if(!img.clamp_image().has_value()) {
+        std::cerr << "Error in clamping the image: " << img.clamp_image().error() << "\n";
+        return;
+    }
+    if(!img.apply_gamma_correction(params.gamma).has_value()) {
+        std::cerr << "Error in applying gamma correction: " << img.apply_gamma_correction(params.gamma).error() << "\n";
+        return;
+    }
     // TODO: check this later in HDRImage
-    img.write_ldr_image(params.output_png_file_name);
+    if(!img.write_ldr_image(params.output_png_file_name).has_value()) {
+        std::cerr << "Error in writing the image: " << img.write_ldr_image(params.output_png_file_name).error() << "\n";
+        return;
+    }
 
     std::cout << std::format("File \"{}\" correctly writen on disk.\n", params.output_png_file_name);
 }
@@ -138,11 +150,23 @@ void run_demo(const Parameters& params) {
     std::println("Rendering demo scene...");
     tracer.fire_all_rays(ray_tracing_func);
 
-    tracer.frame.normalize_image(params.factor);
-    tracer.frame.clamp_image();
-    tracer.frame.apply_gamma_correction(params.gamma);
+    if(!tracer.frame.normalize_image(params.factor).has_value()) {
+        std::cerr << "Error in normalizing the image: " << tracer.frame.normalize_image(params.factor).error() << "\n";
+        return;
+    }
+    if(!tracer.frame.clamp_image().has_value()) {
+        std::cerr << "Error in clamping the image: " << tracer.frame.clamp_image().error() << "\n";
+        return;
+    }
+    if(!tracer.frame.apply_gamma_correction(params.gamma).has_value()) {
+        std::cerr << "Error in applying gamma correction: " << tracer.frame.apply_gamma_correction(params.gamma).error() << "\n";
+        return;
+    }
     // TODO: check this later in HDRImage
-    tracer.frame.write_ldr_image(params.output_png_file_name);
+    if(!tracer.frame.write_ldr_image(params.output_png_file_name).has_value()) {
+        std::cerr << "Error in writing the image: " << tracer.frame.write_ldr_image(params.output_png_file_name).error() << "\n";
+        return;
+    }
 
     std::println("Demo image \"{}\" correctly writen on disk.\n", params.output_png_file_name);
 }
