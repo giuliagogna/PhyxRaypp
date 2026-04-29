@@ -65,7 +65,14 @@ end
 
 -- Optimization flags for release builds
 set_optimize("fastest")    -- -O3
-add_vectorexts("all")      -- SIMD
+
+if is_plat("windows") then
+    -- This will run slower on Windows
+    add_vectorexts("avx", "avx2")
+else
+    -- This will run faster on macOS and Linux
+    add_vectorexts("all")
+end
 
 -- ==========================================
 -- 2. Principal target (production code)
