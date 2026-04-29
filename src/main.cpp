@@ -110,7 +110,7 @@ void run_pfm2png(const Parameters& params) {
         std::cerr << "Error in applying gamma correction: " << img.apply_gamma_correction(params.gamma).error() << "\n";
         return;
     }
-    // TODO: check this later in HDRImage
+
     if(!img.write_ldr_image(params.output_png_file_name).has_value()) {
         std::cerr << "Error in writing the image: " << img.write_ldr_image(params.output_png_file_name).error() << "\n";
         return;
@@ -162,7 +162,7 @@ void run_demo(const Parameters& params) {
         std::cerr << "Error in applying gamma correction: " << tracer.frame.apply_gamma_correction(params.gamma).error() << "\n";
         return;
     }
-    // TODO: check this later in HDRImage
+
     if(!tracer.frame.write_ldr_image(params.output_png_file_name).has_value()) {
         std::cerr << "Error in writing the image: " << tracer.frame.write_ldr_image(params.output_png_file_name).error() << "\n";
         return;
