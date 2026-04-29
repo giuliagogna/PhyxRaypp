@@ -138,7 +138,7 @@ TEST_CASE("TEST 2: Sphere Test Suite") {
         CHECK(aux::are_close(intersection->t, 2.0f));
     }
 
-    SUBCASE("CHeck no intersection with sphere") {
+    SUBCASE("Check no intersection with sphere") {
         Ray direct_ray1(Point{0.0f, 0.0f, 2.0f}, Vec{0.0f, 0.0f, -1.0f});
         auto intersection1 = translated_sphere.ray_intersection(direct_ray1);
 
@@ -149,7 +149,19 @@ TEST_CASE("TEST 2: Sphere Test Suite") {
         CHECK_FALSE(intersection2.has_value());
     }
 
-
+    SUBCASE("Check AABB calculation for a sphere") {
+        Transformation rot = R_x(0.4f) * R_y(0.3f) * R_z(0.5f);
+        Transformation scale = Scale(Vec{2.0f, 2.0f, 2.0f});
+        Transformation tr = Trans(Vec{3.0f, 3.0f, 3.0f});
+        Sphere rotated_dilatated_translated(tr * scale * rot);
+        AABB spheric_aabb = rotated_dilatated_translated.get_AABB(0.1);
+        CHECK(aux::are_close(spheric_aabb.x_max, 5.1f));
+        CHECK(aux::are_close(spheric_aabb.x_min, 0.9f));
+        CHECK(aux::are_close(spheric_aabb.y_max, 5.1f));
+        CHECK(aux::are_close(spheric_aabb.y_min, 0.9f));
+        CHECK(aux::are_close(spheric_aabb.z_max, 5.1f));
+        CHECK(aux::are_close(spheric_aabb.y_min, 0.9f));
+    }
 }
 
 // ========================== PLANE STRUCT TESTS ===========================

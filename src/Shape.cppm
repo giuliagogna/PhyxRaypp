@@ -35,6 +35,12 @@ bool HitRecord::is_close(const HitRecord& other, float epsilon) const {
 // SHAPE STRUCTURE (virtual base class for all shapes)
 // ======================================================
 
+export struct AABB {
+    float x_min, x_max;
+    float y_min, y_max;
+    float z_min, z_max;
+};
+
 export struct Shape {
     // GG: Constructor in Shape needs to be initialized with a transformation.
     //     The object is put into the scene in the right location: responsibility of calculations is delegated
@@ -42,6 +48,7 @@ export struct Shape {
     Shape(const Transformation& trans = Transformation{}) : trans(trans) {}
     virtual ~Shape() = default; // Virtual destructor for proper cleanup of derived classes
     virtual std::optional<HitRecord> ray_intersection(const Ray& ray) const = 0; // Pure virtual method to compute ray-shape intersection
+    virtual AABB get_AABB(float padding = 1e-3) const = 0; // Pure virtual method to get the AABB of the shape (used for AABB construction)
     Transformation trans; // Transformation from the shape's local space to world space (position and orientation of the shape in the scene)
 };
 
@@ -53,7 +60,7 @@ export struct Sphere : Shape {
     using Shape::Shape; // Constructor takes in the Shape transformation
 
     /// Returns a HitRecord in the axis origin frame if the ray intersects the sphere, std::nullopt otherwise
-    std::optional<HitRecord> ray_intersection(const Ray& ray) const { // Override method to compute ray-sphere intersection
+    std::optional<HitRecord> ray_intersection(const Ray& ray) const override { // Override method to compute ray-sphere intersection
 
         // World Space -> Local Space
         Ray local_ray = ray.transform(trans.inverse()); // Transform the ray to the sphere reference frame (where the sphere is a unit sphere centered at the origin)
@@ -123,6 +130,25 @@ export struct Sphere : Shape {
         return record;
     }
 
+    AABB get_AABB(float padding = 1e-3) const override {
+        // For the sphere we have to consider that the transformatiom
+        // might carry a rotation which doesn't affect the sphere but affects the AABB.
+        // We have to focus on matrix elements
+        float x_dil = std::sqrt(trans.m.mat[0]*trans.m.mat[0] + trans.m.mat[1]*trans.m.mat[1] + trans.m.mat[2]*trans.m.mat[2]);
+        float y_dil = std::sqrt(trans.m.mat[4]*trans.m.mat[4] + trans.m.mat[5]*trans.m.mat[5] + trans.m.mat[6]*trans.m.mat[6]);
+        float z_dil = std::sqrt(trans.m.mat[8]*trans.m.mat[8] + trans.m.mat[9]*trans.m.mat[9] + trans.m.mat[10]*trans.m.mat[10]);
+
+        // Traslazione (posizione del centro nel mondo)
+        float tx = trans.m.mat[3];
+        float ty = trans.m.mat[7];
+        float tz = trans.m.mat[11];
+
+        return AABB { 
+            .x_min = tx - x_dil - padding, .x_max = tx + x_dil + padding,
+            .y_min = ty - y_dil - padding, .y_max = ty + y_dil + padding,
+            .z_min = tz - z_dil - padding, .z_max = tz + z_dil + padding       
+        };
+    }
 };
 
 // ==================================
@@ -168,6 +194,11 @@ export struct Plane : Shape {
         record.surface_params.v = local_point.y - std::floor(local_point.y);
 
         return record;
+    }
+
+    // Should not be used since it's a infinite element
+    AABB get_AABB(float padding = 1e-3) const override {
+        return AABB{};
     }
 };
 
