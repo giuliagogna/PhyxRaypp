@@ -1,6 +1,7 @@
 # [Unreleased]
 
 ## Added
+- Added more shapes (`Cube`)
 - Command line interface with `pfm2png` and `demo` subcommands in main
 - `Shape` (Sphere, Plane) and `World` structs for scene management
 
