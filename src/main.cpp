@@ -121,7 +121,8 @@ void run_pfm2png(const Parameters& params) {
 
 void run_demo(const Parameters& params) {
     World world;
-
+//    Transformation tr = Trans(Vec{0.0f, 0.5f, 0.5f})*Scale(Vec{0.1f, 0.1f, 0.1f})*R_z(std::numbers::pi_v<float>/3.0f);
+//    world.add(std::make_unique<Cube>(tr));
     Transformation scale_01 = Scale(Vec{0.1f, 0.1f, 0.1f});
     world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f,  0.5f,  0.5f}) * scale_01));
     world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f,  0.5f, -0.5f}) * scale_01));
@@ -135,6 +136,7 @@ void run_demo(const Parameters& params) {
     world.add(std::make_unique<Sphere>(Trans(Vec{ 0.0f,  0.0f, -0.5f}) * scale_01));
 
     PerspectiveCamera camera(1.0f, 3.0f, Transformation{});
+    //OrthogonalCamera camera(1.0f, R_z(std::numbers::pi_v<float>/3.0f));
     HDRImage frame(800, 800);
     ImageTracer tracer(frame, camera);
 
