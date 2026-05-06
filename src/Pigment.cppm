@@ -19,6 +19,21 @@
 module;
 
 export module Pigment;
+import std;
+import Color;
+import Geometry;
 
 export struct Pigment {
+    virtual ~Pigment() = default;
+    [[nodiscard]] virtual Color get_color(const Vec2D& uv) const = 0;
+};
+
+export struct UniformPigment : Pigment {
+    Color color;
+
+    explicit UniformPigment(const Color& c) : color{c} {}
+
+    [[nodiscard]] Color get_color(const Vec2D& uv) const override {
+        return color; // Ignora le UV, il colore è uguale ovunque
+    }
 };
