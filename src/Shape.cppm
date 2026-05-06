@@ -36,9 +36,30 @@ bool HitRecord::is_close(const HitRecord& other, float epsilon) const {
 // ======================================================
 
 export struct AABB {
-    float x_min, x_max;
-    float y_min, y_max;
-    float z_min, z_max;
+    float x_min = std::numeric_limits<float>::infinity(), x_max = - std::numeric_limits<float>::infinity();
+    float y_min = std::numeric_limits<float>::infinity(), y_max = - std::numeric_limits<float>::infinity();
+    float z_min = std::numeric_limits<float>::infinity(), z_max = - std::numeric_limits<float>::infinity();
+
+    bool is_inside(AABB& greater) const {
+        if (x_max < greater.x_max &&
+            x_min > greater.x_min &&
+            y_max < greater.y_max &&
+            y_min > greater.y_min &&
+            z_max < greater.z_max &&
+            z_min > greater.z_min
+            ) return true;
+        return false;
+    }
+
+    void expand_to_include(const AABB& other) {
+        this->x_max = std::max(other.x_max, this->x_max);
+        this->x_min = std::min(other.x_min, this->x_min);
+        this->y_max = std::max(other.y_max, this->y_max);
+        this->y_min = std::min(other.y_min, this->y_min);
+        this->z_max = std::max(other.z_max, this->z_max);
+        this->z_min = std::min(other.z_min, this->z_min);
+    }
+
 };
 
 export struct Shape {
@@ -50,8 +71,10 @@ export struct Shape {
     virtual std::optional<HitRecord> ray_intersection(const Ray& ray) const = 0; // Pure virtual method to compute ray-shape intersection
     virtual AABB get_AABB(float padding = 1e-3) const = 0; // Pure virtual method to get the AABB of the shape (used for AABB construction)
     Transformation trans; // Transformation from the shape's local space to world space (position and orientation of the shape in the scene)
+    bool is_inside(AABB& aabb, float padding = 1e-3) {
+        return this->get_AABB().is_inside(aabb);
+    }
 };
-
 
 // ======================================================
 // SPHERE
