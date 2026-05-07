@@ -24,18 +24,25 @@ import Camera;
 import auxiliary_functions;
 import Color;
 import HDRImage;
+import Material;
+import Pigment;
+import BRDF;
 
 // ================================================
 // HIT RECORD STRUCTURE
 // ================================================
 
+// Forward declaration
+export struct Shape;
+
 export struct HitRecord {
     Ray ray; // Ray that hit the shape
     Point hit_point; // Point of intersection
     Normal hit_normal; // Normal at the intersection point
-
     Vec2D surface_params; // UV coordinates at the intersection point
     float t; // Ray parameter at the intersection point
+    std::shared_ptr<Shape> hitted_shape;
+
     bool is_close(const HitRecord& other, float epsilon = 1e-5f) const; // Check if two HitRecords are close enough
 };
 
@@ -136,6 +143,7 @@ export struct Sphere : Shape {
         // Normalize it before return
         record.hit_normal = (trans * local_normal).normalize();
         record.surface_params = {u, v};
+        record.hitted_shape = std::make_shared<Sphere>(*this); // Store a shared pointer to the hit shape in the record
 
         return record;
     }
@@ -183,6 +191,7 @@ export struct Plane : Shape {
         // - floor(-3.2) = -4
         record.surface_params.u = local_point.x - std::floor(local_point.x);
         record.surface_params.v = local_point.y - std::floor(local_point.y);
+        record.hitted_shape = std::make_shared<Plane>(*this); // Store a shared pointer to the hit shape in the record
 
         return record;
     }

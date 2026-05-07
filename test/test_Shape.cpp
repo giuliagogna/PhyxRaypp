@@ -245,7 +245,7 @@ TEST_CASE("TEST 3: Plane - Comprehensive Test Suite") {
 
 
 // ======================== WORLD STRUCT TESTS =============================
-TEST_CASE("World - Testing Ray Intersection and Scene Management") {
+TEST_CASE("TEST 4: World - Testing Ray Intersection and Scene Management") {
     // SETUP: Create an empty world.
     // doctest will reset this to empty before each SUBCASE.
     World world;
@@ -327,3 +327,30 @@ TEST_CASE("World - Testing Ray Intersection and Scene Management") {
         CHECK(hit->hit_normal.is_close(Normal{-1.0f, 0.0f, 0.0f}));
     }
 }
+
+// ======================== SHAPE IN HITRECORD TESTS =============================
+TEST_CASE("TEST 5: Pointer to a Shape in HitRecord") {
+
+    SUBCASE("Intersection with sphere") {
+        
+        Sphere sphere;
+
+        Ray direct_ray(Point{0.0f, 0.0f, 2.0f}, Vec{0.0f, 0.0f, -1.0f});
+        auto intersection = sphere.ray_intersection(direct_ray);
+
+        REQUIRE(intersection.has_value());
+        CHECK(intersection->hitted_shape->ray_intersection(direct_ray)->is_close(*intersection));
+    }
+
+    SUBCASE("Intersection with plane") {
+        
+        Plane plane;
+
+        Ray direct_ray(Point{0.0f, 0.0f, 1.0f}, Vec{0.0f, 0.0f, -1.0f});
+        auto intersection = plane.ray_intersection(direct_ray);
+
+        REQUIRE(intersection.has_value());
+        CHECK(intersection->hitted_shape->ray_intersection(direct_ray)->is_close(*intersection));
+    }
+}
+
