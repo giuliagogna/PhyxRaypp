@@ -60,13 +60,13 @@ bool HitRecord::is_close(const HitRecord& other, float epsilon) const {
 // ======================================================
 
 export struct Shape {
-    // GG: Constructor in Shape needs to be initialized with a transformation.
-    //     The object is put into the scene in the right location: responsibility of calculations is delegated
-    //     to the object that performs them in its frame of reference
-    Shape(const Transformation& trans = Transformation{}) : trans(trans) {}
+    Transformation trans; // Transformation from the shape's local space to world space (position and orientation of the shape in the scene)
+    std::shared_ptr<Material> material; // Material of the shape (color, BRDF, etc.)
+
+    Shape(const Transformation& trans = Transformation{}, std::shared_ptr<Material> material = nullptr) : trans(trans), material(material) {}
     virtual ~Shape() = default; // Virtual destructor for proper cleanup of derived classes
     virtual std::optional<HitRecord> ray_intersection(const Ray& ray) const = 0; // Pure virtual method to compute ray-shape intersection
-    Transformation trans; // Transformation from the shape's local space to world space (position and orientation of the shape in the scene)
+    
 };
 
 

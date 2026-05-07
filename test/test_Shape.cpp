@@ -25,6 +25,9 @@ import Geometry;
 import Camera;
 import Shape;
 import auxiliary_functions;
+import Material;
+import BRDF;
+import Pigment;
 
 // ====================== HITRECORD STRUCT TESTS =================================
 // =========================================================================
@@ -343,7 +346,7 @@ TEST_CASE("TEST 5: Pointer to a Shape in HitRecord") {
     }
 
     SUBCASE("Intersection with plane") {
-        
+
         Plane plane;
 
         Ray direct_ray(Point{0.0f, 0.0f, 1.0f}, Vec{0.0f, 0.0f, -1.0f});
@@ -354,3 +357,6 @@ TEST_CASE("TEST 5: Pointer to a Shape in HitRecord") {
     }
 }
 
+TEST_CASE("TEST 6: Shape's material") {
+    Sphere sphere(Transformation{}, std::make_shared<Material>(std::make_shared<DiffusiveBRDF>(std::make_shared<UniformPigment>(Color{0.0f, 0.0f, 1.0f}), Color{0.0f, 0.0f, 1.0f}), std::make_shared<UniformPigment>(Color{1.0f, 0.0f, 0.0f})));
+}
