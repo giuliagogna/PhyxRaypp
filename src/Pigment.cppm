@@ -31,7 +31,7 @@ export struct Pigment {
 export struct UniformPigment : Pigment {
     Color color;
 
-    explicit UniformPigment(const Color& c) : color{c} {}
+    UniformPigment(const Color& c) : color{c} {}
 
     [[nodiscard]] Color get_color(const Vec2D& uv) const override {
         return color; // Ignora le UV, il colore è uguale ovunque
