@@ -37,10 +37,11 @@ export struct PCG {
         std::uint64_t oldstate = state;
         state = oldstate * 6364136223846793005ULL + inc;
 
-        // 2. Applicazione della funzione di output (XSH-RR)
-        // Questa parte trasforma lo stato interno a 64-bit in un output a 32-bit
+        // Apply the scrambling function (XorShift + RandomRotation)
         std::uint32_t xorshifted = static_cast<std::uint32_t>(((oldstate >> 18u) ^ oldstate) >> 27u);
         std::uint32_t rot = static_cast<std::uint32_t>(oldstate >> 59u);
+
+        // Using the C++20/23 rotr rotation function
         return std::rotr(xorshifted, rot);
     }
 
