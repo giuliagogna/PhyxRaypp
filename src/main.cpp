@@ -5,6 +5,7 @@ import Color;
 import auxiliary_functions;
 import Camera;
 import Shape;
+import Pigment;
 
 struct Parameters {
     std::string command = ""; // "pfm2png" o "demo"
@@ -124,30 +125,80 @@ void run_demo(const Parameters& params) {
 //    Transformation tr = Trans(Vec{0.0f, 0.5f, 0.5f})*Scale(Vec{0.1f, 0.1f, 0.1f})*R_z(std::numbers::pi_v<float>/3.0f);
 //    world.add(std::make_unique<Cube>(tr));
     Transformation scale_01 = Scale(Vec{0.1f, 0.1f, 0.1f});
-    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f,  0.5f,  0.5f}) * scale_01));
-    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f,  0.5f, -0.5f}) * scale_01));
-    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f, -0.5f,  0.5f}) * scale_01));
-    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f, -0.5f, -0.5f}) * scale_01));
-    world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f,  0.5f,  0.5f}) * scale_01));
-    world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f,  0.5f, -0.5f}) * scale_01));
-    world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f, -0.5f,  0.5f}) * scale_01));
-    world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f, -0.5f, -0.5f}) * scale_01));
-    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.0f,  0.5f,  0.0f}) * scale_01));
-    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.0f,  0.0f, -0.5f}) * scale_01));
+//    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f,  0.5f,  0.5f}) * scale_01));
+//    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f,  0.5f, -0.5f}) * scale_01));
+//    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f, -0.5f,  0.5f}) * scale_01));
+//    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f, -0.5f, -0.5f}) * scale_01));
+//    world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f,  0.5f,  0.5f}) * scale_01));
+//    world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f,  0.5f, -0.5f}) * scale_01));
+//    world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f, -0.5f,  0.5f}) * scale_01));
+//    world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f, -0.5f, -0.5f}) * scale_01));
+//    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.0f,  0.5f,  0.0f}) * scale_01));
+//    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.0f,  0.0f, -0.5f}) * scale_01));
+
+    // Optional: Add a floor plane just below the spheres to see the infinite checkerboard!
+    world.add(std::make_unique<Plane>(Trans(Vec{0.0f, 0.0f, -1.0f}) * R_z(std::numbers::pi_v<float> / 2.0f)));
+    //world.add(std::make_unique<Plane>(Trans(Vec{0.0f, 0.0f, 1.0f})));
 
     PerspectiveCamera camera(1.0f, 3.0f, Transformation{});
     //OrthogonalCamera camera(1.0f, R_z(std::numbers::pi_v<float>/3.0f));
     HDRImage frame(800, 800);
     ImageTracer tracer(frame, camera);
 
-    std::function<Color(const Ray&)> ray_tracing_func = [&world](const Ray& ray) {
+    // 1. Instantiate your Pigments
+    // Let's use Red and White with 10 subdivisions
+    CheckeredPigment checkered(Color{1.0f, 0.0f, 0.0f}, Color{1.0f, 1.0f, 1.0f}, 2);
+
+//    HDRImage img(2, 2);
+//
+//    Color red{1.0f, 0.0f, 0.0f};
+//    Color green{0.0f, 1.0f, 0.0f};
+//    Color blue{0.0f, 0.0f, 1.0f};
+//    Color white{1.0f, 1.0f, 1.0f};
+//
+//    img.set_pixel(0, 0, red);
+//    img.set_pixel(1, 0, green);
+//    img.set_pixel(0, 1, blue);
+//    img.set_pixel(1, 1, white);
+
+    // Load the real PFM image
+    std::string pfm_path = "images/memorial.pfm";
+    auto img_res = HDRImage::read_pfm_file(pfm_path);
+
+    if (!img_res.has_value()) {
+        std::cerr << "Error: Could not load texture image '" << pfm_path << "'\n";
+        std::cerr << "Details: " << img_res.error().message << "\n";
+        return; // Abort demo if the texture is missing
+    }
+
+    std::println("Texture '{}' successfully loaded.", pfm_path);
+
+    // Create the pigment using the loaded image
+    HDRImage loaded_img = std::move(img_res.value());
+    ImagePigment image_pigment(loaded_img);
+
+
+    // 2. Capture the pigment in the lambda using &checkered
+    std::function<Color(const Ray&)> ray_tracing_func = [&world, &image_pigment](const Ray& ray) {
         auto hit = world.ray_intersection(ray);
+
         if (hit.has_value()) {
-            return Color{1.0f, 1.0f, 1.0f};
+            // 3. Pass the (u, v) coordinates from the HitRecord to get the color
+            return image_pigment.get_color(hit->surface_params);
         } else {
-            return Color{0.0f, 0.0f, 0.0f};
+            // Background color (Black)
+            return Color{1.0f, 1.0f, 1.0f};
         }
     };
+
+//    std::function<Color(const Ray&)> ray_tracing_func = [&world](const Ray& ray) {
+//        auto hit = world.ray_intersection(ray);
+//        if (hit.has_value()) {
+//            return Color{1.0f, 1.0f, 1.0f};
+//        } else {
+//            return Color{0.0f, 0.0f, 0.0f};
+//        }
+//    };
 
     std::println("Rendering demo scene...");
     tracer.fire_all_rays(ray_tracing_func);

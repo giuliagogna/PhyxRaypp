@@ -1,6 +1,9 @@
 # [Unreleased]
 
 ## Added
+- Material struct
+- BRDF struct
+- Pigment struct
 - Command line interface with `pfm2png` and `demo` subcommands in main
 - `Shape` (Sphere, Plane) and `World` structs for scene management
 
