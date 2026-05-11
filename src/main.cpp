@@ -149,33 +149,35 @@ void run_demo(const Parameters& params) {
     // Let's use Red and White with 10 subdivisions
     CheckeredPigment checkered(Color{1.0f, 0.0f, 0.0f}, Color{1.0f, 1.0f, 1.0f}, 2);
 
-//    HDRImage img(2, 2);
-//
-//    Color red{1.0f, 0.0f, 0.0f};
-//    Color green{0.0f, 1.0f, 0.0f};
-//    Color blue{0.0f, 0.0f, 1.0f};
-//    Color white{1.0f, 1.0f, 1.0f};
-//
-//    img.set_pixel(0, 0, red);
-//    img.set_pixel(1, 0, green);
-//    img.set_pixel(0, 1, blue);
-//    img.set_pixel(1, 1, white);
+    HDRImage img(2, 2);
+
+    Color red{1.0f, 0.0f, 0.0f};
+    Color green{0.0f, 1.0f, 0.0f};
+    Color blue{0.0f, 0.0f, 1.0f};
+    Color white{1.0f, 1.0f, 1.0f};
+
+    img.set_pixel(0, 0, red);
+    img.set_pixel(1, 0, green);
+    img.set_pixel(0, 1, blue);
+    img.set_pixel(1, 1, white);
 
     // Load the real PFM image
-    std::string pfm_path = "images/memorial.pfm";
-    auto img_res = HDRImage::read_pfm_file(pfm_path);
+//    std::string pfm_path = "images/memorial.pfm";
+//    auto img_res = HDRImage::read_pfm_file(pfm_path);
+//
+//    if (!img_res.has_value()) {
+//        std::cerr << "Error: Could not load texture image '" << pfm_path << "'\n";
+//        std::cerr << "Details: " << img_res.error().message << "\n";
+//        return; // Abort demo if the texture is missing
+//    }
+//
+//    std::println("Texture '{}' successfully loaded.", pfm_path);
+//
+//    // Create the pigment using the loaded image
+//    HDRImage loaded_img = std::move(img_res.value());
+//    ImagePigment image_pigment(loaded_img);
 
-    if (!img_res.has_value()) {
-        std::cerr << "Error: Could not load texture image '" << pfm_path << "'\n";
-        std::cerr << "Details: " << img_res.error().message << "\n";
-        return; // Abort demo if the texture is missing
-    }
-
-    std::println("Texture '{}' successfully loaded.", pfm_path);
-
-    // Create the pigment using the loaded image
-    HDRImage loaded_img = std::move(img_res.value());
-    ImagePigment image_pigment(loaded_img);
+    ImagePigment image_pigment(img);
 
 
     // 2. Capture the pigment in the lambda using &checkered
