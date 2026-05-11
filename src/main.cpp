@@ -123,18 +123,32 @@ void run_demo(const Parameters& params) {
     World world;
 
     Transformation scale_01 = Scale(Vec{0.1f, 0.1f, 0.1f});
-    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f,  0.5f,  0.5f}) * scale_01));
-    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f,  0.5f, -0.5f}) * scale_01));
-    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f, -0.5f,  0.5f}) * scale_01));
-    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f, -0.5f, -0.5f}) * scale_01));
-    world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f,  0.5f,  0.5f}) * scale_01));
-    world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f,  0.5f, -0.5f}) * scale_01));
-    world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f, -0.5f,  0.5f}) * scale_01));
-    world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f, -0.5f, -0.5f}) * scale_01));
-    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.0f,  0.5f,  0.0f}) * scale_01));
-    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.0f,  0.0f, -0.5f}) * scale_01));
+    //world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f,  0.5f,  0.5f}) * scale_01));
+    //world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f,  0.5f, -0.5f}) * scale_01));
+    //world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f, -0.5f,  0.5f}) * scale_01));
+    //world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f, -0.5f, -0.5f}) * scale_01));
+    //world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f,  0.5f,  0.5f}) * scale_01));
+    //world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f,  0.5f, -0.5f}) * scale_01));
+    //world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f, -0.5f,  0.5f}) * scale_01));
+    //world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f, -0.5f, -0.5f}) * scale_01));
+    //world.add(std::make_unique<Sphere>(Trans(Vec{ 0.0f,  0.5f,  0.0f}) * scale_01));
+    //world.add(std::make_unique<Sphere>(Trans(Vec{ 0.0f,  0.0f, -0.5f}) * scale_01));
 
-    PerspectiveCamera camera(1.0f, 3.0f, Transformation{});
+    //world.add(std::make_unique<Cube>(Trans(Vec{ 0.5f,  0.5f,  0.5f}) * scale_01));
+    //world.add(std::make_unique<Cube>(Trans(Vec{ 0.5f,  0.5f, -0.5f}) * scale_01));
+    //world.add(std::make_unique<Cube>(Trans(Vec{ 0.5f, -0.5f,  0.5f}) * scale_01));
+    //world.add(std::make_unique<Cube>(Trans(Vec{ 0.5f, -0.5f, -0.5f}) * scale_01));
+    //world.add(std::make_unique<Cube>(Trans(Vec{-0.5f,  0.5f,  0.5f}) * scale_01));
+    //world.add(std::make_unique<Cube>(Trans(Vec{-0.5f,  0.5f, -0.5f}) * scale_01));
+    //world.add(std::make_unique<Cube>(Trans(Vec{-0.5f, -0.5f,  0.5f}) * scale_01));
+    //world.add(std::make_unique<Cube>(Trans(Vec{-0.5f, -0.5f, -0.5f}) * scale_01));
+    //world.add(std::make_unique<Cube>(Trans(Vec{ 0.0f,  0.5f,  0.0f}) * scale_01));
+    //world.add(std::make_unique<Cube>(Trans(Vec{ 0.0f,  0.0f, -0.5f}) * scale_01));
+
+    world.add(std::make_unique<Cube>(Trans(Vec{ 0.5f,  0.5f,  0.5}) * scale_01));
+
+    //PerspectiveCamera camera(1.0f, 3.0f, Transformation{});
+    OrthogonalCamera camera(1.0f);
     HDRImage frame(800, 800);
     ImageTracer tracer(frame, camera);
 
