@@ -1,20 +1,3 @@
-/*
-* Copyright (c) 2026 Giulia Gogna, Riccardo Piazza.
- *
- * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
- * the European Commission - subsequent versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the Licence.
- * You may obtain a copy of the Licence at:
- *
- * https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the Licence is distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the Licence for the specific language governing permissions and
- * limitations under the Licence.
- */
-
 import std;
 import HDRImage;
 import Geometry;
@@ -22,7 +5,6 @@ import Color;
 import auxiliary_functions;
 import Camera;
 import Shape;
-
 
 // Helper function to parse floats
 [[nodiscard]] std::expected<float, std::string> parse_float(std::string_view str) {
@@ -199,15 +181,44 @@ World build_plane_world() {
     return world;
 }
 
-// When cube is merged uncomment
-// World build_cube_world(){}
+/// Builds a scene with 10 cubes in place of the spheres
+ World build_cube_world() {
+    World world;
+
+    Transformation scale_01 = Scale(Vec{0.1f, 0.1f, 0.1f});
+    world.add(std::make_unique<Cube>(Trans(Vec{ 0.5f,  0.5f,  0.5f}) * scale_01));
+    world.add(std::make_unique<Cube>(Trans(Vec{ 0.5f,  0.5f, -0.5f}) * scale_01));
+    world.add(std::make_unique<Cube>(Trans(Vec{ 0.5f, -0.5f,  0.5f}) * scale_01));
+    world.add(std::make_unique<Cube>(Trans(Vec{ 0.5f, -0.5f, -0.5f}) * scale_01));
+    world.add(std::make_unique<Cube>(Trans(Vec{-0.5f,  0.5f,  0.5f}) * scale_01));
+    world.add(std::make_unique<Cube>(Trans(Vec{-0.5f,  0.5f, -0.5f}) * scale_01));
+    world.add(std::make_unique<Cube>(Trans(Vec{-0.5f, -0.5f,  0.5f}) * scale_01));
+    world.add(std::make_unique<Cube>(Trans(Vec{-0.5f, -0.5f, -0.5f}) * scale_01));
+    world.add(std::make_unique<Cube>(Trans(Vec{ 0.0f,  0.5f,  0.0f}) * scale_01));
+    world.add(std::make_unique<Cube>(Trans(Vec{ 0.0f,  0.0f, -0.5f}) * scale_01));
+
+    return world;
+}
+
+World build_one_cube_world() {
+    World world;
+
+    Transformation scale_01 = Scale(Vec{0.1f, 0.1f, 0.1f});
+    Transformation transl = Trans(Vec{0.0f, 0.5f, 0.5f});
+    Transformation total_trans = transl * scale_01;
+
+    world.add(std::make_unique<Cube>(total_trans));
+
+    return world;
+}
 
 void run_demo(const Parameters& params) {
 
     // Change the function you call here to build another world
-    World world = build_sphere_world();
+    World world = build_one_cube_world();
 
-    PerspectiveCamera camera(1.0f, 3.0f, Transformation{});
+    OrthogonalCamera camera (1.0f);
+    //PerspectiveCamera camera(1.0f, 3.0f, Transformation{});
     HDRImage frame(800, 800);
     ImageTracer tracer(frame, camera);
 
