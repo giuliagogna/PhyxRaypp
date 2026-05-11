@@ -23,17 +23,28 @@ import auxiliary_functions;
 import Camera;
 import Shape;
 
-// Helper function to parse floats without exceptions using std::from_chars
-[[nodiscard]] std::expected<float, std::string> parse_float(std::string_view str) {
-    float value = 0.0f;
-    // ptr points to the first character it could not convert in a float
-    // ec captures the error (float too big to fit in a float or character not possible to convert in float)
-    auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
 
-    // std::errc means no error occured
-    if (ec != std::errc() || ptr != str.data() + str.size()) {
+// Helper function to parse floats
+[[nodiscard]] std::expected<float, std::string> parse_float(std::string_view str) {
+    std::string safe_str(str);
+
+    // Strip all whitespace and hidden terminal characters (like \n or \r)
+    std::erase_if(safe_str, [](unsigned char c) { return std::isspace(c); });
+
+    // Replace any commas with dots so it is always standardized
+    std::replace(safe_str.begin(), safe_str.end(), ',', '.');
+
+    // Parse using an Input String Stream locked to standard programming formatting
+    float value = 0.0f;
+    std::istringstream iss(safe_str);
+    iss.imbue(std::locale::classic());
+    iss >> value;
+
+    // Check
+    if (iss.fail() || !iss.eof()) {
         return std::unexpected(std::format("Format error: '{}' is not a valid float number.", str));
     }
+
     return value;
 }
 
