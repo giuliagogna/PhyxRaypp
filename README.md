@@ -20,7 +20,26 @@ xmake
 ### Usage
 The executable PhyxRadpp has two main commands: `pfm2png` and `demo`.
 
-### 1. Ray Tracing Demo
+### 1. PFM to PNG Converter
+Converts an HDR image into a standard PNG.
+
+```bash
+xmake run PhyxRadpp pfm2png <INPUT_PFM> <ALPHA_FACTOR> <GAMMA> <OUTPUT_PNG>
+```
+
+(Example: `xmake run PhyxRadpp pfm2png <image_path>.pfm 0.2 2.2 <output_name>.png`)
+
+Here is the result of the conversion of `images/memorial.pfm` into `memorial_alpha0.2_gamma_1.png`
+The following command
+
+```bash
+xmake run PhyxRadpp pfm2png images/memorial.pfm 0.2 1.0 memorial
+```
+
+<img src="memorial_alpha0.2_gamma1.png" alt="Conversion result" width="50%">
+
+
+### 2. Ray Tracing Demo
 Renders a hard-coded black-and-white 3D scene. To run it and output a file named demo.png with an alpha of 1 and gamma of 1, use:
 
 ```bash
@@ -28,16 +47,7 @@ xmake run PhyxRadpp demo 1 1 demo
 ```
 Here is the demo result
 
-<img src="demo_alpha1_gamma1.png" alt="Demo rendering result" width="50%">
-
-### 2. PFM to PNG Converter
-Converts an HDR image into a standard PNG.
-
-```bash
-xmake run PhyxRadpp pfm2png <INPUT_PFM> <ALPHA_FACTOR> <GAMMA> <OUTPUT_PNG>
-```
-
-(Example: `xmake run PhyxRadpp pfm2png image.pfm 0.2 2.2 output.png`)
+<img src="demo_spheres_alpha0.2_gamma1.png" alt="Demo rendering result" width="50%">
 
 ### Testing
 To build and run the `doctest` unit test suite, simply use:

@@ -1,3 +1,20 @@
+/*
+* Copyright (c) 2026 Giulia Gogna, Riccardo Piazza.
+ *
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ * https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ */
+
 import std;
 import HDRImage;
 import Geometry;
@@ -6,46 +23,66 @@ import auxiliary_functions;
 import Camera;
 import Shape;
 
+// Helper function to parse floats without exceptions using std::from_chars
+[[nodiscard]] std::expected<float, std::string> parse_float(std::string_view str) {
+    float value = 0.0f;
+    // ptr points to the first character it could not convert in a float
+    // ec captures the error (float too big to fit in a float or character not possible to convert in float)
+    auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
+
+    // std::errc means no error occured
+    if (ec != std::errc() || ptr != str.data() + str.size()) {
+        return std::unexpected(std::format("Format error: '{}' is not a valid float number.", str));
+    }
+    return value;
+}
+
 struct Parameters {
+
+public:
     std::string command = ""; // "pfm2png" o "demo"
 
     // Shared parameters
     std::string input_pfm_file_name = "";
-    float factor = 0.2f;
+    float alpha = 0.2f;
     float gamma = 1.0f;
     std::string output_png_file_name = "";
 
-    [[nodiscard]] std::expected<void, std::string> parse_command_line(int argc, char* argv[]) {
-        std::string program_name = std::filesystem::path(argv[0]).filename().string();
+    [[nodiscard]] std::expected<void, std::string> parse_command_line(std::span<char*> args) {
+        std::string program_name = std::filesystem::path(args[0]).filename().string();
 
-        if (argc < 2) {
+        if (args.size() < 2) {
             return std::unexpected(std::format(
                 "Error: No command passed.\n"
                 "Available commands: pfm2png, demo\n\n"
                 "Usage:\n"
-                "  ./{} pfm2png <INPUT_PFM> <ALPHA_FACTOR> <GAMMA> <OUTPUT_PNG>\n"
-                "  ./{} demo <ALPHA_FACTOR> <GAMMA> <OUTPUT_PNG>",
+                "  xmake run {} pfm2png <INPUT_PFM> <ALPHA_FACTOR> <GAMMA> <OUTPUT_PNG>\n"
+                "  xmake run {} demo <ALPHA_FACTOR> <GAMMA> <OUTPUT_PNG>",
                 program_name, program_name
             ));
         }
 
-        command = argv[1];
+        command = args[1];
 
         // ==========================================
         // PARSING PFM2PNG
         // ==========================================
         if (command == "pfm2png") {
-            if (argc != 6) { // ./prog pfm2png input alpha gamma output
+            if (args.size() != 6) { // [xmake run] <program_name> pfm2png <input> <alpha> <gamma> <output>
                 return std::unexpected("Error: Wrong number of parameters for 'pfm2png'. Expected 4 arguments.");
             }
-            input_pfm_file_name = argv[2];
-            try {
-                factor = std::stof(argv[3]);
-                gamma = std::stof(argv[4]);
-            } catch (...) {
-                return std::unexpected("Format error: ALPHA_FACTOR and GAMMA must be numbers.");
-            }
-            output_png_file_name = process_output_filename(argv[5], factor, gamma);
+            input_pfm_file_name = args[2];
+
+            auto alpha_res = parse_float(args[3]);
+            auto gamma_res = parse_float(args[4]);
+
+            if (!alpha_res) return std::unexpected(alpha_res.error());
+            if (!gamma_res) return std::unexpected(gamma_res.error());
+
+            alpha = alpha_res.value();
+            gamma = gamma_res.value();
+            output_png_file_name = process_output_filename(args[5], alpha, gamma);
+
             return {};
         }
 
@@ -53,16 +90,20 @@ struct Parameters {
         // PARSING DEMO
         // ==========================================
         else if (command == "demo") {
-            if (argc != 5) { // ./prog demo alpha gamma output
+            if (args.size() != 5) { // [xmake run] <program_name> demo <alpha> <gamma> <output>
                 return std::unexpected("Error: Wrong number of parameters for 'demo'. Expected 3 arguments.");
             }
-            try {
-                factor = std::stof(argv[2]);
-                gamma = std::stof(argv[3]);
-            } catch (...) {
-                return std::unexpected("Format error: ALPHA_FACTOR and GAMMA must be numbers.");
-            }
-            output_png_file_name = process_output_filename(argv[4], factor, gamma);
+
+            auto alpha_res = parse_float(args[2]);
+            auto gamma_res = parse_float(args[3]);
+
+            if (!alpha_res) return std::unexpected(alpha_res.error());
+            if (!gamma_res) return std::unexpected(gamma_res.error());
+
+            alpha = alpha_res.value();
+            gamma = gamma_res.value();
+            output_png_file_name = process_output_filename(args[4], alpha, gamma);
+
             return {};
         }
 
@@ -71,17 +112,19 @@ struct Parameters {
 
 private:
     // Helper function to format output file name
-    std::string process_output_filename(const std::string& base_path, float f, float g) {
-        std::filesystem::path base(base_path);
-        std::filesystem::path parent_dir = base.parent_path();
-        std::string stem = base.stem().string();
-        std::string ext = base.extension().string();
+    std::string process_output_filename(std::string_view base_path, float a, float g) {
+        std::filesystem::path path(base_path);
+
+        std::string ext = path.extension().string();
         if (ext.empty()) {
             ext = ".png";
             std::println("Added default extension .png");
         }
-        std::string new_filename = std::format("{}_alpha{}_gamma{}", stem, f, g);
-        return (parent_dir / (new_filename + ext)).string();
+
+        std::string new_filename = std::format("{}_alpha{}_gamma{}{}", path.stem().string(), a, g, ext);
+        path.replace_filename(new_filename);
+
+        return path.string();
     }
 };
 
@@ -89,37 +132,38 @@ private:
 // EXECUTION FUNCTIONS (SUBCOMMANDS)
 // ====================================
 
+// Function to run pfm2png
 void run_pfm2png(const Parameters& params) {
     auto img_res = HDRImage::read_pfm_file(params.input_pfm_file_name);
     if (!img_res.has_value()) {
-        std::cerr << "Error reading image: " << img_res.error().message << "\n";
+        std::println("Error reading image: {}", img_res.error().message);
         return;
     }
     HDRImage img = std::move(img_res.value());
-    std::cout << std::format("File \"{}\" read from disk.\n", params.input_pfm_file_name);
+    std::println("File \"{}\" read from disk.", params.input_pfm_file_name);
 
-    if(!img.normalize_image(params.factor).has_value()) {
-        std::cerr << "Error in normalizing the image: " << img.normalize_image(params.factor).error() << "\n";
-        return;
-    }
-    if(!img.clamp_image().has_value()) {
-        std::cerr << "Error in clamping the image: " << img.clamp_image().error() << "\n";
-        return;
-    }
-    if(!img.apply_gamma_correction(params.gamma).has_value()) {
-        std::cerr << "Error in applying gamma correction: " << img.apply_gamma_correction(params.gamma).error() << "\n";
-        return;
-    }
+    // C++23 Monadic operations: chains operations and short-circuits on the first error
+    // Error messages are propagated to process_result.error()
+    auto process_result = img.normalize_image(params.alpha)
+        .and_then([&]() { return img.clamp_image(); })
+        .and_then([&]() { return img.apply_gamma_correction(params.gamma); })
+        .and_then([&]() { return img.write_ldr_image(params.output_png_file_name); });
 
-    if(!img.write_ldr_image(params.output_png_file_name).has_value()) {
-        std::cerr << "Error in writing the image: " << img.write_ldr_image(params.output_png_file_name).error() << "\n";
+    if (!process_result.has_value()) {
+        std::println("Error during image processing: {}", process_result.error());
         return;
     }
 
-    std::cout << std::format("File \"{}\" correctly writen on disk.\n", params.output_png_file_name);
+    std::println("File \"{}\" correctly written on disk.", params.output_png_file_name);
 }
 
-void run_demo(const Parameters& params) {
+// Function tu run demo
+// Using external functions to build the World, so it can be quickly changed in the running function
+// If you want to build a different scene write another function
+
+/// Builds a scene with 10 sphere: 8 on the vertexes of a cube and two in the center of the left and bottom face
+World build_sphere_world() {
+
     World world;
 
     Transformation scale_01 = Scale(Vec{0.1f, 0.1f, 0.1f});
@@ -133,6 +177,24 @@ void run_demo(const Parameters& params) {
     world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f, -0.5f, -0.5f}) * scale_01));
     world.add(std::make_unique<Sphere>(Trans(Vec{ 0.0f,  0.5f,  0.0f}) * scale_01));
     world.add(std::make_unique<Sphere>(Trans(Vec{ 0.0f,  0.0f, -0.5f}) * scale_01));
+
+    return world;
+}
+
+/// Builds a scene with a plane on the bottom half of the scene
+World build_plane_world() {
+    World world;
+    world.add(std::make_unique<Plane>(Trans(Vec{0.0f, 0.0f, -1.0f}) * R_z(std::numbers::pi_v<float> / 2.0f)));
+    return world;
+}
+
+// When cube is merged uncomment
+// World build_cube_world(){}
+
+void run_demo(const Parameters& params) {
+
+    // Change the function you call here to build another world
+    World world = build_sphere_world();
 
     PerspectiveCamera camera(1.0f, 3.0f, Transformation{});
     HDRImage frame(800, 800);
@@ -150,21 +212,13 @@ void run_demo(const Parameters& params) {
     std::println("Rendering demo scene...");
     tracer.fire_all_rays(ray_tracing_func);
 
-    if(!tracer.frame.normalize_image(params.factor).has_value()) {
-        std::cerr << "Error in normalizing the image: " << tracer.frame.normalize_image(params.factor).error() << "\n";
-        return;
-    }
-    if(!tracer.frame.clamp_image().has_value()) {
-        std::cerr << "Error in clamping the image: " << tracer.frame.clamp_image().error() << "\n";
-        return;
-    }
-    if(!tracer.frame.apply_gamma_correction(params.gamma).has_value()) {
-        std::cerr << "Error in applying gamma correction: " << tracer.frame.apply_gamma_correction(params.gamma).error() << "\n";
-        return;
-    }
+    auto process_result = tracer.frame.normalize_image(params.alpha)
+        .and_then([&]() { return tracer.frame.clamp_image(); })
+        .and_then([&]() { return tracer.frame.apply_gamma_correction(params.gamma); })
+        .and_then([&]() { return tracer.frame.write_ldr_image(params.output_png_file_name); });
 
-    if(!tracer.frame.write_ldr_image(params.output_png_file_name).has_value()) {
-        std::cerr << "Error in writing the image: " << tracer.frame.write_ldr_image(params.output_png_file_name).error() << "\n";
+    if (!process_result.has_value()) {
+        std::println("Error during image processing: {}", process_result.error());
         return;
     }
 
@@ -178,10 +232,13 @@ void run_demo(const Parameters& params) {
 int main(int argc, char* argv[]) {
     Parameters parameters;
 
-    auto parse_res = parameters.parse_command_line(argc, argv);
+    // std::span gives us a safe, modern view over the C-style array
+    std::span<char*> args(argv, argc);
+
+    auto parse_res = parameters.parse_command_line(args);
     if (!parse_res.has_value()) {
-        std::cerr << parse_res.error() << "\n";
-        return 0;
+        std::println("{}", parse_res.error());
+        return 1; // Return non-zero for error execution
     }
 
     if (parameters.command == "pfm2png") {
