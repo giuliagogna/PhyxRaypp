@@ -41,7 +41,11 @@ export struct HitRecord {
     Normal hit_normal; // Normal at the intersection point
     Vec2D surface_params; // UV coordinates at the intersection point
     float t; // Ray parameter at the intersection point
-    std::shared_ptr<Shape> hitted_shape;
+
+    // std::shared_ptr<Shape> hitted_shape;
+    // GG: using raw pointer instead of the smart shared_ptr to avoid useless copies of the Shape
+    //     HitRecord does not need to own the shape, it just needs a quick way to look at it
+    const Shape* hitted_shape = nullptr;
 
     bool is_close(const HitRecord& other, float epsilon = 1e-5f) const; // Check if two HitRecords are close enough
 };
@@ -52,7 +56,8 @@ bool HitRecord::is_close(const HitRecord& other, float epsilon) const {
            hit_normal.is_close(other.hit_normal, epsilon) &&
            aux::are_close(surface_params.u, other.surface_params.u, epsilon) &&
            aux::are_close(surface_params.v, other.surface_params.v, epsilon) &&
-           aux::are_close(t, other.t, epsilon);
+           aux::are_close(t, other.t, epsilon) &&
+           hitted_shape == other.hitted_shape;
 }
 
 // ======================================================
@@ -143,7 +148,10 @@ export struct Sphere : Shape {
         // Normalize it before return
         record.hit_normal = (trans * local_normal).normalize();
         record.surface_params = {u, v};
-        record.hitted_shape = std::make_shared<Sphere>(*this); // Store a shared pointer to the hit shape in the record
+
+        //record.hitted_shape = std::make_shared<Sphere>(*this); // Store a shared pointer to the hit shape in the record
+        // Point directly to this exact sphere in memory
+        record.hitted_shape = this;
 
         return record;
     }
@@ -191,7 +199,10 @@ export struct Plane : Shape {
         // - floor(-3.2) = -4
         record.surface_params.u = local_point.x - std::floor(local_point.x);
         record.surface_params.v = local_point.y - std::floor(local_point.y);
-        record.hitted_shape = std::make_shared<Plane>(*this); // Store a shared pointer to the hit shape in the record
+        //record.hitted_shape = std::make_shared<Plane>(*this); // Store a shared pointer to the hit shape in the record
+
+        // Point directly to this exact plane in memory
+        record.hitted_shape = this;
 
         return record;
     }

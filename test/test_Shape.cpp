@@ -47,17 +47,21 @@ TEST_CASE("TEST 1: Similarity between two HitRecord objects (is_close())") {
     Vec2D uv1{0.5f, 0.5f};
     Vec2D uv2{0.5f, 0.5f};
     Vec2D uv3{0.1f, 0.1f};
-    //std::pair<float, float> uv1{0.5f, 0.5f};
-    //std::pair<float, float> uv2{0.5f, 0.5f};
-    //std::pair<float, float> uv3{0.1f, 0.1f};
 
-    HitRecord hit1{ray1, Point{1.0f, 2.0f, 3.0f}, normal1, uv1, 5.0f};
-    HitRecord hit2{ray2, Point{1.0f, 2.0f, 3.0f}, normal2, uv2, 5.0f};
-    HitRecord hit3{ray3, Point{1.0f, 2.0f, 3.0f}, normal3, uv3, 5.0f};
+    Sphere dummy_shape1;
+    Sphere dummy_shape2;
+
+    HitRecord hit1{ray1, Point{1.0f, 2.0f, 3.0f}, normal1, uv1, 5.0f, &dummy_shape1};
+    HitRecord hit2{ray2, Point{1.0f, 2.0f, 3.0f}, normal2, uv2, 5.0f, &dummy_shape1};
+    HitRecord hit3{ray3, Point{1.0f, 2.0f, 3.0f}, normal3, uv3, 5.0f, &dummy_shape1};
+
+    // hit4 has identical geometry to hit1, but hits a different shape: points to another memory address
+    HitRecord hit4{ray1, Point{1.0f, 2.0f, 3.0f}, normal1, uv1, 5.0f, &dummy_shape2};
 
     SUBCASE("Test with default tolerance") {
         CHECK(hit1.is_close(hit2) == true);
         CHECK(hit1.is_close(hit3) == false);
+        CHECK(hit1.is_close(hit4) == false);
     }
 
     SUBCASE("Test with custom tolerance") {
@@ -66,9 +70,37 @@ TEST_CASE("TEST 1: Similarity between two HitRecord objects (is_close())") {
    }
 }
 
-// ====================== SPHERE STRUCT TESTS ==============================
 
-TEST_CASE("TEST 2: Sphere Test Suite") {
+// =========================================================================
+// TEST 2: Test if the recording of the shape in HitRecord works correctly
+// =========================================================================
+TEST_CASE("TEST 2: Pointer to a Shape in HitRecord (consistency tests)") {
+
+    SUBCASE("Intersection with sphere") {
+
+        Sphere sphere;
+
+        Ray direct_ray(Point{0.0f, 0.0f, 2.0f}, Vec{0.0f, 0.0f, -1.0f});
+        auto intersection = sphere.ray_intersection(direct_ray);
+
+        REQUIRE(intersection.has_value());
+        CHECK(intersection->hitted_shape->ray_intersection(direct_ray)->is_close(intersection.value()));
+    }
+
+    SUBCASE("Intersection with plane") {
+
+        Plane plane;
+
+        Ray direct_ray(Point{0.0f, 0.0f, 1.0f}, Vec{0.0f, 0.0f, -1.0f});
+        auto intersection = plane.ray_intersection(direct_ray);
+
+        REQUIRE(intersection.has_value());
+        CHECK(intersection->hitted_shape->ray_intersection(direct_ray)->is_close(intersection.value()));
+    }
+}
+
+// ====================== SPHERE STRUCT TESTS ==============================
+TEST_CASE("TEST 3: Sphere Test Suite") {
 
     Sphere sphere;
 
@@ -156,8 +188,7 @@ TEST_CASE("TEST 2: Sphere Test Suite") {
 }
 
 // ========================== PLANE STRUCT TESTS ===========================
-
-TEST_CASE("TEST 3: Plane - Comprehensive Test Suite") {
+TEST_CASE("TEST 4: Plane - Comprehensive Test Suite") {
     // SETUP
     // This canonical plane is initialized once here, and doctest will
     // automatically reset its state before executing each SUBCASE.
@@ -248,7 +279,7 @@ TEST_CASE("TEST 3: Plane - Comprehensive Test Suite") {
 
 
 // ======================== WORLD STRUCT TESTS =============================
-TEST_CASE("TEST 4: World - Testing Ray Intersection and Scene Management") {
+TEST_CASE("TEST 5: World - Testing Ray Intersection and Scene Management") {
     // SETUP: Create an empty world.
     // doctest will reset this to empty before each SUBCASE.
     World world;
@@ -331,32 +362,31 @@ TEST_CASE("TEST 4: World - Testing Ray Intersection and Scene Management") {
     }
 }
 
-// ======================== SHAPE IN HITRECORD TESTS =============================
-TEST_CASE("TEST 5: Pointer to a Shape in HitRecord") {
+// ======================== SHAPE'S MATERIAL TESTS =============================
+TEST_CASE("TEST 6: Shape's material assignment and memory storage") {
 
-    SUBCASE("Intersection with sphere") {
-        
-        Sphere sphere;
+    // Build the components step-by-step for readability
+    auto brdf_pigment = std::make_shared<UniformPigment>(Color{0.0f, 0.0f, 1.0f}); // Blue
+    auto brdf = std::make_shared<DiffusiveBRDF>(brdf_pigment, Color{1.0f, 1.0f, 1.0f});
 
-        Ray direct_ray(Point{0.0f, 0.0f, 2.0f}, Vec{0.0f, 0.0f, -1.0f});
-        auto intersection = sphere.ray_intersection(direct_ray);
+    auto emitted_pigment = std::make_shared<UniformPigment>(Color{1.0f, 0.0f, 0.0f}); // Red
 
-        REQUIRE(intersection.has_value());
-        CHECK(intersection->hitted_shape->ray_intersection(direct_ray)->is_close(*intersection));
-    }
+    auto material = std::make_shared<Material>(brdf, emitted_pigment);
 
-    SUBCASE("Intersection with plane") {
+    // Attach to the shape
+    Sphere sphere(Transformation{}, material);
 
-        Plane plane;
+    // Verify the architecture exists inside the Shape
+    REQUIRE(sphere.material != nullptr);
+    REQUIRE(sphere.material->brdf != nullptr);
+    REQUIRE(sphere.material->emitted_radiance != nullptr);
 
-        Ray direct_ray(Point{0.0f, 0.0f, 1.0f}, Vec{0.0f, 0.0f, -1.0f});
-        auto intersection = plane.ray_intersection(direct_ray);
+    // Verify the data inside the Shape's architecture is perfectly intact
+    Vec2D dummy_uv{0.0f, 0.0f};
+    Color expected_emission{1.0f, 0.0f, 0.0f};
 
-        REQUIRE(intersection.has_value());
-        CHECK(intersection->hitted_shape->ray_intersection(direct_ray)->is_close(*intersection));
-    }
-}
+    CHECK(sphere.material->emitted_radiance->get_color(dummy_uv).is_close(expected_emission));
 
-TEST_CASE("TEST 6: Shape's material") {
-    Sphere sphere(Transformation{}, std::make_shared<Material>(std::make_shared<DiffusiveBRDF>(std::make_shared<UniformPigment>(Color{0.0f, 0.0f, 1.0f}), Color{0.0f, 0.0f, 1.0f}), std::make_shared<UniformPigment>(Color{1.0f, 0.0f, 0.0f})));
+    Color expected_brdf_color{0.0f, 0.0f, 1.0f};
+    CHECK(sphere.material->brdf->pigment->get_color(dummy_uv).is_close(expected_brdf_color));
 }

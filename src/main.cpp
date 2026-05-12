@@ -23,6 +23,9 @@ import auxiliary_functions;
 import Camera;
 import Shape;
 import Pigment;
+import Material;
+import BRDF;
+import Renderer;
 
 
 // Helper function to parse floats
@@ -58,6 +61,7 @@ public:
     std::string input_pfm_file_name = "";
     float alpha = 0.2f;
     float gamma = 1.0f;
+    std::string algorithm = "flat";
     std::string output_png_file_name = "";
 
     [[nodiscard]] std::expected<void, std::string> parse_command_line(std::span<char*> args) {
@@ -75,6 +79,13 @@ public:
         }
 
         command = args[1];
+
+        // Search for the optional flag --algorithm
+        for (int i = 2; i < args.size(); ++i) {
+            if (std::string_view(args[i]) == "--algorithm" && i + 1 < args.size()) {
+                algorithm = args[i + 1];
+            }
+        }
 
         // ==========================================
         // PARSING PFM2PNG
@@ -102,7 +113,7 @@ public:
         // PARSING DEMO
         // ==========================================
         else if (command == "demo") {
-            if (args.size() != 5) { // [xmake run] <program_name> demo <alpha> <gamma> <output>
+            if (args.size() < 5) { // [xmake run] <program_name> demo <alpha> <gamma> <output>
                 return std::unexpected("Error: Wrong number of parameters for 'demo'. Expected 3 arguments.");
             }
 
@@ -169,27 +180,37 @@ void run_pfm2png(const Parameters& params) {
     std::println("File \"{}\" correctly written on disk.", params.output_png_file_name);
 }
 
-// Function tu run demo
+// Function to run demo
 // Using external functions to build the World, so it can be quickly changed in the running function
 // If you want to build a different scene write another function
 
 /// Builds a scene with 10 sphere: 8 on the vertexes of a cube and two in the center of the left and bottom face
-World build_sphere_world() {
-
+World build_10_white_spheres_world() {
     World world;
-    Transformation tr = Trans(Vec{0.0f, 0.5f, 0.5f})*Scale(Vec{0.1f, 0.1f, 0.1f})*R_z(std::numbers::pi_v<float>/3.0f);
-
     Transformation scale_01 = Scale(Vec{0.1f, 0.1f, 0.1f});
-    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f,  0.5f,  0.5f}) * scale_01));
-    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f,  0.5f, -0.5f}) * scale_01));
-    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f, -0.5f,  0.5f}) * scale_01));
-    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f, -0.5f, -0.5f}) * scale_01));
-    world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f,  0.5f,  0.5f}) * scale_01));
-    world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f,  0.5f, -0.5f}) * scale_01));
-    world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f, -0.5f,  0.5f}) * scale_01));
-    world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f, -0.5f, -0.5f}) * scale_01));
-    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.0f,  0.5f,  0.0f}) * scale_01));
-    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.0f,  0.0f, -0.5f}) * scale_01));
+
+    // Helper lambda to quickly generate a solid color material
+    auto make_solid_mat = [](Color c) {
+        auto pigment = std::make_shared<UniformPigment>(c);
+        auto brdf = std::make_shared<DiffusiveBRDF>(pigment, Color{1.0f, 1.0f, 1.0f});
+        return std::make_shared<Material>(brdf);
+    };
+
+    Color c = Color{0.0f, 0.0f, 0.0f};
+
+    // 8 Spheres on the vertices of a cube, each with a different color
+    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f,  0.5f,  0.5f}) * scale_01, make_solid_mat(c)));
+    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f,  0.5f, -0.5f}) * scale_01, make_solid_mat(c)));
+    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f, -0.5f,  0.5f}) * scale_01, make_solid_mat(c)));
+    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f, -0.5f, -0.5f}) * scale_01, make_solid_mat(c)));
+    world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f,  0.5f,  0.5f}) * scale_01, make_solid_mat(c)));
+    world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f,  0.5f, -0.5f}) * scale_01, make_solid_mat(c)));
+    world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f, -0.5f,  0.5f}) * scale_01, make_solid_mat(c)));
+    world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f, -0.5f, -0.5f}) * scale_01, make_solid_mat(c)));
+
+    // 2 Spheres on the left and bottom faces
+    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.0f,  0.5f,  0.0f}) * scale_01, make_solid_mat(c)));
+    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.0f,  0.0f, -0.5f}) * scale_01, make_solid_mat(c)));
 
     return world;
 }
@@ -197,8 +218,56 @@ World build_sphere_world() {
 /// Builds a scene with a plane on the bottom half of the scene
 World build_plane_world() {
     World world;
-    // world.add(std::make_unique<Plane>(Trans(Vec{0.0f, 0.0f, -1.0f}) * R_z(std::numbers::pi_v<float> / 2.0f)));
-    world.add(std::make_unique<Plane>(Trans(Vec{0.0f, 0.0f, -1.0f})));
+
+    // Build a red and green checkerboard material directly inside the function
+    auto checkered_pigment = std::make_shared<CheckeredPigment>(Color{1.0f, 0.0f, 0.0f}, Color{0.0f, 1.0f, 0.0f}, 4);
+    auto brdf = std::make_shared<DiffusiveBRDF>(checkered_pigment, Color{1.0f, 1.0f, 1.0f});
+    auto plane_material = std::make_shared<Material>(brdf);
+
+    // Attach it to the rotated plane
+    world.add(std::make_unique<Plane>(
+        // Plane is rotated 90° to have images in the right orientation
+        Trans(Vec{0.0f, 0.0f, -1.0f}) * R_z(std::numbers::pi_v<float> / 2.0f),
+        plane_material
+    ));
+
+    return world;
+}
+
+World build_plane_and_sphere_world() {
+    World world;
+
+    // Build the Plane (Floor)
+    auto plane_pigment = std::make_shared<CheckeredPigment>(Color{0.8f, 0.0f, 0.0f}, Color{0.0f, 0.8f, 0.0f}, 4);
+    auto plane_brdf = std::make_shared<DiffusiveBRDF>(plane_pigment, Color{1.0f, 1.0f, 1.0f});
+    auto plane_material = std::make_shared<Material>(plane_brdf);
+
+    world.add(std::make_unique<Plane>(
+        Trans(Vec{0.0f, 0.0f, -1.0f}) * R_z(std::numbers::pi_v<float> / 2.0f),
+        plane_material
+    ));
+
+    // Build the Sphere (Hovering above the floor)
+    std::shared_ptr<Material> sphere_material;
+    std::string pfm_path = "images/memorial.pfm";
+    auto img_res = HDRImage::read_pfm_file(pfm_path);
+
+    if (img_res.has_value()) {
+        // If the image loads successfully, create the ImagePigment
+        auto image_pigment = std::make_shared<ImagePigment>(std::move(img_res.value()));
+        auto sphere_brdf = std::make_shared<DiffusiveBRDF>(image_pigment, Color{1.0f, 1.0f, 1.0f});
+        sphere_material = std::make_shared<Material>(sphere_brdf);
+    } else {
+        // Safety Fallback: If the image is missing, make the sphere solid Blue
+        std::println("Warning: Could not load '{}'. Using blue fallback.", pfm_path);
+        auto fallback_pigment = std::make_shared<UniformPigment>(Color{0.0f, 0.0f, 1.0f});
+        auto fallback_brdf = std::make_shared<DiffusiveBRDF>(fallback_pigment, Color{1.0f, 1.0f, 1.0f});
+        sphere_material = std::make_shared<Material>(fallback_brdf);
+    };
+
+    // Sphere is of ray 1, so keeping it on the origin should do the job
+    world.add(std::make_unique<Sphere>(Scale(Vec{0.3f, 0.3f, 0.3f}), sphere_material));
+
     return world;
 }
 
@@ -207,73 +276,39 @@ World build_plane_world() {
 
 void run_demo(const Parameters& params) {
 
+    // =============================================================
     // Change the function you call here to build another world
-    World world = build_plane_world();
+    //World world = build_10_white_spheres_world();
+    World world = build_plane_and_sphere_world();
+    // =============================================================
 
     PerspectiveCamera camera(1.0f, 3.0f, Transformation{});
     //OrthogonalCamera camera(1.0f, R_z(std::numbers::pi_v<float>/3.0f));
     HDRImage frame(800, 800);
     ImageTracer tracer(frame, camera);
 
-    // Instantiate Pigments
-    // Let's use Red and White with 10 subdivisions
-    CheckeredPigment checkered(Color{1.0f, 0.0f, 0.0f}, Color{1.0f, 1.0f, 1.0f}, 2);
+    // =============================================================
+    // Modify this color to have a different background color
+    Color sky_color{0.5f, 0.7f, 1.0f};
+    //Color sky_color(1.0f, 1.0f, 1.0f);
+    //Color sky_color = Color{0.0f, 0.0f, 0.0f};
+    // =============================================================
 
-    HDRImage img(2, 2);
+    std::unique_ptr<Renderer> renderer;
 
-    Color red{1.0f, 0.0f, 0.0f};
-    Color green{0.0f, 1.0f, 0.0f};
-    Color blue{0.0f, 0.0f, 1.0f};
-    Color white{1.0f, 1.0f, 1.0f};
+    if (params.algorithm == "onoff") {
+        renderer = std::make_unique<OnOffRenderer>(&world, sky_color);
+    } else if (params.algorithm == "flat") {
+        renderer = std::make_unique<FlatRenderer>(&world, sky_color);
+    } else {
+        std::println("Warning: Unknown algorithm '{}'. Defaulting to flat.", params.algorithm);
+        renderer = std::make_unique<FlatRenderer>(&world, sky_color);
+    }
 
-    img.set_pixel(0, 0, red);
-    img.set_pixel(1, 0, green);
-    img.set_pixel(0, 1, blue);
-    img.set_pixel(1, 1, white);
-
-//    // Load the real PFM image
-//    std::string pfm_path = "images/memorial.pfm";
-//    auto img_res = HDRImage::read_pfm_file(pfm_path);
-//
-//    if (!img_res.has_value()) {
-//        std::cerr << "Error: Could not load texture image '" << pfm_path << "'\n";
-//        std::cerr << "Details: " << img_res.error().message << "\n";
-//        return; // Abort demo if the texture is missing
-//    }
-//
-//    std::println("Texture '{}' successfully loaded.", pfm_path);
-//
-//    // Create the pigment using the loaded image
-//    HDRImage loaded_img = std::move(img_res.value());
-//    ImagePigment image_pigment(loaded_img);
-
-    ImagePigment image_pigment(img);
-
-
-    // Capture the pigment in the lambda using &checkered
-    std::function<Color(const Ray&)> ray_tracing_func = [&world, &image_pigment](const Ray& ray) {
-        auto hit = world.ray_intersection(ray);
-
-        if (hit.has_value()) {
-            // Pass the (u, v) coordinates from the HitRecord to get the color
-            return image_pigment.get_color(hit->surface_params);
-        } else {
-            // Background color (Black)
-            return Color{0.0f, 0.0f, 0.0f};
-        }
-    };
-
-//    std::function<Color(const Ray&)> ray_tracing_func = [&world](const Ray& ray) {
-//        auto hit = world.ray_intersection(ray);
-//        if (hit.has_value()) {
-//            return Color{1.0f, 1.0f, 1.0f};
-//        } else {
-//            return Color{0.0f, 0.0f, 0.0f};
-//        }
-//    };
-
-    std::println("Rendering demo scene...");
-    tracer.fire_all_rays(ray_tracing_func);
+    std::println("Rendering demo scene using '{}' algorithm...", params.algorithm);
+    tracer.fire_all_rays(
+        [&renderer](const Ray& ray) { return (*renderer)(ray); }
+    );
 
     auto process_result = tracer.frame.normalize_image(params.alpha)
         .and_then([&]() { return tracer.frame.clamp_image(); })

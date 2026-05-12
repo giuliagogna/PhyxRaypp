@@ -27,5 +27,37 @@ import BRDF;
 import Material;
 
 TEST_CASE("Test Material constructors") {
-    // Can't test yet since it's still pure virual!
+
+    SUBCASE("Default constructor provides non-emitting white material") {
+        Material default_mat; // Uses the default arguments
+
+        // Verify pointers are not null
+        REQUIRE(default_mat.brdf != nullptr);
+        REQUIRE(default_mat.emitted_radiance != nullptr);
+
+        // Verify the default emission is pure black (doesn't glow)
+        Vec2D dummy_uv{0.0f, 0.0f};
+        Color expected_emission{0.0f, 0.0f, 0.0f};
+        CHECK(default_mat.emitted_radiance->get_color(dummy_uv).is_close(expected_emission));
+    }
+
+    SUBCASE("Custom constructor correctly assigns pointers") {
+        // Build concrete components
+        auto red_pigment = std::make_shared<UniformPigment>(Color{1.0f, 0.0f, 0.0f});
+        auto custom_brdf = std::make_shared<DiffusiveBRDF>(red_pigment, Color{1.0f, 1.0f, 1.0f});
+
+        auto green_emission = std::make_shared<UniformPigment>(Color{0.0f, 1.0f, 0.0f});
+
+        // Pass them into the material
+        Material custom_mat(custom_brdf, green_emission);
+
+        // Verify they were safely moved and stored
+        REQUIRE(custom_mat.brdf != nullptr);
+        REQUIRE(custom_mat.emitted_radiance != nullptr);
+
+        // Verify the emission is the exact green we passed in
+        Vec2D dummy_uv{0.0f, 0.0f};
+        Color expected_emission{0.0f, 1.0f, 0.0f};
+        CHECK(custom_mat.emitted_radiance->get_color(dummy_uv).is_close(expected_emission));
+    }
 }
