@@ -4,6 +4,7 @@ PhyxRadpp is a modern C++23 ray tracer and image processing utility. Built with 
 
 Currently, the engine is capable of processing High Dynamic Range (HDR) images and rendering 3D scenes featuring perspective cameras and mathematical shapes (such as spheres and planes).
 
+------------------------------------------------------------------------------------------------------------------------------------------------
 ## Features
 
 * **PFM to PNG Conversion:** Converts HDR `.pfm` image files into standard `.png` files. Includes customizable exposure scaling (alpha factor) and gamma correction.
@@ -13,6 +14,7 @@ Currently, the engine is capable of processing High Dynamic Range (HDR) images a
   - flat: A flat-shading renderer that resolves surface parameters (UV coordinates) to apply colors and image textures.
 * **Modern C++23 Architecture:** Fully modularized codebase (`.cppm` files), utilizing the newest features like `std::expected` for safe error handling.
 
+------------------------------------------------------------------------------------------------------------------------------------------------
 ## Quick Start (Building & Running)
 
 If your system is already set up with a modern C++ compiler, building the project is incredibly simple. Navigate to the folder containing `xmake.lua` and run:
@@ -20,7 +22,8 @@ If your system is already set up with a modern C++ compiler, building the projec
 xmake
 ```
 
-### Usage
+------------------------------------------------------------------------------------------------------------------------------------------------
+## Usage
 The executable PhyxRadpp has two main commands: `pfm2png` and `demo`.
 
 ### 1. PFM to PNG Converter
@@ -67,7 +70,8 @@ xmake run PhyxRadpp demo 1 1 demo_silhouette --algorithm onoff
 
 *Note: if you use the default settings for OnOffRenderer the values of `alpha` and `gamma` are irrelevant. Be careful to set sensible values of `alpha` and `gamma` when you render different colors.*
 
-### Testing
+------------------------------------------------------------------------------------------------------------------------------------------------
+## Testing
 To build and run the `doctest` unit test suite, simply use:
 
 ```bash
@@ -79,7 +83,8 @@ xmake run test_<FILE_NAME>
 ```
 (Example for `HDRImage`: `xmake run test_HDRImage`)
 
-### First Time Setup (Dependencies)
+------------------------------------------------------------------------------------------------------------------------------------------------
+## First Time Setup (Dependencies)
 If you are compiling this project on a fresh machine, you need a C++23 compatible compiler. `xmake` will automatically download `doctest` and `stb`, but you must provide the compiler.
 
 ### 🐧 Linux (Ubuntu)
