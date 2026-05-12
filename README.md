@@ -7,7 +7,10 @@ Currently, the engine is capable of processing High Dynamic Range (HDR) images a
 ## Features
 
 * **PFM to PNG Conversion:** Converts HDR `.pfm` image files into standard `.png` files. Includes customizable exposure scaling (alpha factor) and gamma correction.
-* **Basic Ray Tracing Demo:** Renders a 3D scene containing multiple geometric primitives (spheres, cubes). Calculates ray-object intersections from a perspective camera, outputting a black-and-white silhouette map of the hits.
+* **Modular Material System:** Features an extensible architecture for materials and BRDFs. Includes support for UniformPigment (solid colors), CheckeredPigment (procedural grids), and ImagePigment (HDR texture mapping).
+* **Multi-Algorithm Ray Tracing:** Renders 3D scenes using interchangeable algorithms. Currently supports:
+  - onoff: A fast silhouette map of ray-object intersections (default black and white image).
+  - flat: A flat-shading renderer that resolves surface parameters (UV coordinates) to apply colors and image textures.
 * **Modern C++23 Architecture:** Fully modularized codebase (`.cppm` files), utilizing the newest features like `std::expected` for safe error handling.
 
 ## Quick Start (Building & Running)
@@ -27,27 +30,42 @@ Converts an HDR image into a standard PNG.
 xmake run PhyxRadpp pfm2png <INPUT_PFM> <ALPHA_FACTOR> <GAMMA> <OUTPUT_PNG>
 ```
 
-(Example: `xmake run PhyxRadpp pfm2png <image_path>.pfm 0.2 2.2 <output_name>.png`)
-
-Here is the result of the conversion of `images/memorial.pfm` into `memorial_alpha0.2_gamma_1.png`
-The following command
+#### -- Example 1.1: Conversion from `.pfm` to `.png`
+Here is a command that converts `images/memorial.pfm` into `memorial_alpha0.2_gamma_1.png`
 
 ```bash
 xmake run PhyxRadpp pfm2png images/memorial.pfm 0.2 1.0 memorial
 ```
 
-<img src="memorial_alpha0.2_gamma1.png" alt="Conversion result" width="50%">
+<img src="memorial_alpha0.2_gamma1.png" alt="Conversion result" width="40%">
 
 
 ### 2. Ray Tracing Demo
-Renders a hard-coded black-and-white 3D scene. To run it and output a file named demo.png with an alpha of 1 and gamma of 1, use:
+Renders a 3D scene. You can optionally specify the rendering algorithm using the `--algorithm` flag (defaults to `flat`).
 
 ```bash
-xmake run PhyxRadpp demo 1 1 demo
+xmake run PhyxRadpp demo <ALPHA_FACTOR> <GAMMA> <OUTPUT_PNG> [--algorithm <onoff|flat>]
 ```
-Here is the demo result
+#### -- Example 2.1: Textured Scene (Flat Shading)
+To render a scene with a textured sphere and a checkered plane using an `alpha=0.3` and `gamma=2.2`:
 
-<img src="demo_spheres_alpha0.2_gamma1.png" alt="Demo rendering result" width="50%">
+```bash
+xmake run PhyxRadpp demo 0.3 2.2 sphere_plane --algorithm flat
+```
+
+<img src="sphere_plane_alpha0.3_gamma2.2.png" alt="Textured scene" width="50%">
+
+
+#### -- Example 2.2: Silhouette Mode (On/Off)
+To render a black-and-white silhouette of the geometry:
+
+```bash
+xmake run PhyxRadpp demo 1 1 demo_silhouette --algorithm onoff
+```
+
+<img src="spheres_alpha1_gamma1.png" alt="OnOff spheres result" width="50%">
+
+*Note: if you use the default settings for OnOffRenderer the values of `alpha` and `gamma` are irrelevant. Be careful to set sensible values of `alpha` and `gamma` when you render different colors.*
 
 ### Testing
 To build and run the `doctest` unit test suite, simply use:
