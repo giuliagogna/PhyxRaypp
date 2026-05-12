@@ -297,7 +297,10 @@ void run_demo(const Parameters& params) {
     std::unique_ptr<Renderer> renderer;
 
     if (params.algorithm == "onoff") {
-        renderer = std::make_unique<OnOffRenderer>(&world, sky_color);
+        // By passing ONLY &world OnOffRenderer constructor automatically fills in your default Black background and White hit color
+        // If you ever want to change it, you just add the colors back:
+        // renderer = std::make_unique<OnOffRenderer>(&world, Color{1,0,0}, Color{0,1,0});
+        renderer = std::make_unique<OnOffRenderer>(&world);
     } else if (params.algorithm == "flat") {
         renderer = std::make_unique<FlatRenderer>(&world, sky_color);
     } else {
