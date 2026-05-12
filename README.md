@@ -49,7 +49,24 @@ Renders a 3D scene. You can optionally specify the rendering algorithm using the
 ```bash
 xmake run PhyxRadpp demo <ALPHA_FACTOR> <GAMMA> <OUTPUT_PNG> [--algorithm <onoff|flat>]
 ```
+
+#### Changing the Active Scene & Creating Custom Scenes
+Because PhyxRadpp is designed to be highly modular, scenes are built using dedicated builder functions. To change the scene that gets rendered, open `src/main.cpp` and locate the `run_demo` function.
+
+You can change the active scene by commenting/uncommenting the desired `World world = ...` line:
+
+```cpp
+// =============================================================
+    // Change the function you call here to build another world
+    //World world = build_10_white_spheres_world();
+    World world = build_plane_and_sphere_world();
+// =============================================================
+```
+
+You can also easily build and render your own custom 3D environments without altering the core rendering logic by writing a new `build_my_custom_world()` function and calling it here.
+
 #### -- Example 2.1: Textured Scene (Flat Shading)
+Ensure `World world = build_plane_and_sphere_world();` is active in `main.cpp`.
 To render a scene with a textured sphere and a checkered plane using an `alpha=0.3` and `gamma=2.2`:
 
 ```bash
@@ -60,6 +77,7 @@ xmake run PhyxRadpp demo 0.3 2.2 sphere_plane --algorithm flat
 
 
 #### -- Example 2.2: Silhouette Mode (On/Off)
+Ensure `World world = build_10_white_spheres_world();` is active in `main.cpp`.
 To render a black-and-white silhouette of the geometry:
 
 ```bash
