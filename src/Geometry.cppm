@@ -161,7 +161,6 @@ template<typename Curr, typename Res> Res _same (const Curr& left) {
     };
 }
 
-
 // ================================================
 // OPERATORS OVERLOAD
 // ================================================
@@ -680,6 +679,49 @@ struct std::formatter<Vec> {
         return float_fmt.format(v.z, ctx);
     }
 };
+
+// ================================================
+// TEMPLATE ORTHONORMAL BASIS GENERATOR
+// ================================================
+
+/// Using a template allows this function to accept both Normal and Vec
+/// Create a orthonormal basis (ONB) from a vector representing the z axis (normalized)
+/// Return a tuple containing the three vectors (e1, e2, e3) of the basis. The result is such
+/// that e3 = normal.
+/// The `normal` vector must be *normalized*, otherwise this method won't work.
+export template <typename VectorType>
+std::array<Vec, 3> create_onb_from_z(const VectorType& normal) {
+
+    // std::copysign(1.0f, normal.z) copies the sign bit of normal.z onto 1.0f.
+    // It returns exactly 1.0f if positive/zero, and -1.0f if negative.
+    float sign = std::copysign(1.0f, normal.z);
+
+    float a = -1.0f / (sign + normal.z);
+    float b = normal.x * normal.y * a;
+
+    Vec e1{
+        1.0f + sign * normal.x * normal.x * a,
+        sign * b,
+        -sign * normal.x
+    };
+
+    Vec e2{
+        b,
+        sign + normal.y * normal.y * a,
+        -normal.y
+    };
+
+    Vec e3{
+        normal.x,
+        normal.y,
+        normal.z
+    };
+
+    // Returns an array containing the [e1, e2, e3] basis vectors
+    // To unpack use auto [e1, e2, e3] = create_onb_from_z()
+    return std::array<Vec, 3>{e1, e2, e3};
+}
+
 
 export template <>
 struct std::formatter<Normal> {
