@@ -7,11 +7,9 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Added flag `--algorithm` to choose between OnOffRenderer or FlatRenderer
 - Renderer struct with OnOffRenderer and FlatRenderer
-- Material struct
-- BRDF struct
-- Image Pigment
-- Checkered Pigment
-- Uniform Pigment
+- Material, BRDF, Pigments (Image, Checkered, Uniform) struct
+- PCG random generator algorithm
+- Refined main architecture
 
 ## [0.2.0] - 2026-05-06
 
