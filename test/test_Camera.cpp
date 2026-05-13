@@ -23,6 +23,9 @@ import Color;
 import HDRImage;
 import Geometry;
 import Camera;
+import Shape;
+import Pigment;
+import PCG;
 
 // ====================== RAY STRUCT TESTS =================================
 // =========================================================================
@@ -160,7 +163,7 @@ TEST_CASE("Ray generation from ImageTracer (fire_ray())") {
       // The two rays hit the same spot on the screen, since u_pixel and v_pixel in ray1 are bigger than 1 starting from (0,0)
       CHECK(ray1.is_close(ray2));
    }
-   SUBCASE("Complete mapping (fire_all_rays())") {
+   SUBCASE("Complete mapping (fire_all_rays()), no antialiasing") {
       // Call fire_all_rays passing a lambda function that returns a simple color
       tracer.fire_all_rays([](const Ray&) {
         return Color{1.0f, 2.0f, 3.0f};
@@ -182,3 +185,35 @@ TEST_CASE("Ray generation from ImageTracer (fire_ray())") {
       CHECK(Point(0.0f, -2.0, -1.0f).is_close(bottom_right_ray.at(1.0f)));
    }
 }
+
+TEST_CASE("Antialiasing") {
+
+   HDRImage image = HDRImage(4, 2);
+   OrthogonalCamera camera = OrthogonalCamera(2.0f, R_y(std::numbers::pi_v<float> / 2.0f));
+   ImageTracer tracer = ImageTracer(image, camera);
+   Plane plane;
+   CheckeredPigment pigment (Color{1.0f, 1.0f, 1.0f}, Color{0.0f, 0.0f, 1.0f}, 10000);
+
+   SUBCASE("Complete mapping (fire_all_rays()), antialiasing") {
+      auto func = [&](const Ray& ray) {
+         auto hit = plane.ray_intersection(ray);
+         if(!hit) return Color{0.0f, 0.0f, 0.0f}; // Return black if the ray misses the plane
+         return pigment.get_color(hit->surface_params);
+      };
+
+      PCG pcg;
+
+      tracer.fire_all_rays(func, pcg, 100);
+
+      const int width = tracer.frame.width;
+      const int height = tracer.frame.height;
+      // Check that every pixel of the image has been correctly colored
+      for (int col = 0; col < width; col++) {
+         for (int row = 0; row < height; row++) {
+            CHECK(tracer.frame.get_pixel(col, row).is_close(Color{0.5f, 0.5f, 1.0f}, 2e-2f));
+         }
+      }
+   }
+}
+
+
