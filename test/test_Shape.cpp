@@ -367,7 +367,7 @@ TEST_CASE("TEST 6: Shape's material assignment and memory storage") {
 
     // Build the components step-by-step for readability
     auto brdf_pigment = std::make_shared<UniformPigment>(Color{0.0f, 0.0f, 1.0f}); // Blue
-    auto brdf = std::make_shared<DiffusiveBRDF>(brdf_pigment, Color{1.0f, 1.0f, 1.0f});
+    auto brdf = std::make_shared<DiffusiveBRDF>(brdf_pigment);
 
     auto emitted_pigment = std::make_shared<UniformPigment>(Color{1.0f, 0.0f, 0.0f}); // Red
 

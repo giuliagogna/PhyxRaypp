@@ -24,39 +24,70 @@ import Geometry;
 import auxiliary_functions;
 import Pigment;
 import BRDF;
+import PCG;
+import Camera;
 
 TEST_CASE("Test BRDF constructors") {
 
-    Color reflectance{1.0f, 2.0f, 3.0f};
     UniformPigment white{Color{1.0f, 1.0f, 1.0f}};
 
     SUBCASE("DiffusiveBRDF") {
-        DiffusiveBRDF diffusive(std::make_shared<UniformPigment>(white), reflectance);
-        CHECK(diffusive.reflectance.is_close(reflectance));
+        DiffusiveBRDF diffusive(std::make_shared<UniformPigment>(white));
         CHECK(diffusive.pigment->get_color(Vec2D{0.0f, 0.0f}).is_close(white.get_color(Vec2D{0.0f, 0.0f})));
     }
 
     SUBCASE("SpecularBRDF") {
-        float sharpness = 10.;
-        SpecularBRDF specular(std::make_shared<UniformPigment>(white), reflectance, sharpness);
+        SpecularBRDF specular(std::make_shared<UniformPigment>(white));
+
+        CHECK(specular.pigment->get_color(Vec2D{0.0f, 0.0f}).is_close(white.get_color(Vec2D{0.0f, 0.0f})));
+        CHECK(aux::are_close(specular.threshold_angle_rad, std::numbers::pi_v<float> / 1800.0f));
     }
 }
 
-TEST_CASE("Test BRDF::eval() for DiffusiveBRDF and SpecularBRDF") {
-    Color reflectance{1.0f, 10.0f, 100.0f};
-    UniformPigment pink{Color{2.0f, 1.0f, 1.0f}};
+TEST_CASE("Test scatter_ray method") {
+    PCG pcg;
+    UniformPigment blue(Color{0.0f, 0.0f, 1.0f});
+    Point hit_point{0.0f, 0.0f, 0.0f};
+    Normal normal{0.0f, 0.0f, 1.0f};
+    int depth = 2;
 
-    SUBCASE("DiffusiveBRDF") {
-        DiffusiveBRDF diffusive(std::make_shared<UniformPigment>(pink), reflectance);
-        CHECK(diffusive.eval(Normal{1.0f, 0.0f, 0.0f}, Vec{-1.0f, 0.0f, 0.0f}, Vec{1.0f, 0.0f, 0.0f}, Vec2D{0.0f, 0.0f}).is_close(Color{2.0f, 10.0f, 100.0f} / std::numbers::pi_v<float>));
+    SUBCASE("SpecularBRDF deterministic reflection") {
+        SpecularBRDF specular; // Uses default white pigment
+
+        // Ray coming in at a 45-degree angle (down and to the right)
+        Vec incoming_dir = Vec{1.0f, 0.0f, -1.0f}.normalize();
+
+        Ray scattered = specular.scatter_ray(pcg, incoming_dir, hit_point, normal, depth);
+
+        // A perfect mirror should reflect it 45 degrees (up and to the right)
+        Vec expected_out_dir = Vec{1.0f, 0.0f, 1.0f}.normalize();
+
+        // Check if the ray properties are correct
+        CHECK(scattered.origin.is_close(hit_point));
+        CHECK(scattered.direction.is_close(expected_out_dir));
+        CHECK(scattered.depth == depth);
+        CHECK(scattered.tmin == 1.0e-3f);
     }
 
-    SUBCASE("SpecularBRDF") {
-        SpecularBRDF specular(std::make_shared<UniformPigment>(pink), reflectance, 1e5f);
-        CHECK(specular.eval(Normal{1.0f, 0.0f, 0.0f}, Vec{-1.0f, 0.0f, 0.0f}, Vec{1.0f, 0.0f, 0.0f}, Vec2D{0.0f, 0.0f}).is_close(Color{2.0f, 10.0f, 100.0f}));
+    SUBCASE("DiffusiveBRDF stochastic reflection properties") {
+        DiffusiveBRDF diffuse; // Uses default white pigment
 
-        std::println("Outcoming color: {}", specular.eval(Normal{1.0f, 0.0f, 0.0f}, Vec{-1.0f, 0.0f, 0.0f}, Vec{0.0f, 1.0f, 0.0f}, Vec2D{0.0f, 0.0f}));
-        CHECK(specular.eval(Normal{1.0f, 0.0f, 0.0f}, Vec{-1.0f, 0.0f, 0.0f}, Vec{0.0f, 1.0f, 0.0f}, Vec2D{0.0f, 0.0f}).is_close(Color{0.0f, 0.0f, 0.0f}));
+        // Ray coming straight down
+        Vec incoming_dir = Vec{0.0f, 0.0f, -1.0f};
+
+        Ray scattered = diffuse.scatter_ray(pcg, incoming_dir, hit_point, normal, depth);
+
+        // Check basic ray properties
+        CHECK(scattered.origin.is_close(hit_point));
+        CHECK(scattered.depth == depth);
+        CHECK(scattered.tmin == 1.0e-3f);
+
+        // Check that the direction vector is normalized (length == 1)
+        CHECK(aux::are_close(scattered.direction.norm(), 1.0f));
+
+        // Hemisphere check: The dot product of the outgoing ray and the normal
+        // MUST be >= 0. If it's negative, the ray bounced INSIDE the object!
+        float dot_product = scattered.direction * normal;
+        CHECK(dot_product >= 0.0f);
     }
 }
-

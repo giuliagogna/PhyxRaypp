@@ -192,7 +192,7 @@ World build_10_white_spheres_world() {
     // Helper lambda to quickly generate a solid color material
     auto make_solid_mat = [](Color c) {
         auto pigment = std::make_shared<UniformPigment>(c);
-        auto brdf = std::make_shared<DiffusiveBRDF>(pigment, Color{1.0f, 1.0f, 1.0f});
+        auto brdf = std::make_shared<DiffusiveBRDF>(pigment);
         return std::make_shared<Material>(brdf);
     };
 
@@ -221,7 +221,7 @@ World build_plane_world() {
 
     // Build a red and green checkerboard material directly inside the function
     auto checkered_pigment = std::make_shared<CheckeredPigment>(Color{1.0f, 0.0f, 0.0f}, Color{0.0f, 1.0f, 0.0f}, 4);
-    auto brdf = std::make_shared<DiffusiveBRDF>(checkered_pigment, Color{1.0f, 1.0f, 1.0f});
+    auto brdf = std::make_shared<DiffusiveBRDF>(checkered_pigment);
     auto plane_material = std::make_shared<Material>(brdf);
 
     // Attach it to the rotated plane
@@ -239,7 +239,7 @@ World build_plane_and_sphere_world() {
 
     // Build the Plane (Floor)
     auto plane_pigment = std::make_shared<CheckeredPigment>(Color{0.8f, 0.0f, 0.0f}, Color{0.0f, 0.8f, 0.0f}, 4);
-    auto plane_brdf = std::make_shared<DiffusiveBRDF>(plane_pigment, Color{1.0f, 1.0f, 1.0f});
+    auto plane_brdf = std::make_shared<DiffusiveBRDF>(plane_pigment);
     auto plane_material = std::make_shared<Material>(plane_brdf);
 
     world.add(std::make_unique<Plane>(
@@ -255,13 +255,13 @@ World build_plane_and_sphere_world() {
     if (img_res.has_value()) {
         // If the image loads successfully, create the ImagePigment
         auto image_pigment = std::make_shared<ImagePigment>(std::move(img_res.value()));
-        auto sphere_brdf = std::make_shared<DiffusiveBRDF>(image_pigment, Color{1.0f, 1.0f, 1.0f});
+        auto sphere_brdf = std::make_shared<DiffusiveBRDF>(image_pigment);
         sphere_material = std::make_shared<Material>(sphere_brdf);
     } else {
         // Safety Fallback: If the image is missing, make the sphere solid Blue
         std::println("Warning: Could not load '{}'. Using blue fallback.", pfm_path);
         auto fallback_pigment = std::make_shared<UniformPigment>(Color{0.0f, 0.0f, 1.0f});
-        auto fallback_brdf = std::make_shared<DiffusiveBRDF>(fallback_pigment, Color{1.0f, 1.0f, 1.0f});
+        auto fallback_brdf = std::make_shared<DiffusiveBRDF>(fallback_pigment);
         sphere_material = std::make_shared<Material>(fallback_brdf);
     };
 
