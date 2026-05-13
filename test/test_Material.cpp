@@ -44,7 +44,7 @@ TEST_CASE("Test Material constructors") {
     SUBCASE("Custom constructor correctly assigns pointers") {
         // Build concrete components
         auto red_pigment = std::make_shared<UniformPigment>(Color{1.0f, 0.0f, 0.0f});
-        auto custom_brdf = std::make_shared<DiffusiveBRDF>(red_pigment, Color{1.0f, 1.0f, 1.0f});
+        auto custom_brdf = std::make_shared<DiffusiveBRDF>(red_pigment);
 
         auto green_emission = std::make_shared<UniformPigment>(Color{0.0f, 1.0f, 0.0f});
 

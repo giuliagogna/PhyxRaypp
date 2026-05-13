@@ -36,7 +36,7 @@ TEST_CASE("TEST: Renderers (OnOff and Flat)") {
 
     // Create sphere with a green material
     auto green_pigment = std::make_shared<UniformPigment>(Color{0.0f, 1.0f, 0.0f});
-    auto brdf = std::make_shared<DiffusiveBRDF>(green_pigment, Color{1.0f, 1.0f, 1.0f});
+    auto brdf = std::make_shared<DiffusiveBRDF>(green_pigment);
     auto material = std::make_shared<Material>(brdf);
 
     // Sphere is at the origin (0,0,0) by default
