@@ -27,6 +27,8 @@ import Material;
 import Camera;
 import Renderer;
 import Shape;
+import PCG;
+import auxiliary_functions;
 
 // =========================================================================
 // TEST: Renderers
@@ -36,7 +38,7 @@ TEST_CASE("TEST: Renderers (OnOff and Flat)") {
 
     // Create sphere with a green material
     auto green_pigment = std::make_shared<UniformPigment>(Color{0.0f, 1.0f, 0.0f});
-    auto brdf = std::make_shared<DiffusiveBRDF>(green_pigment, Color{1.0f, 1.0f, 1.0f});
+    auto brdf = std::make_shared<DiffusiveBRDF>(green_pigment);
     auto material = std::make_shared<Material>(brdf);
 
     // Sphere is at the origin (0,0,0) by default
@@ -74,5 +76,48 @@ TEST_CASE("TEST: Renderers (OnOff and Flat)") {
 
         // Hitting a shape with NO material should trigger the Red fallback
         CHECK(renderer(fallback_ray).is_close(Color{1.0f, 0.0f, 0.0f}));
+    }
+}
+
+TEST_CASE("PathTracer: Furnace Test") {
+    PCG pcg;
+
+    int num_tests = 100000;
+
+    for (int i = 0 ; i < num_tests; ++i) {
+
+        World world;
+
+        float emitted_radiance = pcg.random_float();
+
+        // Pick a reflectance that is not too close to 1
+        float reflectance = pcg.random_float() * 0.9;
+
+        auto enclosure_material = std::make_shared<Material>(
+            std::make_shared<DiffusiveBRDF>(
+                std::make_shared<UniformPigment>(Color{1.0f, 1.0f, 1.0f} * reflectance)
+            ),
+            std::make_shared<UniformPigment>(Color{1.0f, 1.0f, 1.0f} * emitted_radiance)
+        );
+
+        // Add a sphere centered in the origin to the world
+        world.add(std::make_unique<Sphere>(Transformation{}, enclosure_material));
+
+        // QUESTION: 100 reflections are not enough to make these tests pass. Is that normal?
+        PathTracer path_tracer(pcg, &world, Color{0.0f, 0.0f, 0.0f}, 1, 1000, 1001);
+
+        // Ray starting from the center of the sphere in a random direction
+        Ray initial_ray{Point{0.0f, 0.0f, 0.0f}, Vec{pcg.random_float(), pcg.random_float(), pcg.random_float()}};
+
+        // Run the Path Tracer
+        Color color = path_tracer(initial_ray);
+
+        // Analytical result of the radiance
+        float expected = emitted_radiance / (1.0f - reflectance);
+
+        CHECK(aux::are_close(color.r, expected, 1e-3f));
+        CHECK(aux::are_close(color.g, expected, 1e-3f));
+        CHECK(aux::are_close(color.b, expected, 1e-3f));
+
     }
 }

@@ -23,38 +23,67 @@ import Color;
 import Geometry;
 import Camera;
 import Pigment;
+import PCG;
 
 // Virtual DRDF class
 export struct BRDF {
     std::shared_ptr<Pigment> pigment;
-    Color reflectance;
 
-    // RP: Should I pass Color by referenc??? I'll test if I have time to...
-    BRDF(std::shared_ptr<Pigment> pigment, Color reflectance) : pigment(pigment), reflectance(reflectance) {}
-    virtual Color eval(Normal normal, Vec in_dir, Vec out_dir, Vec2D uv) const = 0;
+    BRDF(std::shared_ptr<Pigment> pigment) : pigment(pigment) {}
+
+    virtual Ray scatter_ray(
+        PCG& pcg,
+        Vec incoming_direction,
+        Point interaction_point,
+        Normal normal,
+        int depth
+        ) = 0;
 };
 
 // Pure isotropic diffusion BRDF
 export struct DiffusiveBRDF : BRDF {
-    DiffusiveBRDF(std::shared_ptr<Pigment> pigment, Color reflectance) : BRDF(pigment, reflectance) {}
+    DiffusiveBRDF(std::shared_ptr<Pigment> pigment = std::make_shared<UniformPigment>(Color{1.0f, 1.0f, 1.0f})) :
+        BRDF(pigment = std::move(pigment)) {}
 
-    Color eval(Normal normal, Vec in_dir, Vec out_dir, Vec2D uv) const override {
-        return pigment->get_color(uv) * (reflectance / std::numbers::pi_v<float>);
-    }
+    Ray scatter_ray(PCG& pcg, Vec incoming_direction, Point interaction_point, Normal normal, int depth) override {
+        auto [e1, e2, e3] = create_onb_from_z(normal);
+
+        float cos_theta_sq = pcg.random_float();
+        float cos_theta = std::sqrt(cos_theta_sq);
+        float sin_theta = std::sqrt(1 - cos_theta_sq);
+        float phi = 2.0f * std::numbers::pi_v<float> * pcg.random_float();
+
+        return Ray{
+            interaction_point,
+            e1*std::cos(phi)*sin_theta + e2*std::sin(phi)*sin_theta + e3*cos_theta,
+            1.0e-3f,
+            std::numeric_limits<float>::infinity(),
+            depth
+        };
+    };
 };
 
 // Specular reflection BRDF, chosen sharpness
 export struct SpecularBRDF : BRDF {
-    float sharpness;
+    float threshold_angle_rad;
 
-    SpecularBRDF(std::shared_ptr<Pigment> pigment, Color reflectance, float sharpness = 10.0f) : BRDF(pigment, reflectance), sharpness(sharpness) {}
-    Color eval(Normal normal, Vec in_dir, Vec out_dir, Vec2D uv) const override {
-        
-        float overlap = (out_dir.normalize() - in_dir.normalize()).to_norm() * normal;
-        if (overlap > 1.0f) overlap = 1.0f;
-        if (overlap < 0.0f) overlap = 0.0f;
-        return pigment->get_color(uv) * reflectance * std::pow(overlap, sharpness);
-    }
+    SpecularBRDF(std::shared_ptr<Pigment> pigment = std::make_shared<UniformPigment>(Color{1.0f, 1.0f, 1.0f}),
+                 float threshold_angle = std::numbers::pi_v<float> / 1800.0f) :
+        BRDF(std::move(pigment)), threshold_angle_rad(threshold_angle) {}
+
+    Ray scatter_ray(PCG& pcg, Vec incoming_direction, Point interaction_point, Normal normal, int depth) override {
+        Vec ray_dir = incoming_direction.normalize();
+        Vec normal_vec = Vec{normal.x, normal.y, normal.z}.normalize();
+        float dot_product = normal_vec * ray_dir;
+
+        return Ray{
+            interaction_point,
+            ray_dir - normal_vec * 2 * dot_product,
+            1.0e-3f,
+            std::numeric_limits<float>::infinity(),
+            depth
+        };
+    };
 };
 
 

@@ -32,8 +32,7 @@ export struct Material {
     // Constructor with default arguments
     Material(
         std::shared_ptr<BRDF> brdf = std::make_shared<DiffusiveBRDF>(
-            std::make_shared<UniformPigment>(Color{1.0f, 1.0f, 1.0f}), // Default white pigment
-            Color{1.0f, 1.0f, 1.0f}                                    // Default white reflectance
+            std::make_shared<UniformPigment>(Color{1.0f, 1.0f, 1.0f})
         ),
 
         std::shared_ptr<Pigment> emitted_radiance = std::make_shared<UniformPigment>(Color{0.0f, 0.0f, 0.0f}) // Default black emission
