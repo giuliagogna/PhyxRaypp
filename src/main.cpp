@@ -26,6 +26,7 @@ import Pigment;
 import Material;
 import BRDF;
 import Renderer;
+import PCG;
 
 
 // Helper function to parse floats
@@ -276,10 +277,13 @@ World build_plane_and_sphere_world() {
 
 void run_demo(const Parameters& params) {
 
+    // Create RNG object;
+    PCG pcg;
+
     // =============================================================
     // Change the function you call here to build another world
     //World world = build_10_white_spheres_world();
-    World world = build_plane_and_sphere_world();
+    World world = build_plane_world();
     // =============================================================
 
     PerspectiveCamera camera(1.0f, 3.0f, Transformation{});
@@ -309,9 +313,7 @@ void run_demo(const Parameters& params) {
     }
 
     std::println("Rendering demo scene using '{}' algorithm...", params.algorithm);
-    tracer.fire_all_rays(
-        [&renderer](const Ray& ray) { return (*renderer)(ray); }
-    );
+    tracer.fire_all_rays( [&renderer](const Ray& ray) { return (*renderer)(ray); }, pcg, 5);
 
     auto process_result = tracer.frame.normalize_image(params.alpha)
         .and_then([&]() { return tracer.frame.clamp_image(); })
