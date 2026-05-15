@@ -291,40 +291,190 @@ World build_plane_and_sphere_world() {
     return world;
 }
 
+World build_Cornell_box_world() {
+    World world;
+
+    // Build the Floor
+    auto floor_pigment = std::make_shared<UniformPigment>(Color{0.8f, 0.8f, 0.8f});
+    auto floor_brdf = std::make_shared<DiffusiveBRDF>(floor_pigment);
+    auto floor_material = std::make_shared<Material>(floor_brdf);
+
+    world.add(std::make_unique<Plane>(
+        Trans(Vec{0.0f, 0.0f, -2.0f}) * R_z(std::numbers::pi_v<float> / 2.0f),
+        floor_material
+    ));
+
+    // Build the Left Wall
+    auto left_wall_pigment = std::make_shared<UniformPigment>(Color{0.8f, 0.0f, 0.0f});
+    auto left_wall_brdf = std::make_shared<DiffusiveBRDF>(left_wall_pigment);
+    auto left_wall_material = std::make_shared<Material>(left_wall_brdf);
+
+    world.add(std::make_unique<Plane>(
+        Trans(Vec{0.0f, -2.0f, 0.0f}) * R_x(std::numbers::pi_v<float> / 2.0f),
+        left_wall_material
+    ));
+
+    // Build the Right Wall
+    auto right_wall_pigment = std::make_shared<UniformPigment>(Color{0.0f, 0.8f, 0.0f});
+    auto right_wall_brdf = std::make_shared<DiffusiveBRDF>(right_wall_pigment);
+    auto right_wall_material = std::make_shared<Material>(right_wall_brdf);
+
+    world.add(std::make_unique<Plane>(
+        Trans(Vec{0.0f, 2.0f, 0.0f}) * R_x(std::numbers::pi_v<float> / 2.0f),
+        right_wall_material
+    ));
+
+    // Build the Front Wall
+    world.add(std::make_unique<Plane>(
+        Trans(Vec{6.0f, 0.0f, 0.0f}) * R_y(std::numbers::pi_v<float> / 2.0f),
+        floor_material
+    ));
+
+    // Build the Rear Wall
+    world.add(std::make_unique<Plane>(
+        Trans(Vec{-4.0f, 0.0f, 0.0f}) * R_y(std::numbers::pi_v<float> / 2.0f),
+        floor_material
+    ));
+
+    // Build the Ceiling
+    world.add(std::make_unique<Plane>(
+        Trans(Vec{0.0f, 0.0f, 2.0f}),
+        floor_material
+    ));
+
+    // Build the Lamp
+    auto lamp_emission = std::make_shared<UniformPigment>(Color{1.0f, 1.0f, 1.0f});
+    auto lamp_brdf = std::make_shared<DiffusiveBRDF>(std::make_shared<UniformPigment>(Color{1.0f, 1.0f, 1.0f}));
+    auto lamp_material = std::make_shared<Material>(lamp_brdf, lamp_emission);
+
+    world.add(std::make_unique<Sphere>(
+        Trans(Vec{2.0f, 0.0f, 2.0f}) * Scale(Vec{0.5f, 0.5f, 0.5f}),
+        lamp_material
+    ));
+
+    // Build some spheres
+    auto blue_brdf = std::make_shared<DiffusiveBRDF>(std::make_shared<UniformPigment>(Color{0.0f, 0.0f, 1.0f}));
+    auto blue_material = std::make_shared<Material>(blue_brdf);
+    auto pink_brdf = std::make_shared<DiffusiveBRDF>(std::make_shared<UniformPigment>(Color{1.0f, 0.0f, 1.0f}));
+    auto pink_material = std::make_shared<Material>(pink_brdf);
+    auto mirror_brdf = std::make_shared<SpecularBRDF>(SpecularBRDF{std::make_shared<UniformPigment>(Color{0.8f, 0.8f, 0.8f})});
+    auto mirror_material = std::make_shared<Material>(mirror_brdf);
+
+    world.add(std::make_unique<Sphere>(
+        Trans(Vec{4.0f, -1.0f, -1.6f}) * Scale(Vec{0.4f, 0.4f, 0.4f}),
+        blue_material
+    ));
+
+    world.add(std::make_unique<Sphere>(
+        Trans(Vec{4.0f, 1.0f, -1.6f}) * Scale(Vec{0.4f, 0.4f, 0.4f}),
+        pink_material
+    ));
+
+    world.add(std::make_unique<Sphere>(
+        Trans(Vec{4.8f, 0.0f, -0.5f}) * Scale(Vec{0.7f, 0.7f, 0.7f}),
+        mirror_material
+    ));
+
+    return world;
+}
+
+World build_complex_world() {
+    World world;
+
+    /////////////////////////////////
+    // Build the Plane (Floor)
+    /////////////////////////////////
+    auto floor_pigment = std::make_shared<CheckeredPigment>(Color{0.6f, 0.0f, 0.4f}, Color{0.0f, 0.8f, 0.0f}, 4);
+    auto floor_brdf = std::make_shared<DiffusiveBRDF>(floor_pigment);
+    auto floor_material = std::make_shared<Material>(floor_brdf);
+
+    world.add(std::make_unique<Plane>(
+        Trans(Vec{0.0f, 0.0f, -1.0f}) * R_z(std::numbers::pi_v<float> / 2.0f),
+        floor_material
+    ));
+
+    /////////////////////////////////////////////////
+    // Build the Sphere (Hovering above the floor)
+    /////////////////////////////////////////////////
+    std::shared_ptr<Material> sphere_material;
+    std::string pfm_path = "images/memorial.pfm";
+    auto img_res = HDRImage::read_pfm_file(pfm_path);
+
+    if (img_res.has_value()) {
+        // If the image loads successfully, create the ImagePigment
+        auto image_pigment = std::make_shared<ImagePigment>(std::move(img_res.value()));
+        auto sphere_brdf = std::make_shared<DiffusiveBRDF>(image_pigment);
+        sphere_material = std::make_shared<Material>(sphere_brdf);
+    } else {
+        // Safety Fallback: If the image is missing, make the sphere solid Blue
+        std::println("Warning: Could not load '{}'. Using blue fallback.", pfm_path);
+        auto fallback_pigment = std::make_shared<UniformPigment>(Color{0.0f, 0.0f, 1.0f});
+        auto fallback_brdf = std::make_shared<DiffusiveBRDF>(fallback_pigment);
+        sphere_material = std::make_shared<Material>(fallback_brdf);
+    };
+
+    // Sphere is of ray 1, so keeping it on the origin should do the job
+    world.add(std::make_unique<Sphere>(Scale(Vec{0.3f, 0.3f, 0.3f}), sphere_material));
+
+    //////////////////////////////////
+    // Build mirror
+    //////////////////////////////////
+    auto mirror_brdf = std::make_shared<SpecularBRDF>(SpecularBRDF{std::make_shared<UniformPigment>(Color{1.0f, 0.2f, 0.2f})});
+    auto mirror_material = std::make_shared<Material>(mirror_brdf);
+
+    world.add(std::make_unique<Plane>(
+        Trans(Vec{3.0f, 3.0f, 0.0f}) * R_z(std::numbers::pi_v<float> / 8.0f) * R_y(std::numbers::pi_v<float> / 2.0f),
+        mirror_material
+    ));
+
+    //////////////////////////////////
+    // Build lamp
+    //////////////////////////////////
+    auto lamp_emission = std::make_shared<UniformPigment>(Color{10.0f, 10.0f, 10.0f});
+    auto lamp_brdf = std::make_shared<DiffusiveBRDF>(std::make_shared<UniformPigment>(Color{1.0f, 1.0f, 1.0f}));
+    auto lamp_material = std::make_shared<Material>(lamp_brdf, lamp_emission);
+
+    world.add(std::make_unique<Sphere>(
+        Trans(Vec{0.0f, 0.0f, 3.0f}) * Scale(Vec{0.5f, 0.5f, 0.5f}),
+        lamp_material
+    ));
+
+    return world;
+}
+
 // When cube is merged uncomment
 // World build_cube_world(){}
 
 void run_demo(const Parameters& params) {
 
-    // =============================================================
-    // Change the function you call here to build another world
-    //World world = build_10_white_spheres_world();
-    World world = build_plane_world();
-    // =============================================================
-
+    PCG pcg; //RNG object
     PerspectiveCamera camera(1.0f, 3.0f, Transformation{});
     //OrthogonalCamera camera(1.0f, R_z(std::numbers::pi_v<float>/3.0f));
-    HDRImage frame(800, 800);
+    HDRImage frame(300, 300);
     ImageTracer tracer(frame, camera);
 
-    // =============================================================
-    // Modify this color to have a different background color
-    Color sky_color{0.5f, 0.7f, 1.0f};
-    //Color sky_color(1.0f, 1.0f, 1.0f);
-    //Color sky_color = Color{0.0f, 0.0f, 0.0f};
-    // =============================================================
-
+    // Creating default objects
+    World world;
     std::unique_ptr<Renderer> renderer;
 
-    if (params.algorithm == "onoff") {
-        // By passing ONLY &world OnOffRenderer constructor automatically fills in your default Black background and White hit color
-        // If you ever want to change it, you just add the colors back:
-        // renderer = std::make_unique<OnOffRenderer>(&world, Color{1,0,0}, Color{0,1,0});
+    // Modify the default objects for the selected algorithm
+
+    if (params.algorithm == "onoff") { // Hit or Miss renderer: 10 white spheres will be used.
+        Color sky_color{0.0f, 0.0f, 0.0f};
+        world = build_10_white_spheres_world();
         renderer = std::make_unique<OnOffRenderer>(&world);
-    } else if (params.algorithm == "flat") {
+    } else if (params.algorithm == "flat") { // Flat renderer: a checkered plane will be used
+        Color sky_color{0.5f, 0.7f, 1.0f};
+        world = build_plane_world();
         renderer = std::make_unique<FlatRenderer>(&world, sky_color);
+    } else if (params.algorithm == "pathtracing") { // Path tracing renderer: a complex scene will be used
+        Color sky_color{0.5f, 0.7f, 1.0f};
+        world = build_Cornell_box_world();
+        renderer = std::make_unique<PathTracer>(pcg, &world, sky_color, 10, 10, 3);
     } else {
         std::println("Warning: Unknown algorithm '{}'. Defaulting to flat.", params.algorithm);
+        Color sky_color{0.5f, 0.7f, 1.0f};
+        world = build_plane_world();
         renderer = std::make_unique<FlatRenderer>(&world, sky_color);
     }
 

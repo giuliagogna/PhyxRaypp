@@ -40,4 +40,3 @@ export struct Material {
     ) : brdf(std::move(brdf)), emitted_radiance(std::move(emitted_radiance)) {}
 
 };
-

@@ -35,7 +35,7 @@ import Material;
 // =========================================================================
 export struct Renderer {
     const World* world;
-    Color background_color;
+    Color background_color; // Emissive color of the environment (if ray does not hit anything)
 
     Renderer(const World* world, Color bg_color = Color{0.0f, 0.0f, 0.0f}) : world{world}, background_color{bg_color} {}
 
@@ -111,39 +111,44 @@ export struct PathTracer : Renderer {
         int russian_roulette_limit = 3
         ) : Renderer(world, background_color), pcg(pcg), num_of_rays(num_of_rays), max_depth(max_depth), russian_roulette_limit(russian_roulette_limit) {}
 
-
     [[nodiscard]] Color operator()(const Ray& ray) const override {
 
         // If the ray has been reflected too many times return black
+        // This happens at the end of recursion if it's not truncated by the Russian Roulette before
         if(ray.depth > max_depth) {
             return Color{0.0f, 0.0f, 0.0f};
         }
 
-        // If the ray does not intersect anything return the background
+        // If the ray does not intersect anything return the background (emissive) color and stops the recursion
         auto hit_record = world->ray_intersection(ray);
         if (!hit_record.has_value()) {
             return background_color;
         }
 
+        // If the ray intersects something, we need to solve the rendering equation at the point of intersection
         auto hit_material = hit_record->hitted_shape->material;
-        Color hit_color = hit_material->brdf->pigment->get_color(hit_record->surface_params);
-        Color emitted_radiance = hit_material->emitted_radiance->get_color(hit_record->surface_params);
+        Color hit_color = hit_material->brdf->pigment->get_color(hit_record->surface_params); // the Color it "reflects"
+        Color emitted_radiance = hit_material->emitted_radiance->get_color(hit_record->surface_params); // the Color it emits
 
-        float hit_color_lum = std::max({hit_color.r, hit_color.g, hit_color.b});
-
+        //////////////////////////////////////////////////////////////////////////////////////////////////
         // Russian Roulette: triggered only if the ray has been reflected at least russian_roulette_limit
-        if (ray.depth > russian_roulette_limit) {
+        //////////////////////////////////////////////////////////////////////////////////////////////////
+        // The probability of terminating the recursion is based on the luminosity of the current hit
+        // "Load the bullets!"
+        float hit_color_lum = std::max({hit_color.r, hit_color.g, hit_color.b});
+        // "Pull the trigger!"
+        if (ray.depth > russian_roulette_limit) { // First reflections are mandatory
             float q = std::max(0.05f, 1.0f-hit_color_lum);
-
-            if (pcg.random_float()>q) {
+            if (pcg.random_float() > q) {
                 // Keep the recursion going, but compensate for other potentially discarded rays
                 hit_color *= 1.0f/(1.0f - q);
             } else {
-                // Stop the recursion prematurely
+                // Stop the recursion prematurely 
                 return emitted_radiance;
             }
-
         }
+
+        // If the ray survived the Russian Roulette, it's time for the recursive call...
 
         // Montecarlo integration
         Color cum_radiance = Color{0.0f, 0.0f, 0.0f};
@@ -152,15 +157,15 @@ export struct PathTracer : Renderer {
             for (int ray_index = 0; ray_index < num_of_rays; ray_index++) {
 
                 Ray new_ray = hit_material->brdf->scatter_ray(
-                pcg,
-                hit_record->ray.direction,
-                hit_record->hit_point,
-                hit_record->hit_normal,
-                hit_record->ray.depth + 1
+                    pcg,
+                    hit_record->ray.direction,
+                    hit_record->hit_point,
+                    hit_record->hit_normal,
+                    hit_record->ray.depth + 1
                 );
 
                 Color new_radiance = (*this)(new_ray);
-                cum_radiance += hit_color * new_radiance;
+                cum_radiance += hit_color * new_radiance; // Add the radiance of the new ray, obtained by recursion, to the current radiance
             }
         }
 
