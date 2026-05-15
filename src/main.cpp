@@ -28,7 +28,7 @@ import BRDF;
 import Renderer;
 import PCG;
 
-
+using namespace std;
 // Helper function to parse floats
 [[nodiscard]] std::expected<float, std::string> parse_float(std::string_view str) {
     std::string safe_str(str);
@@ -56,7 +56,7 @@ import PCG;
 struct Parameters {
 
 public:
-    std::string command = ""; // "pfm2png" o "demo"
+    std::string command = ""; // "pfm2png", "demo", "demo_antialiasing"
 
     // Shared parameters
     std::string input_pfm_file_name = "";
@@ -71,11 +71,12 @@ public:
         if (args.size() < 2) {
             return std::unexpected(std::format(
                 "Error: No command passed.\n"
-                "Available commands: pfm2png, demo\n\n"
+                "Available commands: pfm2png, demo, demo_antialiasing\n\n"
                 "Usage:\n"
                 "  xmake run {} pfm2png <INPUT_PFM> <ALPHA_FACTOR> <GAMMA> <OUTPUT_PNG>\n"
-                "  xmake run {} demo <ALPHA_FACTOR> <GAMMA> <OUTPUT_PNG>",
-                program_name, program_name
+                "  xmake run {} demo <ALPHA_FACTOR> <GAMMA> <OUTPUT_PNG>\n"
+                "  xmake run {} demo_antialiasing <ALPHA_FACTOR> <GAMMA> <OUTPUT_PNG>",
+                program_name, program_name, program_name
             ));
         }
 
@@ -116,6 +117,24 @@ public:
         else if (command == "demo") {
             if (args.size() < 5) { // [xmake run] <program_name> demo <alpha> <gamma> <output>
                 return std::unexpected("Error: Wrong number of parameters for 'demo'. Expected 3 arguments.");
+            }
+
+            auto alpha_res = parse_float(args[2]);
+            auto gamma_res = parse_float(args[3]);
+
+            if (!alpha_res) return std::unexpected(alpha_res.error());
+            if (!gamma_res) return std::unexpected(gamma_res.error());
+
+            alpha = alpha_res.value();
+            gamma = gamma_res.value();
+            output_png_file_name = process_output_filename(args[4], alpha, gamma);
+
+            return {};
+        }
+
+        else if (command == "demo_antialiasing") {
+            if (args.size() < 5) { // [xmake run] <program_name> demo_antialiasing <alpha> <gamma> <output>
+                return std::unexpected("Error: Wrong number of parameters for 'demo_antialiasing'. Expected 3 arguments.");
             }
 
             auto alpha_res = parse_float(args[2]);
@@ -277,9 +296,6 @@ World build_plane_and_sphere_world() {
 
 void run_demo(const Parameters& params) {
 
-    // Create RNG object;
-    PCG pcg;
-
     // =============================================================
     // Change the function you call here to build another world
     //World world = build_10_white_spheres_world();
@@ -313,7 +329,60 @@ void run_demo(const Parameters& params) {
     }
 
     std::println("Rendering demo scene using '{}' algorithm...", params.algorithm);
-    tracer.fire_all_rays( [&renderer](const Ray& ray) { return (*renderer)(ray); }, pcg, 5);
+    tracer.fire_all_rays( [&renderer](const Ray& ray) { return (*renderer)(ray); });
+
+    auto process_result = tracer.frame.normalize_image(params.alpha)
+        .and_then([&]() { return tracer.frame.clamp_image(); })
+        .and_then([&]() { return tracer.frame.apply_gamma_correction(params.gamma); })
+        .and_then([&]() { return tracer.frame.write_ldr_image(params.output_png_file_name); });
+
+    if (!process_result.has_value()) {
+        std::println("Error during image processing: {}", process_result.error());
+        return;
+    }
+
+    std::println("Demo image \"{}\" correctly writen on disk.\n", params.output_png_file_name);
+}
+
+void run_demo_antialiasing(const Parameters& params) {
+
+    // Create RNG object;
+    PCG pcg;
+
+    // =============================================================
+    // Change the function you call here to build another world
+    //World world = build_10_white_spheres_world();
+    World world = build_plane_world();
+    // =============================================================
+
+    PerspectiveCamera camera(1.0f, 3.0f, Transformation{});
+    //OrthogonalCamera camera(1.0f, R_z(std::numbers::pi_v<float>/3.0f));
+    HDRImage frame(3200, 3200);
+    ImageTracer tracer(frame, camera);
+
+    // =============================================================
+    // Modify this color to have a different background color
+    Color sky_color{0.5f, 0.7f, 1.0f};
+    //Color sky_color(1.0f, 1.0f, 1.0f);
+    //Color sky_color = Color{0.0f, 0.0f, 0.0f};
+    // =============================================================
+
+    std::unique_ptr<Renderer> renderer;
+
+    if (params.algorithm == "onoff") {
+        // By passing ONLY &world OnOffRenderer constructor automatically fills in your default Black background and White hit color
+        // If you ever want to change it, you just add the colors back:
+        // renderer = std::make_unique<OnOffRenderer>(&world, Color{1,0,0}, Color{0,1,0});
+        renderer = std::make_unique<OnOffRenderer>(&world);
+    } else if (params.algorithm == "flat") {
+        renderer = std::make_unique<FlatRenderer>(&world, sky_color);
+    } else {
+        std::println("Warning: Unknown algorithm '{}'. Defaulting to flat.", params.algorithm);
+        renderer = std::make_unique<FlatRenderer>(&world, sky_color);
+    }
+
+    std::println("Rendering demo scene using '{}' algorithm...", params.algorithm);
+    tracer.fire_all_rays( [&renderer](const Ray& ray) { return (*renderer)(ray); }, pcg, 10);
 
     auto process_result = tracer.frame.normalize_image(params.alpha)
         .and_then([&]() { return tracer.frame.clamp_image(); })
@@ -348,6 +417,11 @@ int main(int argc, char* argv[]) {
         run_pfm2png(parameters);
     } else if (parameters.command == "demo") {
         run_demo(parameters);
+    } else if (parameters.command == "demo_antialiasing") {
+        run_demo_antialiasing(parameters);
+    } else {
+        std::println("Error: Unknown command '{}'.", parameters.command);
+        return 1;
     }
 
     return 0;

@@ -190,25 +190,16 @@ void ImageTracer::fire_all_rays(const std::function<Color(const Ray&)>& func) {
 void ImageTracer::fire_all_rays(const std::function<Color(const Ray&)>& func, PCG& pcg, int antialiasing_level) {
     const int width = frame.width;
     const int height = frame.height;
+    if (antialiasing_level < 1) antialiasing_level = 1;
 
     // Takes a function as an argument: it will be the algorithm to solve the rendering equation
     for (int row = 0; row < height; ++row) {
         for (int col = 0; col < width; ++col) {
 
-            if (antialiasing_level < 1) antialiasing_level = 1;
-
             Color sum; // Cumulates sampled Colors
             for (int iu = 0; iu < antialiasing_level; iu++) {
                 for (int iv = 0; iv < antialiasing_level; iv++) {
-                    int times = int (pcg.random_float() * 5); // Randomize the number of samples per pixel to avoid banding artifacts
-                    for (int t; t < times; t++) {
-                        pcg.random();
-                    }
                     float u = (float(iu) + pcg.random_float() ) / antialiasing_level;
-                    times = int (pcg.random_float() * 5); // Randomize the number of samples per pixel to avoid banding artifacts
-                    for (int t; t < times; t++) {
-                        pcg.random();
-                    }
                     float v = (float(iv) + pcg.random_float() ) / antialiasing_level;
                     Ray ray = fire_ray(row, col, u, v);
                     sum += func(ray);
@@ -218,4 +209,3 @@ void ImageTracer::fire_all_rays(const std::function<Color(const Ray&)>& func, PC
         }
     }
 }
-
