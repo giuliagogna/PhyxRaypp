@@ -390,3 +390,76 @@ TEST_CASE("TEST 6: Shape's material assignment and memory storage") {
     Color expected_brdf_color{0.0f, 0.0f, 1.0f};
     CHECK(sphere.material->brdf->pigment->get_color(dummy_uv).is_close(expected_brdf_color));
 }
+
+TEST_CASE("TEST 7: Paraboloid - Comprehensive test suite") {
+    // Default unitary paraboloid (z = x^2 + y^2, bounds: z in [0, 1])
+    Paraboloid paraboloid;
+
+    SUBCASE("Intersection with ray hitting the paraboloid (Vertex)") {
+        Ray ray{Point{0.0f, 0.0f, 2.0f}, Vec{0.0f, 0.0f, -1.0f}};
+        auto hit = paraboloid.ray_intersection(ray);
+
+        REQUIRE(hit.has_value());
+        CHECK(hit->hit_point.is_close(Point{0.0f, 0.0f, 0.0f}));
+        CHECK(hit->hit_normal.is_close(Normal{0.0f, 0.0f, 1.0f}));
+    }
+
+    SUBCASE("Ray missing the paraboloid (Parallel and outside rim)") {
+        Ray ray{Point{2.0f, 2.0f, 2.0f}, Vec{0.0f, 0.0f, -1.0f}};
+        auto hit = paraboloid.ray_intersection(ray);
+        CHECK_FALSE(hit.has_value());
+    }
+
+    SUBCASE("Non-trivial oblique intersection and normal verification") {
+        Ray ray{Point{0.5f, 0.0f, 2.0f}, Vec{0.0f, 0.0f, -1.0f}};
+        auto hit = paraboloid.ray_intersection(ray);
+
+        REQUIRE(hit.has_value());
+        CHECK(hit->hit_point.is_close(Point{0.5f, 0.0f, 0.25f}));
+        
+        Normal expected_normal = Normal{-1.0f, 0.0f, 1.0f}.normalize();
+        CHECK(hit->hit_normal.is_close(expected_normal));
+    }
+
+    SUBCASE("Boundary check: ray missing due to height truncation (z > 1)") {
+        Ray ray{Point{2.0f, 0.0f, 5.0f}, Vec{0.0f, 0.0f, -1.0f}};
+        auto hit = paraboloid.ray_intersection(ray);
+        CHECK_FALSE(hit.has_value());
+    }
+
+    SUBCASE("Transformation: Translation") {
+        Transformation translation = Trans(Vec{0.0f, 0.0f, 3.0f});
+        Paraboloid translated_paraboloid{translation};
+        Ray ray{Point{0.0f, 0.0f, 5.0f}, Vec{0.0f, 0.0f, -1.0f}};
+        auto hit = translated_paraboloid.ray_intersection(ray);
+
+        REQUIRE(hit.has_value());
+        CHECK(hit->hit_point.is_close(Point{0.0f, 0.0f, 3.0f}));
+        CHECK(hit->hit_normal.is_close(Normal{0.0f, 0.0f, 1.0f}));
+    }
+
+    SUBCASE("Transformation: Scaling (Altering curvature and height)") {
+        Transformation scaling = Scale(Vec{2.0f, 2.0f, 4.0f});
+        Paraboloid scaled_paraboloid{scaling};
+        Ray ray{Point{1.0f, 0.0f, 5.0f}, Vec{0.0f, 0.0f, -1.0f}};
+        auto hit = scaled_paraboloid.ray_intersection(ray);
+
+        REQUIRE(hit.has_value());
+        CHECK(hit->hit_point.is_close(Point{1.0f, 0.0f, 1.0f}));
+        Normal expected_normal = Normal{-0.5f, 0.0f, 0.25f}.normalize();
+        CHECK(hit->hit_normal.is_close(expected_normal));
+    }
+
+    SUBCASE("Transformation: Rotation") {
+        Transformation rotation = R_x(std::numbers::pi_v<float> / 2.0f); 
+        Paraboloid rotated_paraboloid{rotation};
+
+        Ray ray{Point{0.0f, 5.0f, 0.0f}, Vec{0.0f, -1.0f, 0.0f}};
+        auto hit = rotated_paraboloid.ray_intersection(ray);
+
+        REQUIRE(hit.has_value());
+        CHECK(hit->hit_point.is_close(Point{0.0f, 0.0f, 0.0f}));
+        
+        CHECK(hit->hit_normal.is_close(Normal{0.0f, 1.0f, 0.0f}));
+    }
+}
