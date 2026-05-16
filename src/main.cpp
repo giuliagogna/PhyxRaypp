@@ -56,14 +56,23 @@ using namespace std;
 struct Parameters {
 
 public:
-    std::string command = ""; // "pfm2png", "demo", "demo_antialiasing"
+    std::string command = ""; // "pfm2png", "demo"
 
     // Shared parameters
     std::string input_pfm_file_name = "";
     float alpha = 0.2f;
     float gamma = 1.0f;
     std::string algorithm = "flat";
+    std::string antialiasing = "no_antialiasing";
+    int antialiasing_level = 0;
     std::string output_png_file_name = "";
+    std::pair<int, int> image_dimension{800, 800};
+
+    // See PathTracer struct for more details
+    int pathtracer_num_of_rays = 4;
+    int pathtracer_max_depth = 4;
+    int pathtracer_rr_depth = 2;
+
 
     [[nodiscard]] std::expected<void, std::string> parse_command_line(std::span<char*> args) {
         std::string program_name = std::filesystem::path(args[0]).filename().string();
@@ -71,23 +80,26 @@ public:
         if (args.size() < 2) {
             return std::unexpected(std::format(
                 "Error: No command passed.\n"
-                "Available commands: pfm2png, demo, demo_antialiasing\n\n"
+                "Available commands: pfm2png, demo\n\n"
+
                 "Usage:\n"
                 "  xmake run {} pfm2png <INPUT_PFM> <ALPHA_FACTOR> <GAMMA> <OUTPUT_PNG>\n"
-                "  xmake run {} demo <ALPHA_FACTOR> <GAMMA> <OUTPUT_PNG>\n"
-                "  xmake run {} demo_antialiasing <ALPHA_FACTOR> <GAMMA> <OUTPUT_PNG>",
-                program_name, program_name, program_name
+                "  xmake run {} demo    <ALPHA_FACTOR> <GAMMA> <OUTPUT_PNG> [FLAGS]\n\n"
+
+                "Optional Flags for 'demo':\n"
+                "  --algorithm <type>              Render engine: 'flat' or 'pathtracing' (default: 'flat')\n"
+                "  --antialiasing <N>              Apply anti-aliasing with NxN samples per pixel\n"
+                "  --dimensions <width> <height>   Set output image resolution in pixels\n"
+                "  --pathtracer_params <rays> <max_depth> <rr_depth>\n"
+                "                                  Configure PathTracer settings:\n"
+                "                                    <rays>      : Number of rays per hit\n"
+                "                                    <max_depth> : Maximum reflection depth\n"
+                "                                    <rr_depth>  : Russian Roulette start depth\n",
+                program_name, program_name
             ));
         }
 
         command = args[1];
-
-        // Search for the optional flag --algorithm
-        for (int i = 2; i < args.size(); ++i) {
-            if (std::string_view(args[i]) == "--algorithm" && i + 1 < args.size()) {
-                algorithm = args[i + 1];
-            }
-        }
 
         // ==========================================
         // PARSING PFM2PNG
@@ -115,7 +127,7 @@ public:
         // PARSING DEMO
         // ==========================================
         else if (command == "demo") {
-            if (args.size() < 5) { // [xmake run] <program_name> demo <alpha> <gamma> <output>
+            if (args.size() < 5) { // [xmake run] <program_name> demo <alpha> <gamma> <output> <flags>
                 return std::unexpected("Error: Wrong number of parameters for 'demo'. Expected 3 arguments.");
             }
 
@@ -129,24 +141,42 @@ public:
             gamma = gamma_res.value();
             output_png_file_name = process_output_filename(args[4], alpha, gamma);
 
-            return {};
-        }
-
-        else if (command == "demo_antialiasing") {
-            if (args.size() < 5) { // [xmake run] <program_name> demo_antialiasing <alpha> <gamma> <output>
-                return std::unexpected("Error: Wrong number of parameters for 'demo_antialiasing'. Expected 3 arguments.");
+            /////////////////////////
+            // FLAGS
+            /////////////////////////
+            // Search for the optional flags --algorithm, --antialiasing or --dimensions
+            for (int i = 2; i < args.size(); ++i) {
+                if (std::string_view(args[i]) == "--algorithm" && i + 1 < args.size()) {
+                    algorithm = args[i + 1];
+                    if (algorithm != "flat" && algorithm != "pathtracing") {
+                        return std::unexpected(std::format("Error: Invalid algorithm '{}'. Expected 'flat' or 'pathtracing'.", algorithm));
+                    }
+                } else if (std::string_view(args[i]) == "--antialiasing" && i + 1 < args.size()) {
+                    antialiasing = "apply_AA";
+                    auto parse_antialiasing_level = parse_float(args[i + 1]);
+                    if(!parse_antialiasing_level) return std::unexpected(parse_antialiasing_level.error());
+                    antialiasing_level = parse_antialiasing_level.value() < 1 ? 1 : parse_antialiasing_level.value();                
+                } else if (std::string_view(args[i]) == "--dimensions" && i + 2 < args.size()) {                    
+                    auto parse_x = parse_float(args[i+1]);
+                    if(!parse_x) return std::unexpected(parse_x.error());
+                    auto parse_y = parse_float(args[i+2]);
+                    if(!parse_y) return std::unexpected(parse_y.error());
+                    image_dimension = std::make_pair(parse_x.value() < 1 ? 1 : parse_x.value(), parse_y.value() < 1 ? 1 : parse_y.value());         
+                } else if (std::string_view(args[i]) == "--pathtracer_params" && i + 3 < args.size()) {
+                    // Number of rays emitted per hit
+                    auto parse_num_of_rays = parse_float(args[i + 1]);
+                    if(!parse_num_of_rays) return std::unexpected(parse_num_of_rays.error());
+                    pathtracer_num_of_rays = parse_num_of_rays.value() < 1 ? 1 : parse_num_of_rays.value();
+                    // Max number of reflecion of a Camera shot ray
+                    auto parse_max_depth = parse_float(args[i + 2]);
+                    if(!parse_max_depth) return std::unexpected(parse_max_depth.error());
+                    pathtracer_max_depth = parse_max_depth.value() < 1 ? 1 : parse_max_depth.value();
+                    // Russian Roulette depth condition
+                    auto parse_rr_depth = parse_float(args[i + 3]);
+                    if(!parse_rr_depth) return std::unexpected(parse_rr_depth.error());
+                    pathtracer_rr_depth = parse_rr_depth.value() < 1 ? 1 : parse_rr_depth.value();
+                }
             }
-
-            auto alpha_res = parse_float(args[2]);
-            auto gamma_res = parse_float(args[3]);
-
-            if (!alpha_res) return std::unexpected(alpha_res.error());
-            if (!gamma_res) return std::unexpected(gamma_res.error());
-
-            alpha = alpha_res.value();
-            gamma = gamma_res.value();
-            output_png_file_name = process_output_filename(args[4], alpha, gamma);
-
             return {};
         }
 
@@ -450,7 +480,7 @@ void run_demo(const Parameters& params) {
     PCG pcg; //RNG object
     PerspectiveCamera camera(1.0f, 3.0f, Transformation{});
     //OrthogonalCamera camera(1.0f, R_z(std::numbers::pi_v<float>/3.0f));
-    HDRImage frame(300, 300);
+    HDRImage frame(params.image_dimension.first, params.image_dimension.second);
     ImageTracer tracer(frame, camera);
 
     // Creating default objects
@@ -470,7 +500,7 @@ void run_demo(const Parameters& params) {
     } else if (params.algorithm == "pathtracing") { // Path tracing renderer: a complex scene will be used
         Color sky_color{0.5f, 0.7f, 1.0f};
         world = build_Cornell_box_world();
-        renderer = std::make_unique<PathTracer>(pcg, &world, sky_color, 10, 10, 3);
+        renderer = std::make_unique<PathTracer>(pcg, &world, sky_color, params.pathtracer_num_of_rays, params.pathtracer_max_depth, params.pathtracer_rr_depth);
     } else {
         std::println("Warning: Unknown algorithm '{}'. Defaulting to flat.", params.algorithm);
         Color sky_color{0.5f, 0.7f, 1.0f};
@@ -479,60 +509,11 @@ void run_demo(const Parameters& params) {
     }
 
     std::println("Rendering demo scene using '{}' algorithm...", params.algorithm);
-    tracer.fire_all_rays( [&renderer](const Ray& ray) { return (*renderer)(ray); });
-
-    auto process_result = tracer.frame.normalize_image(params.alpha)
-        .and_then([&]() { return tracer.frame.clamp_image(); })
-        .and_then([&]() { return tracer.frame.apply_gamma_correction(params.gamma); })
-        .and_then([&]() { return tracer.frame.write_ldr_image(params.output_png_file_name); });
-
-    if (!process_result.has_value()) {
-        std::println("Error during image processing: {}", process_result.error());
-        return;
-    }
-
-    std::println("Demo image \"{}\" correctly writen on disk.\n", params.output_png_file_name);
-}
-
-void run_demo_antialiasing(const Parameters& params) {
-
-    // Create RNG object;
-    PCG pcg;
-
-    // =============================================================
-    // Change the function you call here to build another world
-    //World world = build_10_white_spheres_world();
-    World world = build_plane_world();
-    // =============================================================
-
-    PerspectiveCamera camera(1.0f, 3.0f, Transformation{});
-    //OrthogonalCamera camera(1.0f, R_z(std::numbers::pi_v<float>/3.0f));
-    HDRImage frame(3200, 3200);
-    ImageTracer tracer(frame, camera);
-
-    // =============================================================
-    // Modify this color to have a different background color
-    Color sky_color{0.5f, 0.7f, 1.0f};
-    //Color sky_color(1.0f, 1.0f, 1.0f);
-    //Color sky_color = Color{0.0f, 0.0f, 0.0f};
-    // =============================================================
-
-    std::unique_ptr<Renderer> renderer;
-
-    if (params.algorithm == "onoff") {
-        // By passing ONLY &world OnOffRenderer constructor automatically fills in your default Black background and White hit color
-        // If you ever want to change it, you just add the colors back:
-        // renderer = std::make_unique<OnOffRenderer>(&world, Color{1,0,0}, Color{0,1,0});
-        renderer = std::make_unique<OnOffRenderer>(&world);
-    } else if (params.algorithm == "flat") {
-        renderer = std::make_unique<FlatRenderer>(&world, sky_color);
+    if (params.antialiasing == "apply_AA") {
+        tracer.fire_all_rays( [&renderer](const Ray& ray) { return (*renderer)(ray); }, pcg, params.antialiasing_level);
     } else {
-        std::println("Warning: Unknown algorithm '{}'. Defaulting to flat.", params.algorithm);
-        renderer = std::make_unique<FlatRenderer>(&world, sky_color);
+        tracer.fire_all_rays( [&renderer](const Ray& ray) { return (*renderer)(ray); });
     }
-
-    std::println("Rendering demo scene using '{}' algorithm...", params.algorithm);
-    tracer.fire_all_rays( [&renderer](const Ray& ray) { return (*renderer)(ray); }, pcg, 10);
 
     auto process_result = tracer.frame.normalize_image(params.alpha)
         .and_then([&]() { return tracer.frame.clamp_image(); })
@@ -546,6 +527,59 @@ void run_demo_antialiasing(const Parameters& params) {
 
     std::println("Demo image \"{}\" correctly writen on disk.\n", params.output_png_file_name);
 }
+
+//void run_demo_antialiasing(const Parameters& params) {
+//
+//    // Create RNG object;
+//    PCG pcg;
+//
+//    // =============================================================
+//    // Change the function you call here to build another world
+//    //World world = build_10_white_spheres_world();
+//    World world = build_plane_world();
+//    // =============================================================
+//
+//    PerspectiveCamera camera(1.0f, 3.0f, Transformation{});
+//    //OrthogonalCamera camera(1.0f, R_z(std::numbers::pi_v<float>/3.0f));
+//    HDRImage frame(3200, 3200);
+//    ImageTracer tracer(frame, camera);
+//
+//    // =============================================================
+//    // Modify this color to have a different background color
+//    Color sky_color{0.5f, 0.7f, 1.0f};
+//    //Color sky_color(1.0f, 1.0f, 1.0f);
+//    //Color sky_color = Color{0.0f, 0.0f, 0.0f};
+//    // =============================================================
+//
+//    std::unique_ptr<Renderer> renderer;
+//
+//    if (params.algorithm == "onoff") {
+//        // By passing ONLY &world OnOffRenderer constructor automatically fills in your default Black background and White hit color
+//        // If you ever want to change it, you just add the colors back:
+//        // renderer = std::make_unique<OnOffRenderer>(&world, Color{1,0,0}, Color{0,1,0});
+//        renderer = std::make_unique<OnOffRenderer>(&world);
+//    } else if (params.algorithm == "flat") {
+//        renderer = std::make_unique<FlatRenderer>(&world, sky_color);
+//    } else {
+//        std::println("Warning: Unknown algorithm '{}'. Defaulting to flat.", params.algorithm);
+//        renderer = std::make_unique<FlatRenderer>(&world, sky_color);
+//    }
+//
+//    std::println("Rendering demo scene using '{}' algorithm...", params.algorithm);
+//    tracer.fire_all_rays( [&renderer](const Ray& ray) { return (*renderer)(ray); }, pcg, 10);
+//
+//    auto process_result = tracer.frame.normalize_image(params.alpha)
+//        .and_then([&]() { return tracer.frame.clamp_image(); })
+//        .and_then([&]() { return tracer.frame.apply_gamma_correction(params.gamma); })
+//        .and_then([&]() { return tracer.frame.write_ldr_image(params.output_png_file_name); });
+//
+//    if (!process_result.has_value()) {
+//        std::println("Error during image processing: {}", process_result.error());
+//        return;
+//    }
+//
+//    std::println("Demo image \"{}\" correctly writen on disk.\n", params.output_png_file_name);
+//}
 
 // ====================================
 // MAIN FUNCTION
@@ -567,8 +601,6 @@ int main(int argc, char* argv[]) {
         run_pfm2png(parameters);
     } else if (parameters.command == "demo") {
         run_demo(parameters);
-    } else if (parameters.command == "demo_antialiasing") {
-        run_demo_antialiasing(parameters);
     } else {
         std::println("Error: Unknown command '{}'.", parameters.command);
         return 1;
