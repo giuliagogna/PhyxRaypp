@@ -208,6 +208,126 @@ export struct Plane : Shape {
     }
 };
 
+// ======================================================
+// PARABOLOID (Unitary: z = x^2 + y^2, bounded between z = 0 and z = 1)
+// ======================================================
+export struct Paraboloid : Shape {
+    
+    using Shape::Shape;
+
+    [[nodiscard]] std::optional<HitRecord> ray_intersection(const Ray& ray) const override {
+        
+        // Trasformazione: World Space -> Local Space
+        Ray local_ray = ray.transform(trans.inverse());
+
+        Vec O = local_ray.origin.to_vec();
+        Vec D = local_ray.direction;
+
+        // Coefficients for At^2 + Bt + C = 0 equation
+        float A = D.x * D.x + D.y * D.y;
+        float B = 2.0f * (O.x * D.x + O.y * D.y) - D.z;
+        float C = O.x * O.x + O.y * O.y - O.z;
+
+        // Default invalid t1 and t2
+        float t1 = -1.0f;
+        float t2 = -1.0f;
+
+        // CAREFULLY AVOID DIVISON BY ZERO
+        if (std::abs(A) < 1e-6f) {
+            // CONSIDERING A VERTICAL RAY
+            // Rays are generally order unit in module so if A is close to zero, B should not be zero (otherwise,
+            // this will lead to problems but I won't check anythin more)
+            t1 = -C / B;
+
+        } else {
+            // Standard quadratic formula
+            float discriminant = (B * B) - 4.0f * A * C;
+            if (discriminant >= 0.0f) { // C'è intersezione
+                float sqrt_disc = std::sqrt(discriminant);
+                t1 = (-B - sqrt_disc) / (2.0f * A);
+                t2 = (-B + sqrt_disc) / (2.0f * A);
+            }
+        }
+
+        // Test and compare candidates
+        for (float t : {t1, t2}) {
+            if (t > local_ray.tmin && t < local_ray.tmax) { 
+                Point local_point = local_ray.at(t);
+                
+                // Z axis limit
+                if (local_point.z >= 0.0f && local_point.z <= 1.0f) {
+                    
+                    Normal local_normal{2.0f * local_point.x, 2.0f * local_point.y, -1.0f};
+                    
+                    if (local_normal * local_ray.direction > 0.0f) {
+                        local_normal = -local_normal;
+                    }
+
+                    // UV mapping (cylindrical)
+                    float phi = std::atan2(local_point.y, local_point.x);
+                    float u = phi / (2.0f * std::numbers::pi_v<float>);
+                    u = (u >= 0.0f) ? u : (u + 1.0f);
+                    float v = local_point.z;
+
+                    // Local Space -> World Space: report the HitRecord in the global space
+                    HitRecord record;
+                    record.ray = ray;
+                    record.t = t;
+                    record.hit_point = trans * local_point;
+                    record.hit_normal = (trans * local_normal).normalize();
+                    record.surface_params = {u, v};
+                    record.hitted_shape = this;
+
+                    return record;
+                }
+            }
+        }
+
+        return std::nullopt; 
+    }
+};
+
+// ======================================================
+// SQUARE (Unitary, centered at the origin, parallel to the xy plane, bounded between x = -0.5 and x = 0.5, y = -0.5 and y = 0.5)
+// ======================================================
+export struct Square : Shape {
+    using Shape::Shape;
+
+    [[nodiscard]] std::optional<HitRecord> ray_intersection(const Ray& ray) const override {
+        // World Space -> Local Space
+        Ray local_ray = ray.transform(trans.inverse());
+        // Control parallelism: if z-component of ray direction is close to zero there is no intersection
+        if (std::abs(local_ray.direction.z) < 1e-5f) {
+            return std::nullopt;
+        }
+
+        // Intersection: O_z + t * d_z = 0  =>  t = -O_z / d_z
+        float t = -local_ray.origin.z / local_ray.direction.z;
+        // Check if the intersection is within the ray's bounds
+        if (t > local_ray.tmin && t < local_ray.tmax) {
+            // Calculate the intersection point in local space
+            Point local_point = local_ray.at(t);
+            // Check if the intersection point is within the square bounds
+            if (std::abs(local_point.x) <= 0.5f && std::abs(local_point.y) <= 0.5f) {
+                // Calculate the normal (assuming a flat surface)
+                Normal local_normal{0.0f, 0.0f, 1.0f};
+                if (local_normal * local_ray.direction > 0.0f) {
+                    local_normal = -local_normal;
+                }
+                // Convert to world space
+                HitRecord record;
+                record.ray = ray;
+                record.t = t;
+                record.hit_point = trans * local_point;
+                record.hit_normal = (trans * local_normal).normalize();
+                record.surface_params = {local_point.x + 0.5f, local_point.y + 0.5f};
+                record.hitted_shape = this;
+                return record;
+            }
+        }
+        return std::nullopt;
+    }
+};
 
 // ===================================================================================
 // WORLD STRUCT
