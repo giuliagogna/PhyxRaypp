@@ -287,6 +287,48 @@ export struct Paraboloid : Shape {
     }
 };
 
+// ======================================================
+// SQUARE (Unitary, centered at the origin, parallel to the xy plane, bounded between x = -0.5 and x = 0.5, y = -0.5 and y = 0.5)
+// ======================================================
+export struct Square : Shape {
+    using Shape::Shape;
+
+    [[nodiscard]] std::optional<HitRecord> ray_intersection(const Ray& ray) const override {
+        // World Space -> Local Space
+        Ray local_ray = ray.transform(trans.inverse());
+        // Control parallelism: if z-component of ray direction is close to zero there is no intersection
+        if (std::abs(local_ray.direction.z) < 1e-5f) {
+            return std::nullopt;
+        }
+
+        // Intersection: O_z + t * d_z = 0  =>  t = -O_z / d_z
+        float t = -local_ray.origin.z / local_ray.direction.z;
+        // Check if the intersection is within the ray's bounds
+        if (t > local_ray.tmin && t < local_ray.tmax) {
+            // Calculate the intersection point in local space
+            Point local_point = local_ray.at(t);
+            // Check if the intersection point is within the square bounds
+            if (std::abs(local_point.x) <= 0.5f && std::abs(local_point.y) <= 0.5f) {
+                // Calculate the normal (assuming a flat surface)
+                Normal local_normal{0.0f, 0.0f, 1.0f};
+                if (local_normal * local_ray.direction > 0.0f) {
+                    local_normal = -local_normal;
+                }
+                // Convert to world space
+                HitRecord record;
+                record.ray = ray;
+                record.t = t;
+                record.hit_point = trans * local_point;
+                record.hit_normal = (trans * local_normal).normalize();
+                record.surface_params = {local_point.x + 0.5f, local_point.y + 0.5f};
+                record.hitted_shape = this;
+                return record;
+            }
+        }
+        return std::nullopt;
+    }
+};
+
 // ===================================================================================
 // WORLD STRUCT
 // ===================================================================================
