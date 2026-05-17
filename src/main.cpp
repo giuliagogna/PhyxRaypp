@@ -505,6 +505,92 @@ World parabolic_lens_room_world() {
     return world;
 }
 
+World build_optical_table_world() {
+    World world;
+
+    // Build the Floor
+    auto floor_pigment = std::make_shared<UniformPigment>(Color{0.8f, 0.8f, 0.8f});
+    auto floor_brdf = std::make_shared<DiffusiveBRDF>(floor_pigment);
+    auto floor_material = std::make_shared<Material>(floor_brdf);
+
+    world.add(std::make_unique<Plane>(
+        Trans(Vec{0.0f, 0.0f, -2.0f}) * R_z(std::numbers::pi_v<float> / 2.0f),
+        floor_material
+    ));
+
+    // Build the Left Wall
+    auto left_wall_pigment = std::make_shared<UniformPigment>(Color{0.8f, 0.0f, 0.0f});
+    auto left_wall_brdf = std::make_shared<DiffusiveBRDF>(left_wall_pigment);
+    auto left_wall_material = std::make_shared<Material>(left_wall_brdf);
+
+    world.add(std::make_unique<Plane>(
+        Trans(Vec{0.0f, -2.0f, 0.0f}) * R_x(std::numbers::pi_v<float> / 2.0f),
+        left_wall_material
+    ));
+
+    // Build the Right Wall
+    auto right_wall_pigment = std::make_shared<UniformPigment>(Color{0.0f, 0.8f, 0.0f});
+    auto right_wall_brdf = std::make_shared<DiffusiveBRDF>(right_wall_pigment);
+    auto right_wall_material = std::make_shared<Material>(right_wall_brdf);
+
+    world.add(std::make_unique<Plane>(
+        Trans(Vec{0.0f, 2.0f, 0.0f}) * R_x(std::numbers::pi_v<float> / 2.0f),
+        right_wall_material
+    ));
+
+    // Build the Front Wall
+    world.add(std::make_unique<Plane>(
+        Trans(Vec{6.0f, 0.0f, 0.0f}) * R_y(std::numbers::pi_v<float> / 2.0f),
+        floor_material
+    ));
+
+    // Build the Rear Wall
+    world.add(std::make_unique<Plane>(
+        Trans(Vec{-7.0f, 0.0f, 0.0f}) * R_y(std::numbers::pi_v<float> / 2.0f),
+        floor_material
+    ));
+
+    // Build the Ceiling
+    world.add(std::make_unique<Plane>(
+        Trans(Vec{0.0f, 0.0f, 2.0f}),
+        floor_material
+    ));
+
+    // Build the Lamp (ceiling light source)
+    auto lamp_emission = std::make_shared<UniformPigment>(Color{1.0f, 1.0f, 1.0f});
+    auto lamp_brdf = std::make_shared<DiffusiveBRDF>(std::make_shared<UniformPigment>(Color{1.0f, 0.2f, 0.2f}));
+    auto lamp_material = std::make_shared<Material>(lamp_brdf, lamp_emission);
+
+    world.add(std::make_unique<Sphere>(
+        Trans(Vec{0.0f, 0.0f, 2.0f}) * Scale(Vec{0.5f, 0.5f, 0.5f}),
+        lamp_material
+    ));
+
+    // Build the lens
+    // Mirror
+    auto mirror_brdf = std::make_shared<SpecularBRDF>(SpecularBRDF{std::make_shared<UniformPigment>(Color{1.0f, 1.0f, 1.0f})});
+    auto mirror_material = std::make_shared<Material>(mirror_brdf);
+    // Magnified object
+    auto checkered_pigment = std::make_shared<CheckeredPigment>(Color{0.0f, 0.0f, 1.0f}, Color{0.0f, 1.0f, 1.0f}, 4);
+    auto checkered_brdf = std::make_shared<DiffusiveBRDF>(checkered_pigment);
+    auto checkered_material = std::make_shared<Material>(checkered_brdf);
+    
+
+    
+
+    world.add(std::make_unique<Square>(
+        Trans(Vec{4.0f, 0.0f, 0.0f}) * R_z(std::numbers::pi_v<float> / 4.0) * R_y(std::numbers::pi_v<float> / 2.0),
+        mirror_material
+    ));
+
+    world.add(std::make_unique<Sphere>(
+        Trans(Vec{4.0f, -1.5f, 0.25f}) * Scale(Vec{0.2f, 0.2f, 0.2f}) * R_y(std::numbers::pi_v<float> / 2.0),
+        checkered_material
+    ));
+
+    return world;
+}
+
 World build_Cornell_box_world() {
     World world;
 
@@ -682,7 +768,7 @@ void run_demo(const Parameters& params) {
         renderer = std::make_unique<FlatRenderer>(&world, sky_color);
     } else if (params.algorithm == "pathtracing") { // Path tracing renderer: a complex scene will be used
         Color sky_color{0.5f, 0.7f, 1.0f};
-        world = parabolic_lens_room_world();
+        world = build_optical_table_world();
         renderer = std::make_unique<PathTracer>(pcg, &world, sky_color, params.pathtracer_num_of_rays, params.pathtracer_max_depth, params.pathtracer_rr_depth);
     } else {
         std::println("Warning: Unknown algorithm '{}'. Defaulting to flat.", params.algorithm);
