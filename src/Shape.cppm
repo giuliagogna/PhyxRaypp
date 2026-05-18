@@ -244,13 +244,18 @@ export struct Cube : Shape {
             local_normal = -local_normal;
         }
 
+        // Coordinates on the single face of the cube
+        float u_local{0.0f}, v_local{0.0f};
+        // Coordinates in the Atlas representation
         float u{0.0f}, v{0.0f};
-
         // Auxiliary variables for the raw coordinates
         float raw_u{0.0f}, raw_v{0.0f};
+        // Variables used to position the face in the atlas cross
+        float col{0.0f}, row{0.0f};
 
         // u and v are taken as the free coordinates on the face of the cube that gets hit by the ray
         // using Z-axis that points upward
+        // Afterwards u and v are transformed to map the faces of the cube in a cross
 
         // one of the YZ faces
         if (std::abs(local_normal.x) > 0.5f) {
@@ -258,23 +263,39 @@ export struct Cube : Shape {
             // to rotate the frame of reference and watch the face behind: the Y-axis now points to the left
             raw_u = (local_point.x > 0.0f) ? local_point.y : -local_point.y;
             raw_v = local_point.z;
+
+            // Set the position in the cross
+            col = 1.0f;
+            row = (local_point.x > 0.0f) ? 0.0f : 2.0f;
         }
         // one of the XZ faces
         else if (std::abs(local_normal.y) > 0.5f) {
             raw_u = (local_point.y > 0.0f) ? -local_point.x : local_point.x;
             raw_v = local_point.z;
+
+            // Set the position in the cross
+            col = (local_point.y > 0.0f) ? 0.0f : 2.0f;
+            row = 2.0f;
         }
         // one of the XY faces
         else if (std::abs(local_normal.z) > 0.5f) {
             // Top face (+Z) or Bottom face (-Z) using Y-axis always right and X-axis downward for the
             // top face and upward for the bottom face
-            raw_u = local_point.y;
-            raw_v = (local_point.z > 0.0f) ? -local_point.x : local_point.x;
+            // Climbing on the top face from the face X=-1 and going on the bottom face from X=-1
+            raw_u = -local_point.y;
+            raw_v = (local_point.z > 0.0f) ? local_point.x : -local_point.x;
+
+            // Set the position in the cross
+            col = 1.0f;
+            row = (local_point.z > 0.0f) ? 3.0f : 1.0f;
         }
 
         // Convert the local coordinates from [-1, 1] range to standard UV [0, 1] range
-        u = (raw_u + 1.0f) * 0.5f;
-        v = (raw_v + 1.0f) * 0.5f;
+        u_local = (raw_u + 1.0f) * 0.5f;
+        v_local = (raw_v + 1.0f) * 0.5f;
+
+        u = (col + u_local)/3.0f;
+        v = (row + v_local)/4.0f;
 
 
         HitRecord record;

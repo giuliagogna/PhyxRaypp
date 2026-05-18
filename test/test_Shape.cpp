@@ -273,42 +273,42 @@ TEST_CASE("TEST 4: CUBE - Comprehensive Test Suite") {
             ray1,
             Point{1.0f, 0.0f, 0.0f},
             Normal{1.0f, 0.0f, 0.0f},
-            Vec2D{0.5f, 0.5f},
+            Vec2D{0.5f, 0.125f},
             1.0f
         };
         HitRecord exp2{
             ray2,
             Point{-1.0f, 0.0f, 0.0f},
             Normal{-1.0f, 0.0f, 0.0f},
-            Vec2D{0.5f, 0.5f},
+            Vec2D{0.5f, 0.625f},
             1.0f
         };
         HitRecord exp3{
             ray3,
             Point{0.0f, 1.0f, 0.0f},
             Normal{0.0f, 1.0f, 0.0f},
-            Vec2D{0.5f, 0.5f},
+            Vec2D{1.0f/6.0f, 0.625f},
             1.0f
         };
         HitRecord exp4{
             ray4,
             Point{0.0f, -1.0f, 0.0f},
             Normal{0.0f, -1.0f, 0.0f},
-            Vec2D{0.5f, 0.5f},
+            Vec2D{5.0f/6.0f, 0.625f},
             1.0f
         };
         HitRecord exp5{
             ray5,
             Point{0.0f, 0.0f, 1.0f},
             Normal{0.0f, 0.0f, 1.0f},
-            Vec2D{0.5f, 0.5f},
+            Vec2D{0.5f, 0.875f},
             1.0f
         };
         HitRecord exp6{
             ray6,
             Point{0.0f, 0.0f, -1.0f},
             Normal{0.0f, 0.0f, -1.0f},
-            Vec2D{0.5f, 0.5f},
+            Vec2D{0.5f, 0.375f},
             1.0f
         };
 
@@ -383,7 +383,7 @@ TEST_CASE("TEST 4: CUBE - Comprehensive Test Suite") {
         CHECK(record->ray.is_close(ray));
         CHECK(record->hit_point.is_close(Point(1.0f, 0.0f, 0.0f)));
         CHECK(record->hit_normal.is_close(Normal{-1.0f, 0.0f, 0.0f}));
-        CHECK(record->surface_params.is_close(Vec2D{0.5f, 0.5f}));
+        CHECK(record->surface_params.is_close(Vec2D{0.5f, 0.125f}));
         CHECK(aux::are_close(record->t, 1.0f));
     }
 
@@ -392,7 +392,7 @@ TEST_CASE("TEST 4: CUBE - Comprehensive Test Suite") {
         auto record = cube.ray_intersection(ray);
 
         REQUIRE(record.has_value());
-        CHECK(record->surface_params.is_close(Vec2D{0.75f, 0.25f}));
+        CHECK(record->surface_params.is_close(Vec2D{7.0f/12.0f, 0.25f/4.0f}));
     }
 
     SUBCASE("UV parametrization - Z face") {
@@ -400,7 +400,7 @@ TEST_CASE("TEST 4: CUBE - Comprehensive Test Suite") {
         auto record = cube.ray_intersection(ray);
 
         REQUIRE(record.has_value());
-        CHECK(record->surface_params.is_close(Vec2D{0.75f, 0.25f}));
+        CHECK(record->surface_params.is_close(Vec2D{5.0f/12.0f, 15.0f/16.0f}));
     }
 
     SUBCASE("Cube transformation") {
@@ -412,7 +412,7 @@ TEST_CASE("TEST 4: CUBE - Comprehensive Test Suite") {
             ray,
             Point{3.0f, 0.0f, 0.0f},
             Normal{-1.0f, 0.0f, 0.0f},
-            Vec2D{0.5f, 0.5f},
+            Vec2D{0.5f, 0.625f},
             3.0f
         };
 
