@@ -171,6 +171,124 @@ export struct Plane : Shape {
     }
 };
 
+// ==================================
+// CUBE
+// =================================
+
+export struct Cube : Shape {
+    using Shape::Shape;
+    [[nodiscard]] std::optional<HitRecord> ray_intersection(const Ray& ray) const override {
+        Ray local_ray = ray.transform(trans.inverse());
+
+        // Calculate the 1/dx, 1/dy and 1/dz only once
+        Vec inv_direction = Vec{
+                                1.0f/local_ray.direction.x,
+                                1.0f/local_ray.direction.y,
+                                1.0f/local_ray.direction.z
+                                };
+
+        // left-bottom-behind corner and right-upper-front corner of the canonical cube
+        Vec bounds[2] = {Vec{-1.0f, -1.0f, -1.0f}, Vec{1.0f, 1.0f, 1.0f}};
+
+        // This is used to determine which face gets hit first
+        int sign[3];
+        sign[0] = (local_ray.direction.x < 0) ? 1 : 0;
+        sign[1] = (local_ray.direction.y < 0) ? 1 : 0;
+        sign[2] = (local_ray.direction.z < 0) ? 1 : 0;
+
+        float tmin = (bounds[sign[0]].x - local_ray.origin.x) * inv_direction.x;
+        float tmax = (bounds[1-sign[0]].x - local_ray.origin.x) * inv_direction.x;
+        float tymin = (bounds[sign[1]].y - local_ray.origin.y) * inv_direction.y;
+        float tymax = (bounds[1-sign[1]].y - local_ray.origin.y) * inv_direction.y;
+
+        if (tmin > tymax || tymin > tmax) return std::nullopt;
+        if (tymin > tmin) tmin = tymin;
+        if (tymax < tmax) tmax = tymax;
+
+        float tzmin = (bounds[sign[2]].z - local_ray.origin.z) * inv_direction.z;
+        float tzmax = (bounds[1-sign[2]].z - local_ray.origin.z) * inv_direction.z;
+
+        if (tmin > tzmax || tzmin > tmax) return std::nullopt;
+        if (tzmin > tmin) tmin = tzmin;
+        if (tzmax < tmax) tmax = tzmax;
+
+        float first_hit_t{0.0f};
+        if (tmin > local_ray.tmin && tmin < local_ray.tmax) {
+            first_hit_t = tmin;
+        } else if (tmax > local_ray.tmin && tmax < local_ray.tmax) {
+            first_hit_t = tmax;
+        } else {
+            return std::nullopt;
+        }
+
+        Point local_point = local_ray.at(first_hit_t);
+        Normal local_normal{0.0f, 0.0f, 0.0f};
+
+        // To calculate the normal, evaluate which coordinate of the impact point is the biggest
+        // that will give the face on which the ray impacts and normal will be the normal vector to
+        // this face
+        float abs_x = std::abs(local_point.x);
+        float abs_y = std::abs(local_point.y);
+        float abs_z = std::abs(local_point.z);
+
+        if (abs_x >= abs_y && abs_x >= abs_z) {
+            local_normal = Normal{(local_point.x > 0.0f) ? 1.0f : -1.0f, 0.0f, 0.0f};
+        } else if (abs_y >= abs_x && abs_y >= abs_z) {
+            local_normal = Normal{0.0f, (local_point.y > 0.0f) ? 1.0f : -1.0f, 0.0f};
+        } else {
+            local_normal = Normal{0.0f, 0.0f, (local_point.z > 0.0f) ? 1.0f : -1.0f};
+        }
+
+        // Invert the normal if the ray comes from inside
+        if (local_point.to_vec() * local_ray.direction > 0.0f) {
+            local_normal = -local_normal;
+        }
+
+        float u{0.0f}, v{0.0f};
+
+        // Auxiliary variables for the raw coordinates
+        float raw_u{0.0f}, raw_v{0.0f};
+
+        // u and v are taken as the free coordinates on the face of the cube that gets hit by the ray
+        // using Z-axis that points upward
+
+        // one of the YZ faces
+        if (std::abs(local_normal.x) > 0.5f) {
+            // If the face is the one at positive X, Y-axis is oriented to the right, otherwise imagine
+            // to rotate the frame of reference and watch the face behind: the Y-axis now points to the left
+            raw_u = (local_point.x > 0.0f) ? local_point.y : -local_point.y;
+            raw_v = local_point.z;
+        }
+        // one of the XZ faces
+        else if (std::abs(local_normal.y) > 0.5f) {
+            raw_u = (local_point.y > 0.0f) ? -local_point.x : local_point.x;
+            raw_v = local_point.z;
+        }
+        // one of the XY faces
+        else if (std::abs(local_normal.z) > 0.5f) {
+            // Top face (+Z) or Bottom face (-Z) using Y-axis always right and X-axis downward for the
+            // top face and upward for the bottom face
+            raw_u = local_point.y;
+            raw_v = (local_point.z > 0.0f) ? -local_point.x : local_point.x;
+        }
+
+        // Convert the local coordinates from [-1, 1] range to standard UV [0, 1] range
+        u = (raw_u + 1.0f) * 0.5f;
+        v = (raw_v + 1.0f) * 0.5f;
+
+
+        HitRecord record;
+        record.ray = ray;
+        record.t = first_hit_t;
+        record.hit_point = trans * local_point;
+        record.hit_normal = (trans * local_normal).normalize();
+        record.surface_params.u = u;
+        record.surface_params.v = v;
+
+        return record;
+    }
+};
+
 
 // ===================================================================================
 // WORLD STRUCT

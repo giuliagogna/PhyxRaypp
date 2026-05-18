@@ -243,6 +243,184 @@ TEST_CASE("TEST 3: Plane - Comprehensive Test Suite") {
     }
 }
 
+// ======================== CUBE STRUCT TESTS =============================
+TEST_CASE("TEST 4: CUBE - Comprehensive Test Suite") {
+    Cube cube;
+
+    SUBCASE("Rays perpendicular to the faces") {
+        Ray ray1{Point{2.0f, 0.0f, 0.0f}, Vec{-1.0f, 0.0f, 0.0f}};
+        Ray ray2{Point{-2.0f, 0.0f, 0.0f}, Vec{1.0f, 0.0f, 0.0f}};
+        Ray ray3{Point{0.0f, 2.0f, 0.0f}, Vec{0.0f, -1.0f, 0.0f}};
+        Ray ray4{Point{0.0f, -2.0f, 0.0f}, Vec{0.0f, 1.0f, 0.0f}};
+        Ray ray5{Point{0.0f, 0.0f, 2.0f}, Vec{0.0f, 0.0f, -1.0f}};
+        Ray ray6{Point{0.0f, 0.0f, -2.0f}, Vec{0.0f, 0.0f, 1.0f}};
+
+        auto record1 = cube.ray_intersection(ray1);
+        auto record2 = cube.ray_intersection(ray2);
+        auto record3 = cube.ray_intersection(ray3);
+        auto record4 = cube.ray_intersection(ray4);
+        auto record5 = cube.ray_intersection(ray5);
+        auto record6 = cube.ray_intersection(ray6);
+
+        REQUIRE(record1.has_value());
+        REQUIRE(record2.has_value());
+        REQUIRE(record3.has_value());
+        REQUIRE(record4.has_value());
+        REQUIRE(record5.has_value());
+        REQUIRE(record6.has_value());
+
+        HitRecord exp1{
+            ray1,
+            Point{1.0f, 0.0f, 0.0f},
+            Normal{1.0f, 0.0f, 0.0f},
+            Vec2D{0.5f, 0.5f},
+            1.0f
+        };
+        HitRecord exp2{
+            ray2,
+            Point{-1.0f, 0.0f, 0.0f},
+            Normal{-1.0f, 0.0f, 0.0f},
+            Vec2D{0.5f, 0.5f},
+            1.0f
+        };
+        HitRecord exp3{
+            ray3,
+            Point{0.0f, 1.0f, 0.0f},
+            Normal{0.0f, 1.0f, 0.0f},
+            Vec2D{0.5f, 0.5f},
+            1.0f
+        };
+        HitRecord exp4{
+            ray4,
+            Point{0.0f, -1.0f, 0.0f},
+            Normal{0.0f, -1.0f, 0.0f},
+            Vec2D{0.5f, 0.5f},
+            1.0f
+        };
+        HitRecord exp5{
+            ray5,
+            Point{0.0f, 0.0f, 1.0f},
+            Normal{0.0f, 0.0f, 1.0f},
+            Vec2D{0.5f, 0.5f},
+            1.0f
+        };
+        HitRecord exp6{
+            ray6,
+            Point{0.0f, 0.0f, -1.0f},
+            Normal{0.0f, 0.0f, -1.0f},
+            Vec2D{0.5f, 0.5f},
+            1.0f
+        };
+
+        CHECK(record1->is_close(exp1));
+        CHECK(record2->is_close(exp2));
+        CHECK(record3->is_close(exp3));
+        CHECK(record4->is_close(exp4));
+        CHECK(record5->is_close(exp5));
+        CHECK(record6->is_close(exp6));
+
+        // Test each component of the HitRecord object individually to better debug
+        // Ray
+        CHECK(record1->ray.is_close(exp1.ray));
+        CHECK(record2->ray.is_close(exp2.ray));
+        CHECK(record3->ray.is_close(exp3.ray));
+        CHECK(record4->ray.is_close(exp4.ray));
+        CHECK(record5->ray.is_close(exp5.ray));
+        CHECK(record6->ray.is_close(exp6.ray));
+
+        // Hit Point
+        CHECK(record1->hit_point.is_close(exp1.hit_point));
+        CHECK(record2->hit_point.is_close(exp2.hit_point));
+        CHECK(record3->hit_point.is_close(exp3.hit_point));
+        CHECK(record4->hit_point.is_close(exp4.hit_point));
+        CHECK(record5->hit_point.is_close(exp5.hit_point));
+        CHECK(record6->hit_point.is_close(exp6.hit_point));
+
+        // Hit Normal
+        CHECK(record1->hit_normal.is_close(exp1.hit_normal));
+        CHECK(record2->hit_normal.is_close(exp2.hit_normal));
+        CHECK(record3->hit_normal.is_close(exp3.hit_normal));
+        CHECK(record4->hit_normal.is_close(exp4.hit_normal));
+        CHECK(record5->hit_normal.is_close(exp5.hit_normal));
+        CHECK(record6->hit_normal.is_close(exp6.hit_normal));
+
+        // Surface params
+        CHECK(record1->surface_params.is_close(exp1.surface_params));
+        CHECK(record2->surface_params.is_close(exp2.surface_params));
+        CHECK(record3->surface_params.is_close(exp3.surface_params));
+        CHECK(record4->surface_params.is_close(exp4.surface_params));
+        CHECK(record5->surface_params.is_close(exp5.surface_params));
+        CHECK(record6->surface_params.is_close(exp6.surface_params));
+
+        // t
+        CHECK(aux::are_close(record1->t, exp1.t));
+        CHECK(aux::are_close(record2->t, exp2.t));
+        CHECK(aux::are_close(record3->t, exp3.t));
+        CHECK(aux::are_close(record4->t, exp4.t));
+        CHECK(aux::are_close(record5->t, exp5.t));
+        CHECK(aux::are_close(record6->t, exp6.t));
+
+    }
+
+    SUBCASE("Missed intersection - Ray parallel to a face outside the cube") {
+        Ray ray_miss{Point{2.0f, 5.0f, 3.0}, Vec{-1.0f, 0.0f, 0.0f}};
+        auto record = cube.ray_intersection(ray_miss);
+
+        CHECK_FALSE(record.has_value());
+    }
+
+    SUBCASE("Missed interection - Ray with direction outward outside the cube") {
+        Ray ray_miss{Point{2.0f, 0.0f, 0.0f}, Vec{1.0f, 0.0f, 0.0f}};
+        auto record = cube.ray_intersection(ray_miss);
+        CHECK_FALSE(record.has_value());
+    }
+
+    SUBCASE("Ray from inside the cube") {
+        Ray ray{Point{0.0f, 0.0f, 0.0f}, Vec{1.0f, 0.0f, 0.0f}};
+        auto record = cube.ray_intersection(ray);
+
+        REQUIRE(record.has_value());
+        CHECK(record->ray.is_close(ray));
+        CHECK(record->hit_point.is_close(Point(1.0f, 0.0f, 0.0f)));
+        CHECK(record->hit_normal.is_close(Normal{-1.0f, 0.0f, 0.0f}));
+        CHECK(record->surface_params.is_close(Vec2D{0.5f, 0.5f}));
+        CHECK(aux::are_close(record->t, 1.0f));
+    }
+
+    SUBCASE("UV parametrization - X face") {
+        Ray ray{Point{3.0f, 0.5f, -0.5f}, Vec{-1.0f, 0.0f, 0.0f}};
+        auto record = cube.ray_intersection(ray);
+
+        REQUIRE(record.has_value());
+        CHECK(record->surface_params.is_close(Vec2D{0.75f, 0.25f}));
+    }
+
+    SUBCASE("UV parametrization - Z face") {
+        Ray ray{Point{0.5f, 0.5f, 3.0f}, Vec{0.0f, 0.0f, -1.0f}};
+        auto record = cube.ray_intersection(ray);
+
+        REQUIRE(record.has_value());
+        CHECK(record->surface_params.is_close(Vec2D{0.75f, 0.25f}));
+    }
+
+    SUBCASE("Cube transformation") {
+        Cube cube_transformed{Trans(Vec{5.0f, 0.0f, 0.0f})*Scale(Vec{2.0f, 2.0f, 2.0f})};
+        Ray ray{Point{0.0f, 0.0f, 0.0f}, Vec{1.0f, 0.0f, 0.0f}};
+
+        auto record = cube_transformed.ray_intersection(ray);
+        HitRecord exp{
+            ray,
+            Point{3.0f, 0.0f, 0.0f},
+            Normal{-1.0f, 0.0f, 0.0f},
+            Vec2D{0.5f, 0.5f},
+            3.0f
+        };
+
+        REQUIRE(record.has_value());
+        CHECK(record->is_close(exp));
+    }
+}
+
 
 // ======================== WORLD STRUCT TESTS =============================
 TEST_CASE("World - Testing Ray Intersection and Scene Management") {
