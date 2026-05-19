@@ -342,6 +342,7 @@ export struct Cube : Shape {
         record.hit_normal = (trans * local_normal).normalize();
         record.surface_params.u = u;
         record.surface_params.v = v;
+        record.hitted_shape = this;
 
         return record;
     }

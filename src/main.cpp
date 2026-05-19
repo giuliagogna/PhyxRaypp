@@ -148,7 +148,7 @@ public:
             for (int i = 2; i < args.size(); ++i) {
                 if (std::string_view(args[i]) == "--algorithm" && i + 1 < args.size()) {
                     algorithm = args[i + 1];
-                    if (algorithm != "flat" && algorithm != "pathtracing") {
+                    if (algorithm != "flat" && algorithm != "pathtracing" && algorithm != "onoff") {
                         return std::unexpected(std::format("Error: Invalid algorithm '{}'. Expected 'flat' or 'pathtracing'.", algorithm));
                     }
                 } else if (std::string_view(args[i]) == "--antialiasing" && i + 1 < args.size()) {
@@ -473,12 +473,42 @@ World build_complex_world() {
 }
 
 // When cube is merged uncomment
-// World build_cube_world(){}
+World build_cube_world() {
+    World world;
+
+    std::shared_ptr<Material> cube_material;
+
+    std::string pfm_path = "images/memorial.pfm";
+    auto img_res = HDRImage::read_pfm_file(pfm_path);
+
+    if (img_res.has_value()) {
+        // Create the ImagePigment from the loaded file
+        auto image_pigment = std::make_shared<ImagePigment>(std::move(img_res.value()));
+        // Attach it to a Diffusive surface
+        auto cube_brdf = std::make_shared<DiffusiveBRDF>(image_pigment);
+        // Create the final material
+        cube_material = std::make_shared<Material>(cube_brdf);
+    } else {
+        std::println("Warning: Could not load '{}'. Using red fallback.", pfm_path);
+        auto fallback_pigment = std::make_shared<UniformPigment>(Color{1.0f, 0.0f, 0.0f});
+        auto fallback_brdf = std::make_shared<DiffusiveBRDF>(fallback_pigment);
+        cube_material = std::make_shared<Material>(fallback_brdf);
+    };
+
+    // Add the textured cube to the center of the world
+    Transformation scale01 = Scale(Vec{0.5f, 0.5f, 0.5f});
+    Transformation rot_x = R_x(std::numbers::pi_v<float>); // rotate the cube to have the image correctly oriented
+    Transformation rot_z = R_z(std::numbers::pi_v<float> / 4.0f);
+
+    world.add(std::make_unique<Cube>(scale01*rot_z*rot_x, cube_material));
+
+    return world;
+}
 
 void run_demo(const Parameters& params) {
 
     PCG pcg; //RNG object
-    PerspectiveCamera camera(1.0f, 3.0f, Transformation{});
+    PerspectiveCamera camera(1.0f, 3.0f, R_y(std::numbers::pi_v<float> / 6.0f));
     //OrthogonalCamera camera(1.0f, R_z(std::numbers::pi_v<float>/3.0f));
     HDRImage frame(params.image_dimension.first, params.image_dimension.second);
     ImageTracer tracer(frame, camera);
@@ -495,7 +525,7 @@ void run_demo(const Parameters& params) {
         renderer = std::make_unique<OnOffRenderer>(&world);
     } else if (params.algorithm == "flat") { // Flat renderer: a checkered plane will be used
         Color sky_color{0.5f, 0.7f, 1.0f};
-        world = build_plane_world();
+        world = build_cube_world();
         renderer = std::make_unique<FlatRenderer>(&world, sky_color);
     } else if (params.algorithm == "pathtracing") { // Path tracing renderer: a complex scene will be used
         Color sky_color{0.5f, 0.7f, 1.0f};
@@ -607,4 +637,5 @@ int main(int argc, char* argv[]) {
     }
 
     return 0;
+
 }

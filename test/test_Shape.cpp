@@ -308,42 +308,48 @@ TEST_CASE("TEST 4: CUBE - Comprehensive Test Suite") {
             Point{1.0f, 0.0f, 0.0f},
             Normal{1.0f, 0.0f, 0.0f},
             Vec2D{0.5f, 0.125f},
-            1.0f
+            1.0f,
+            &cube
         };
         HitRecord exp2{
             ray2,
             Point{-1.0f, 0.0f, 0.0f},
             Normal{-1.0f, 0.0f, 0.0f},
             Vec2D{0.5f, 0.625f},
-            1.0f
+            1.0f,
+            &cube
         };
         HitRecord exp3{
             ray3,
             Point{0.0f, 1.0f, 0.0f},
             Normal{0.0f, 1.0f, 0.0f},
             Vec2D{1.0f/6.0f, 0.625f},
-            1.0f
+            1.0f,
+            &cube
         };
         HitRecord exp4{
             ray4,
             Point{0.0f, -1.0f, 0.0f},
             Normal{0.0f, -1.0f, 0.0f},
             Vec2D{5.0f/6.0f, 0.625f},
-            1.0f
+            1.0f,
+            &cube
         };
         HitRecord exp5{
             ray5,
             Point{0.0f, 0.0f, 1.0f},
             Normal{0.0f, 0.0f, 1.0f},
             Vec2D{0.5f, 0.875f},
-            1.0f
+            1.0f,
+            &cube
         };
         HitRecord exp6{
             ray6,
             Point{0.0f, 0.0f, -1.0f},
             Normal{0.0f, 0.0f, -1.0f},
             Vec2D{0.5f, 0.375f},
-            1.0f
+            1.0f,
+            &cube
         };
 
         CHECK(record1->is_close(exp1));
@@ -393,6 +399,14 @@ TEST_CASE("TEST 4: CUBE - Comprehensive Test Suite") {
         CHECK(aux::are_close(record4->t, exp4.t));
         CHECK(aux::are_close(record5->t, exp5.t));
         CHECK(aux::are_close(record6->t, exp6.t));
+
+        // hitted_shape
+        CHECK(record1->hitted_shape == &cube);
+        CHECK(record2->hitted_shape == &cube);
+        CHECK(record3->hitted_shape == &cube);
+        CHECK(record4->hitted_shape == &cube);
+        CHECK(record5->hitted_shape == &cube);
+        CHECK(record6->hitted_shape == &cube);
 
     }
 
@@ -447,7 +461,8 @@ TEST_CASE("TEST 4: CUBE - Comprehensive Test Suite") {
             Point{3.0f, 0.0f, 0.0f},
             Normal{-1.0f, 0.0f, 0.0f},
             Vec2D{0.5f, 0.625f},
-            3.0f
+            3.0f,
+            &cube_transformed,
         };
 
         REQUIRE(record.has_value());
