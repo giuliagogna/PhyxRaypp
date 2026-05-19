@@ -5,7 +5,13 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- scatter_ray method in BRDF: SpecularBRDF, DiffusiveBRDF
+- OrthoNormal Base generator
+- Added flag `--algorithm` to choose between OnOffRenderer or FlatRenderer
+- Renderer struct with OnOffRenderer and FlatRenderer
+- Material, BRDF, Pigments (Image, Checkered, Uniform) struct
 - PCG random generator algorithm
+- Refined main architecture
 
 ## [0.2.0] - 2026-05-06
 

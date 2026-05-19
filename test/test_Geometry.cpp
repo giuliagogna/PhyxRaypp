@@ -21,6 +21,7 @@
 import std;
 import auxiliary_functions;
 import Geometry;
+import PCG;
 
 // is_close() methods are not tested since thy are just a wrapper for aux::are_close()
 
@@ -527,10 +528,49 @@ TEST_CASE("Test 10: Object Conversions and Normalization (to_vec, to_Normal, Nor
 
 }
 
+// =============================================================================
+// TEST 12: OrthoNormal Base generation
+// =============================================================================
 
+TEST_CASE("OrthoNormal Base Generation") {
+    PCG pcg; // Default constructor (43, 54)
+    int n_samples = 1000000;
+
+    for(int i = 0; i < n_samples; i++) {
+        float x = pcg.random_float();
+        float y = pcg.random_float();
+        float z = pcg.random_float();
+
+        // Initializing as Vec for comparison with the orthonormal base made of vectors
+        // The orthonormal base HAS to return vectors because they indicate the direction towards which
+        // we have to shoot the ray
+        Vec normal = Vec{x, y, z}.normalize();
+
+        auto [e1, e2, e3] = create_onb_from_z(normal);
+
+        // Verify the z-axis is aligned with the normal
+        CHECK(e3.is_close(normal));
+
+        // Verify the base is orthogonal
+        CHECK(aux::are_close(e1*e2, 0.0f));
+        CHECK(aux::are_close(e2*e3, 0.0f));
+        CHECK(aux::are_close(e1*e3, 0.0f));
+
+        // Verify that each component is normalized
+        CHECK(aux::are_close(e1.norm2(), 1.0f));
+        CHECK(aux::are_close(e2.norm2(), 1.0f));
+        CHECK(aux::are_close(e3.norm2(), 1.0f));
+
+        // Verify the cross products give the correct basis vector
+        CHECK((e1%e2).is_close(e3));
+        CHECK((e2%e3).is_close(e1));
+        CHECK((e3%e1).is_close(e2));
+
+    }
+}
 
 // =============================================================================
-// TEST 12: String Conversions
+// TEST 13: String Conversions
 // =============================================================================
 TEST_CASE("Test 12: String conversions") {
     Point p(1.3f, 4.6f, -7.8f);
