@@ -240,25 +240,23 @@ export {
     Normal operator- (const Normal& n) {
         return _negate<Normal, void, Normal>(n);
     }
+    
     // Scalar products
 
-    // GG: Why commented?
-    // RP: prof didn't wanted in the lectures
+    /// Point * scalar -> Point
+    Point operator*= (Point& p, float scalar) {
+        // GG: Need to assign the result to the calling object
+        p = _scalar_multiply<Point, float, Point>(p, scalar);
+        return p;
+    }
 
-//    /// Point * scalar -> Point
-//    Point operator*= (Point& p, float scalar) {
-//        // GG: Need to assign the result to the calling object
-//        p = _scalar_multiply<Point, float, Point>(p, scalar);
-//        return p;
-//    }
-//
-//    Point operator* (const Point& p, float scalar) {
-//        return _scalar_multiply<Point, float, Point>(p, scalar);
-//    }
-//
-//    Point operator* (float scalar, const Point& p) {
-//        return _scalar_multiply<Point, float, Point>(p, scalar);
-//    }
+    Point operator* (const Point& p, float scalar) {
+        return _scalar_multiply<Point, float, Point>(p, scalar);
+    }
+
+    Point operator* (float scalar, const Point& p) {
+        return _scalar_multiply<Point, float, Point>(p, scalar);
+    }
 
     /// Vec*=scalar -> Vec
     Vec& operator*= (Vec& v, float scalar) {
@@ -535,7 +533,37 @@ export {
         return t;
     }
 
-    // RP: I think we will need some (angle, axis) type rotation/reflection transformation. We will see in lectures I guess.
+    // ===============================================
+    // Min e Max functions for BVH/AAB purporse
+    // ===============================================
+
+    // Template
+    template<typename Curr, typename Res> Res min_v (const Curr& left, const Curr& right) {
+        return Res{
+            std::min(left.x, right.x),
+            std::min(left.y, right.y),
+            std::min(left.z, right.z)
+        };
+    }
+
+    // Template
+    template<typename Curr, typename Res> Res max_v (const Curr& left, const Curr& right) {
+        return Res{
+            std::max(left.x, right.x),
+            std::max(left.y, right.y),
+            std::max(left.z, right.z)
+        };
+    }
+
+    // Min for each index
+    Point min (const Point& left, const Point& right) {
+        return min_v<Point, Point>(left, right);
+    }
+
+    // Max for each index
+    Point max (const Point& left, const Point& right) {
+        return max_v<Point, Point>(left, right);
+    }
 };
 
 // ===================================================================================
@@ -617,7 +645,6 @@ Vec Point::to_vec() const {
 Normal Vec::to_norm() const {
     return _scalar_divide<Vec, float, Normal>(*this, this->norm());
 }
-
 
 /// Transformation consistency
 bool Transformation::is_consistent() const {
