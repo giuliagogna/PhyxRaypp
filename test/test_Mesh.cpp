@@ -66,40 +66,61 @@ TEST_CASE("TEST 1: BVHAABB test suite") {
 }
 
 TEST_CASE("TEST 2: BVHNode test suite") {
-    Transformation rotation = R_x(0.1f);
     std::vector<TrianglePoint> triangle_points;
-    triangle_points.push_back({rotation * Point{ 0.0f,  0.0f,  1.0f}, rotation * Normal{ 0.0f,  0.0f,  1.0f}.normalize()});
-    triangle_points.push_back({rotation * Point{-1.0f, -1.0f,  0.0f}, rotation * Normal{-1.0f, -1.0f,  0.0f}.normalize()});
-    triangle_points.push_back({rotation * Point{-1.0f,  1.0f,  0.0f}, rotation * Normal{-1.0f,  1.0f,  0.0f}.normalize()});
-    triangle_points.push_back({rotation * Point{ 1.0f,  1.0f,  0.0f}, rotation * Normal{ 1.0f, -1.0f,  0.0f}.normalize()});
-    triangle_points.push_back({rotation * Point{ 1.0f,  -1.0f,  0.0f}, rotation * Normal{ 1.0f,  1.0f,  0.0f}.normalize()});
-    triangle_points.push_back({rotation * Point{ 0.0f,  0.0f, -1.0f}, rotation * Normal{ 0.0f,  0.0f, -1.0f}.normalize()});
+
+    triangle_points.push_back({Point{ 1.0f + 0.1f,  1.0f,  1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
+    triangle_points.push_back({Point{ 1.0f + 0.1f,  1.0f, -1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
+    triangle_points.push_back({Point{ 1.0f + 0.1f, -1.0f,  1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
+    triangle_points.push_back({Point{ 1.0f + 0.1f, -1.0f, -1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
+    triangle_points.push_back({Point{-1.0f + 0.1f,  1.0f,  1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
+    triangle_points.push_back({Point{-1.0f + 0.1f,  1.0f, -1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
+    triangle_points.push_back({Point{-1.0f + 0.1f, -1.0f,  1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
+    triangle_points.push_back({Point{-1.0f + 0.1f, -1.0f, -1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
+
+    triangle_points.push_back({Point{ 1.0f,  1.0f + 0.1f,  1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
+    triangle_points.push_back({Point{ 1.0f,  1.0f + 0.1f, -1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
+    triangle_points.push_back({Point{ 1.0f, -1.0f + 0.1f,  1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
+    triangle_points.push_back({Point{ 1.0f, -1.0f + 0.1f, -1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
+    triangle_points.push_back({Point{-1.0f,  1.0f + 0.1f,  1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
+    triangle_points.push_back({Point{-1.0f,  1.0f + 0.1f, -1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
+    triangle_points.push_back({Point{-1.0f, -1.0f + 0.1f,  1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
+    triangle_points.push_back({Point{-1.0f, -1.0f + 0.1f, -1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
+
+    triangle_points.push_back({Point{ 1.0f,  1.0f,  1.0f + 0.1f}, Normal{ 0.0f,  0.0f,  1.0f}});
+    triangle_points.push_back({Point{ 1.0f,  1.0f, -1.0f + 0.1f}, Normal{ 0.0f,  0.0f,  1.0f}});
+    triangle_points.push_back({Point{ 1.0f, -1.0f,  1.0f + 0.1f}, Normal{ 0.0f,  0.0f,  1.0f}});
+    triangle_points.push_back({Point{ 1.0f, -1.0f, -1.0f + 0.1f}, Normal{ 0.0f,  0.0f,  1.0f}});
+    triangle_points.push_back({Point{-1.0f,  1.0f,  1.0f + 0.1f}, Normal{ 0.0f,  0.0f,  1.0f}});
+    triangle_points.push_back({Point{-1.0f,  1.0f, -1.0f + 0.1f}, Normal{ 0.0f,  0.0f,  1.0f}});
+    triangle_points.push_back({Point{-1.0f, -1.0f,  1.0f + 0.1f}, Normal{ 0.0f,  0.0f,  1.0f}});
+    triangle_points.push_back({Point{-1.0f, -1.0f, -1.0f + 0.1f}, Normal{ 0.0f,  0.0f,  1.0f}});
     
     std::vector<TriangleIndexes> triangle_point_indexes;
-    triangle_point_indexes.push_back(TriangleIndexes{0, 1, 2});
-    triangle_point_indexes.push_back(TriangleIndexes{0, 2, 3});
-    triangle_point_indexes.push_back(TriangleIndexes{0, 3, 4});
-    triangle_point_indexes.push_back(TriangleIndexes{0, 4, 1});
-    triangle_point_indexes.push_back(TriangleIndexes{5, 1, 2});
-    triangle_point_indexes.push_back(TriangleIndexes{5, 2, 3});
-    triangle_point_indexes.push_back(TriangleIndexes{5, 3, 4});
-    triangle_point_indexes.push_back(TriangleIndexes{5, 4, 1});
+    triangle_point_indexes.push_back(TriangleIndexes{0, 8, 16});
+    triangle_point_indexes.push_back(TriangleIndexes{1, 9, 17});
+    triangle_point_indexes.push_back(TriangleIndexes{2, 10, 18});
+    triangle_point_indexes.push_back(TriangleIndexes{3, 11, 19});
+    triangle_point_indexes.push_back(TriangleIndexes{4, 12, 20});
+    triangle_point_indexes.push_back(TriangleIndexes{5, 13, 21});
+    triangle_point_indexes.push_back(TriangleIndexes{6, 14, 22});
+    triangle_point_indexes.push_back(TriangleIndexes{7, 15, 23});
+    
 
     BVHAABB first_bounds;
     for (auto& point : triangle_points) {
         first_bounds.grow(point.point);
     }
-    REQUIRE(first_bounds.maxPoint.is_close(rotation * Point{1.0f, 1.0f, 1.0f}, 1e-1));    // Not easy because I rotated the shape... I just want to check if it's not completely broken
-    REQUIRE(first_bounds.minPoint.is_close(rotation * Point{-1.0f, -1.0f, -1.0f}, 1e-1)); // Not easy because I rotated the shape... I just want to check if it's not completely broken
+    REQUIRE(first_bounds.maxPoint.is_close(Point{1.1f, 1.1f, 1.1f}));   
+    REQUIRE(first_bounds.minPoint.is_close(Point{-1.0f, -1.0f, -1.0f}));
 
     BVHNode first_node{first_bounds};
     first_node.minIndex = 0;
     first_node.maxIndex = static_cast<int>(triangle_point_indexes.size());
     std::vector<BVHNode> all_nodes;
     all_nodes.push_back(first_node);
-    all_nodes[0].Extend_tree_wrapper(all_nodes, triangle_points, triangle_point_indexes, 3, 1);
+    all_nodes[0].Extend_tree_wrapper(all_nodes, triangle_points, triangle_point_indexes, 2, 1);
     
-    CHECK(all_nodes.size() == 15);
+    CHECK(all_nodes.size() == 15); // 1 + 2 + 4 + 8 = 15
 
     for(auto& node : all_nodes) {
         if (node.is_leaf) {

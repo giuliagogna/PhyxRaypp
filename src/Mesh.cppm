@@ -130,17 +130,25 @@ export struct BVHNode { // RP: seems that alignas() is a secret weapon for perfo
     // This is the only safe call so that the tree is correctly built with the best axis at each step.
     // Thus I put this pubblic to avoid calling the dangerous private method.
     void Extend_tree_wrapper(std::vector<BVHNode>& current_nodes, const std::vector<TrianglePoint>& mesh_points, std::vector<TriangleIndexes>& triangle_point_indexes, const int n_bins, const int is_leaf_threshold = 1) {
-        Extend_tree(current_nodes, mesh_points, triangle_point_indexes, n_bins, is_leaf_threshold);
+
+        Extend_tree(current_nodes, current_nodes.size() - 1, mesh_points, triangle_point_indexes, n_bins, is_leaf_threshold);
     }
 
 private:
-    // I want this private because it's good to call it with the default axis=4. Otherwise it's possible that it
-    // does not explore all the casistics correctly (don't cut on )
-    void Extend_tree(std::vector<BVHNode>& current_nodes, const std::vector<TrianglePoint>& mesh_points, std::vector<TriangleIndexes>& triangle_point_indexes, const int n_bins, const int is_leaf_threshold = 1, int axis = 3) {
+    // A B S O L U T E     C I N E M A:
+    // The this logic breaks since it's possible that the std::vector reallocates. No way.
+    // I just declare it static because I don't want any more problems with the std::vector reallocation.
+    // I just pass the current index to the recursive calls and I don't care about the actual position of the node in the std::vector.
+
+    // I want this private because it's good to call it with the default axis=3. Otherwise it's possible that it
+    // does not explore all the casistics correctly (don't cut on the longest axis at each step) and thus it does not build a good tree.
+    static void Extend_tree(std::vector<BVHNode>& current_nodes, int node_index,const std::vector<TrianglePoint>& mesh_points, std::vector<TriangleIndexes>& triangle_point_indexes, const int n_bins, const int is_leaf_threshold = 1, int axis = 3) {
         
+        int minIndex = current_nodes[node_index].minIndex;
+        int maxIndex = current_nodes[node_index].maxIndex;
         // Stop if the first node is a leaf (contains isLeaf_threshold or less triangles).
         if (maxIndex - minIndex <= is_leaf_threshold) {
-            is_leaf = true;
+            current_nodes[node_index].is_leaf = true;
             return;
         }
 
@@ -158,7 +166,7 @@ private:
 
         // Can't split if the mesh is a funny ensemble of triangles with the same centroid
         if (centroid_bounds.maxPoint.is_close(centroid_bounds.minPoint)) {
-            is_leaf = true;
+            current_nodes[node_index].is_leaf = true;
             return;
         }
 
@@ -228,9 +236,9 @@ private:
         }
 
         // No split cost
-        float no_split_cost = bounds.area() * (maxIndex - minIndex);
+        float no_split_cost = current_nodes[node_index].bounds.area() * (maxIndex - minIndex);
         if (best_cost >= no_split_cost) {
-            is_leaf = true;
+            current_nodes[node_index].is_leaf = true;
             return;
         }
 
@@ -262,46 +270,46 @@ private:
         // Check if there is a better cutting for the AABB along other axis
         if (left_maxIndex == minIndex || left_maxIndex == maxIndex) {
             axis = (axis + 1) % 3; // Cicle on axis indexes
-            if (axis == bounds.longestAxis()) {
-                is_leaf = true;
+            if (axis == current_nodes[node_index].bounds.longestAxis()) {
+                current_nodes[node_index].is_leaf = true;
                 return;
             } else { // Try with another direction
-                Extend_tree(current_nodes, mesh_points, triangle_point_indexes, n_bins, is_leaf_threshold, axis);
+                Extend_tree(current_nodes, node_index, mesh_points, triangle_point_indexes, n_bins, is_leaf_threshold, axis);
                 return;
             }
         }
 
         // Allocate the new children in the std::vector<BVHNode>
-        left_child_index = static_cast<int>(current_nodes.size());
+        current_nodes[node_index].left_child_index = static_cast<int>(current_nodes.size());
         current_nodes.push_back(BVHNode());
-        right_child_index = static_cast<int>(current_nodes.size());
+        current_nodes[node_index].right_child_index = static_cast<int>(current_nodes.size());
         current_nodes.push_back(BVHNode());
 
         // Update datamembers of the children
         // Triangle points indexes of the child 
-        current_nodes[left_child_index].minIndex = minIndex;
-        current_nodes[left_child_index].maxIndex = left_maxIndex;
-        current_nodes[right_child_index].minIndex = left_maxIndex;
-        current_nodes[right_child_index].maxIndex = maxIndex;
+        current_nodes[current_nodes[node_index].left_child_index].minIndex = minIndex;
+        current_nodes[current_nodes[node_index].left_child_index].maxIndex = left_maxIndex;
+        current_nodes[current_nodes[node_index].right_child_index].minIndex = left_maxIndex;
+        current_nodes[current_nodes[node_index].right_child_index].maxIndex = maxIndex;
 
         // Update the AABB of the children
-        current_nodes[left_child_index].bounds = BVHAABB();
-        for (int i = current_nodes[left_child_index].minIndex; i < current_nodes[left_child_index].maxIndex; ++i) {
-            current_nodes[left_child_index].bounds.grow(mesh_points[triangle_point_indexes[i].i1].point);
-            current_nodes[left_child_index].bounds.grow(mesh_points[triangle_point_indexes[i].i2].point);
-            current_nodes[left_child_index].bounds.grow(mesh_points[triangle_point_indexes[i].i3].point);
+        current_nodes[current_nodes[node_index].left_child_index].bounds = BVHAABB();
+        for (int i = current_nodes[current_nodes[node_index].left_child_index].minIndex; i < current_nodes[current_nodes[node_index].left_child_index].maxIndex; ++i) {
+            current_nodes[current_nodes[node_index].left_child_index].bounds.grow(mesh_points[triangle_point_indexes[i].i1].point);
+            current_nodes[current_nodes[node_index].left_child_index].bounds.grow(mesh_points[triangle_point_indexes[i].i2].point);
+            current_nodes[current_nodes[node_index].left_child_index].bounds.grow(mesh_points[triangle_point_indexes[i].i3].point);
         }
-        current_nodes[right_child_index].bounds = BVHAABB();
-        for (int i = current_nodes[right_child_index].minIndex; i < current_nodes[right_child_index].maxIndex; ++i) {
-            current_nodes[right_child_index].bounds.grow(mesh_points[triangle_point_indexes[i].i1].point);
-            current_nodes[right_child_index].bounds.grow(mesh_points[triangle_point_indexes[i].i2].point);
-            current_nodes[right_child_index].bounds.grow(mesh_points[triangle_point_indexes[i].i3].point);
+        current_nodes[current_nodes[node_index].right_child_index].bounds = BVHAABB();
+        for (int i = current_nodes[current_nodes[node_index].right_child_index].minIndex; i < current_nodes[current_nodes[node_index].right_child_index].maxIndex; ++i) {
+            current_nodes[current_nodes[node_index].right_child_index].bounds.grow(mesh_points[triangle_point_indexes[i].i1].point);
+            current_nodes[current_nodes[node_index].right_child_index].bounds.grow(mesh_points[triangle_point_indexes[i].i2].point);
+            current_nodes[current_nodes[node_index].right_child_index].bounds.grow(mesh_points[triangle_point_indexes[i].i3].point);
         }
 
         // Call this method to generate the entire tree recursively
-        current_nodes[left_child_index].Extend_tree(current_nodes, mesh_points, triangle_point_indexes, n_bins, is_leaf_threshold, axis);
-        current_nodes[right_child_index].Extend_tree(current_nodes, mesh_points, triangle_point_indexes, n_bins, is_leaf_threshold, axis);
-        
+        current_nodes[current_nodes[node_index].left_child_index].Extend_tree(current_nodes, current_nodes[node_index].left_child_index, mesh_points, triangle_point_indexes, n_bins, is_leaf_threshold);
+        current_nodes[current_nodes[node_index].right_child_index].Extend_tree(current_nodes, current_nodes[node_index].right_child_index, mesh_points, triangle_point_indexes, n_bins, is_leaf_threshold);
+
         return;
     }    
 };
