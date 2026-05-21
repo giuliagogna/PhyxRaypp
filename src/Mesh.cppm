@@ -57,7 +57,7 @@ export struct BVHAABB {
         return e.y > e.z ? 1 : 2;
     }
 
-    bool intersect(const Ray& ray, float tmax_limit) const {
+    bool intersect(const Ray& ray) const {
         Vec inv_direction{1.0f / ray.direction.x, 1.0f / ray.direction.y, 1.0f / ray.direction.z};
 
         // Sign logic to avoid if()
@@ -85,7 +85,7 @@ export struct BVHAABB {
         tmax = std::min(tmax, std::max(tzmin, tzmax));
 
         // Hit check
-        return (tmin < tmax && tmax > ray.tmin && tmin < tmax_limit);
+        return (tmin < tmax && tmax > ray.tmin && tmin < ray.tmax);
     }
 };
 
@@ -120,39 +120,39 @@ export struct BVHNode { // RP: seems that alignas() is a secret weapon for perfo
     int left_child_index = -1;
     int right_child_index = -1;
 
-    std::span<TriangleIndexes> triangle_point_indexes;
+    int minIndex = 0; // This is the first index of the triangle_point_indexes vector that belongs to this node
+    int maxIndex = 0; // This is the last index of the triangle_point_indexes
+
+//    std::span<TriangleIndexes> triangle_point_indexes;
     bool is_leaf = false;
 
     // Pubblic wrapper to call the private method with the default axis value.
     // This is the only safe call so that the tree is correctly built with the best axis at each step.
     // Thus I put this pubblic to avoid calling the dangerous private method.
-    void Extend_tree_wrapper(std::vector<BVHNode>& current_nodes, const std::vector<TrianglePoint>& mesh_points, const int n_bins, const int is_leaf_threshold = 1) {
-        Extend_tree(current_nodes, mesh_points, n_bins, is_leaf_threshold);
+    void Extend_tree_wrapper(std::vector<BVHNode>& current_nodes, const std::vector<TrianglePoint>& mesh_points, std::vector<TriangleIndexes>& triangle_point_indexes, const int n_bins, const int is_leaf_threshold = 1) {
+        Extend_tree(current_nodes, mesh_points, triangle_point_indexes, n_bins, is_leaf_threshold);
     }
 
 private:
     // I want this private because it's good to call it with the default axis=4. Otherwise it's possible that it
     // does not explore all the casistics correctly (don't cut on )
-    void Extend_tree(std::vector<BVHNode>& current_nodes, const std::vector<TrianglePoint>& mesh_points, const int n_bins, const int is_leaf_threshold = 1, int axis = 3) {
+    void Extend_tree(std::vector<BVHNode>& current_nodes, const std::vector<TrianglePoint>& mesh_points, std::vector<TriangleIndexes>& triangle_point_indexes, const int n_bins, const int is_leaf_threshold = 1, int axis = 3) {
         
-        // Stop if the node is a leaf (contains isLeaf_threshold or less triangles).
-        if (triangle_point_indexes.size() <= is_leaf_threshold) {
+        // Stop if the first node is a leaf (contains isLeaf_threshold or less triangles).
+        if (maxIndex - minIndex <= is_leaf_threshold) {
             is_leaf = true;
             return;
-        }
-        
-        // First call: compute the best axis and use it
-        if (axis > 2 || axis < 0) {
-            axis = bounds.longestAxis();
         }
 
         // Compute each triangle's centroid to determine the BVHAABB size of centroids only
         BVHAABB centroid_bounds;
-        for (const auto& tri : triangle_point_indexes) {
-            Point v0 = mesh_points[tri.i1].point;
-            Point v1 = mesh_points[tri.i2].point;
-            Point v2 = mesh_points[tri.i3].point;
-            Point centroid = (v0 + v1.to_vec() + v2.to_vec()) * (1.0f / 3.0f);
+        for (int i = minIndex; i < maxIndex; ++i) {
+            const auto& tri = triangle_point_indexes[i];
+
+            Point centroid = (mesh_points[tri.i1].point +
+                              mesh_points[tri.i2].point.to_vec() +
+                              mesh_points[tri.i3].point.to_vec()) * (1.0f / 3.0f);
+
             centroid_bounds.grow(centroid);
         }
 
@@ -162,46 +162,53 @@ private:
             return;
         }
 
+        // First call: compute the best axis and use it
+        if (axis > 2 || axis < 0) {
+            axis = centroid_bounds.longestAxis();
+        }
+
         // Binning
-        BVHBin bins[n_bins];
+        std::vector<BVHBin> bins(n_bins);
         float scale = n_bins / (get_axis_value(centroid_bounds.maxPoint, axis) - get_axis_value(centroid_bounds.minPoint, axis)); // Bins density
 
         // Select each bin for each triangle based on its centroid
-        for (const auto& tri : triangle_point_indexes) {
-            Point centroid = (mesh_points[tri.i1].point + mesh_points[tri.i2].point + mesh_points[tri.i3].point) * (1.0f / 3.0f);
+        for (int i = minIndex; i < maxIndex; ++i) {
+            Point centroid = (mesh_points[triangle_point_indexes[i].i1].point +
+                              mesh_points[triangle_point_indexes[i].i2].point.to_vec() +
+                              mesh_points[triangle_point_indexes[i].i3].point.to_vec()) * (1.0f / 3.0f);
 
             // Find the bin index where the triangle belongs to
-            int bin_index = std::min(n_bins - 1, static_cast<int>((get_axis_value(centroid, axis) - get_axis_value(centroid_bounds.minPoint, axis)) * scale));
-            bins[bin_index].triCount++; // Update the population of the bin
+            int bin_index = std::max(0, std::min(n_bins - 1, static_cast<int>((get_axis_value(centroid, axis) - get_axis_value(centroid_bounds.minPoint, axis)) * scale)));
+            bins[bin_index].trianglesCount++; // Update the population of the bin
             
             // Grow the AABB of the bin
-            bins[bin_index].bounds.grow(mesh_points[tri.i1].point);
-            bins[bin_index].bounds.grow(mesh_points[tri.i2].point);
-            bins[bin_index].bounds.grow(mesh_points[tri.i3].point);
+            bins[bin_index].bounds.grow(mesh_points[triangle_point_indexes[i].i1].point);
+            bins[bin_index].bounds.grow(mesh_points[triangle_point_indexes[i].i2].point);
+            bins[bin_index].bounds.grow(mesh_points[triangle_point_indexes[i].i3].point);
         }
 
         // SAH formula (to be minimized):
-        // C ~ AreaL * CountL + AreaR * CountR (simplified formula neglecting tree branching overrhead)    
+        // C ~ AreaL * CountL + AreaR * CountR (simplified formula neglecting tree branching overhead)    
 
         // We compute the left term values
-        float left_bounds_area[n_bins - 1];
-        int left_count[n_bins - 1];
+        std::vector<float> left_bounds_area(n_bins - 1);
+        std::vector<int> left_count(n_bins - 1);
         int left_sum = 0; 
         BVHAABB left_box;
         for (int i = 0; i < n_bins - 1; ++i) {
-            left_sum += bins[i].triCount; // Cumulative sum from the left
+            left_sum += bins[i].trianglesCount; // Cumulative sum from the left
             left_box.grow(bins[i].bounds); // Grow the AABB from the left
             left_bounds_area[i] = left_box.area(); // Compute the area at this point
             left_count[i] = left_sum; // Count the triangles 
         }
 
         // Same stuff but from the right. Of course indexes run backwards
-        float right_bounds_area[n_bins - 1];
-        int right_count[n_bins - 1];
+        std::vector<float> right_bounds_area(n_bins - 1);
+        std::vector<int> right_count(n_bins - 1);
         BVHAABB right_box;
         int right_sum = 0;
         for (int i = n_bins - 1; i > 0; --i) {
-            right_sum += bins[i].triCount;
+            right_sum += bins[i].trianglesCount;
             right_box.grow(bins[i].bounds);
             right_bounds_area[i - 1] = right_box.area();
             right_count[i - 1] = right_sum;
@@ -221,7 +228,7 @@ private:
         }
 
         // No split cost
-        float no_split_cost = bounds.area() * triangle_point_indexes.size();
+        float no_split_cost = bounds.area() * (maxIndex - minIndex);
         if (best_cost >= no_split_cost) {
             is_leaf = true;
             return;
@@ -230,37 +237,37 @@ private:
         // Now we have the split_value to cut the current AABB!
 
         // Reordering the std::vector segment: 
-        // I reorder the std::vector segment I see from the std::span window to have the
+        // I reorder the std::vector segment I see from the window to have the
         // left child members at the start of the window and the right child ones at the end
-        int left_count_final;
+        int left_maxIndex = minIndex; // This will be the max index of the left child, so it will be the first index of the right child
         {
-            int i = 0;
-            int j = triangle_point_indexes.size() - 1;
+            int i = minIndex;
+            int j = maxIndex - 1;
 
             while (i <= j) {
                 Point centroid = (mesh_points[triangle_point_indexes[i].i1].point +
-                                  mesh_points[triangle_point_indexes[i].i2].point +
-                                  mesh_points[triangle_point_indexes[i].i3].point) * (1.0f / 3.0f);
+                                  mesh_points[triangle_point_indexes[i].i2].point.to_vec() +
+                                  mesh_points[triangle_point_indexes[i].i3].point.to_vec()) * (1.0f / 3.0f);
 
                 if (get_axis_value(centroid, axis) < split_value) {
                     i++;
                 } else {
                     std::swap(triangle_point_indexes[i], triangle_point_indexes[j]);
-                    j--; // Already swapped so I don't swap it anymore
+                    j--; // I don't swap it anymore
                 }
-            }
-        
-            left_count_final = i;
+            }        
+            left_maxIndex = i;
         }
 
         // Check if there is a better cutting for the AABB along other axis
-        if (left_count_final == 0 || left_count_final == triangle_point_indexes.size()) {
+        if (left_maxIndex == minIndex || left_maxIndex == maxIndex) {
             axis = (axis + 1) % 3; // Cicle on axis indexes
             if (axis == bounds.longestAxis()) {
                 is_leaf = true;
                 return;
             } else { // Try with another direction
-                Extend_tree(current_nodes, mesh_points, n_bins, is_leaf_threshold, axis);
+                Extend_tree(current_nodes, mesh_points, triangle_point_indexes, n_bins, is_leaf_threshold, axis);
+                return;
             }
         }
 
@@ -270,33 +277,38 @@ private:
         right_child_index = static_cast<int>(current_nodes.size());
         current_nodes.push_back(BVHNode());
 
-        // Create sub-spans of the current std::span to update the triangle_point_indexes members for the children
-        current_nodes[left_idx_alloc].triangle_point_indexes = triangle_point_indexes.subspan(0, left_count_final);
-        current_nodes[right_idx_alloc].triangle_point_indexes = triangle_point_indexes.subspan(left_count_final);
+        // Update datamembers of the children
+        // Triangle points indexes of the child 
+        current_nodes[left_child_index].minIndex = minIndex;
+        current_nodes[left_child_index].maxIndex = left_maxIndex;
+        current_nodes[right_child_index].minIndex = left_maxIndex;
+        current_nodes[right_child_index].maxIndex = maxIndex;
 
         // Update the AABB of the children
-        current_nodes[left_idx_alloc].bounds = BVHAABB();
-        for (const auto& tri : current_nodes[left_idx_alloc].triangle_point_indexes) {
-            current_nodes[left_idx_alloc].bounds.grow(mesh_points[tri.i1].point);
-            current_nodes[left_idx_alloc].bounds.grow(mesh_points[tri.i2].point);
-            current_nodes[left_idx_alloc].bounds.grow(mesh_points[tri.i3].point);
+        current_nodes[left_child_index].bounds = BVHAABB();
+        for (int i = current_nodes[left_child_index].minIndex; i < current_nodes[left_child_index].maxIndex; ++i) {
+            current_nodes[left_child_index].bounds.grow(mesh_points[triangle_point_indexes[i].i1].point);
+            current_nodes[left_child_index].bounds.grow(mesh_points[triangle_point_indexes[i].i2].point);
+            current_nodes[left_child_index].bounds.grow(mesh_points[triangle_point_indexes[i].i3].point);
         }
-        current_nodes[right_idx_alloc].bounds = BVHAABB();
-        for (const auto& tri : current_nodes[right_idx_alloc].triangle_point_indexes) {
-            current_nodes[right_idx_alloc].bounds.grow(mesh_points[tri.i1].point);
-            current_nodes[right_idx_alloc].bounds.grow(mesh_points[tri.i2].point);
-            current_nodes[right_idx_alloc].bounds.grow(mesh_points[tri.i3].point);
+        current_nodes[right_child_index].bounds = BVHAABB();
+        for (int i = current_nodes[right_child_index].minIndex; i < current_nodes[right_child_index].maxIndex; ++i) {
+            current_nodes[right_child_index].bounds.grow(mesh_points[triangle_point_indexes[i].i1].point);
+            current_nodes[right_child_index].bounds.grow(mesh_points[triangle_point_indexes[i].i2].point);
+            current_nodes[right_child_index].bounds.grow(mesh_points[triangle_point_indexes[i].i3].point);
         }
 
         // Call this method to generate the entire tree recursively
-        current_nodes[left_idx_alloc].Extend_tree(current_nodes, mesh_points, is_leaf_threshold);
-        current_nodes[right_idx_alloc].Extend_tree(current_nodes, mesh_points, is_leaf_threshold);
-    }
+        current_nodes[left_child_index].Extend_tree(current_nodes, mesh_points, triangle_point_indexes, n_bins, is_leaf_threshold, axis);
+        current_nodes[right_child_index].Extend_tree(current_nodes, mesh_points, triangle_point_indexes, n_bins, is_leaf_threshold, axis);
+        
+        return;
+    }    
 };
 
-// ===================================
+// ===============
 // BVH Mesh
-// ===================================
+// ===============
 
 export struct Mesh : Shape {
     using Shape::Shape;
@@ -304,4 +316,4 @@ export struct Mesh : Shape {
     std::vector<TrianglePoint> triangle_points;
     std::vector<TriangleIndexes> triangle_points_indexes;
     std::vector<BVHNode> nodes;
-}
+};
