@@ -337,13 +337,28 @@ export struct InputStream {
     }
 
     std::expected<std::unique_ptr<Token>, GrammarError> _parse_keyword_or_identifier_token(char first_char, SourceLocation token_location) {
-        std::string word = "camera";
+        std::string res_string = "";
+        res_string.push_back(first_char);
 
-        if (KEYWORDS.contains(word)) {
-            return std::make_unique<KeywordToken>(token_location, KEYWORDS.at(word));
-        } else {
-            return std::make_unique<IdentifierToken>(token_location, word);
+        std::optional<char> ch = read_char();
+
+        while (ch.has_value() && (std::isalnum(ch.value()) || ch.value() == '_')) {
+            res_string.push_back(ch.value());
+            ch = read_char();
         }
+
+        // If the loop finished and 'ch' still has a value, it means we hit a
+        // character that isn't alphanumeric or underscore. Put it back.
+        if (ch.has_value()) {
+            unread_char(ch);
+        }
+
+        if (KEYWORDS.contains(res_string)) {
+            return std::make_unique<KeywordToken>(token_location, KEYWORDS.at(res_string));
+        } else {
+            return std::make_unique<IdentifierToken>(token_location, res_string);
+        }
+
     }
 
     std::expected<std::unique_ptr<Token>, GrammarError> read_token() {
@@ -378,9 +393,6 @@ export struct InputStream {
             // We have an invalid character as '@' or '&'
             return std::unexpected(GrammarError{location, std::format("Invalid character '{}'", ch.value())});
         }
-
-
-
     }
 };
 
