@@ -274,11 +274,66 @@ export struct InputStream {
     }
 
     std::expected<std::unique_ptr<Token>, GrammarError>_parse_string_token(SourceLocation token_location) {
-        return std::make_unique<LiteralStringToken>(token_location, std::string{"Hello"});
+        std::string res_string = "";
+        std::optional<char> ch = read_char();
+
+        while (ch.has_value() && ch.value() != '"') {
+            res_string.push_back(ch.value());
+            ch = read_char();
+        }
+
+        if (!ch.has_value()) {
+            // It ended because we ran out of characters. Error!
+            return std::unexpected(GrammarError{token_location, "Unterminated string"});
+        }
+
+        return std::make_unique<LiteralStringToken>(token_location, res_string);
     }
 
     std::expected<std::unique_ptr<Token>, GrammarError> _parse_float_token(char first_char, SourceLocation token_location) {
-        return std::make_unique<LiteralNumberToken>(token_location, 0.5);
+        std::string float_string = "";
+        float_string.push_back(first_char);
+
+        std::optional<char> ch = read_char();
+
+        while (ch.has_value() && (std::isdigit(ch.value()) ||
+                                  ch.value() == '.' ||
+                                  ch.value() == 'e' ||
+                                  ch.value() == 'E' ||
+                                  ch.value() == '+' ||
+                                  ch.value() == '-')) {
+
+            float_string.push_back(ch.value());
+            ch = read_char();
+        }
+
+        // If the loop finished and 'ch' still has a value, it means we hit a
+        // character that isn't part of a number (like a comma or space). Put it back.
+        if (ch.has_value()) {
+            unread_char(ch);
+        }
+
+        float res_float;
+
+        // std::from_chars reads the string memory directly and returns an error code
+        auto [ptr, error_code] = std::from_chars(float_string.data(),
+                                                 float_string.data() + float_string.size(),
+                                                 res_float);
+
+        if (error_code == std::errc::invalid_argument) {
+            return std::unexpected(GrammarError{
+                                        token_location,
+                                  std::format("'{}' is not a valid floating-point number.", float_string)
+                                           });
+        } else if (error_code == std::errc::result_out_of_range) {
+            return std::unexpected(GrammarError{
+                                        token_location,
+                                  std::format("'{}' is out of the floating-point value range.", float_string)
+                                           });
+        }
+
+        return std::make_unique<LiteralNumberToken>(token_location, res_float);
+
     }
 
     std::expected<std::unique_ptr<Token>, GrammarError> _parse_keyword_or_identifier_token(char first_char, SourceLocation token_location) {
