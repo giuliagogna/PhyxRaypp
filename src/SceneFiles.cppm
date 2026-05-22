@@ -18,6 +18,10 @@
 
 module;
 
+// Include the C-error header here in the global fragment so the macros exist
+#include <cerrno>
+#include <cstdlib>
+
 export module SceneFiles;
 
 import std;
@@ -314,22 +318,26 @@ export struct InputStream {
         }
 
         float res_float;
+        char* end_ptr = nullptr;
 
-        // std::from_chars reads the string memory directly and returns an error code
-        auto [ptr, error_code] = std::from_chars(float_string.data(),
-                                                 float_string.data() + float_string.size(),
-                                                 res_float);
+        errno = 0;
 
-        if (error_code == std::errc::invalid_argument) {
+        res_float = std::strtof(float_string.c_str(), &end_ptr);
+
+        // Check if the number was too big or too small to fit in a float
+        if (errno == ERANGE) {
             return std::unexpected(GrammarError{
-                                        token_location,
-                                  std::format("'{}' is not a valid floating-point number.", float_string)
-                                           });
-        } else if (error_code == std::errc::result_out_of_range) {
+                token_location,
+                std::format("'{}' is out of the floating-point value range.", float_string)
+            });
+        }
+
+        // If the end_ptr didn't move from the start, it completely failed to parse a number
+        if (end_ptr == float_string.c_str()) {
             return std::unexpected(GrammarError{
-                                        token_location,
-                                  std::format("'{}' is out of the floating-point value range.", float_string)
-                                           });
+                token_location,
+                std::format("'{}' is an invalid floating-point number", float_string)
+            });
         }
 
         return std::make_unique<LiteralNumberToken>(token_location, res_float);
