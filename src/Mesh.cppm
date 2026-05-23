@@ -119,6 +119,7 @@ export struct BVHNode { // RP: seems that alignas() is a secret weapon for perfo
     BVHAABB bounds;
     int left_child_index = -1;
     int right_child_index = -1;
+    int node_index = -1;
 
     int minIndex = 0; // This is the first index of the triangle_point_indexes vector that belongs to this node
     int maxIndex = 0; // This is the last index of the triangle_point_indexes
@@ -130,10 +131,9 @@ export struct BVHNode { // RP: seems that alignas() is a secret weapon for perfo
     // This is the only safe call so that the tree is correctly built with the best axis at each step.
     // Thus I put this pubblic to avoid calling the dangerous private method.
     void Extend_tree_wrapper(std::vector<BVHNode>& current_nodes, const std::vector<TrianglePoint>& mesh_points, std::vector<TriangleIndexes>& triangle_point_indexes, const int n_bins, const int is_leaf_threshold = 1) {
-
+    
         Extend_tree(current_nodes, current_nodes.size() - 1, mesh_points, triangle_point_indexes, n_bins, is_leaf_threshold);
     }
-
 private:
     // A B S O L U T E     C I N E M A:
     // The this logic breaks since it's possible that the std::vector reallocates. No way.
@@ -143,7 +143,7 @@ private:
     // I want this private because it's good to call it with the default axis=3. Otherwise it's possible that it
     // does not explore all the casistics correctly (don't cut on the longest axis at each step) and thus it does not build a good tree.
     static void Extend_tree(std::vector<BVHNode>& current_nodes, int node_index,const std::vector<TrianglePoint>& mesh_points, std::vector<TriangleIndexes>& triangle_point_indexes, const int n_bins, const int is_leaf_threshold = 1, int axis = 3) {
-        
+        current_nodes[node_index].node_index = node_index;
         int minIndex = current_nodes[node_index].minIndex;
         int maxIndex = current_nodes[node_index].maxIndex;
         // Stop if the first node is a leaf (contains isLeaf_threshold or less triangles).
@@ -321,7 +321,69 @@ private:
 export struct Mesh : Shape {
     using Shape::Shape;
 
-    std::vector<TrianglePoint> triangle_points;
+    std::vector<TrianglePoint> mesh_points;
     std::vector<TriangleIndexes> triangle_points_indexes;
     std::vector<BVHNode> nodes;
+
+    [[nodiscard]] std::optional<HitRecord> ray_intersection(const Ray& ray) const override {
+        Ray local_ray = ray;
+        return ray_intersection_unwrapped(local_ray);
+    }
+
+    [[nodiscard]] std::optional<HitRecord> ray_intersection_unwrapped(Ray& local_ray, int starting_index = 0, std::optional<HitRecord> closest_hit = std::nullopt) const {
+        if (!nodes[starting_index].bounds.intersect(local_ray)) {
+            return std::nullopt; // No intersection with the bounding box, skip this node
+        }
+
+        if (nodes[starting_index].is_leaf) {
+            // Check intersection with triangles in this leaf node
+            for (int i = nodes[starting_index].minIndex; i < nodes[starting_index].maxIndex; ++i) {
+                const auto& tri = triangle_points_indexes[i];
+                const auto& A = mesh_points[tri.i1];
+                const auto& B = mesh_points[tri.i2];
+                const auto& C = mesh_points[tri.i3];
+
+                // Ray-triangle intersection test (Möller–Trumbore algorithm)
+                Vec AB = B.point - A.point;
+                Vec AC = C.point - A.point;
+                Vec P = local_ray.direction % AC;
+                float inv_det = AB * P;
+                if (std::abs(inv_det) < 1e-8f) {
+                    continue; // Ray is parallel to the triangle
+                }
+                float u = ((local_ray.origin - A.point) * P) * inv_det;
+                float v = ((local_ray.origin - A.point) * (AB % P)) * inv_det;
+                float t = ((local_ray.origin - A.point) % AB) * AC * inv_det;
+                if (u >= 0 && v >= 0 && u + v <= 1 && t >= local_ray.tmin && t <= local_ray.tmax) {
+                    // Intersection found
+                    HitRecord hit;
+                    hit.ray = local_ray;
+                    hit.t = t;
+                    hit.hit_point = local_ray.at(t);
+                    Vec interpolated_normal = (A.normal * (1 - u - v) + B.normal * u + C.normal * v);
+                    hit.hit_normal = (interpolated_normal * (-std::copysign(1.0f, interpolated_normal * local_ray.direction))).to_norm(); // Flip normal if it's facing the ray
+                    hit.surface_params = {u, v}; // Will be updated in the future with actual UV coordinates if available
+                    hit.hitted_shape = this; // Point directly to this exact mesh in memory
+                    // Uodate local ray tmax
+                    local_ray.tmax = t; // Shrink the ray range to find closer intersections
+                    closest_hit = hit; // Update the closest hit
+                }
+            }
+            return closest_hit;
+
+        } else {
+            // Recursion on children
+            // 3. INTERNAL NODE: Recursive traversal
+            if (auto left_hit = ray_intersection_unwrapped(local_ray, nodes[starting_index].left_child_index, closest_hit)) {
+                local_ray.tmax = left_hit->t; // Shrink the ray range to find closer intersections
+                closest_hit = left_hit;
+            }
+
+            if (auto right_hit = ray_intersection_unwrapped(local_ray, nodes[starting_index].right_child_index, closest_hit)) {
+                local_ray.tmax = right_hit->t; // Shrink the ray range to find closer intersections
+                closest_hit = right_hit; // Guaranteed to be closer if found because local_ray.tmax was shrunk
+            }
+            return closest_hit; // Return the closest hit found in the children
+        }
+    }
 };
