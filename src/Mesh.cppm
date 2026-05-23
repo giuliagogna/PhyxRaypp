@@ -347,10 +347,12 @@ export struct Mesh : Shape {
                 Vec AB = B.point - A.point;
                 Vec AC = C.point - A.point;
                 Vec P = local_ray.direction % AC;
-                float inv_det = AB * P;
-                if (std::abs(inv_det) < 1e-8f) {
-                    continue; // Ray is parallel to the triangle
+                float det = AB * P;
+                // Early exit if ray is parallel or nearly parallel to the triangle plane
+                if (std::abs(det) < 1e-8f) {
+                    continue; 
                 }
+                float inv_det = 1.0f / det;
                 float u = ((local_ray.origin - A.point) * P) * inv_det;
                 float v = ((local_ray.origin - A.point) * (AB % P)) * inv_det;
                 float t = ((local_ray.origin - A.point) % AB) * AC * inv_det;
