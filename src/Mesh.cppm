@@ -346,7 +346,7 @@ export struct Mesh : Shape {
         nodes(std::move(bvh_nodes)) {
 
     }
-
+    // Transformation not supported yet!!!
     Mesh(std::string obj_file, std::shared_ptr<Material> material = nullptr, int BVH_n_bins = 12, int BVH_is_leaf_threshold = 3) : Shape(Transformation{}, material) {
         // Call read_mesh_from_obj(obj_file)
         auto file_reading_result = read_mesh_from_obj(obj_file);
@@ -358,6 +358,9 @@ export struct Mesh : Shape {
         }
         // Work on the creation of the root node
         BVHNode root;
+        // Put minIndex and maxIndex
+        root.minIndex = 0;
+        root.maxIndex = triangle_points_indexes.size();
         // Extend AABB of the root
         for (auto& mesh_point : mesh_points) {
             root.bounds.grow(mesh_point.point);

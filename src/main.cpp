@@ -27,6 +27,7 @@ import Material;
 import BRDF;
 import Renderer;
 import PCG;
+import Mesh;
 
 using namespace std;
 // Helper function to parse floats
@@ -472,6 +473,21 @@ World build_complex_world() {
     return world;
 }
 
+World build_Utah_teapot_world(std::string obj_file) {
+    World world;
+
+    // Build a texture for the teapot (actual texturing not supported yet)
+    auto checkered_pigment = std::make_shared<CheckeredPigment>(Color{1.0f, 1.0f, 1.0f}, Color{0.0f, 0.0f, 0.0f}, 3);
+    auto brdf = std::make_shared<DiffusiveBRDF>(checkered_pigment);
+    auto teapot_material = std::make_shared<Material>(brdf);
+\
+    Mesh teapot_mesh(obj_file, teapot_material);
+    
+    world.add(std::make_unique<Mesh>(teapot_mesh));
+
+    return world;
+}
+
 // When cube is merged uncomment
 // World build_cube_world(){}
 
@@ -494,18 +510,16 @@ void run_demo(const Parameters& params) {
         world = build_10_white_spheres_world();
         renderer = std::make_unique<OnOffRenderer>(&world);
     } else if (params.algorithm == "flat") { // Flat renderer: a checkered plane will be used
-        Color sky_color{0.5f, 0.7f, 1.0f};
-        world = build_plane_world();
+        tracer.camera.trans = R_z(1.0f) * R_y(0.5f) * Trans(Vec{-10.0f, 0.0f, 2.0f}); // That's what the teapot file I found needs :-)
+        Color sky_color{0.01f, 0.01f, 1.0f};
+        world = build_Utah_teapot_world("./mesh/utah_teapot.obj");
         renderer = std::make_unique<FlatRenderer>(&world, sky_color);
     } else if (params.algorithm == "pathtracing") { // Path tracing renderer: a complex scene will be used
         Color sky_color{0.5f, 0.7f, 1.0f};
         world = build_Cornell_box_world();
         renderer = std::make_unique<PathTracer>(pcg, &world, sky_color, params.pathtracer_num_of_rays, params.pathtracer_max_depth, params.pathtracer_rr_depth);
     } else {
-        std::println("Warning: Unknown algorithm '{}'. Defaulting to flat.", params.algorithm);
-        Color sky_color{0.5f, 0.7f, 1.0f};
-        world = build_plane_world();
-        renderer = std::make_unique<FlatRenderer>(&world, sky_color);
+        
     }
 
     std::println("Rendering demo scene using '{}' algorithm...", params.algorithm);
