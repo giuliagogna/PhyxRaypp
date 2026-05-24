@@ -319,20 +319,32 @@ private:
 // ===============
 
 export struct Mesh : Shape {
-    using Shape::Shape;
 
     std::vector<TrianglePoint> mesh_points;
     std::vector<TriangleIndexes> triangle_points_indexes;
     std::vector<BVHNode> nodes;
 
+    using Shape::Shape;
+
+    Mesh(
+        const Transformation& trans,
+        std::shared_ptr<Material> material,
+        std::vector<TrianglePoint> points,
+        std::vector<TriangleIndexes> indexes,
+        std::vector<BVHNode> bvh_nodes
+    ) : Shape(trans, material), 
+        mesh_points(std::move(points)),
+        triangle_points_indexes(std::move(indexes)),
+        nodes(std::move(bvh_nodes)) {}
+
     [[nodiscard]] std::optional<HitRecord> ray_intersection(const Ray& ray) const override {
-        Ray local_ray = ray;
+        Ray local_ray = ray.transform(trans.inverse());
         return ray_intersection_unwrapped(local_ray);
     }
 
     [[nodiscard]] std::optional<HitRecord> ray_intersection_unwrapped(Ray& local_ray, int starting_index = 0, std::optional<HitRecord> closest_hit = std::nullopt) const {
         if (!nodes[starting_index].bounds.intersect(local_ray)) {
-            return std::nullopt; // No intersection with the bounding box, skip this node
+            return closest_hit; // No intersection with the bounding box, skip this node
         }
 
         if (nodes[starting_index].is_leaf) {
@@ -344,18 +356,20 @@ export struct Mesh : Shape {
                 const auto& C = mesh_points[tri.i3];
 
                 // Ray-triangle intersection test (Möller–Trumbore algorithm)
-                Vec AB = B.point - A.point;
-                Vec AC = C.point - A.point;
-                Vec P = local_ray.direction % AC;
-                float det = AB * P;
+                Vec E1 = B.point - A.point;
+                Vec E2 = C.point - A.point;
+                Vec P = local_ray.direction % E2;
+                Vec T = local_ray.origin - A.point;
+                Vec Q = T % E1;
+                float det = E1 * P;
                 // Early exit if ray is parallel or nearly parallel to the triangle plane
-                if (std::abs(det) < 1e-8f) {
+                if (std::abs(det) < 1e-6f) {
                     continue; 
                 }
                 float inv_det = 1.0f / det;
-                float u = ((local_ray.origin - A.point) * P) * inv_det;
-                float v = ((local_ray.origin - A.point) * (AB % P)) * inv_det;
-                float t = ((local_ray.origin - A.point) % AB) * AC * inv_det;
+                float u = (T * P) * inv_det;
+                float v = (Q * local_ray.direction) * inv_det;
+                float t = (Q * E2) * inv_det;
                 if (u >= 0 && v >= 0 && u + v <= 1 && t >= local_ray.tmin && t <= local_ray.tmax) {
                     // Intersection found
                     HitRecord hit;

@@ -65,8 +65,12 @@ TEST_CASE("TEST 1: BVHAABB test suite") {
     }
 }
 
-TEST_CASE("TEST 2: BVHNode test suite") {
-    std::vector<TrianglePoint> triangle_points;
+static BVHNode first_node{}; // Static because I want to preserve changes through the SUBCASEs
+static std::vector<TrianglePoint> triangle_points;
+static std::vector<TriangleIndexes> triangle_point_indexes;
+static std::vector<BVHNode> all_nodes;
+
+TEST_CASE("TEST 2: BVHNode test suite") {    
 
     triangle_points.push_back({Point{ 1.0f + 0.1f,  1.0f,  1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
     triangle_points.push_back({Point{ 1.0f + 0.1f,  1.0f, -1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
@@ -95,7 +99,6 @@ TEST_CASE("TEST 2: BVHNode test suite") {
     triangle_points.push_back({Point{-1.0f, -1.0f,  1.0f + 0.1f}, Normal{ 0.0f,  0.0f,  1.0f}});
     triangle_points.push_back({Point{-1.0f, -1.0f, -1.0f + 0.1f}, Normal{ 0.0f,  0.0f,  1.0f}});
     
-    std::vector<TriangleIndexes> triangle_point_indexes;
     triangle_point_indexes.push_back(TriangleIndexes{0, 8, 16});
     triangle_point_indexes.push_back(TriangleIndexes{1, 9, 17});
     triangle_point_indexes.push_back(TriangleIndexes{2, 10, 18});
@@ -113,27 +116,34 @@ TEST_CASE("TEST 2: BVHNode test suite") {
     REQUIRE(first_bounds.maxPoint.is_close(Point{1.1f, 1.1f, 1.1f}));   
     REQUIRE(first_bounds.minPoint.is_close(Point{-1.0f, -1.0f, -1.0f}));
 
-    BVHNode first_node{first_bounds};
+    first_node.bounds = first_bounds;
     first_node.minIndex = 0;
     first_node.maxIndex = static_cast<int>(triangle_point_indexes.size());
-    std::vector<BVHNode> all_nodes;
     all_nodes.push_back(first_node);
     all_nodes[0].Extend_tree_wrapper(all_nodes, triangle_points, triangle_point_indexes, 2, 1);
     
-    CHECK(all_nodes.size() == 15); // 1 + 2 + 4 + 8 = 15
-
-    for(auto& node : all_nodes) {
-        if (node.is_leaf) {
-            std::println("== LEAF ==");
-        }
-        std::println("Node index: {}", &node - &all_nodes[0]);
-        std::println("Node bounds: min {}, max {}", node.bounds.minPoint, node.bounds.maxPoint);
-        std::println("Node triangle indexes and values:");
-        for (int i = node.minIndex; i < node.maxIndex; ++i) {
-            const auto& tri = triangle_point_indexes[i];
-            std::println("  Triangle indexes: {}, {}, {}", tri.i1, tri.i2, tri.i3);
-            std::println("  Triangle points: {}, {}, {}", triangle_points[tri.i1].point, triangle_points[tri.i2].point, triangle_points[tri.i3].point);
-        }
+    SUBCASE("Test BVHNode::Extend_tree()") {
+        CHECK(all_nodes.size() == 15); // 1 + 2 + 4 + 8 = 15
     }
-
 }
+
+TEST_CASE("TEST 3: Mesh test suite") {
+    Mesh mesh {
+        Transformation{}, 
+        std::make_shared<Material>(), // <--- Sostituisci Material{} con questo
+        triangle_points, 
+        triangle_point_indexes, 
+        all_nodes
+    };
+    Ray test_ray{Point{1.01f, 1.01f, 2.0f}, Vec{0.0f, 0.0f, -1.0f}};
+    auto record = mesh.ray_intersection(test_ray);
+    CHECK(record.has_value());
+    HitRecord hit_record = record.value();
+    CHECK(hit_record.is_close(hit_record.hitted_shape->ray_intersection(test_ray).value()));
+    CHECK(hit_record.hit_normal.is_close(Normal{0.0f, 0.0f, 1.0f}));
+    CHECK(hit_record.hit_point.is_close(Point{1.01f, 1.01f, 1.08f}));
+    CHECK(aux::are_close(hit_record.t, 0.92f));
+}
+
+
+    
