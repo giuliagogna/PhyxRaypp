@@ -93,11 +93,19 @@ export struct BVHAABB {
 export struct TrianglePoint {
     Point point;
     Normal normal;
+
+    bool is_close(const TrianglePoint& other) {
+        return (point.is_close(other.point) && normal.is_close(other.normal));
+    }
 };
 
 // Indexes to 3 points in the cloud to form a Triangle
 export struct TriangleIndexes {
     int i1, i2, i3;
+
+    bool is_equal(const TriangleIndexes& other) {
+        return (i1 == other.i1 && i2 == other.i2 && i3 == other.i3);
+    }
 };
 
 // A bin of the BVH binning method
@@ -401,5 +409,113 @@ export struct Mesh : Shape {
             }
             return closest_hit; // Return the closest hit found in the children
         }
+    }
+
+    // Reads a line in the header, skipping comments (lines starting with #) and empty lines.
+    [[nodiscard]] std::expected<std::string, std::string> _read_line(std::istream& stream) {
+        std::string result;
+        
+        // read till we find a line that is not a comment (starting with #) and not empty (for example an extra newline)
+        while (std::getline(stream, result)) {
+            // remove carriage return \r
+            if (!result.empty() && result.ends_with("\r")) {
+                result.pop_back();
+            }
+
+            // if the line starts with # it is a comment and we skip it (flexibility)
+            if (result.empty() || result.starts_with("#") || result.starts_with("o")) {
+                continue;
+            }
+
+            return result;
+        }
+
+        return std::unexpected("Impossible to read line.");
+    }
+
+    [[nodiscard]] std::expected<void, std::string> read_mesh_from_obj(std::istream& obj_stream) {
+        std::vector<Point> just_points;
+        std::vector<Normal> just_normals;
+        std::vector<TriangleIndexes> indexes;
+        std::vector<TrianglePoint> points_and_normals;
+        int n_points = 0;
+        bool has_entered_while_cycle = false;
+
+        // Read a valid line from the stream
+        auto line_expected = _read_line(obj_stream);
+        while (line_expected.has_value()) {
+            has_entered_while_cycle = true;
+            // Clean from the / / / (if we are in the faces field of the file)
+            std::string& line = line_expected.value();
+            std::replace(line.begin(), line.end(), '/', ' ');
+            // Reput in a stream
+            std::istringstream ss(line); // Using a string stream to parse things
+            // Reading the line prefix
+            // v: vertex point
+            // vn: vertex normal
+            // vt: vertex texture coordinates (not supported yet)
+            // f: triangular face points and normals indexes
+            std::string prefix;
+            ss >> prefix;
+
+            if (prefix == "v") { // Triangles verticies section
+                Point v;
+                ss >> v.x >> v.y >> v.z; 
+                just_points.push_back(v);
+            } 
+            else if (prefix == "vn") { // Triangles normals section
+                Normal vn;
+                ss >> vn.x >> vn.y >> vn.z;
+                vn.normalize();
+                just_normals.push_back(vn);
+            } 
+            else if (prefix == "f") { // Triangles section
+                if (!n_points) {
+                    n_points = just_normals.size();
+                    if(n_points != just_points.size()) {
+                        return std::unexpected("Points and Normals std::vector are different in size, please check the .obj file");
+                    }                    
+                }
+
+                // Reading the indexes
+                int v1, vn1, v2, vn2, v3, vn3, junk;
+                ss >> v1 >> junk >> vn1
+                   >> v2 >> junk >> vn2
+                   >> v3 >> junk >> vn3;
+                v1--; vn1--; v2--; vn2--; v3--; vn3--; // .obj files indexing starts from 1 so they are readapted to start drom 0 to match this code
+                
+                if (v1 != vn1 || v2 != vn2 || v3 != vn3) {
+                    return std::unexpected("Problems with triangle indexing in .obj file: for a single triangle Point and Normal should be under the same index");
+                }
+                if (v1 >= n_points || v2 >= n_points || v3 >= n_points) {
+                    return std::unexpected("Problems with triangle indexing in .obj file: index out of range");
+                }
+
+                indexes.push_back(TriangleIndexes{v1, v2, v3});
+            }
+
+            // Avanziamo alla riga successiva prima di ricominciare il ciclo
+            line_expected = _read_line(obj_stream);
+        }
+        if (!has_entered_while_cycle) {
+            return std::unexpected("Problems with the .obj file");
+        }
+        triangle_points_indexes = indexes; // Update the object data member
+
+        for (int i = 0; i < n_points; i++) {
+            points_and_normals.push_back({just_points[i], just_normals[i]});
+        }
+        mesh_points = points_and_normals;
+        return {};       
+    }
+
+    // wrapper: you pass the file name string to call read_mesh_from_obj
+    [[nodiscard]] std::expected<void, std::string> read_mesh_from_obj(std::string obj_file) {
+        std::ifstream fs(obj_file);
+        if (!fs.is_open()) {
+            return std::unexpected("Can't find " + obj_file);
+        }
+
+        return read_mesh_from_obj(fs);
     }
 };
