@@ -343,10 +343,32 @@ export struct Mesh : Shape {
     ) : Shape(trans, material), 
         mesh_points(std::move(points)),
         triangle_points_indexes(std::move(indexes)),
-        nodes(std::move(bvh_nodes)) {}
+        nodes(std::move(bvh_nodes)) {
+
+    }
+
+    Mesh(std::string obj_file, std::shared_ptr<Material> material = nullptr, int BVH_n_bins = 12, int BVH_is_leaf_threshold = 3) : Shape(Transformation{}, material) {
+        // Call read_mesh_from_obj(obj_file)
+        auto file_reading_result = read_mesh_from_obj(obj_file);
+        if (!file_reading_result.has_value()) {
+            std::println("ERROR: ");
+            std::print("{}", file_reading_result.error());
+            std::print("\n --- from constructor Mesh::Mesh(std::string, std::shared_ptr<Material>)");
+            return;
+        }
+        // Work on the creation of the root node
+        BVHNode root;
+        // Extend AABB of the root
+        for (auto& mesh_point : mesh_points) {
+            root.bounds.grow(mesh_point.point);
+        }
+        nodes.push_back(root);
+        // Call BVHNode::Extend_tree via wrapper
+        nodes[0].Extend_tree_wrapper(nodes, mesh_points, triangle_points_indexes, BVH_n_bins, BVH_is_leaf_threshold);
+    }
 
     [[nodiscard]] std::optional<HitRecord> ray_intersection(const Ray& ray) const override {
-        Ray local_ray = ray.transform(trans.inverse());
+        Ray local_ray = ray.transform(trans.inverse()); // Not really supported...
         return ray_intersection_unwrapped(local_ray);
     }
 

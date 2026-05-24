@@ -221,12 +221,23 @@ f 1/1/1 2/2/2 3/3/3)"};
 
     SUBCASE("Test Mesh::read_mesh_from_obj(std::string)") {
         Mesh mesh;
+        // Invalid file
         auto not_found_result = mesh.read_mesh_from_obj("Invalid_file.obj");
         CHECK(!not_found_result.has_value());
         CHECK(not_found_result.error() == "Can't find Invalid_file.obj");
+        // Valid fine: a Utah teapot
         auto correct_file_path_result = mesh.read_mesh_from_obj("./mesh/utah_teapot.obj");
         CHECK(correct_file_path_result.has_value());
+        // Check for the correct number of points
         CHECK(mesh.mesh_points.size() == 481);
+        CHECK(mesh.triangle_points_indexes.size() == 880);
+    }
+
+    SUBCASE("Test Mesh::Mesh(...) (constructor from file name, applying BVH)") {
+        // Utah teapot mesh
+        Mesh mesh("./mesh/utah_teapot.obj");
+        CHECK(mesh.mesh_points.size() == 481);
+        CHECK(mesh.triangle_points_indexes.size() == 880);
     }
 }
 
