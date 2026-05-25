@@ -146,6 +146,24 @@ TEST_CASE("TEST 3: Mesh test suite") {
         CHECK(aux::are_close(hit_record.t, 0.92f));
     }
 
+    SUBCASE("Test Mesh::ray_intersection with a Transformation") {
+        Mesh mesh {
+            Scale(Vec{1.0f, 1.0f, 2.0f}), 
+            std::make_shared<Material>(), // <--- Sostituisci Material{} con questo
+            triangle_points, 
+            triangle_point_indexes, 
+            all_nodes
+        };
+        Ray test_ray{Point{1.01f, 1.01f, -3.0f}, Vec{0.0f, 0.0f, 1.0f}};
+        auto record = mesh.ray_intersection(test_ray);
+        CHECK(record.has_value());
+        HitRecord hit_record = record.value();
+        CHECK(hit_record.is_close(hit_record.hitted_shape->ray_intersection(test_ray).value()));
+        CHECK(hit_record.hit_normal.is_close(Normal{0.0f, 0.0f, -1.0f}));
+        CHECK(hit_record.hit_point.is_close(Point{1.01f, 1.01f, -1.84f}));
+        CHECK(aux::are_close(hit_record.t, 1.16f));
+    }
+
     SUBCASE("Test Mesh::read_mesh_from_obj(std::istream)") {
         Mesh mesh;
 

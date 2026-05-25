@@ -371,8 +371,16 @@ export struct Mesh : Shape {
     }
 
     [[nodiscard]] std::optional<HitRecord> ray_intersection(const Ray& ray) const override {
-        Ray local_ray = ray.transform(trans.inverse()); // Not really supported...
-        return ray_intersection_unwrapped(local_ray);
+        // Reference frame of the mesh
+        Ray local_ray = ray.transform(trans.inverse());
+        auto hit_record = ray_intersection_unwrapped(local_ray);
+        if (hit_record.has_value()) {
+            hit_record->ray = ray;
+            hit_record->hit_point = ray.at(hit_record->t);
+            hit_record->hit_normal = (trans * hit_record->hit_normal).normalize();
+        }
+        return hit_record;
+
     }
 
     [[nodiscard]] std::optional<HitRecord> ray_intersection_unwrapped(Ray& local_ray, int starting_index = 0, std::optional<HitRecord> closest_hit = std::nullopt) const {
@@ -404,11 +412,10 @@ export struct Mesh : Shape {
                 float v = (Q * local_ray.direction) * inv_det;
                 float t = (Q * E2) * inv_det;
                 if (u >= 0 && v >= 0 && u + v <= 1 && t >= local_ray.tmin && t <= local_ray.tmax) {
-                    // Intersection found
+                    // Some members of the HitRecord struct will be updated outside this method,
+                    // since we are in the frame of reference of the Mesh.
                     HitRecord hit;
-                    hit.ray = local_ray;
                     hit.t = t;
-                    hit.hit_point = local_ray.at(t);
                     Vec interpolated_normal = (A.normal * (1 - u - v) + B.normal * u + C.normal * v);
                     hit.hit_normal = (interpolated_normal * (-std::copysign(1.0f, interpolated_normal * local_ray.direction))).to_norm(); // Flip normal if it's facing the ray
                     hit.surface_params = {u, v}; // Will be updated in the future with actual UV coordinates if available
@@ -435,7 +442,6 @@ export struct Mesh : Shape {
             return closest_hit; // Return the closest hit found in the children
         }
     }
-
     // Reads a line in the header, skipping comments (lines starting with #) and empty lines.
     [[nodiscard]] std::expected<std::string, std::string> _read_line(std::istream& stream) {
         std::string result;
