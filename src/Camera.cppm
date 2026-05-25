@@ -192,6 +192,8 @@ void ImageTracer::fire_all_rays(const std::function<Color(const Ray&)>& func, PC
     const int height = frame.height;
     if (antialiasing_level < 1) antialiasing_level = 1;
 
+    float antialiasing_level_reciprocal = 1.0f / (antialiasing_level*antialiasing_level);
+
     // Takes a function as an argument: it will be the algorithm to solve the rendering equation
     for (int row = 0; row < height; ++row) {
         for (int col = 0; col < width; ++col) {
@@ -205,7 +207,7 @@ void ImageTracer::fire_all_rays(const std::function<Color(const Ray&)>& func, PC
                     sum += func(ray);
                 }
             }
-            frame.set_pixel(col, row, sum / float(antialiasing_level * antialiasing_level));
+            frame.set_pixel(col, row, sum * antialiasing_level_reciprocal);
         }
     }
 }
