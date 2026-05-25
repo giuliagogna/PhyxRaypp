@@ -347,7 +347,7 @@ export struct Mesh : Shape {
 
     }
     // Transformation not supported yet!!!
-    Mesh(std::string obj_file, std::shared_ptr<Material> material = nullptr, int BVH_n_bins = 12, int BVH_is_leaf_threshold = 3) : Shape(Transformation{}, material) {
+    Mesh(std::string obj_file, std::shared_ptr<Material> material = nullptr, Transformation trans = Transformation{}, int BVH_n_bins = 12, int BVH_is_leaf_threshold = 3) : Shape(trans, material) {
         // Call read_mesh_from_obj(obj_file)
         auto file_reading_result = read_mesh_from_obj(obj_file);
         if (!file_reading_result.has_value()) {

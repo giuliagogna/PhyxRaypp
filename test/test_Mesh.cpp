@@ -256,24 +256,6 @@ f 1/1/1 2/2/2 3/3/3)"};
         Mesh mesh("./mesh/utah_teapot.obj");
         CHECK(mesh.mesh_points.size() == 481);
         CHECK(mesh.triangle_points_indexes.size() == 880);
-//        for (const auto& node : mesh.nodes) {
-//            if (node.is_leaf) {
-//                // Recuperiamo la terzina di indici dei vertici di questo triangolo
-//                const auto& tri_idx = mesh.triangle_points_indexes[node.minIndex];
-//            
-//                // Recuperiamo i 3 punti reali (punti + normali) dalla mesh
-//                const auto& p1 = mesh.mesh_points[tri_idx.i1].point;
-//                const auto& p2 = mesh.mesh_points[tri_idx.i2].point;
-//                const auto& p3 = mesh.mesh_points[tri_idx.i3].point;
-//            
-//                // Stampiamo le coordinate X, Y, Z di ogni vertice del triangolo
-//                std::println("Triangle: ({}, {}, {}) - ({}, {}, {}) - ({}, {}, {})",
-//                    p1.x, p1.y, p1.z,
-//                    p2.x, p2.y, p2.z,
-//                    p3.x, p3.y, p3.z
-//                );
-//            }
-//        }
     }
 }
 

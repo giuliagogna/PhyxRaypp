@@ -388,24 +388,22 @@ World build_Cornell_box_world() {
     auto blue_material = std::make_shared<Material>(blue_brdf);
     auto pink_brdf = std::make_shared<DiffusiveBRDF>(std::make_shared<UniformPigment>(Color{1.0f, 0.0f, 1.0f}));
     auto pink_material = std::make_shared<Material>(pink_brdf);
-    auto mirror_brdf = std::make_shared<SpecularBRDF>(SpecularBRDF{std::make_shared<UniformPigment>(Color{0.8f, 0.8f, 0.8f})});
+    auto mirror_brdf = std::make_shared<SpecularBRDF>(SpecularBRDF{std::make_shared<UniformPigment>(Color{0.6f, 0.6f, 0.6f})});
     auto mirror_material = std::make_shared<Material>(mirror_brdf);
 
     world.add(std::make_unique<Sphere>(
-        Trans(Vec{4.0f, -1.0f, -1.6f}) * Scale(Vec{0.4f, 0.4f, 0.4f}),
+        Trans(Vec{4.0f, -1.0f, 1.2f}) * Scale(Vec{0.4f, 0.4f, 0.4f}),
         blue_material
     ));
 
     world.add(std::make_unique<Sphere>(
-        Trans(Vec{4.0f, 1.0f, -1.6f}) * Scale(Vec{0.4f, 0.4f, 0.4f}),
+        Trans(Vec{4.0f, 1.0f, 1.2f}) * Scale(Vec{0.4f, 0.4f, 0.4f}),
         pink_material
     ));
 
-    world.add(std::make_unique<Sphere>(
-        Trans(Vec{4.8f, 0.0f, -0.5f}) * Scale(Vec{0.7f, 0.7f, 0.7f}),
-        mirror_material
-    ));
-
+    Mesh teapot_mesh("mesh/utah_teapot.obj", mirror_material, Trans(Vec{6.0f, 0.0f, -1.0f}) * R_z(std::numbers::pi_v<float> / 2.0f) * Scale(Vec{0.4f, 0.4f, 0.4f}));
+    
+    world.add(std::make_unique<Mesh>(teapot_mesh));
     return world;
 }
 
