@@ -214,6 +214,26 @@ TEST_CASE("Antialiasing") {
          }
       }
    }
+
+   SUBCASE("Complete mapping (fire_all_rays_antialiasing_parallel())") {
+      auto func = [&](const Ray& ray) {
+         auto hit = plane.ray_intersection(ray);
+         if(!hit) return Color{0.0f, 0.0f, 0.0f}; // Return black if the ray misses the plane
+         return pigment.get_color(hit->surface_params);
+      };
+
+      tracer.fire_all_rays_antialiasing_parallel(func, 100);
+
+      const int width = tracer.frame.width;
+      const int height = tracer.frame.height;
+      // Check that every pixel of the image has been correctly colored
+      for (int col = 0; col < width; col++) {
+         for (int row = 0; row < height; row++) {
+            std::println ("Pixel ({}, {}) : {}", col, row, tracer.frame.get_pixel(col, row));
+            CHECK(tracer.frame.get_pixel(col, row).is_close(Color{0.5f, 0.5f, 1.0f}, 2e-2f));
+         }
+      }
+   }
 }
 
 

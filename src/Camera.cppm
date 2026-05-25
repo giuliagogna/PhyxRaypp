@@ -17,7 +17,8 @@
 
 module;
 
-//#include <format>
+#include <tbb/parallel_reduce.h>
+#include <tbb/blocked_range.h>
 
 export module Camera;
 
@@ -52,7 +53,15 @@ export struct Ray {
 
     // RP: I don't feel it's spontaneous to have it here.
     // GG: You mean implementation? I put it here because it's just a return, but I can move it
-    Ray transform(const Transformation& trans) const;
+    Ray transform(const Transformation& trans) const {
+        return Ray{
+            .origin = trans * origin,
+            .direction = trans * direction,
+            .tmin = tmin,
+            .tmax = tmax,
+            .depth = depth
+        };
+    }
 };
 // We will need to manage transformations
 // GG: We have them in Geometry
@@ -84,14 +93,27 @@ export struct Camera {
 export struct OrthogonalCamera : Camera {
     OrthogonalCamera(float aspect_ratio=1.0f, const Transformation& trans = Transformation{})
         : Camera(aspect_ratio, trans) {}
-    [[nodiscard]] Ray fire_ray(float u, float v) const override;
+    
+    // Declared this way, u and v are always between 0 and 1
+    [[nodiscard]] Ray fire_ray(float u, float v) const override {
+        // Ray origin is on the image plane at distance d from the camera position
+        const Point ray_origin{-1.0f, (1.0f - 2.0f * u) * aspect_ratio, 2.0f * v - 1.0f}; // Camera space origin
+        constexpr Vec ray_direction{1.0f, 0.0f, 0.0f}; // Camera space direction (orthogonal to the image plane)
+        return Ray{ray_origin, ray_direction}.transform(trans);
+    }
 };
 
 export struct PerspectiveCamera : Camera {
     float d; // Screen-observer distance
     PerspectiveCamera(float aspect_ratio=1.0f, float d=1.0f, const Transformation& trans=Transformation{})
         : Camera(aspect_ratio, trans), d(d) {}
-    [[nodiscard]] Ray fire_ray(float u, float v) const override;
+    
+    [[nodiscard]] Ray fire_ray(float u, float v) const override {
+        // Ray origin is the camera position (0,0,0 in camera space)
+        const Point ray_origin{-d, 0.0f, 0.0f}; // Camera space origin
+        const Vec ray_direction{d, (1.0f - 2.0f * u) * aspect_ratio, 2.0f * v - 1.0f}; // Camera space direction (from the camera position to the pixel on the image plane)
+        return Ray{ray_origin, ray_direction}.transform(trans);
+    }
 };
 
 
@@ -111,103 +133,112 @@ export struct ImageTracer {
     HDRImage frame;
 
     // GG: Added default values to u_pixel and v_pixel to let the ray pass through the center of the pixel
-    [[nodiscard]] Ray fire_ray(int row, int col, float u_pixel=0.5f, float v_pixel=0.5f) const; // Generate a ray from the camera through the pixel at pixel coordinates (row, col) with subpixel offsets (u_pixel, v_pixel)
-    void fire_all_rays(const std::function<Color(const Ray&)>& func);
-    void fire_all_rays(const std::function<Color(const Ray&)>& func, PCG& pcg, int antialiasing_level = 1);
-};
+    // RP: SUS
+    // GG: Leave the bug, Tomasi specifically required this in order to be able to see something
+    //     fail in the following of the course
+    //                             ___________________________________
+    //                            |                                   |
+    //                            |        ___________                |
+    //                            |       |           |               |
+    //                            |       |           |               |
+    //                            |       |           |               |
+    //                            |       |           |               |
+    //                            |       |           |               |
+    //                            |       |           |               |
+    [[nodiscard]] Ray fire_ray(int row, int col, float u_pixel=0.5f, float v_pixel=0.5f) const {
+        const float width = static_cast<const float>(frame.width);
+        const float height = static_cast<const float>(frame.height);
 
+        const float u = (static_cast<const float>(col) + u_pixel) / width;
+        const float v = 1.0f - (static_cast<const float>(row) + v_pixel) / height;
 
-// ================================================================
-// IMPLEMENTATION
-// ================================================================
+        return camera.fire_ray(u, v);
+    }
 
+    void fire_all_rays(const std::function<Color(const Ray&)>& func) {
+        const int width = frame.width;
+        const int height = frame.height;
 
-// RAY TRANSFORM
-Ray Ray::transform(const Transformation& trans) const {
-    return Ray{
-        .origin = trans * origin,
-        .direction = trans * direction,
-        .tmin = tmin,
-        .tmax = tmax,
-        .depth = depth
-    };
-}
-
-// FIRE RAY
-// Declared this way, u and v are always between 0 and 1
-Ray OrthogonalCamera::fire_ray(const float u, const float v) const {
-    // Ray origin is on the image plane at distance d from the camera position
-    const Point ray_origin{-1.0f, (1.0f - 2.0f * u) * aspect_ratio, 2.0f * v - 1.0f}; // Camera space origin
-    constexpr Vec ray_direction{1.0f, 0.0f, 0.0f}; // Camera space direction (orthogonal to the image plane)
-    return Ray{ray_origin, ray_direction}.transform(trans);
-}
-
-Ray PerspectiveCamera::fire_ray(const float u, const float v) const {
-    // Ray origin is the camera position (0,0,0 in camera space)
-    const Point ray_origin{-d, 0.0f, 0.0f}; // Camera space origin
-    const Vec ray_direction{d, (1.0f - 2.0f * u) * aspect_ratio, 2.0f * v - 1.0f}; // Camera space direction (from the camera position to the pixel on the image plane)
-    return Ray{ray_origin, ray_direction}.transform(trans);
-}
-
-// RP: SUS
-// GG: Leave the bug, Tomasi specifically required this in order to be able to see something
-//     fail in the following of the course
-//                             ___________________________________
-//                            |                                   |
-//                            |        ___________                |
-//                            |       |           |               |
-//                            |       |           |               |
-//                            |       |           |               |
-//                            |       |           |               |
-//                            |       |           |               |
-//                            |       |           |               |
-Ray ImageTracer::fire_ray(const int row, const int col, const float u_pixel, const float v_pixel) const {
-    const float width = static_cast<const float>(frame.width);
-    const float height = static_cast<const float>(frame.height);
-
-    const float u = (static_cast<const float>(col) + u_pixel) / width;
-    const float v = 1.0f - (static_cast<const float>(row) + v_pixel) / height;
-
-    return camera.fire_ray(u, v);
-}
-
-// FIRE ALL RAYS
-
-void ImageTracer::fire_all_rays(const std::function<Color(const Ray&)>& func) {
-    const int width = frame.width;
-    const int height = frame.height;
-
-    // Takes a function as an argument: it will be the algorithm to solve the rendering equation
-    for (int row = 0; row < height; ++row) {
-        for (int col = 0; col < width; ++col) {
-            Ray ray = fire_ray(row, col, 0.5f, 0.5f);
-            Color color = func(ray);
-            frame.set_pixel(col, row, color);
+        // Takes a function as an argument: it will be the algorithm to solve the rendering equation
+        for (int row = 0; row < height; ++row) {
+            for (int col = 0; col < width; ++col) {
+                Ray ray = fire_ray(row, col, 0.5f, 0.5f);
+                Color color = func(ray);
+                frame.set_pixel(col, row, color);
+            }
         }
     }
-}
 
-void ImageTracer::fire_all_rays(const std::function<Color(const Ray&)>& func, PCG& pcg, int antialiasing_level) {
-    const int width = frame.width;
-    const int height = frame.height;
-    if (antialiasing_level < 1) antialiasing_level = 1;
+    void fire_all_rays(const std::function<Color(const Ray&)>& func, PCG& pcg, int antialiasing_level = 1) {
+        const int width = frame.width;
+        const int height = frame.height;
+        if (antialiasing_level < 1) antialiasing_level = 1;
 
-    float antialiasing_level_reciprocal = 1.0f / (antialiasing_level*antialiasing_level);
+        const int total_samples = antialiasing_level * antialiasing_level;
+        const float antialiasing_level_reciprocal = 1.0f / float(total_samples);
 
-    // Takes a function as an argument: it will be the algorithm to solve the rendering equation
-    for (int row = 0; row < height; ++row) {
-        for (int col = 0; col < width; ++col) {
-
-            Color sum; // Cumulates sampled Colors
-            for (int iu = 0; iu < antialiasing_level; iu++) {
-                for (int iv = 0; iv < antialiasing_level; iv++) {
-                    float u = (float(iu) + pcg.random_float() ) / antialiasing_level;
-                    float v = (float(iv) + pcg.random_float() ) / antialiasing_level;
+        // Cycle on pixels, and internally at each pixel cycle on subpixels to perform antialiasing
+        for (int row = 0; row < height; ++row) {
+            for (int col = 0; col < width; ++col) {
+                Color sum; // Cumulates sampled Colors
+                for (int i = 0; i < total_samples; i++) {
+                    // Inter-pixel indexing
+                    int iu = i / antialiasing_level;
+                    int iv = i % antialiasing_level;
+                    float u = (float(iu) + pcg.random_float()) / antialiasing_level;
+                    float v = (float(iv) + pcg.random_float()) / antialiasing_level;
                     Ray ray = fire_ray(row, col, u, v);
                     sum += func(ray);
                 }
+                frame.set_pixel(col, row, sum * antialiasing_level_reciprocal); // Takes the average for that pixel
             }
-            frame.set_pixel(col, row, sum * antialiasing_level_reciprocal);
         }
     }
-}
+
+    // Antialiasing on a single pixel is performed via shared memory parallelization
+    void fire_all_rays_antialiasing_parallel(const std::function<Color(const Ray&)>& func, int antialiasing_level = 1) {
+        const int width = frame.width;
+        const int height = frame.height;
+        if (antialiasing_level < 1) antialiasing_level = 1;
+
+        const int total_samples = antialiasing_level * antialiasing_level;
+        const float antialiasing_level_reciprocal = 1.0f / float(total_samples);
+
+        // Cycle on each pixel
+        for (int row = 0; row < height; ++row) {
+            for (int col = 0; col < width; ++col) {
+
+                Color pixel_color_sum = tbb::parallel_reduce(
+                    tbb::blocked_range<int>(0, total_samples),
+                    Color{0.0f, 0.0f, 0.0f}, // TTB stuff: default cumulator
+                    
+                    // TTB stuff: Mapping Lambda computes a portion of the samples
+                    [&](const tbb::blocked_range<int>& range, Color local_sum) -> Color {
+                        // Each thread will use its own uncorrelated PCG
+                        PCG local_pcg(row * width + col + range.begin(), row * width - col + range.end()); // Differing seeding strategy
+                        
+                        for (int i = range.begin(); i < range.end(); i++) {
+                            // Inter-pixel indexes
+                            int iu = i / antialiasing_level;
+                            int iv = i % antialiasing_level;
+
+                            float u = (float(iu) + local_pcg.random_float()) / antialiasing_level;
+                            float v = (float(iv) + local_pcg.random_float()) / antialiasing_level;
+
+                            Ray ray = fire_ray(row, col, u, v);
+                            local_sum += func(ray);
+                        }
+                        return local_sum;
+                    },
+                    
+                    // TTB stuff: Reducing Lambda merges the Color sums from the threads
+                    [](Color a, Color b) -> Color {
+                        return a + b;
+                    }
+                );
+
+                frame.set_pixel(col, row, pixel_color_sum * antialiasing_level_reciprocal); // Takes the average for that pixel
+            }
+        }
+    }
+};
