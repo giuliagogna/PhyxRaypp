@@ -2,7 +2,7 @@
 
 PhyxRadpp is a modern C++23 ray tracer and image processing utility. Built with performance and modern standards in mind, the project heavily utilizes C++23 modules and the `xmake` build system.
 
-Currently, the engine is capable of processing High Dynamic Range (HDR) images and rendering 3D scenes featuring perspective cameras and mathematical shapes (such as spheres and planes).
+Currently, the engine is capable of processing High Dynamic Range (HDR) images and rendering 3D scenes featuring perspective cameras and mathematical shapes (such as spheres, planes and cubes), and physically based rendering (PBR) through path tracing.
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 ## Features
@@ -10,8 +10,9 @@ Currently, the engine is capable of processing High Dynamic Range (HDR) images a
 * **PFM to PNG Conversion:** Converts HDR `.pfm` image files into standard `.png` files. Includes customizable exposure scaling (alpha factor) and gamma correction.
 * **Modular Material System:** Features an extensible architecture for materials and BRDFs. Includes support for UniformPigment (solid colors), CheckeredPigment (procedural grids), and ImagePigment (HDR texture mapping).
 * **Multi-Algorithm Ray Tracing:** Renders 3D scenes using interchangeable algorithms. Currently supports:
-  - onoff: A fast silhouette map of ray-object intersections (default black and white image).
-  - flat: A flat-shading renderer that resolves surface parameters (UV coordinates) to apply colors and image textures.
+  - `onoff`: A fast silhouette map of ray-object intersections (default black and white image).
+  - `flat`: A flat-shading renderer that resolves surface parameters (UV coordinates) to apply colors and image textures.
+  - `pathtracing`: An advanced renderer that numerically solves the rendering equation using Monte Carlo integration and Russian Roulette depth control for photorealistic global illumination.
 * **Modern C++23 Architecture:** Fully modularized codebase (`.cppm` files), utilizing the newest features like `std::expected` for safe error handling.
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
@@ -44,26 +45,25 @@ xmake run PhyxRadpp pfm2png images/memorial.pfm 0.2 1.0 memorial
 
 
 ### 2. Ray Tracing Demo
-Renders a 3D scene. You can optionally specify the rendering algorithm using the `--algorithm` flag (defaults to `flat`).
+Renders a 3D scene. You can optionally specify the rendering algorithm, resolution, antialiasing, and path tracing parameters.
 
 ```bash
-xmake run PhyxRadpp demo <ALPHA_FACTOR> <GAMMA> <OUTPUT_PNG> [--algorithm <onoff|flat>]
+xmake run PhyxRadpp demo <ALPHA_FACTOR> <GAMMA> <OUTPUT_PNG> [FLAGS]
 ```
+**Optional Flags:**
+* `--algorithm <type>` : Render engine (`onoff`, `flat`, or `pathtracing`). Default is `flat`.
+* `--antialiasing <N>` : Apply anti-aliasing with NxN samples per pixel.
+* `--dimensions <W> <H>` : Set output image resolution in pixels (Width Height).
+* `--pathtracer_params <rays> <max_depth> <rr_depth>` : Configure PathTracer settings.
+  * `<rays>` : Number of Monte Carlo rays emitted per hit.
+  * `<max_depth>` : Maximum reflection depth/bounces.
+  * `<rr_depth>` : Russian Roulette start depth.
 
 #### Changing the Active Scene & Creating Custom Scenes
-Because PhyxRadpp is designed to be highly modular, scenes are built using dedicated builder functions. To change the scene that gets rendered, open `src/main.cpp` and locate the `run_demo` function.
+Because `PhyxRadpp`
+Because PhyxRadpp is designed to be highly modular, scenes are built using dedicated builder functions. To change the scene that gets rendered, open `src/main.cpp` and locate the `run_demo function.
 
-You can change the active scene by commenting/uncommenting the desired `World world = ...` line:
-
-```cpp
-// =============================================================
-    // Change the function you call here to build another world
-    //World world = build_10_white_spheres_world();
-    World world = build_plane_and_sphere_world();
-// =============================================================
-```
-
-You can also easily build and render your own custom 3D environments without altering the core rendering logic by writing a new `build_my_custom_world()` function and calling it here.
+You can easily build and render your own custom 3D environments without altering the core rendering logic by writing a new `build_my_custom_world()` function and calling it in the algorithm selection block.
 
 #### -- Example 2.1: Textured Scene (Flat Shading)
 Ensure `World world = build_plane_and_sphere_world();` is active in `main.cpp`.
@@ -87,6 +87,19 @@ xmake run PhyxRadpp demo 1 1 demo_silhouette --algorithm onoff
 <img src="spheres_alpha1_gamma1.png" alt="OnOff spheres result" width="50%">
 
 *Note: if you use the default settings for OnOffRenderer the values of `alpha` and `gamma` are irrelevant. Be careful to set sensible values of `alpha` and `gamma` when you render different colors.*
+
+#### -- Example 2.3: Global Illumination (Path Tracing)
+Ensure `World world = build_Cornell_box_world();` is active for the pathtracing algorithm block in `main.cpp`.
+
+To render a photorealistic Cornell Box containing diffusive and mirrored spheres, solving the rendering equation with a 400x400 resolution, 10x10 antialiasing (100 samples per pixel), 4 rays per bounce, a max depth of 4, and Russian Roulette starting at depth 3.
+
+```bash
+xmake run PhyxRadpp demo 1 1 Cornell_Box_Sphere_400_400_anti10_path443 --algorithm pathtracing --dimensions 400 400 --antialiasing 10 --pathtracer_params 4 4 3
+```
+
+<img src="Cornell_Box_Sphere_400_400_anti10_path443_alpha1_gamma1.png" alt="OnOff spheres result" width="50%">
+
+*Note: The code will automatically append _alpha1_gamma1.png to your output filename.*
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 ## Testing
