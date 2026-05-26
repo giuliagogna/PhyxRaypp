@@ -135,23 +135,6 @@ TEST_CASE("Test 4: Scalar Multiplications") {
 
     Vec exp_sn(scalar*xn, scalar*yn, scalar*zn);
 
-// These have been commented in Geometry.cppm
-//    SUBCASE("Point *= scalar") {
-//        Point p_mut = p;
-//        p_mut *= scalar;
-//        CHECK(aux::are_xyz_close(p_mut, Point(2.0f, 4.0f, 6.0f)));
-//    }
-//
-//    SUBCASE("Point * scalar") {
-//        Point res = p * scalar;
-//        CHECK(aux::are_xyz_close(res, Point(2.0f, 4.0f, 6.0f)));
-//    }
-//
-//    SUBCASE("scalar * Point") {
-//        Point res = scalar * p;
-//        CHECK(aux::are_xyz_close(res, Point(2.0f, 4.0f, 6.0f)));
-//    }
-
     SUBCASE("Vec *= scalar -> Vec") {
         Vec v_mut = v;
         v_mut *= scalar;
@@ -473,7 +456,7 @@ TEST_CASE("Test 9: Transformations") {
 // =============================================================================
 // TEST 10: Squared Length and Length (norm2, norm)
 // =============================================================================
-TEST_CASE("Test 8: Length and Squared Length") {
+TEST_CASE("Test 10: Length and Squared Length") {
     SUBCASE("Vec::Normal and Vec::Normal2") {
         Vec v(3.0f, 4.0f, 5.0f); // Length should be 5
 
@@ -492,7 +475,7 @@ TEST_CASE("Test 8: Length and Squared Length") {
 // =============================================================================
 // Test 11: Object conversion and normalization
 // =============================================================================
-TEST_CASE("Test 10: Object Conversions and Normalization (to_vec, to_Normal, Normalize)") {
+TEST_CASE("Test 11: Object Conversions and Normalization (to_vec, to_Normal, Normalize)") {
 
     SUBCASE("Vec::Normalize") {
         // A vector of length 5
@@ -532,7 +515,7 @@ TEST_CASE("Test 10: Object Conversions and Normalization (to_vec, to_Normal, Nor
 // TEST 12: OrthoNormal Base generation
 // =============================================================================
 
-TEST_CASE("OrthoNormal Base Generation") {
+TEST_CASE("Test 12: OrthoNormal Base Generation") {
     PCG pcg; // Default constructor (43, 54)
     int n_samples = 1000000;
 
@@ -572,7 +555,26 @@ TEST_CASE("OrthoNormal Base Generation") {
 // =============================================================================
 // TEST 13: String Conversions
 // =============================================================================
-TEST_CASE("Test 12: String conversions") {
+
+TEST_CASE("Test 13: Min and Max functions for BVH/AAB") {
+    Point p1{1.0f, 4.0f, 6.0f};
+    Point p2{2.0f, 5.0f, 3.0f};
+
+    SUBCASE("Min") {
+        Point exp = min(p1, p2);
+        CHECK(exp.is_close(Point{1.0f, 4.0f, 3.0f}));
+    }
+
+    SUBCASE("Max") {
+        Point exp = max(p1, p2);
+        CHECK(exp.is_close(Point{2.0f, 5.0f, 6.0f}));
+    }
+}
+
+// =============================================================================
+// TEST 14: String Conversions
+// =============================================================================
+TEST_CASE("Test 14: String conversions") {
     Point p(1.3f, 4.6f, -7.8f);
     Vec v(4.6f, -33.9f, 0.012f);
     Normal n(1.0f, 0.0f, 0.0f);
