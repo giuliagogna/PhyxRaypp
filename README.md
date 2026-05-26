@@ -13,6 +13,7 @@ Currently, the engine is capable of processing High Dynamic Range (HDR) images a
   - `onoff`: A fast silhouette map of ray-object intersections (default black and white image).
   - `flat`: A flat-shading renderer that resolves surface parameters (UV coordinates) to apply colors and image textures.
   - `pathtracing`: An advanced renderer that numerically solves the rendering equation using Monte Carlo integration and Russian Roulette depth control for photorealistic global illumination.
+* **OBJ file support:** Imports vertexes and normals from OBJ files to generate triangular meshes. The ray intersection method is optimized by a BVH binary tree SAH logic.
 * **Modern C++23 Architecture:** Fully modularized codebase (`.cppm` files), utilizing the newest features like `std::expected` for safe error handling.
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
@@ -41,7 +42,7 @@ Here is a command that converts `images/memorial.pfm` into `memorial_alpha0.2_ga
 xmake run PhyxRadpp pfm2png images/memorial.pfm 0.2 1.0 memorial
 ```
 
-<img src="memorial_alpha0.2_gamma1.png" alt="Conversion result" width="40%">
+<img src="generated_images/memorial_alpha0.2_gamma1.png" alt="Conversion result" width="40%">
 
 
 ### 2. Ray Tracing Demo
@@ -73,7 +74,7 @@ To render a scene with a textured sphere and a checkered plane using an `alpha=0
 xmake run PhyxRadpp demo 0.3 2.2 sphere_plane --algorithm flat
 ```
 
-<img src="sphere_plane_alpha0.3_gamma2.2.png" alt="Textured scene" width="50%">
+<img src="generated_images/sphere_plane_alpha0.3_gamma2.2.png" alt="Textured scene" width="50%">
 
 
 #### -- Example 2.2: Silhouette Mode (On/Off)
@@ -84,7 +85,7 @@ To render a black-and-white silhouette of the geometry:
 xmake run PhyxRadpp demo 1 1 demo_silhouette --algorithm onoff
 ```
 
-<img src="spheres_alpha1_gamma1.png" alt="OnOff spheres result" width="50%">
+<img src="generated_images/spheres_alpha1_gamma1.png" alt="OnOff spheres result" width="50%">
 
 *Note: if you use the default settings for OnOffRenderer the values of `alpha` and `gamma` are irrelevant. Be careful to set sensible values of `alpha` and `gamma` when you render different colors.*
 
@@ -97,7 +98,7 @@ To render a photorealistic Cornell Box containing diffusive and mirrored spheres
 xmake run PhyxRadpp demo 1 1 Cornell_Box_Sphere_400_400_anti10_path443 --algorithm pathtracing --dimensions 400 400 --antialiasing 10 --pathtracer_params 4 4 3
 ```
 
-<img src="Cornell_Box_Sphere_400_400_anti10_path443_alpha1_gamma1.png" alt="OnOff spheres result" width="50%">
+<img src="generated_images/Cornell_Box_Sphere_400_400_anti10_path443_alpha1_gamma1.png" alt="OnOff spheres result" width="50%">
 
 *Note: The code will automatically append _alpha1_gamma1.png to your output filename.*
 
