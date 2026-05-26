@@ -38,10 +38,10 @@ xmake run PhyxRadpp pfm2png <INPUT_PFM> <ALPHA_FACTOR> <GAMMA> <OUTPUT_PNG>
 Here is a command that converts `images/memorial.pfm` into `memorial_alpha0.2_gamma_1.png`
 
 ```bash
-xmake run PhyxRadpp pfm2png images/memorial.pfm 0.2 1.0 memorial
+xmake run PhyxRadpp pfm2png images/memorial.pfm 0.3 1.0 memorial
 ```
 
-<img src="memorial_alpha0.2_gamma1.png" alt="Conversion result" width="40%">
+<img src="conversion_memorial_alpha0.3_gamma1.png" alt="Conversion result" width="40%">
 
 
 ### 2. Ray Tracing Demo
@@ -84,7 +84,7 @@ To render a black-and-white silhouette of the geometry:
 xmake run PhyxRadpp demo 1 1 demo_silhouette --algorithm onoff
 ```
 
-<img src="spheres_alpha1_gamma1.png" alt="OnOff spheres result" width="50%">
+<img src="demo_silhouette_alpha1_gamma1.png" alt="OnOff spheres result" width="50%">
 
 *Note: if you use the default settings for OnOffRenderer the values of `alpha` and `gamma` are irrelevant. Be careful to set sensible values of `alpha` and `gamma` when you render different colors.*
 
