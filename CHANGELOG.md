@@ -4,9 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+--------
+
+## [0.3.0] - 2026-05-20
+
 ### Added
-- scatter_ray method in BRDF: SpecularBRDF, DiffusiveBRDF
-- OrthoNormal Base generator
+- Rendering algorithm Pathtracer
+- Antialiasing
+- Cube shape
+- SpecularBRDF, DiffusiveBRDF
 - Added flag `--algorithm` to choose between OnOffRenderer or FlatRenderer
 - Renderer struct with OnOffRenderer and FlatRenderer
 - Material, BRDF, Pigments (Image, Checkered, Uniform) struct
