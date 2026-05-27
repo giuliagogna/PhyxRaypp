@@ -36,10 +36,10 @@ xmake run PhyxRadpp pfm2png <INPUT_PFM> <ALPHA_FACTOR> <GAMMA> <OUTPUT_PNG>
 ```
 
 #### -- Example 1.1: Conversion from `.pfm` to `.png`
-Here is a command that converts `images/memorial.pfm` into `memorial_alpha0.2_gamma_1.png`
+Here is a command that converts `images/memorial.pfm` into `generated_images/memorial_alpha0.2_gamma_1.png`
 
 ```bash
-xmake run PhyxRadpp pfm2png images/memorial.pfm 0.2 1.0 memorial
+xmake run PhyxRadpp pfm2png images/memorial.pfm 0.3 1.0 memorial
 ```
 
 <img src="generated_images/memorial_alpha0.2_gamma1.png" alt="Conversion result" width="40%">
@@ -95,7 +95,7 @@ Ensure `World world = build_Cornell_box_world();` is active for the pathtracing 
 To render a photorealistic Cornell Box containing diffusive and mirrored spheres, solving the rendering equation with a 400x400 resolution, 10x10 antialiasing (100 samples per pixel), 4 rays per bounce, a max depth of 4, and Russian Roulette starting at depth 3.
 
 ```bash
-xmake run PhyxRadpp demo 1 1 Cornell_Box_Sphere_400_400_anti10_path443 --algorithm pathtracing --dimensions 400 400 --antialiasing 10 --pathtracer_params 4 4 3
+xmake run PhyxRadpp demo 1 1 teapot --algorithm pathtracing --dimensions 400 400 --antialiasing 10 --pathtracer_params 4 4 3
 ```
 
 <img src="generated_images/Cornell_Box_Sphere_400_400_anti10_path443_alpha1_gamma1.png" alt="OnOff spheres result" width="50%">

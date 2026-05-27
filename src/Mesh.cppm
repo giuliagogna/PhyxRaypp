@@ -334,6 +334,9 @@ export struct Mesh : Shape {
 
     using Shape::Shape;
 
+    // Windows whines
+    Mesh() = default;
+
     Mesh(
         const Transformation& trans,
         std::shared_ptr<Material> material,

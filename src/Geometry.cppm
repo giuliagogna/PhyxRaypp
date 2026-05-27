@@ -534,7 +534,7 @@ export {
     }
 
     // ===============================================
-    // Min e Max functions for BVH/AAB purporse
+    // Min and Max functions for BVH/AAB purpose
     // ===============================================
 
     // Template
