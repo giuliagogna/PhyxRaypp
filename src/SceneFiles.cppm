@@ -30,6 +30,13 @@ import std;
 import Material;
 import Shape;
 import Camera;
+import Color;
+import Pigment;
+import BRDF;
+import Shape;
+import Camera;
+import Geometry;
+import HDRImage;
 
 /// Language symbols in a string_view object
 export constexpr std::string_view SYMBOLS = "()<>[],*";
@@ -441,6 +448,10 @@ export struct Scene {
     std::unordered_set<std::string> overridden_variables;
 };
 
+// ============================================================================================
+// EXPECT FUNCTIONS
+// ============================================================================================
+
 std::expected<void, GrammarError> expect_symbol(InputStream& input_file, char symbol) {
     /// Read a token from `input_file` and check that it matches `symbol`.
     auto res = input_file.read_token();
@@ -559,8 +570,322 @@ std::expected<float, GrammarError> expect_number(InputStream& input_file, Scene&
         return scene.float_variables.at(var_name);
     }
 
-    return std::unexpected(GrammarError{token->location,"Expected a literal number or a variable, but got a different kind of token"
-    });
+    return std::unexpected(GrammarError{token->location,"Expected a literal number or a variable, but got a different kind of token"});
+
+}
+
+// =====================================================================
+// PARSE FUNCTIONS
+// =====================================================================
+
+std::expected<Vec, GrammarError> parse_vec(InputStream& input_file, Scene& scene) {
+
+    auto open_square_brk = expect_symbol(input_file, '[');
+    if (!open_square_brk.has_value()) { return std::unexpected(open_square_brk.error()); }
+
+    auto vx_res = expect_number(input_file, scene);
+    if (!vx_res.has_value()) { return std::unexpected(vx_res.error()); }
+    float vx = vx_res.value();
+
+    auto comma1 = expect_symbol(input_file, ',');
+    if (comma1.has_value()) { return std::unexpected(comma1.error()); }
+
+    auto vy_res = expect_number(input_file, scene);
+    if (!vy_res.has_value()) { return std::unexpected(vy_res.error()); }
+    float vy = vy_res.value();
+
+    auto comma2 = expect_symbol(input_file, ',');
+    if (!comma2.has_value()) { return std::unexpected(comma2.error()); }
+
+    auto vz_res = expect_number(input_file, scene);
+    if (!vz_res.has_value()) { return std::unexpected(vz_res.error()); }
+    float vz = vz_res.value();
+
+    expect_symbol(input_file, ']');
+
+    return Vec{vx, vy, vz};
+
+}
+
+std::expected<Color, GrammarError> parse_color(InputStream& input_file, Scene& scene) {
+    // Expect '<'
+    auto sym1 = expect_symbol(input_file, '<');
+    if (!sym1.has_value()) { return std::unexpected(sym1.error()); }
+
+    // Expect red
+    auto red = expect_number(input_file, scene);
+    if (!red.has_value()) { return std::unexpected(red.error()); }
+
+    // Expect ','
+    auto sym2 = expect_symbol(input_file, ',');
+    if (!sym2.has_value()) { return std::unexpected(sym2.error()); }
+
+    // Expect Green
+    auto green = expect_number(input_file, scene);
+    if (!green.has_value()) { return std::unexpected(green.error()); }
+
+    // Expect ','
+    auto sym3 = expect_symbol(input_file, ',');
+    if (!sym3.has_value()) { return std::unexpected(sym3.error()); }
+
+    // Expect Blue
+    auto blue = expect_number(input_file, scene);
+    if (!blue.has_value()) { return std::unexpected(blue.error()); }
+
+    // Expect '>'
+    auto sym4 = expect_symbol(input_file, '>');
+    if (!sym4.has_value()) { return std::unexpected(sym4.error()); }
+
+    // Success: return the constructed Color
+    return Color{red.value(), green.value(), blue.value()};
+}
+
+std::expected<std::unique_ptr<Pigment>, GrammarError> parse_pigment(InputStream& input_file, Scene& scene) {
+    auto keyword_res = expect_keywords(input_file, {KeywordEnum::UNIFORM, KeywordEnum::CHECKERED, KeywordEnum::IMAGE});
+    if (!keyword_res.has_value()) { return std::unexpected(keyword_res.error()); }
+    KeywordEnum keyword = keyword_res.value();
+
+    auto open_brk_res = expect_symbol(input_file, '(');
+    if (open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
+
+    if (keyword == KeywordEnum::UNIFORM) {
+        auto color_res = parse_color(input_file, scene);
+        if (!color_res.has_value()) { return std::unexpected(color_res.error()); }
+        Color color = color_res.value();
+
+        // Expect the closed parenthesis after the color
+        auto close_brk_res = expect_symbol(input_file, ')');
+        if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
+
+        UniformPigment pigment(color);
+
+        return std::make_unique<UniformPigment>(pigment);
+
+    } else if (keyword == KeywordEnum::CHECKERED) {
+
+        // First color
+        auto color_res1 = parse_color(input_file, scene);
+        if (!color_res1.has_value()) { return std::unexpected(color_res1.error()); }
+        Color color1 = color_res1.value();
+
+        // Comma
+        auto comma_res = expect_symbol(input_file, ',');
+        if (!comma_res.has_value()) { return std::unexpected(comma_res.error()); }
+
+        // Second color
+        auto color_res2 = parse_color(input_file, scene);
+        if (!color_res2.has_value()) { return std::unexpected(color_res2.error()); }
+        Color color2 = color_res2.value();
+
+        // Comma
+        auto comma2_res = expect_symbol(input_file, ',');
+        if (!comma2_res.has_value()) { return std::unexpected(comma2_res.error()); }
+
+        // Number of subdivisions
+        auto subdiv_res = expect_number(input_file, scene);
+        if (!subdiv_res.has_value()) { return std::unexpected(subdiv_res.error()); }
+        int subdiv = static_cast<int>(subdiv_res.value());
+
+        // Bracket close
+        auto close_brk_res = expect_symbol(input_file, ')');
+        if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
+
+        CheckeredPigment checkered_pigment(color1, color2, subdiv);
+
+        return std::make_unique<CheckeredPigment>(checkered_pigment);
+
+    } else if (keyword == KeywordEnum::IMAGE) {
+
+        auto filename_res = expect_string(input_file);
+        if (!filename_res.has_value()) { return std::unexpected(filename_res.error()); }
+        std::string filename = filename_res.value();
+
+        // Closing bracket
+        auto close_brk_res = expect_symbol(input_file, ')');
+        if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
+
+        // Load the pfm image
+        auto image_res = HDRImage::read_pfm_file(filename.c_str());
+        // If the file doesn't exist or is corrupted, convert the InvalidPfmFileFormat
+        // into a GrammarError so the parser can report it safely
+        if (!image_res.has_value()) {
+            return std::unexpected(GrammarError{
+                input_file.location,
+                std::format("Failed to load image '{}': {}", filename, image_res.error().message)});
+        }
+
+        // Using move() to transfer the HDRImage inside the ImagePigment without copying it
+        return std::make_unique<ImagePigment>(std::move(image_res.value()));
+
+    }
+}
+
+std::expected<std::unique_ptr<BRDF>, GrammarError> parse_brdf(InputStream& input_file, Scene& scene) {
+
+    auto keyword_res = expect_keywords(input_file, {KeywordEnum::DIFFUSE, KeywordEnum::SPECULAR});
+    if (!keyword_res.has_value()) { return std::unexpected(keyword_res.error()); }
+    KeywordEnum keyword = keyword_res.value();
+
+    auto open_brk_res = expect_symbol(input_file, '(');
+    if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
+
+    auto pigment_res = parse_pigment(input_file, scene);
+    if (!pigment_res.has_value()) { return std::unexpected(pigment_res.error()); }
+    std::unique_ptr<Pigment> pigment = std::move(pigment_res.value());
+
+    auto close_brk_res = expect_symbol(input_file, ')');
+    if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
+
+    if (keyword == KeywordEnum::DIFFUSE) {
+        return std::make_unique<DiffusiveBRDF>(std::move(pigment));
+    } else if (keyword == KeywordEnum::SPECULAR) {
+        return std::make_unique<SpecularBRDF>(std::move(pigment));
+    }
+
+    return std::unexpected(GrammarError{input_file.location, "Failed to parse BRDF."});
+
+}
+
+std::expected<std::pair<std::string, Material>, GrammarError> parse_material(InputStream& input_file, Scene& scene) {
+
+    auto identifier_res = expect_string(input_file);
+    if (!identifier_res.has_value()) { return std::unexpected(identifier_res.error()); }
+    std::string name = identifier_res.value();
+
+    auto open_brk_res = expect_symbol(input_file, '(');
+    if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
+
+    auto brdf_res = parse_brdf(input_file, scene);
+    if (!brdf_res.has_value()) { return std::unexpected(brdf_res.error()); }
+    std::unique_ptr<BRDF> brdf = std::move(brdf_res.value());
+
+    auto comma = expect_symbol(input_file, ',');
+    if (!comma.has_value()) { return std::unexpected(comma.error()); }
+
+    auto emitted_rad_res = parse_pigment(input_file, scene);
+    if (!emitted_rad_res.has_value()) { return std::unexpected(emitted_rad_res.error()); }
+    std::unique_ptr<Pigment> emitted_rad = std::move(emitted_rad_res.value());
+
+    auto close_brk_res = expect_symbol(input_file, ')');
+
+    Material material{std::move(brdf), std::move(emitted_rad)};
+
+    return std::pair<std::string, Material>{name, std::move(material)};
+}
+
+std::expected<Transformation, GrammarError> parse_transformation(InputStream& input_file, Scene& scene) {
+    auto result = Transformation{};
+
+    // State flag controlling the loop
+    bool has_next_transformation = true;
+
+    while (has_next_transformation) {
+        auto kw_res = expect_keywords(input_file, std::vector<KeywordEnum>{
+                                                                         KeywordEnum::IDENTITY,
+                                                                         KeywordEnum::TRANSLATION,
+                                                                         KeywordEnum::ROTATION_X,
+                                                                         KeywordEnum::ROTATION_Y,
+                                                                         KeywordEnum::ROTATION_Z,
+                                                                         KeywordEnum::SCALING
+                                                                         });
+        if (!kw_res.has_value()) { return std::unexpected(kw_res.error()); }
+        KeywordEnum kw = kw_res.value();
+
+        if (kw == KeywordEnum::IDENTITY) {
+            // Do nothing (Primitive optimization)
+        } else if (kw == KeywordEnum::TRANSLATION) {
+
+            auto open_brk_res = expect_symbol(input_file, '(');
+            if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
+
+            auto vec_res = parse_vec(input_file, scene);
+            if (!vec_res.has_value()) { return std::unexpected(vec_res.error()); }
+            Vec vec = vec_res.value();
+
+            auto close_brk_res = expect_symbol(input_file, ')');
+            if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
+
+            result = result * Trans(vec);
+
+        } else if (kw == KeywordEnum::ROTATION_X) {
+
+            auto open_brk_res = expect_symbol(input_file, '(');
+            if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
+
+            auto angle_res = expect_number(input_file, scene);
+            if (!angle_res.has_value()) { return std::unexpected(angle_res.error()); }
+            float angle = angle_res.value();
+
+            auto close_brk_res = expect_symbol(input_file, ')');
+            if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
+
+            result = result * R_x(angle);
+
+        } else if (kw == KeywordEnum::ROTATION_Y) {
+
+            auto open_brk_res = expect_symbol(input_file, '(');
+            if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
+
+            auto angle_res = expect_number(input_file, scene);
+            if (!angle_res.has_value()) { return std::unexpected(angle_res.error()); }
+            float angle = angle_res.value();
+
+            auto close_brk_res = expect_symbol(input_file, ')');
+            if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
+
+            result = result * R_y(angle);
+
+        } else if (kw == KeywordEnum::ROTATION_Z) {
+
+            auto open_brk_res = expect_symbol(input_file, '(');
+            if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
+
+            auto angle_res = expect_number(input_file, scene);
+            if (!angle_res.has_value()) { return std::unexpected(angle_res.error()); }
+            float angle = angle_res.value();
+
+            auto close_brk_res = expect_symbol(input_file, ')');
+            if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
+
+            result = result * R_z(angle);
+
+        } else if (kw == KeywordEnum::SCALING) {
+
+            auto open_brk_res = expect_symbol(input_file, '(');
+            if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
+
+            auto vec_res = parse_vec(input_file, scene);
+            if (!vec_res.has_value()) { return std::unexpected(vec_res.error()); }
+            Vec vec = vec_res.value();
+
+            auto close_brk_res = expect_symbol(input_file, ')');
+            if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
+
+            result = result * Scale(vec);
+
+        }
+
+        // We must peek the next token to check if there is another transformation that is being
+        // chained or if the sequence ends. Thus, this is a LL(1) parser
+
+        auto next_token_res = input_file.read_token();
+        if (!next_token_res.has_value()) { return std::unexpected(next_token_res.error()); }
+        std::unique_ptr<Token> next_token = std::move(next_token_res.value());
+
+        auto* sym_token = dynamic_cast<SymbolToken*>(next_token.get());
+
+        // Update the state flag instead of using break/continue
+        if (sym_token != nullptr && sym_token->symbol == '*') {
+            // A '*' was found. Keep the flag true so the while loop repeats.
+            has_next_transformation = true;
+        } else {
+            // The chain is finished. Put the token back and cleanly toggle the flag to false.
+            input_file.unread_token(std::move(next_token));
+            has_next_transformation = false;
+        }
+    }
+
+    return result;
 
 }
 
