@@ -64,3 +64,12 @@ images/test_out_be.pfm
 images/test_showcase_out.pfm
 
 
+# =========================================================================
+# PERF
+# =========================================================================
+# Ignore perf files
+*.old
+perf.data
+report.txt
+perf_stuff/*.png
+

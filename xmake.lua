@@ -8,6 +8,22 @@ set_policy("build.c++.modules", true)
 add_requires("doctest")
 add_requires("stb")
 
+-- Build modes
+add_rules("mode.release", "mode.debug")
+
+-- Custom configuration for profiling mode
+if is_mode("profile") then
+    set_symbols("debug")
+    set_optimize("fastest")
+    set_strip("none")
+    if not is_plat("windows") then
+        add_cxflags("-fno-omit-frame-pointer", {force = true}) 
+    end
+else
+    -- Default configuration
+    set_optimize("fastest") 
+end
+
 -- Variable to hold the found path so we only search ONCE
 local linux_std_path = nil
 
@@ -62,9 +78,6 @@ function add_linux_std_module()
         add_files(linux_std_path, { filetype = "c++.module", headeronly = true })
     end
 end
-
--- Optimization flags for release builds
-set_optimize("fastest")    -- -O3
 
 if is_plat("windows") then
     -- This will run slower on Windows
