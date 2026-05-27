@@ -21,6 +21,7 @@ module;
 // Include the C-error header here in the global fragment so the macros exist
 #include <cerrno>
 #include <cstdlib>
+#include <cassert>
 
 export module SceneFiles;
 
@@ -184,6 +185,8 @@ export struct InputStream {
     std::optional<char> saved_char;
     SourceLocation saved_location;
 
+    std::optional<std::unique_ptr<Token>> saved_token;
+
     int tabulations;
 
     InputStream(std::istream& ifs, const std::string& filename="", int tabulations=8) :
@@ -191,6 +194,7 @@ export struct InputStream {
         location{filename, 1, 1},
         tabulations(tabulations),
         saved_location{filename, 1, 1} {}
+
 
     // Reading methods
     void _update_location(std::optional<char> ch) {
@@ -242,6 +246,9 @@ export struct InputStream {
         if (ch.has_value()) {
             // If an actual character was read, put it in saved_char (when we call read_char after
             // we are going to take the next character from saved_character and not read it from stream)
+            // SAFETY CHECK: Crash immediately if we try to overwrite an unread character! It is a programmer error
+            // not a user error, so it does not need to return error messages
+            assert(!saved_char.has_value());
             saved_char = ch;
             // Return to the location saved before updating
             location = saved_location;
@@ -373,6 +380,15 @@ export struct InputStream {
     }
 
     std::expected<std::unique_ptr<Token>, GrammarError> read_token() {
+
+        // If token was already read and saved, read it from saved_token
+        if (saved_token.has_value()) {
+            // If there was a Token saved in saved_char return that and empty saved_char
+            auto result = std::move(saved_token.value());
+            saved_token = std::nullopt;
+            return result;
+        }
+
         // First skip all whitespaces and comments
         skip_whitespaces_and_comments();
 
@@ -404,6 +420,11 @@ export struct InputStream {
             // We have an invalid character as '@' or '&'
             return std::unexpected(GrammarError{location, std::format("Invalid character '{}'", ch.value())});
         }
+    }
+
+    void unread_token (std::unique_ptr<Token> token){
+        assert(!saved_token.has_value());
+        saved_token = std::move(token);
     }
 };
 
