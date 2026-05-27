@@ -22,10 +22,14 @@ module;
 #include <cerrno>
 #include <cstdlib>
 #include <cassert>
+#include <unordered_map>
 
 export module SceneFiles;
 
 import std;
+import Material;
+import Shape;
+import Camera;
 
 /// Language symbols in a string_view object
 export constexpr std::string_view SYMBOLS = "()<>[],*";
@@ -427,4 +431,136 @@ export struct InputStream {
         saved_token = std::move(token);
     }
 };
+
+
+export struct Scene {
+    std::unordered_map<std::string, std::shared_ptr<Material>> materials;
+    World world;
+    std::unique_ptr<Camera> camera = nullptr;
+    std::unordered_map<std::string, float> float_variables;
+    std::unordered_set<std::string> overridden_variables;
+};
+
+std::expected<void, GrammarError> expect_symbol(InputStream& input_file, char symbol) {
+    /// Read a token from `input_file` and check that it matches `symbol`.
+    auto res = input_file.read_token();
+    if (!res.has_value()) {
+        return std::unexpected(res.error());
+    }
+
+    // Extract the value from the res variable
+    std::unique_ptr<Token> token = std::move(res.value());
+
+    // Is the token actually a SymbolToken?
+    auto* sym_token = dynamic_cast<SymbolToken*>(token.get());
+
+    // If it's not a symbol (it's a keyword or ...)
+    if (sym_token == nullptr) {
+        return std::unexpected(GrammarError{
+            token->location,
+            std::format("Expected symbol '{}', but got a different token type", symbol)
+        });
+    }
+    // If it's the wrong symbol, throw the GrammarError
+    if (sym_token->symbol != symbol) {
+        return std::unexpected(GrammarError{
+            token->location,
+            std::format("Expected symbol '{}', but got {}", symbol, sym_token->symbol)
+        });
+    }
+
+    // Success: returning empty brackets satisfies std::expected<void, ...>
+    return {};
+}
+
+std::expected<KeywordEnum, GrammarError> expect_keywords(InputStream& input_file, const std::vector<KeywordEnum>& expected_keywords) {
+    /// Read a token from `input_file` and check that it is one of the keywords in `keywords`
+
+    auto res = input_file.read_token();
+    if (!res.has_value()) {
+        return std::unexpected(res.error());
+    }
+
+    std::unique_ptr<Token> token = std::move(res.value());
+
+    // Checks if it's a KeywordToken
+    auto* kw_token = dynamic_cast<KeywordToken*>(token.get());
+    if (kw_token == nullptr) {
+        return std::unexpected(GrammarError{token->location,"Expected a keyword, but got a different token type"});
+    }
+
+    // Checks if the keyword is inside our list of allowed keywords
+    // std::ranges::find searches the vector. If it hits the end(), it didn't find it.
+    if (std::ranges::find(expected_keywords, kw_token->keyword) == expected_keywords.end()) {
+        return std::unexpected(GrammarError{token->location,"Got an unexpected keyword for this specific grammar rule"
+        });
+    }
+
+    // Success: return the specific KeywordEnum so the parser knows which one it was.
+    return kw_token->keyword;
+}
+
+std::expected<std::string, GrammarError> expect_identifier(InputStream& input_file) {
+    /// Read a token from `input_file` and check that it is an identifier.
+
+    auto res = input_file.read_token();
+    if (!res.has_value()) {
+        return std::unexpected(res.error());
+    }
+
+    std::unique_ptr<Token> token = std::move(res.value());
+    auto* id_token = dynamic_cast<IdentifierToken*>(token.get());
+    if (id_token == nullptr) {
+        return std::unexpected(GrammarError{token->location, "Expected an Identifier, but got a different kind of token."});
+    }
+
+    // Success: return the identifier
+    return id_token->identifier;
+}
+
+std::expected<std::string, GrammarError> expect_string(InputStream& input_file) {
+    /// Read a token from `input_file` and check that it is a literal string.
+    /// Returns a string
+    auto res = input_file.read_token();
+    if (!res.has_value()) {
+        return std::unexpected(res.error());
+    }
+
+    std::unique_ptr<Token> token = std::move(res.value());
+    auto* string_token = dynamic_cast<LiteralStringToken*>(token.get());
+    if (string_token == nullptr) {
+        return std::unexpected(GrammarError{token->location, "Expected an LiteralString, but got a different kind of token."});
+    }
+
+    // Success: return the string
+    return string_token->string;
+}
+
+std::expected<float, GrammarError> expect_number(InputStream& input_file, Scene& scene) {
+    /// Read a token from `input_file` and check that it is either a literal number or a variable in `scene`
+    auto res = input_file.read_token();
+    if (!res.has_value()) {
+        return std::unexpected(res.error());
+    }
+
+    std::unique_ptr<Token> token = std::move(res.value());
+
+    if (auto* num_token = dynamic_cast<LiteralNumberToken*>(token.get())) {
+        return num_token->number;
+    }
+
+    if (auto* var_token = dynamic_cast<IdentifierToken*>(token.get())) {
+        std::string var_name = var_token->identifier;
+        if (!scene.float_variables.contains(var_name)) {
+            return std::unexpected(GrammarError{token->location,std::format("Unknown variable '{}': variable not in the float_variables list", var_name)});
+        }
+
+        // Return the mapped float value from the dictionary
+        return scene.float_variables.at(var_name);
+    }
+
+    return std::unexpected(GrammarError{token->location,"Expected a literal number or a variable, but got a different kind of token"
+    });
+
+}
 
