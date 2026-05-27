@@ -35,13 +35,13 @@ xmake run PhyxRadpp pfm2png <INPUT_PFM> <ALPHA_FACTOR> <GAMMA> <OUTPUT_PNG>
 ```
 
 #### -- Example 1.1: Conversion from `.pfm` to `.png`
-Here is a command that converts `images/memorial.pfm` into `memorial_alpha0.2_gamma_1.png`
+Here is a command that converts `images/memorial.pfm` into `generated_images/memorial_alpha0.2_gamma_1.png`
 
 ```bash
 xmake run PhyxRadpp pfm2png images/memorial.pfm 0.3 1.0 memorial
 ```
 
-<img src="conversion_memorial_alpha0.3_gamma1.png" alt="Conversion result" width="40%">
+<img src="generated_images/conversion_memorial_alpha0.3_gamma1.png" alt="Conversion result" width="40%">
 
 
 ### 2. Ray Tracing Demo
@@ -73,7 +73,7 @@ To render a scene with a textured sphere and a checkered plane using an `alpha=0
 xmake run PhyxRadpp demo 0.3 2.2 sphere_plane --algorithm flat
 ```
 
-<img src="sphere_plane_alpha0.3_gamma2.2.png" alt="Textured scene" width="50%">
+<img src="generated_images/sphere_plane_alpha0.3_gamma2.2.png" alt="Textured scene" width="50%">
 
 
 #### -- Example 2.2: Silhouette Mode (On/Off)
@@ -84,7 +84,7 @@ To render a black-and-white silhouette of the geometry:
 xmake run PhyxRadpp demo 1 1 demo_silhouette --algorithm onoff
 ```
 
-<img src="demo_silhouette_alpha1_gamma1.png" alt="OnOff spheres result" width="50%">
+<img src="generated_images/demo_silhouette_alpha1_gamma1.png" alt="OnOff spheres result" width="50%">
 
 *Note: if you use the default settings for OnOffRenderer the values of `alpha` and `gamma` are irrelevant. Be careful to set sensible values of `alpha` and `gamma` when you render different colors.*
 
@@ -94,10 +94,10 @@ Ensure `World world = build_Cornell_box_world();` is active for the pathtracing 
 To render a photorealistic Cornell Box containing diffusive and mirrored spheres, solving the rendering equation with a 400x400 resolution, 10x10 antialiasing (100 samples per pixel), 4 rays per bounce, a max depth of 4, and Russian Roulette starting at depth 3.
 
 ```bash
-xmake run PhyxRadpp demo 1 1 Cornell_Box_Sphere_400_400_anti10_path443 --algorithm pathtracing --dimensions 400 400 --antialiasing 10 --pathtracer_params 4 4 3
+xmake run PhyxRadpp demo 1 1 teapot --algorithm pathtracing --dimensions 400 400 --antialiasing 10 --pathtracer_params 4 4 3
 ```
 
-<img src="Cornell_Box_Sphere_400_400_anti10_path443_alpha1_gamma1.png" alt="OnOff spheres result" width="50%">
+<img src="generated_images/Cornell_Box_Utah_Teapot_alpha1_gamma1.png" alt="OnOff spheres result" width="50%">
 
 *Note: The code will automatically append _alpha1_gamma1.png to your output filename.*
 
