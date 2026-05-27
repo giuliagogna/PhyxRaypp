@@ -64,7 +64,9 @@ export enum class KeywordEnum {
     ORTHOGONAL,     // 18
     PERSPECTIVE,    // 19
 
-    FLOAT           // 20
+    FLOAT,           // 20
+
+    MESH             // 21
 };
 
 // Keyword dictionary for the lexer
@@ -88,7 +90,8 @@ export const std::unordered_map<std::string, KeywordEnum> KEYWORDS{
     {"camera", KeywordEnum::CAMERA},
     {"orthogonal", KeywordEnum::ORTHOGONAL},
     {"perspective", KeywordEnum::PERSPECTIVE},
-    {"float", KeywordEnum::FLOAT}
+    {"float", KeywordEnum::FLOAT},
+    {"mesh", KeywordEnum::MESH}
 };
 
 // Abstract Token struct
