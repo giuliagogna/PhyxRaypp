@@ -448,6 +448,8 @@ export struct Scene {
     std::unordered_set<std::string> overridden_variables;
 };
 
+
+export {
 // ============================================================================================
 // EXPECT FUNCTIONS
 // ============================================================================================
@@ -476,7 +478,7 @@ std::expected<void, GrammarError> expect_symbol(InputStream& input_file, char sy
     if (sym_token->symbol != symbol) {
         return std::unexpected(GrammarError{
             token->location,
-            std::format("Expected symbol '{}', but got {}", symbol, sym_token->symbol)
+            std::format("Expected symbol '{}', but got '{}'", symbol, sym_token->symbol)
         });
     }
 
@@ -588,7 +590,7 @@ std::expected<Vec, GrammarError> parse_vec(InputStream& input_file, Scene& scene
     float vx = vx_res.value();
 
     auto comma1 = expect_symbol(input_file, ',');
-    if (comma1.has_value()) { return std::unexpected(comma1.error()); }
+    if (!comma1.has_value()) { return std::unexpected(comma1.error()); }
 
     auto vy_res = expect_number(input_file, scene);
     if (!vy_res.has_value()) { return std::unexpected(vy_res.error()); }
@@ -646,7 +648,7 @@ std::expected<std::unique_ptr<Pigment>, GrammarError> parse_pigment(InputStream&
     KeywordEnum keyword = keyword_res.value();
 
     auto open_brk_res = expect_symbol(input_file, '(');
-    if (open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
+    if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
 
     if (keyword == KeywordEnum::UNIFORM) {
         auto color_res = parse_color(input_file, scene);
@@ -751,7 +753,7 @@ std::expected<std::unique_ptr<BRDF>, GrammarError> parse_brdf(InputStream& input
 
 std::expected<std::pair<std::string, Material>, GrammarError> parse_material(InputStream& input_file, Scene& scene) {
 
-    auto identifier_res = expect_string(input_file);
+    auto identifier_res = expect_identifier(input_file);
     if (!identifier_res.has_value()) { return std::unexpected(identifier_res.error()); }
     std::string name = identifier_res.value();
 
@@ -972,5 +974,7 @@ std::expected<std::unique_ptr<Camera>, GrammarError> parse_camera(InputStream& i
     }
 
     return std::unexpected(GrammarError{input_file.location, "Failed to parse Camera"});
+
+}
 
 }
