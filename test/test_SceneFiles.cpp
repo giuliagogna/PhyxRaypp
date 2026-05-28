@@ -95,7 +95,7 @@ TEST_CASE("Test InputStream") {
 
 // Helper functions to use in the lexer tests
 void check_is_keyword(const std::expected<std::unique_ptr<Token>, GrammarError>& res, KeywordEnum expected_kw) {
-    REQUIRE(res.has_value()); // Ensure no grammar error occured
+    REQUIRE(res.has_value()); // Ensure no grammar error occurred
 
     // Check if the return type is actually what expected: if it is KeywordToken it returns
     // the pointer, otherwise it returns nullptr

@@ -718,6 +718,9 @@ std::expected<std::unique_ptr<Pigment>, GrammarError> parse_pigment(InputStream&
         return std::make_unique<ImagePigment>(std::move(image_res.value()));
 
     }
+
+    return std::unexpected(GrammarError{input_file.location, "Failed to parse pigment keyword."});
+
 }
 
 std::expected<std::unique_ptr<BRDF>, GrammarError> parse_brdf(InputStream& input_file, Scene& scene) {
@@ -889,3 +892,85 @@ std::expected<Transformation, GrammarError> parse_transformation(InputStream& in
 
 }
 
+// Use 'T' to specify which concrete shape to build (e.g., Sphere, Cube, Plane)
+template <typename T>
+std::expected<std::unique_ptr<Shape>, GrammarError> parse_shape(InputStream& input_file, Scene& scene) {
+
+    auto open_brk_res = expect_symbol(input_file, '(');
+    if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
+
+    auto transformation_res = parse_transformation(input_file, scene);
+    if (!transformation_res.has_value()) { return std::unexpected(transformation_res.error()); }
+    Transformation transformation = transformation_res.value();
+
+    auto comma_res = expect_symbol(input_file, ',');
+    if (!comma_res.has_value()) { return std::unexpected(comma_res.error()); }
+
+    // Read the material name
+    auto mat_name_res = expect_identifier(input_file);
+    if (!mat_name_res.has_value()) { return std::unexpected(mat_name_res.error()); }
+    std::string material_name = mat_name_res.value();
+
+    // Look up the name in the dictionary
+    if (!scene.materials.contains(material_name)) {
+        return std::unexpected(GrammarError{
+            input_file.location,
+            std::format("Unknown material '{}' applied to shape.", material_name)
+        });
+    }
+
+    // Grab the existing shared pointer from the dictionary
+    std::shared_ptr<Material> material = scene.materials.at(material_name);
+
+    auto close_brk_res = expect_symbol(input_file, ')');
+    if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
+
+    // Return the "T" shape and cast it to unique_ptr in order to put it in World
+    return std::make_unique<T>(transformation, material);
+}
+
+std::expected<std::unique_ptr<Camera>, GrammarError> parse_camera(InputStream& input_file, Scene& scene) {
+
+    auto open_brk_res = expect_symbol(input_file, '(');
+    if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
+
+    auto keyword_res = expect_keywords(input_file, {KeywordEnum::PERSPECTIVE, KeywordEnum::ORTHOGONAL});
+    if (!keyword_res.has_value()) { return std::unexpected(keyword_res.error()); }
+    KeywordEnum keyword = keyword_res.value();
+
+    auto comma1_res = expect_symbol(input_file, ',');
+    if (!comma1_res.has_value()) { return std::unexpected(comma1_res.error()); }
+
+    auto aspect_ratio_res = expect_number(input_file, scene);
+    if (!aspect_ratio_res.has_value()) { return std::unexpected(aspect_ratio_res.error()); }
+    float aspect_ratio = aspect_ratio_res.value();
+
+    float distance=0.0f;
+    if (keyword == KeywordEnum::PERSPECTIVE) {
+        auto comma2_res = expect_symbol(input_file, ',');
+        if (!comma2_res.has_value()) { return std::unexpected(comma2_res.error()); }
+
+        auto distance_res = expect_number(input_file, scene);
+        if (!distance_res.has_value()) { return std::unexpected(distance_res.error()); }
+        distance = distance_res.value();
+    }
+
+    auto comma3_res = expect_symbol(input_file, ',');
+    if (!comma3_res.has_value()) { return std::unexpected(comma3_res.error()); }
+
+    auto transformation_res = parse_transformation(input_file, scene);
+    if (!transformation_res.has_value()) { return std::unexpected(transformation_res.error()); }
+    Transformation transformation = transformation_res.value();
+
+    auto close_brk_res = expect_symbol(input_file, ')');
+    if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
+
+    if (keyword == KeywordEnum::ORTHOGONAL) {
+        return std::make_unique<OrthogonalCamera>(aspect_ratio, transformation);
+    } else if (keyword == KeywordEnum::PERSPECTIVE) {
+        return std::make_unique<PerspectiveCamera>(aspect_ratio, distance, transformation);
+    }
+
+    return std::unexpected(GrammarError{input_file.location, "Failed to parse Camera"});
+
+}
