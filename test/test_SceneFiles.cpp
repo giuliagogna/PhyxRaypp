@@ -547,7 +547,7 @@ TEST_CASE("Test Parser: Parse functions") {
 
     // parse_material()
     SUBCASE("parse_material()") {
-        SUBCASE("Valid Material") {
+        SUBCASE("Valid Material - constructor with 2 arguments") {
             // Material grammar: identifier( BRDF, emitted_pigment )
             std::istringstream string_stream("my_shiny_mat(specular(uniform(<1.0, 1.0, 1.0>)), uniform(<0.0, 0.0, 0.0>))");
             InputStream stream(string_stream);
@@ -570,6 +570,34 @@ TEST_CASE("Test Parser: Parse functions") {
             // Check that the emitted radiance is a uniform pigment: the correct parsing of pigments has been tested above
             auto* emitted_pigment = dynamic_cast<UniformPigment*>(mat.emitted_radiance.get());
             REQUIRE(emitted_pigment != nullptr); // Proves the emission is uniform
+            CHECK(emitted_pigment->color.is_close(Color{0.0f, 0.0f, 0.0f}));
+
+        }
+
+        SUBCASE("Valid Material - constructor with only BRDF") {
+            // Material grammar: identifier( BRDF, emitted_pigment )
+            std::istringstream string_stream("my_shiny_mat(specular(uniform(<1.0, 1.0, 1.0>)))");
+            InputStream stream(string_stream);
+
+            auto res = parse_material(stream, scene);
+            REQUIRE(res.has_value());
+
+            // Ensure the identifier was parsed correctly
+            CHECK(res.value().first == "my_shiny_mat");
+
+            // Extract the material
+            Material mat = std::move(res.value().second);
+            REQUIRE(mat.brdf != nullptr);
+            REQUIRE(mat.emitted_radiance != nullptr);
+
+            // Check that the BRDF is a specular: the correct parsing pf the BRDF has been tested above
+            auto* spec_brdf = dynamic_cast<SpecularBRDF*>(mat.brdf.get());
+            REQUIRE(spec_brdf != nullptr); // Proves it's specular
+
+            // Check that the emitted radiance is a uniform pigment: the correct parsing of pigments has been tested above
+            auto* emitted_pigment = dynamic_cast<UniformPigment*>(mat.emitted_radiance.get());
+            REQUIRE(emitted_pigment != nullptr); // Proves the emission is uniform
+            CHECK(emitted_pigment->color.is_close(Color{0.0f, 0.0f, 0.0f}));
 
         }
 
@@ -581,6 +609,17 @@ TEST_CASE("Test Parser: Parse functions") {
             auto res = parse_material(stream, scene);
             REQUIRE_FALSE(res.has_value());
             CHECK(res.error().message.find("unexpected keyword") != std::string::npos);
+        }
+
+        SUBCASE("Missing closing bracket (Negative)") {
+            // Just putting a pigment where the BRDF should be
+            std::istringstream string_stream("bad_mat(specular(uniform(<1.0, 1.0, 1.0>), uniform(<0.0, 0.0, 0.0>))");
+            InputStream stream(string_stream);
+
+            auto res = parse_material(stream, scene);
+            REQUIRE_FALSE(res.has_value());
+            //MESSAGE("Parsing error: ", res.error().message);
+            CHECK(res.error().message.find("Expected symbol ')'") != std::string::npos);
         }
     }
 

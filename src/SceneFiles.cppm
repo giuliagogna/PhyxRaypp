@@ -783,18 +783,35 @@ export {
         if (!brdf_res.has_value()) { return std::unexpected(brdf_res.error()); }
         std::unique_ptr<BRDF> brdf = std::move(brdf_res.value());
 
-        auto comma = expect_symbol(input_file, ',');
-        if (!comma.has_value()) { return std::unexpected(comma.error()); }
+        // ========================================
+        // Optional parameter emitted_radiance
+        // ========================================
+        auto next_tok_res = input_file.read_token();
+        if (!next_tok_res.has_value()) { return std::unexpected(next_tok_res.error()); }
+        std::unique_ptr<Token> next_tok = std::move(next_tok_res.value());
 
-        auto emitted_rad_res = parse_pigment(input_file, scene);
-        if (!emitted_rad_res.has_value()) { return std::unexpected(emitted_rad_res.error()); }
-        std::unique_ptr<Pigment> emitted_rad = std::move(emitted_rad_res.value());
+        auto* sym_tok = dynamic_cast<SymbolToken*>(next_tok.get());
 
-        auto close_brk_res = expect_symbol(input_file, ')');
+        // If the ) is found, use the constructor with default emitted_radiance
+        if (sym_tok != nullptr && sym_tok->symbol == ')') {
+            Material material{std::move(brdf)};
+            return std::pair<std::string, Material>{name, std::move(material)};
+        }
+        else if (sym_tok != nullptr && sym_tok->symbol == ',') {
+            auto emitted_rad_res = parse_pigment(input_file, scene);
+            if (!emitted_rad_res.has_value()) { return std::unexpected(emitted_rad_res.error()); }
+            std::unique_ptr<Pigment> emitted_rad = std::move(emitted_rad_res.value());
 
-        Material material{std::move(brdf), std::move(emitted_rad)};
+            auto close_brk_res = expect_symbol(input_file, ')');
+            if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
 
-        return std::pair<std::string, Material>{name, std::move(material)};
+            Material material{std::move(brdf), std::move(emitted_rad)};
+
+            return std::pair<std::string, Material>{name, std::move(material)};
+        }
+        else {
+            return std::unexpected(GrammarError{next_tok->location, "Expected ',' or ')' after BRDF definition."});
+        }
     }
 
     /// @brief Parses an LL(1) chain of affine transformations connected by '*'.
