@@ -37,6 +37,7 @@ import Shape;
 import Camera;
 import Geometry;
 import HDRImage;
+import Mesh;
 
 /// @brief A string view containing all single-character symbols recognized by the language lexer.
 export constexpr std::string_view SYMBOLS = "()<>[],*=;";
@@ -953,6 +954,108 @@ export {
         if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
 
         return std::make_unique<T>(transformation, material);
+    }
+
+    /// @brief Parses a 3D Mesh object from an external .obj file.
+    ///
+    /// Reads the transformation, material identifier, and the file path.
+    /// Optionally accepts two additional integer parameters for the BVH builder: (n_bins, leaf_threshold).
+    ///
+    /// @param input_file The InputStream pointing to the mesh parameters.
+    /// @param scene The active Scene object containing the material dictionary.
+    /// @return A unique pointer to the constructed Mesh safely upcast to Shape.
+    /// @warning Throws a GrammarError if the material is unknown or the file cannot be opened.
+    std::expected<std::unique_ptr<Shape>, GrammarError> parse_mesh(InputStream& input_file, Scene& scene) {
+
+        auto open_brk_res = expect_symbol(input_file, '(');
+        if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
+
+        auto file_res = expect_string(input_file);
+        if (!file_res.has_value()) { return std::unexpected(file_res.error()); }
+        std::string filename = file_res.value();
+
+        // Safety Check: Prevent the constructor from throwing an uncatchable exception
+        std::ifstream fs(filename);
+        if (!fs.is_open()) {
+            return std::unexpected(GrammarError{
+                input_file.location,
+                std::format("Cannot open mesh file '{}'", filename)
+            });
+        }
+        fs.close();
+
+        auto comma1 = expect_symbol(input_file, ',');
+        if (!comma1.has_value()) { return std::unexpected(comma1.error()); }
+
+        auto mat_name_res = expect_identifier(input_file);
+        if (!mat_name_res.has_value()) { return std::unexpected(mat_name_res.error()); }
+        std::string material_name = mat_name_res.value();
+
+        if (!scene.materials.contains(material_name)) {
+            return std::unexpected(GrammarError{
+                input_file.location,
+                std::format("Unknown material '{}' applied to mesh.", material_name)
+            });
+        }
+        std::shared_ptr<Material> material = scene.materials.at(material_name);
+
+        auto comma2 = expect_symbol(input_file, ',');
+        if (!comma2.has_value()) { return std::unexpected(comma2.error()); }
+
+        auto transformation_res = parse_transformation(input_file, scene);
+        if (!transformation_res.has_value()) { return std::unexpected(transformation_res.error()); }
+        Transformation transformation = transformation_res.value();
+
+        // =========================================================
+        // OPTIONAL PARAMETER PARSING
+        // =========================================================
+
+        auto next_tok_res = input_file.read_token();
+        if (!next_tok_res.has_value()) { return std::unexpected(next_tok_res.error()); }
+        std::unique_ptr<Token> tok = std::move(next_tok_res.value());
+        auto* sym_tok = dynamic_cast<SymbolToken*>(tok.get());
+
+        if (sym_tok != nullptr && sym_tok->symbol == ')') {
+            // Only 3 arguments provided.
+            // Call the constructor with 3 args
+            // Mesh.cppm automatically injects its own defaults
+            return std::make_unique<Mesh>(filename, material, transformation);
+        }
+        else if (sym_tok != nullptr && sym_tok->symbol == ',') {
+            // A 4th argument was provided (n_bins)
+            auto bins_res = expect_number(input_file, scene);
+            if (!bins_res.has_value()) { return std::unexpected(bins_res.error()); }
+            int bvh_n_bins = static_cast<int>(bins_res.value());
+
+            auto next_tok2_res = input_file.read_token();
+            if (!next_tok2_res.has_value()) { return std::unexpected(next_tok2_res.error()); }
+            std::unique_ptr<Token> tok2 = std::move(next_tok2_res.value());
+            auto* sym_tok2 = dynamic_cast<SymbolToken*>(tok2.get());
+
+            if (sym_tok2 != nullptr && sym_tok2->symbol == ')') {
+                // Finished: 4 args passed
+                // Mesh.cppm injects its default for threshold (3)
+                return std::make_unique<Mesh>(filename, material, transformation, bvh_n_bins);
+            }
+            else if (sym_tok2 != nullptr && sym_tok2->symbol == ',') {
+                // Case 3: A 5th argument was provided (threshold)
+                auto thresh_res = expect_number(input_file, scene);
+                if (!thresh_res.has_value()) { return std::unexpected(thresh_res.error()); }
+                int bvh_threshold = static_cast<int>(thresh_res.value());
+
+                auto final_close = expect_symbol(input_file, ')');
+                if (!final_close.has_value()) { return std::unexpected(final_close.error()); }
+
+                // Finished: all 5 args passed explicitly
+                return std::make_unique<Mesh>(filename, material, transformation, bvh_n_bins, bvh_threshold);
+            }
+            else {
+                return std::unexpected(GrammarError{tok2->location, "Expected ',' or ')' after mesh BVH bins."});
+            }
+        }
+        else {
+            return std::unexpected(GrammarError{tok->location, "Expected ',' or ')' after mesh filename."});
+        }
     }
 
     /// @brief Parses a Camera declaration from the scene file.

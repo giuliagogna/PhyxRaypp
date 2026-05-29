@@ -27,6 +27,7 @@ import BRDF;
 import Shape;
 import Material;
 import Camera;
+import Mesh;
 
 TEST_CASE("Test InputStream") {
 
@@ -692,6 +693,78 @@ TEST_CASE("Test Parser: Parse functions") {
             REQUIRE_FALSE(res.has_value());
             CHECK(res.error().message.find("Unknown material 'invisible_material'") != std::string::npos);
         }
+    }
+
+    // parse_mesh()
+    SUBCASE("parse_mesh()") {
+
+        auto dummy_brdf = std::make_shared<DiffusiveBRDF>(std::make_shared<UniformPigment>(Color{1.0f,1.0f,1.0f}));
+        scene.materials["mesh_mat"] = std::make_shared<Material>(dummy_brdf);
+
+        std::string test_obj = "dummy_test_mesh.obj";
+        {
+            std::ofstream out(test_obj);
+            out << "v 0 0 0\nv 1 0 0\nv 0 1 0\n";
+            out << "vn 0 0 1\nvn 0 0 1\nvn 0 0 1\n";
+            out << "f 1/1/1 2/2/2 3/3/3\n";
+        }
+
+        SUBCASE("Valid Mesh - 3 Arguments (Defaults)") {
+            std::istringstream string_stream(std::format("(\"{}\", mesh_mat, identity)", test_obj));
+            InputStream stream(string_stream);
+
+            auto res = parse_mesh(stream, scene);
+            REQUIRE(res.has_value());
+
+            // Prove it successfully built a Mesh and linked the material
+            auto* mesh = dynamic_cast<Mesh*>(res.value().get());
+            REQUIRE(mesh != nullptr);
+            CHECK(mesh->material == scene.materials["mesh_mat"]);
+        }
+
+        SUBCASE("Valid Mesh - 4 Arguments (Custom Bins)") {
+            std::istringstream string_stream(std::format("(\"{}\", mesh_mat, identity, 25)", test_obj));
+            InputStream stream(string_stream);
+
+            auto res = parse_mesh(stream, scene);
+            REQUIRE(res.has_value());
+            REQUIRE(dynamic_cast<Mesh*>(res.value().get()) != nullptr);
+        }
+
+        SUBCASE("Valid Mesh - 5 Arguments (Custom Bins & Threshold)") {
+            std::istringstream string_stream(std::format("(\"{}\", mesh_mat, identity, 25, 5)", test_obj));
+            InputStream stream(string_stream);
+
+            auto res = parse_mesh(stream, scene);
+            REQUIRE(res.has_value());
+            REQUIRE(dynamic_cast<Mesh*>(res.value().get()) != nullptr);
+        }
+
+        // ==========================================
+        // Negative Tests
+        // ==========================================
+
+        SUBCASE("Negative: Missing File") {
+            std::istringstream string_stream("(\"this_file_does_not_exist.obj\", mesh_mat, identity)");
+            InputStream stream(string_stream);
+
+            auto res = parse_mesh(stream, scene);
+            REQUIRE_FALSE(res.has_value());
+            CHECK(res.error().message.find("Cannot open mesh file") != std::string::npos);
+        }
+
+        SUBCASE("Negative: Bad Optional Syntax") {
+            // User typed a comma but forgot the number
+            std::istringstream string_stream(std::format("(\"{}\", mesh_mat, identity, )", test_obj));
+            InputStream stream(string_stream);
+
+            auto res = parse_mesh(stream, scene);
+            REQUIRE_FALSE(res.has_value());
+            // Since there is no number, expect_number will throw its standard error
+            CHECK(res.error().message.find("Expected a literal number") != std::string::npos);
+        }
+
+        std::filesystem::remove("dummy_test_mesh.obj");
     }
 }
 
