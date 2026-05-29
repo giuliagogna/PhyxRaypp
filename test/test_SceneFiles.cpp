@@ -378,6 +378,10 @@ TEST_CASE("Test Parser: Parse functions") {
 
             auto* checkered_pigment = dynamic_cast<CheckeredPigment*>(res.value().get());
             REQUIRE(checkered_pigment != nullptr);
+
+            CHECK(checkered_pigment->color1.is_close(Color{0.1, 0.2, 0.3}));
+            CHECK(checkered_pigment->color2.is_close(Color{0.4, 0.5, 0.6}));
+            CHECK(checkered_pigment->num_steps == 4);
         }
 
         SUBCASE("parse_pigment() - IMAGE") {
@@ -401,6 +405,9 @@ TEST_CASE("Test Parser: Parse functions") {
 
             auto* img_pigment = dynamic_cast<ImagePigment*>(pigment_res.value().get());
             CHECK(img_pigment != nullptr);
+
+            Color c = img_pigment->get_color({0.5,0.5});
+            CHECK(c.is_close(Color{1.0f, 0.5f, 0.25f}));
 
             std::filesystem::remove(test_filename);
         }
@@ -463,6 +470,13 @@ TEST_CASE("Test Parser: Parse functions") {
 
             auto* diff_brdf = dynamic_cast<DiffusiveBRDF*>(res.value().get());
             REQUIRE(diff_brdf != nullptr);
+
+            auto* uniform_pigment = dynamic_cast<UniformPigment*>(diff_brdf->pigment.get());
+            REQUIRE(uniform_pigment != nullptr);
+
+            Color c = uniform_pigment->get_color({0.0,0.0});
+            CHECK(c.is_close(Color{1.0, 1.0, 1.0}));
+
         }
 
         SUBCASE("parse_brdf() - SPECULAR") {
@@ -474,6 +488,12 @@ TEST_CASE("Test Parser: Parse functions") {
 
             auto* spec_brdf = dynamic_cast<SpecularBRDF*>(res.value().get());
             REQUIRE(spec_brdf != nullptr);
+
+            auto* uniform_pigment = dynamic_cast<UniformPigment*>(spec_brdf->pigment.get());
+            REQUIRE(uniform_pigment != nullptr);
+
+            Color c = uniform_pigment->get_color({0.0,0.0});
+            CHECK(c.is_close(Color{1.0, 1.0, 1.0}));
         }
 
         // =============================================
@@ -537,10 +557,19 @@ TEST_CASE("Test Parser: Parse functions") {
             // Ensure the identifier was parsed correctly
             CHECK(res.value().first == "my_shiny_mat");
 
-            // Ensure the Material struct contains valid pointers
-            Material mat = res.value().second;
-            CHECK(mat.brdf != nullptr);
-            CHECK(mat.emitted_radiance != nullptr);
+            // Extract the material
+            Material mat = std::move(res.value().second);
+            REQUIRE(mat.brdf != nullptr);
+            REQUIRE(mat.emitted_radiance != nullptr);
+
+            // Check that the BRDF is a specular: the correct parsing pf the BRDF has been tested above
+            auto* spec_brdf = dynamic_cast<SpecularBRDF*>(mat.brdf.get());
+            REQUIRE(spec_brdf != nullptr); // Proves it's specular
+
+            // Check that the emitted radiance is a uniform pigment: the correct parsing of pigments has been tested above
+            auto* emitted_pigment = dynamic_cast<UniformPigment*>(mat.emitted_radiance.get());
+            REQUIRE(emitted_pigment != nullptr); // Proves the emission is uniform
+
         }
 
         SUBCASE("Missing BRDF definition (Negative)") {
@@ -596,6 +625,12 @@ TEST_CASE("Test Parser: Parse functions") {
 
             auto* persp = dynamic_cast<PerspectiveCamera*>(res.value().get());
             REQUIRE(persp != nullptr);
+
+            CHECK(persp->aspect_ratio == 1.5);
+            CHECK(persp->d == 10.0);
+
+            Transformation exp_tr = Trans(Vec{0.0, 0.0, -5.0});
+            CHECK(persp->trans.m.is_close(exp_tr.m));
         }
 
         SUBCASE("parse_camera() - ORTHOGONAL") {
@@ -607,6 +642,11 @@ TEST_CASE("Test Parser: Parse functions") {
 
             auto* ortho = dynamic_cast<OrthogonalCamera*>(res.value().get());
             REQUIRE(ortho != nullptr);
+
+            CHECK(ortho->aspect_ratio == 1.5);
+
+            Transformation exp_tr = Transformation{};
+            CHECK(ortho->trans.m.is_close(exp_tr.m));
         }
 
         SUBCASE("parse_camera() - Missing closing bracket (Negative)") {
@@ -624,8 +664,8 @@ TEST_CASE("Test Parser: Parse functions") {
     SUBCASE("parse_shape<T>()") {
         SUBCASE("Valid Sphere with Material Lookup") {
             // Pre-populate the scene dictionary with a dummy material so the lookup works
-            auto dummy_brdf = std::make_shared<DiffusiveBRDF>(std::make_shared<UniformPigment>(Color{1,1,1}));
-            auto dummy_emitted = std::make_shared<UniformPigment>(Color{0,0,0});
+            auto dummy_brdf = std::make_shared<DiffusiveBRDF>(std::make_shared<UniformPigment>(Color{1.0f,1.0f,1.0f}));
+            auto dummy_emitted = std::make_shared<UniformPigment>(Color{0.0f,0.0f,0.0f});
             scene.materials["blue_mat"] = std::make_shared<Material>(dummy_brdf, dummy_emitted);
 
             std::istringstream string_stream("(scaling([2.0, 2.0, 2.0]), blue_mat)");
@@ -637,6 +677,10 @@ TEST_CASE("Test Parser: Parse functions") {
 
             // Confirm the material pointer was linked to the scene dictionary
             CHECK(res.value()->material == scene.materials["blue_mat"]);
+
+            // Confirm the transformation is correct
+            Transformation expected_trans = Scale(Vec{2.0f, 2.0f, 2.0f});
+            CHECK(res.value()->trans.m.is_close(expected_trans.m));
         }
 
         SUBCASE("Unknown Material applied (Negative)") {
@@ -648,5 +692,93 @@ TEST_CASE("Test Parser: Parse functions") {
             REQUIRE_FALSE(res.has_value());
             CHECK(res.error().message.find("Unknown material 'invisible_material'") != std::string::npos);
         }
+    }
+}
+
+// =======================================================================
+// INTEGRATION TESTS (FILE-BASED)
+// =======================================================================
+
+TEST_CASE("Integration: parse_scene() from external files") {
+
+    SUBCASE("Valid End-to-End Scene") {
+        std::istringstream string_stream(R"(
+            float clock = 150.0;
+            float cam_dist = 2.0;
+
+            material sky_material(
+                diffuse(uniform(<0.0, 0.0, 0.0>)),
+                uniform(<0.7, 0.5, 1.0>)
+            );
+
+            # Here is a comment
+
+            material ground_material(
+                diffuse(checkered(<0.3, 0.5, 0.1>, <0.1, 0.2, 0.5>, 4)),
+                uniform(<0.0, 0.0, 0.0>)
+            );
+
+            material sphere_material(
+                specular(uniform(<0.5, 0.5, 0.5>)),
+                uniform(<0.0, 0.0, 0.0>)
+            );
+
+            plane(translation([0.0, 0.0, 100.0]) * rot_y(clock), sky_material);
+            plane(identity, ground_material);
+
+            sphere(translation([0.0, 0.0, 1.0]), sphere_material);
+
+            camera(perspective, 1.0, cam_dist, rot_z(30.0) * translation([-4.0, 0.0, 1.0]));
+        )");
+
+        InputStream stream(string_stream);
+
+        auto scene_res = parse_scene(stream);
+        if (!scene_res.has_value()) {
+            MESSAGE("Parse error: ", scene_res.error().message);
+        }
+        REQUIRE(scene_res.has_value());
+        Scene scene = std::move(scene_res.value());
+
+        // Check the float variables
+        CHECK(scene.float_variables.size() == 2);
+        CHECK(scene.float_variables.contains("clock"));
+        CHECK(scene.float_variables.at("clock") == 150.0f);
+        CHECK(scene.float_variables.contains("cam_dist"));
+        CHECK(scene.float_variables.at("cam_dist") == 2.0f);
+
+        // Check the materials (not in order). Parsing of the material is tested above
+        CHECK(scene.materials.size() == 3);
+        CHECK(scene.materials.contains("sky_material"));
+        CHECK(scene.materials.contains("sphere_material"));
+        CHECK(scene.materials.contains("ground_material"));
+
+        CHECK(scene.materials.at("sky_material") != nullptr);
+        CHECK(scene.materials.at("sphere_material") != nullptr);
+        CHECK(scene.materials.at("ground_material") != nullptr);
+
+        // Check the shapes in the world
+        REQUIRE(scene.world.shapes.size() == 3);
+
+        // First shape should be a Plane with the sky_material
+        auto* shape1 = dynamic_cast<Plane*>(scene.world.shapes[0].get());
+        REQUIRE(shape1 != nullptr);
+        CHECK(shape1->material == scene.materials.at("sky_material"));
+
+        // Second shape should be a Plane with the ground_material
+        auto* shape2 = dynamic_cast<Plane*>(scene.world.shapes[1].get());
+        REQUIRE(shape2 != nullptr);
+        CHECK(shape2->material == scene.materials.at("ground_material"));
+
+        // Third shape should be a Sphere with the sphere_material
+        auto* shape3 = dynamic_cast<Sphere*>(scene.world.shapes[2].get());
+        REQUIRE(shape3 != nullptr);
+        CHECK(shape3->material == scene.materials.at("sphere_material"));
+
+        // Check the Camera (Plumbing check)
+        REQUIRE(scene.camera != nullptr);
+        auto* persp_cam = dynamic_cast<PerspectiveCamera*>(scene.camera.get());
+        REQUIRE(persp_cam != nullptr);
+
     }
 }
