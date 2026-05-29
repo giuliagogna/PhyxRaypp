@@ -769,6 +769,8 @@ export {
     /// @brief Parses a Material containing its identifier, BRDF, and Emitted Radiance pigment.
     /// @param input_file The InputStream.
     /// @param scene The active Scene object.
+    /// In the scene definition the `emitted_radiance` can be omitted: if none is provided, the default
+    /// black will be applied.
     /// @return A key-value pair of the Material's string identifier and the constructed Material object.
     std::expected<std::pair<std::string, Material>, GrammarError> parse_material(InputStream& input_file, Scene& scene) {
 
@@ -1075,10 +1077,21 @@ export {
         }
     }
 
+    /// @brief Helper function to check if a keyword belongs to the Transformation family.
+    bool is_transformation_keyword(KeywordEnum kw) {
+        return kw == KeywordEnum::IDENTITY ||
+               kw == KeywordEnum::TRANSLATION ||
+               kw == KeywordEnum::ROTATION_X ||
+               kw == KeywordEnum::ROTATION_Y ||
+               kw == KeywordEnum::ROTATION_Z ||
+               kw == KeywordEnum::SCALING;
+    }
+
     /// @brief Parses a Camera declaration from the scene file.
     /// @param input_file The InputStream.
     /// @param scene The active Scene object.
     /// @return A unique pointer to the Camera polymorphism wrapper.
+    /// Aspect ratio, distance, and transformation are all optional.
     std::expected<std::unique_ptr<Camera>, GrammarError> parse_camera(InputStream& input_file, Scene& scene) {
 
         auto open_brk_res = expect_symbol(input_file, '(');
@@ -1088,41 +1101,122 @@ export {
         if (!keyword_res.has_value()) { return std::unexpected(keyword_res.error()); }
         KeywordEnum keyword = keyword_res.value();
 
-        auto comma1_res = expect_symbol(input_file, ',');
-        if (!comma1_res.has_value()) { return std::unexpected(comma1_res.error()); }
+        // Query the structs for their exact defaults
+        float aspect_ratio = PerspectiveCamera{}.aspect_ratio;
+        float distance = PerspectiveCamera{}.d;
+        Transformation transformation{};
 
-        auto aspect_ratio_res = expect_number(input_file, scene);
-        if (!aspect_ratio_res.has_value()) { return std::unexpected(aspect_ratio_res.error()); }
-        float aspect_ratio = aspect_ratio_res.value();
 
-        float distance=0.0f;
-        if (keyword == KeywordEnum::PERSPECTIVE) {
-            auto comma2_res = expect_symbol(input_file, ',');
-            if (!comma2_res.has_value()) { return std::unexpected(comma2_res.error()); }
+        // Peek at the next token
+        auto tok1_res = input_file.read_token();
+        if (!tok1_res.has_value()) { return std::unexpected(tok1_res.error()); }
+        std::unique_ptr<Token> tok1 = std::move(tok1_res.value());
+        auto* sym1 = dynamic_cast<SymbolToken*>(tok1.get());
 
-            auto distance_res = expect_number(input_file, scene);
-            if (!distance_res.has_value()) { return std::unexpected(distance_res.error()); }
-            distance = distance_res.value();
+        if (sym1 != nullptr && sym1->symbol == ')') {
+            if (keyword == KeywordEnum::ORTHOGONAL) return std::make_unique<OrthogonalCamera>();
+            else return std::make_unique<PerspectiveCamera>();
+        }
+        if (sym1 == nullptr || sym1->symbol != ',') {
+            return std::unexpected(GrammarError{tok1->location, "Expected ',' or ')' after camera type."});
         }
 
-        auto comma3_res = expect_symbol(input_file, ',');
-        if (!comma3_res.has_value()) { return std::unexpected(comma3_res.error()); }
+        auto peek2_res = input_file.read_token();
+        if (!peek2_res.has_value()) { return std::unexpected(peek2_res.error()); }
+        std::unique_ptr<Token> peek2 = std::move(peek2_res.value());
+        auto* kw2 = dynamic_cast<KeywordToken*>(peek2.get());
 
-        auto transformation_res = parse_transformation(input_file, scene);
-        if (!transformation_res.has_value()) { return std::unexpected(transformation_res.error()); }
-        Transformation transformation = transformation_res.value();
+        if (kw2 != nullptr && is_transformation_keyword(kw2->keyword)) {
+            // User skipped aspect ratio and distance to go straight to transformation
+            input_file.unread_token(std::move(peek2));
+            auto trans_res = parse_transformation(input_file, scene);
+            if (!trans_res.has_value()) return std::unexpected(trans_res.error());
 
-        auto close_brk_res = expect_symbol(input_file, ')');
-        if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
+            auto close_res = expect_symbol(input_file, ')');
+            if (!close_res.has_value()) return std::unexpected(close_res.error());
+
+            if (keyword == KeywordEnum::ORTHOGONAL) return std::make_unique<OrthogonalCamera>(aspect_ratio, trans_res.value());
+            else return std::make_unique<PerspectiveCamera>(aspect_ratio, distance, trans_res.value());
+        }
+
+        // It wasn't a transformation, so it must be the aspect ratio
+        input_file.unread_token(std::move(peek2));
+        auto ar_res = expect_number(input_file, scene);
+        if (!ar_res.has_value()) { return std::unexpected(ar_res.error()); }
+        aspect_ratio = ar_res.value();
+
+        // Peek at the next token
+        auto tok2_res = input_file.read_token();
+        if (!tok2_res.has_value()) { return std::unexpected(tok2_res.error()); }
+        std::unique_ptr<Token> tok2 = std::move(tok2_res.value());
+        auto* sym2 = dynamic_cast<SymbolToken*>(tok2.get());
+
+        if (sym2 != nullptr && sym2->symbol == ')') {
+            if (keyword == KeywordEnum::ORTHOGONAL) return std::make_unique<OrthogonalCamera>(aspect_ratio);
+            else return std::make_unique<PerspectiveCamera>(aspect_ratio);
+        }
+        if (sym2 == nullptr || sym2->symbol != ',') {
+            return std::unexpected(GrammarError{tok2->location, "Expected ',' or ')' after aspect ratio."});
+        }
 
         if (keyword == KeywordEnum::ORTHOGONAL) {
-            return std::make_unique<OrthogonalCamera>(aspect_ratio, transformation);
-        } else if (keyword == KeywordEnum::PERSPECTIVE) {
-            return std::make_unique<PerspectiveCamera>(aspect_ratio, distance, transformation);
+            // Orthogonal doesn't have distance, so this MUST be a transformation
+            auto trans_res = parse_transformation(input_file, scene);
+            if (!trans_res.has_value()) return std::unexpected(trans_res.error());
+
+            auto close_res = expect_symbol(input_file, ')');
+            if (!close_res.has_value()) return std::unexpected(close_res.error());
+
+            return std::make_unique<OrthogonalCamera>(aspect_ratio, trans_res.value());
         }
+        else {
+            // Perspective: is it distance or transformation?
+            auto peek3_res = input_file.read_token();
+            if (!peek3_res.has_value()) { return std::unexpected(peek3_res.error()); }
+            std::unique_ptr<Token> peek3 = std::move(peek3_res.value());
+            auto* kw3 = dynamic_cast<KeywordToken*>(peek3.get());
 
-        return std::unexpected(GrammarError{input_file.location, "Failed to parse Camera"});
+            if (kw3 != nullptr && is_transformation_keyword(kw3->keyword)) {
+                // User skipped distance and went straight to transformation
+                input_file.unread_token(std::move(peek3));
+                auto trans_res = parse_transformation(input_file, scene);
+                if (!trans_res.has_value()) return std::unexpected(trans_res.error());
 
+                auto close_res = expect_symbol(input_file, ')');
+                if (!close_res.has_value()) return std::unexpected(close_res.error());
+
+                // distance is the default value
+                return std::make_unique<PerspectiveCamera>(aspect_ratio, distance, trans_res.value());
+            }
+
+            // Parse the distance
+            input_file.unread_token(std::move(peek3));
+            auto dist_res = expect_number(input_file, scene);
+            if (!dist_res.has_value()) { return std::unexpected(dist_res.error()); }
+            distance = dist_res.value();
+
+            // Peek at the next token
+            auto tok3_res = input_file.read_token();
+            if (!tok3_res.has_value()) { return std::unexpected(tok3_res.error()); }
+            std::unique_ptr<Token> tok3 = std::move(tok3_res.value());
+            auto* sym3 = dynamic_cast<SymbolToken*>(tok3.get());
+
+            if (sym3 != nullptr && sym3->symbol == ')') {
+                return std::make_unique<PerspectiveCamera>(aspect_ratio, distance);
+            }
+            if (sym3 == nullptr || sym3->symbol != ',') {
+                return std::unexpected(GrammarError{tok3->location, "Expected ',' or ')' after distance."});
+            }
+
+            // Parse the transformation
+            auto trans_res = parse_transformation(input_file, scene);
+            if (!trans_res.has_value()) return std::unexpected(trans_res.error());
+
+            auto close_res = expect_symbol(input_file, ')');
+            if (!close_res.has_value()) return std::unexpected(close_res.error());
+
+            return std::make_unique<PerspectiveCamera>(aspect_ratio, distance, trans_res.value());
+        }
     }
 
 

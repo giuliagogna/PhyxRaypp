@@ -28,6 +28,7 @@ import Shape;
 import Material;
 import Camera;
 import Mesh;
+import auxiliary_functions;
 
 TEST_CASE("Test InputStream") {
 
@@ -656,47 +657,132 @@ TEST_CASE("Test Parser: Parse functions") {
 
     // parse_camera()
     SUBCASE("parse_camera()") {
-        SUBCASE("parse_camera() - PERSPECTIVE") {
-            std::istringstream string_stream("(perspective, 1.5, 10.0, translation([0.0, 0.0, -5.0]))");
+
+        // ==========================================
+        // ORTHOGONAL CAMERA TESTS
+        // ==========================================
+        SUBCASE("ORTHOGONAL - Full Explicit Arguments") {
+            std::istringstream string_stream("(orthogonal, 1.5, translation([0.0, 1.0, 0.0]))");
             InputStream stream(string_stream);
-
-            auto res = parse_camera(stream, scene);
-            REQUIRE(res.has_value());
-
-            auto* persp = dynamic_cast<PerspectiveCamera*>(res.value().get());
-            REQUIRE(persp != nullptr);
-
-            CHECK(persp->aspect_ratio == 1.5);
-            CHECK(persp->d == 10.0);
-
-            Transformation exp_tr = Trans(Vec{0.0, 0.0, -5.0});
-            CHECK(persp->trans.m.is_close(exp_tr.m));
-        }
-
-        SUBCASE("parse_camera() - ORTHOGONAL") {
-            std::istringstream string_stream("(orthogonal, 1.5, identity)");
-            InputStream stream(string_stream);
-
             auto res = parse_camera(stream, scene);
             REQUIRE(res.has_value());
 
             auto* ortho = dynamic_cast<OrthogonalCamera*>(res.value().get());
             REQUIRE(ortho != nullptr);
-
-            CHECK(ortho->aspect_ratio == 1.5);
-
-            Transformation exp_tr = Transformation{};
-            CHECK(ortho->trans.m.is_close(exp_tr.m));
+            CHECK(aux::are_close(ortho->aspect_ratio, 1.5f));
+            CHECK(ortho->trans.m.is_close(Trans(Vec{0.0f, 1.0f, 0.0f}).m));
         }
 
-        SUBCASE("parse_camera() - Missing closing bracket (Negative)") {
-            // Missing the final ')' after the transformation
-            std::istringstream string_stream("(orthogonal, 1.5, identity");
+        SUBCASE("ORTHOGONAL - 1 Argument (Complete Defaults)") {
+            std::istringstream string_stream("(orthogonal)");
             InputStream stream(string_stream);
+            auto res = parse_camera(stream, scene);
+            REQUIRE(res.has_value());
 
+            auto* ortho = dynamic_cast<OrthogonalCamera*>(res.value().get());
+            REQUIRE(ortho != nullptr);
+            CHECK(aux::are_close(ortho->aspect_ratio, 1.0f)); // Struct default
+            CHECK(ortho->trans.m.is_close(Transformation{}.m)); // Struct default
+        }
+
+        SUBCASE("ORTHOGONAL - Skipped Aspect Ratio (direct to transformation)") {
+            std::istringstream string_stream("(orthogonal, scaling([2.0, 2.0, 2.0]))");
+            InputStream stream(string_stream);
+            auto res = parse_camera(stream, scene);
+            REQUIRE(res.has_value());
+
+            auto* ortho = dynamic_cast<OrthogonalCamera*>(res.value().get());
+            REQUIRE(ortho != nullptr);
+            CHECK(aux::are_close(ortho->aspect_ratio, 1.0f)); // Struct default
+            CHECK(ortho->trans.m.is_close(Scale(Vec{2.0f, 2.0f, 2.0f}).m));
+        }
+
+        // ==========================================
+        // PERSPECTIVE CAMERA TESTS
+        // ==========================================
+        SUBCASE("PERSPECTIVE - Full Explicit Arguments") {
+            std::istringstream string_stream("(perspective, 1.77, 10.0, translation([0.0, 0.0, -5.0]))");
+            InputStream stream(string_stream);
+            auto res = parse_camera(stream, scene);
+            REQUIRE(res.has_value());
+
+            auto* persp = dynamic_cast<PerspectiveCamera*>(res.value().get());
+            REQUIRE(persp != nullptr);
+            CHECK(aux::are_close(persp->aspect_ratio, 1.77f));
+            CHECK(aux::are_close(persp->d, 10.0f));
+            CHECK(persp->trans.m.is_close(Trans(Vec{0.0f, 0.0f, -5.0f}).m));
+        }
+
+        SUBCASE("PERSPECTIVE - 1 Argument (Complete Defaults)") {
+            std::istringstream string_stream("(perspective)");
+            InputStream stream(string_stream);
+            auto res = parse_camera(stream, scene);
+            REQUIRE(res.has_value());
+
+            auto* persp = dynamic_cast<PerspectiveCamera*>(res.value().get());
+            REQUIRE(persp != nullptr);
+            CHECK(aux::are_close(persp->aspect_ratio, 1.0f)); // Struct default
+            CHECK(aux::are_close(persp->d, 1.0f));            // Struct default
+            CHECK(persp->trans.m.is_close(Transformation{}.m));
+        }
+
+        SUBCASE("PERSPECTIVE - 3 Arguments (Missing Transformation)") {
+            std::istringstream string_stream("(perspective, 1.77, 5.0)");
+            InputStream stream(string_stream);
+            auto res = parse_camera(stream, scene);
+            REQUIRE(res.has_value());
+
+            auto* persp = dynamic_cast<PerspectiveCamera*>(res.value().get());
+            REQUIRE(persp != nullptr);
+            CHECK(aux::are_close(persp->aspect_ratio, 1.77f));
+            CHECK(aux::are_close(persp->d, 5.0f));
+            CHECK(persp->trans.m.is_close(Transformation{}.m));
+        }
+
+        SUBCASE("PERSPECTIVE - Skipped Distance (AR + Transformation)") {
+            std::istringstream string_stream("(perspective, 1.77, rot_z(1.57))");
+            InputStream stream(string_stream);
+            auto res = parse_camera(stream, scene);
+            REQUIRE(res.has_value());
+
+            auto* persp = dynamic_cast<PerspectiveCamera*>(res.value().get());
+            REQUIRE(persp != nullptr);
+            CHECK(aux::are_close(persp->aspect_ratio, 1.77f));
+            CHECK(aux::are_close(persp->d, 1.0f)); // Struct default!
+            CHECK(persp->trans.m.is_close(R_z(1.57f).m));
+        }
+
+        SUBCASE("PERSPECTIVE - Skipped AR and Distance (Direct to Transformation)") {
+            std::istringstream string_stream("(perspective, identity)");
+            InputStream stream(string_stream);
+            auto res = parse_camera(stream, scene);
+            REQUIRE(res.has_value());
+
+            auto* persp = dynamic_cast<PerspectiveCamera*>(res.value().get());
+            REQUIRE(persp != nullptr);
+            CHECK(aux::are_close(persp->aspect_ratio, 1.0f));
+            CHECK(aux::are_close(persp->d, 1.0f));
+            CHECK(persp->trans.m.is_close(Transformation{}.m));
+        }
+
+        // ==========================================
+        // NEGATIVE TESTS (Error Handling)
+        // ==========================================
+        SUBCASE("Negative - Missing closing bracket") {
+            std::istringstream string_stream("(orthogonal, 1.5");
+            InputStream stream(string_stream);
             auto res = parse_camera(stream, scene);
             REQUIRE_FALSE(res.has_value());
-            CHECK(res.error().message.find("Expected symbol ')'") != std::string::npos);
+            CHECK(res.error().message.find("Expected ',' or ')'") != std::string::npos);
+        }
+
+        SUBCASE("Negative - Trailing Comma") {
+            std::istringstream string_stream("(perspective, 1.5, )");
+            InputStream stream(string_stream);
+            auto res = parse_camera(stream, scene);
+            REQUIRE_FALSE(res.has_value());
+            // Depending on what exact token the parser hits, it will fail expecting a number or transform
+            CHECK(!res.error().message.empty());
         }
     }
 
