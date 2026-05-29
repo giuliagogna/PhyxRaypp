@@ -27,6 +27,7 @@ import Material;
 import BRDF;
 import Renderer;
 import PCG;
+import Mesh;
 
 using namespace std;
 // Helper function to parse floats
@@ -387,24 +388,22 @@ World build_Cornell_box_world() {
     auto blue_material = std::make_shared<Material>(blue_brdf);
     auto pink_brdf = std::make_shared<DiffusiveBRDF>(std::make_shared<UniformPigment>(Color{1.0f, 0.0f, 1.0f}));
     auto pink_material = std::make_shared<Material>(pink_brdf);
-    auto mirror_brdf = std::make_shared<SpecularBRDF>(SpecularBRDF{std::make_shared<UniformPigment>(Color{0.8f, 0.8f, 0.8f})});
+    auto mirror_brdf = std::make_shared<SpecularBRDF>(SpecularBRDF{std::make_shared<UniformPigment>(Color{0.6f, 0.6f, 0.6f})});
     auto mirror_material = std::make_shared<Material>(mirror_brdf);
 
     world.add(std::make_unique<Sphere>(
-        Trans(Vec{4.0f, -1.0f, -1.6f}) * Scale(Vec{0.4f, 0.4f, 0.4f}),
+        Trans(Vec{4.0f, -1.0f, 1.2f}) * Scale(Vec{0.4f, 0.4f, 0.4f}),
         blue_material
     ));
 
     world.add(std::make_unique<Sphere>(
-        Trans(Vec{4.0f, 1.0f, -1.6f}) * Scale(Vec{0.4f, 0.4f, 0.4f}),
+        Trans(Vec{4.0f, 1.0f, 1.2f}) * Scale(Vec{0.4f, 0.4f, 0.4f}),
         pink_material
     ));
 
-    world.add(std::make_unique<Sphere>(
-        Trans(Vec{4.8f, 0.0f, -0.5f}) * Scale(Vec{0.7f, 0.7f, 0.7f}),
-        mirror_material
-    ));
-
+    Mesh teapot_mesh("mesh/utah_teapot.obj", mirror_material, Trans(Vec{6.0f, 0.0f, -1.0f}) * R_z(std::numbers::pi_v<float> / 2.0f) * Scale(Vec{0.4f, 0.4f, 0.4f}));
+    
+    world.add(std::make_unique<Mesh>(teapot_mesh));
     return world;
 }
 
@@ -472,6 +471,21 @@ World build_complex_world() {
     return world;
 }
 
+World build_Utah_teapot_world(std::string obj_file) {
+    World world;
+
+    // Build a texture for the teapot (actual texturing not supported yet)
+    auto checkered_pigment = std::make_shared<CheckeredPigment>(Color{1.0f, 1.0f, 1.0f}, Color{0.0f, 0.0f, 0.0f}, 3);
+    auto brdf = std::make_shared<DiffusiveBRDF>(checkered_pigment);
+    auto teapot_material = std::make_shared<Material>(brdf);
+\
+    Mesh teapot_mesh(obj_file, teapot_material);
+    
+    world.add(std::make_unique<Mesh>(teapot_mesh));
+
+    return world;
+}
+
 // When cube is merged uncomment
 World build_cube_world() {
     World world;
@@ -524,18 +538,16 @@ void run_demo(const Parameters& params) {
         world = build_10_white_spheres_world();
         renderer = std::make_unique<OnOffRenderer>(&world);
     } else if (params.algorithm == "flat") { // Flat renderer: a checkered plane will be used
-        Color sky_color{0.5f, 0.7f, 1.0f};
-        world = build_cube_world();
+        tracer.camera.trans = R_z(1.0f) * R_y(0.5f) * Trans(Vec{-10.0f, 0.0f, 2.0f}); // That's what the teapot file I found needs :-)
+        Color sky_color{0.01f, 0.01f, 1.0f};
+        world = build_Utah_teapot_world("./mesh/utah_teapot.obj");
         renderer = std::make_unique<FlatRenderer>(&world, sky_color);
     } else if (params.algorithm == "pathtracing") { // Path tracing renderer: a complex scene will be used
         Color sky_color{0.5f, 0.7f, 1.0f};
         world = build_Cornell_box_world();
         renderer = std::make_unique<PathTracer>(pcg, &world, sky_color, params.pathtracer_num_of_rays, params.pathtracer_max_depth, params.pathtracer_rr_depth);
     } else {
-        std::println("Warning: Unknown algorithm '{}'. Defaulting to flat.", params.algorithm);
-        Color sky_color{0.5f, 0.7f, 1.0f};
-        world = build_plane_world();
-        renderer = std::make_unique<FlatRenderer>(&world, sky_color);
+        
     }
 
     std::println("Rendering demo scene using '{}' algorithm...", params.algorithm);
