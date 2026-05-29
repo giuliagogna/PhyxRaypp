@@ -39,7 +39,7 @@ import Geometry;
 import HDRImage;
 
 /// Language symbols in a string_view object
-export constexpr std::string_view SYMBOLS = "()<>[],*";
+export constexpr std::string_view SYMBOLS = "()<>[],*=;";
 
 export struct SourceLocation {
     std::string filename = "";
@@ -975,6 +975,153 @@ std::expected<std::unique_ptr<Camera>, GrammarError> parse_camera(InputStream& i
 
     return std::unexpected(GrammarError{input_file.location, "Failed to parse Camera"});
 
+}
+
+
+// Utility function to parse different Shape types inside parse_scene
+using ShapeParserFunc = std::expected<std::unique_ptr<Shape>, GrammarError>(*)(InputStream&, Scene&);
+
+// Static lookup table linking the keyword to the correct template instantiation: this dictionary
+// associates every keyword with the specific parse_shape instantiation to use
+inline const std::unordered_map<KeywordEnum, ShapeParserFunc> SHAPE_PARSERS = {
+    {KeywordEnum::SPHERE, &parse_shape<Sphere>},
+    {KeywordEnum::PLANE,  &parse_shape<Plane>},
+    {KeywordEnum::CUBE,   &parse_shape<Cube>}
+    // To add a cylinder later, just add one line here:
+    // {KeywordEnum::CYLINDER, &parse_shape<Cylinder>}
+};
+
+std::expected<Scene, GrammarError> parse_scene(InputStream& input_file,
+                                               const std::unordered_map<std::string, float>& overridden_variables = {}) {
+
+    /// Read a scene description from a stream and return a :class:`.Scene` object
+    Scene scene;
+
+    // Initialize the scene's float variables with the overrides provided (e.g., from command line)
+    scene.float_variables = overridden_variables;
+
+    // Populate the overridden_variables set so we know which ones to protect from redefinition
+    for (const auto& [key, value] : overridden_variables) {
+        scene.overridden_variables.insert(key);
+    }
+
+    auto token_res = input_file.read_token();
+    if (!token_res.has_value()) { return std::unexpected(token_res.error()); }
+    std::unique_ptr<Token> token = std::move(token_res.value());
+
+    // While the token is not a StopToken the dynamic_cast<StopToken*> remains nullptr
+    // The moment a StopToken is read dynamic_cast<StopToken*>(token.get()) contains a pointer
+    // that is not nullptr and the while interrupts
+    while (dynamic_cast<StopToken*>(token.get()) == nullptr) {
+        // First token should always be a keyword
+        auto* kw_token = dynamic_cast<KeywordToken*>(token.get());
+        if (kw_token == nullptr) { // If what the read token is not a keyword throw an error message
+            return std::unexpected(GrammarError{token->location, "Expected a keyword token."});
+        }
+        KeywordEnum kw = kw_token->keyword;
+
+        if (kw == KeywordEnum::FLOAT) {
+
+            // I want float variables to be defined as
+            // float var_name = value;
+
+            auto variable_name_res = expect_identifier(input_file);
+            if (!variable_name_res.has_value()) { return std::unexpected(variable_name_res.error()); }
+            std::string variable_name = variable_name_res.value();
+            SourceLocation variable_location = input_file.location;
+
+            auto assign_res = expect_symbol(input_file, '=');
+            if (!assign_res.has_value()) { return std::unexpected(assign_res.error()); }
+
+            auto val_res = expect_number(input_file, scene);
+            if (!val_res.has_value()) { return std::unexpected(val_res.error()); }
+            float val = val_res.value();
+
+            // Check for illegal redefinition
+            if (scene.float_variables.contains(variable_name) && !scene.overridden_variables.contains(variable_name)) {
+                return std::unexpected(GrammarError{
+                    variable_location,
+                    std::format("Variable '{}' cannot be redefined.", variable_name)
+                });
+            }
+
+            auto semicolon_res = expect_symbol(input_file, ';');
+            if (!semicolon_res.has_value()) { return std::unexpected(semicolon_res.error()); }
+
+            // Define the variable if it wasn't overridden from the command line
+            if (!scene.overridden_variables.contains(variable_name)) {
+                scene.float_variables[variable_name] = val;
+            }
+
+        } else if (kw == KeywordEnum::MATERIAL) {
+
+            // I want materials to be defined as
+            // material material_name(brdf, emitted_radiance);
+
+            auto material_res = parse_material(input_file, scene);
+            if (!material_res.has_value()) { return std::unexpected(material_res.error()); }
+
+            std::string material_name = material_res.value().first;
+            Material material = std::move(material_res.value().second);
+
+            scene.materials[material_name] = std::make_shared<Material>(std::move(material));
+
+            auto semicolon_res = expect_symbol(input_file, ';');
+            if (!semicolon_res.has_value()) { return std::unexpected(semicolon_res.error()); }
+
+        } else if (kw == KeywordEnum::CAMERA) {
+
+            if (scene.camera) {
+                return std::unexpected(GrammarError{token->location, "You cannot define more than one Camera", });
+            }
+            auto camera_res = parse_camera(input_file, scene);
+            if (!camera_res.has_value()) { return std::unexpected(camera_res.error()); }
+
+            scene.camera = std::move(camera_res.value());
+
+            auto semicolon_res = expect_symbol(input_file, ';');
+            if (!semicolon_res.has_value()) { return std::unexpected(semicolon_res.error()); }
+
+        } else if (SHAPE_PARSERS.contains(kw)) {
+
+            // SHAPE_PARSER.at(kw) is just the particular parse_shape function with the shape indicated by the shape keyword
+            auto shape_res = SHAPE_PARSERS.at(kw)(input_file, scene);
+            if (!shape_res.has_value()) { return std::unexpected(shape_res.error()); }
+
+            scene.world.add(std::move(shape_res.value()));
+
+            auto semicolon_res = expect_symbol(input_file, ';');
+            if (!semicolon_res.has_value()) { return std::unexpected(semicolon_res.error()); }
+
+        } else {
+            // We know it is a keyword, but it's the wrong keyword for the top level
+            // For instance you cannot define uniform() by itself, it has to be inside a material or shape
+
+            // Find the string representation of this keyword by reverse-searching the dictionary
+            std::string kw_str = "unknown";
+            for (const auto& [key_string, enum_val] : KEYWORDS) {
+                if (enum_val == kw) {
+                    kw_str = key_string;
+                    break;
+                }
+            }
+
+            // Print the exact string the user typed in the error message
+            return std::unexpected(GrammarError{
+                token->location,
+                std::format("Keyword '{}' is not allowed at the top level of the scene file.", kw_str)
+            });
+
+        }
+
+        // At the very end of the while loop read the next token to update the pointer that controls the while loop
+        token_res = input_file.read_token();
+        if (!token_res.has_value()) { return std::unexpected(token_res.error()); }
+        token = std::move(token_res.value());
+
+    }
+
+    return scene;
 }
 
 }
