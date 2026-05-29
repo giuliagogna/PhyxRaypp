@@ -38,16 +38,24 @@ import Camera;
 import Geometry;
 import HDRImage;
 
-/// Language symbols in a string_view object
+/// @brief A string view containing all single-character symbols recognized by the language lexer.
 export constexpr std::string_view SYMBOLS = "()<>[],*=;";
 
+/// @brief Represents a specific position within a source file.
+/// Used to precisely locate syntax errors for the user.
+/// This class has the following fields:
+///
+/// - file_name: the name of the file, or the empty string if there is no file associated with this location
+/// (e.g., because the source code was provided as a memory stream, or through a network connection)
+/// - line_num: number of the line (starting from 1)
+/// - col_num: number of the column (starting from 1)
 export struct SourceLocation {
     std::string filename = "";
     int line_num = 0;
     int col_num = 0;
 };
 
-// Keyword enumeration
+/// @brief Enumeration of all reserved keywords in the scene description language.
 export enum class KeywordEnum {
     NEW,            // 1
     // Shapes and BRDFs
@@ -81,7 +89,7 @@ export enum class KeywordEnum {
     MESH             // 21
 };
 
-// Keyword dictionary for the lexer
+/// @brief Dictionary linking literal text strings to their corresponding KeywordEnum.
 export const std::unordered_map<std::string, KeywordEnum> KEYWORDS{
     {"new", KeywordEnum::NEW},
     {"material", KeywordEnum:: MATERIAL},
@@ -106,23 +114,21 @@ export const std::unordered_map<std::string, KeywordEnum> KEYWORDS{
     {"mesh", KeywordEnum::MESH}
 };
 
-// Abstract Token struct
+/// @brief Abstract base class representing a single lexical token.
 export struct Token {
-    /// A lexical token, used when parsing a scene file
     SourceLocation location;
     Token(SourceLocation loc) : location{loc} {}
 
     virtual ~Token() = default;
 };
 
-// StopToken struct: inherits from Token and is returned whenever a stream ends
+/// @brief Token signaling the end of the input stream (EOF).
 export struct StopToken : Token {
-    /// Token signalling the end of a file
     StopToken(SourceLocation location) : Token{location} {}
 };
 
+/// @brief Token containing an identifier (e.g., custom variable or material names).
 export struct IdentifierToken : Token {
-    /// Token that contains the identifiers (i.e. name of variables that are not reserved keywords)
     std::string identifier;
     IdentifierToken(SourceLocation location, std::string id) : Token{location}, identifier{id} {}
 
@@ -131,8 +137,8 @@ export struct IdentifierToken : Token {
     }
 };
 
+/// @brief Token containing a reserved language keyword.
 export struct KeywordToken : Token {
-    /// Toker that contains the keyword (variable type or reserved language word)
     KeywordEnum keyword;
     KeywordToken(SourceLocation location, KeywordEnum kw) : Token{location}, keyword{kw} {}
 
@@ -141,8 +147,8 @@ export struct KeywordToken : Token {
     }
 };
 
+/// @brief Token containing a syntax symbol (e.g., brackets, commas, equals signs).
 export struct SymbolToken : Token {
-    /// Token that contains a symbol (e.g. variable name, bracket, comma ...)
     char symbol;
     SymbolToken(SourceLocation location, char symbol) : Token{location}, symbol{symbol} {}
 
@@ -152,9 +158,9 @@ export struct SymbolToken : Token {
     }
 };
 
+/// @brief Token containing a literal floating-point number.
+///  NOTE: other numerical types are not supported
 export struct LiteralNumberToken : Token {
-    /// Token that contains a literal float number (a number written digit by digit: i.e. 150 is 1-5-0)
-    /// NOTE: other numerical types are not supported
     float number;
     LiteralNumberToken(SourceLocation location, float num) : Token{location}, number{num} {}
 
@@ -163,8 +169,8 @@ export struct LiteralNumberToken : Token {
     }
 };
 
+/// @brief Token containing a literal string enclosed in quotes (e.g., file paths).
 export struct LiteralStringToken : Token {
-    /// Token that contains a string
     std::string string;
     LiteralStringToken(SourceLocation location, std::string str) : Token{location}, string{str} {}
 
@@ -174,20 +180,19 @@ export struct LiteralStringToken : Token {
 
 };
 
+
+/// @brief An error found by the lexer or parser while reading a scene file.
+/// Contains the location of the error and a user-friendly message.
 export struct GrammarError {
-    /// An error found by the lexer/parser while reading a scene file
-
-    /// The fields of this type are the following:
-
-    ///- `file_name`: the name of the file, or the empty string if there is no real file
-    ///- `line_num`: the line number where the error was discovered (starting from 1)
-    ///- `col_num`: the column number where the error was discovered (starting from 1)
-    ///- `message`: a user-frendly error message
 
     SourceLocation location;
     std::string message;
 };
 
+/// @brief A high-level stream wrapper used to safely parse scene files.
+///
+/// This struct tracks line and column numbers automatically and allows the parser
+/// to "unread" characters and tokens, a requirement for LL(1) lookahead parsing.
 export struct InputStream {
     std::istream& ifs;
     SourceLocation location;
@@ -207,7 +212,7 @@ export struct InputStream {
         saved_location{filename, 1, 1} {}
 
 
-    // Reading methods
+    // Internal helper to keep track of columns and lines
     void _update_location(std::optional<char> ch) {
         if (!ch.has_value()) {
             // If no character is read, do nothing
@@ -224,52 +229,53 @@ export struct InputStream {
         }
     }
 
+    /// @brief Reads the next character from the stream or the unread buffer.
+    ///
+    ///- If there was a character saved in `saved_char` return that and empty saved_char
+    ///- If `saved_char` is empty get the new character from the stream
+    ///- If end of file has not been reached save the new character into ch
+    ///- If no character is read ch is filled with null
+    ///- Save the current location and update it
+    /// @return An optional containing the char, or `nullopt` if the stream is empty.
     std::optional<char> read_char() {
         /// Read a new character from the stream
         std::optional<char> ch;
         if (saved_char.has_value()) {
-            // If there was a character saved in saved_char return that and empty saved_char
             ch = saved_char.value();
             saved_char = std::nullopt;
         } else {
-            // If saved_char is empty get the new character from the stream
             char raw_char;
-            // If I'm not at the end of file save the new character into raw_char and pass it to ch
             if (ifs.get(raw_char)) {
                 ch = raw_char;
             } else {
-                // If no character is read the character is filled with null
                 ch = std::nullopt;
             };
         }
 
-        // Save the current location in the saved_location
         saved_location = location;
-
-        // Update the current location: if the ch is nullopt _update_location does nothing and we happy
         _update_location(ch);
-
         return ch;
     }
 
+    /// @brief Pushes a character back into the stream's buffer.
+    ///
+    /// The next call to read_char() will consume this saved character instead of pulling
+    /// from the physical file and returns to the location where it was before reading.
+    /// If an empty character (nullopt) is passed, this function silently does nothing.
+    ///
+    /// @param ch The character to unread.
+    /// @warning Calling this when a character is already buffered is a fatal programmer error (use assert).
     void unread_char(std::optional<char> ch) {
-        /// Returns from the previous character of the stream
         if (ch.has_value()) {
-            // If an actual character was read, put it in saved_char (when we call read_char after
-            // we are going to take the next character from saved_character and not read it from stream)
-            // SAFETY CHECK: Crash immediately if we try to overwrite an unread character! It is a programmer error
-            // not a user error, so it does not need to return error messages
             assert(!saved_char.has_value());
             saved_char = ch;
-            // Return to the location saved before updating
             location = saved_location;
         } else {
-            // If no character was read, there's nothing to unread, so do nothing
             return;
         }
     }
 
-    // Function that skips whitespaces and comments
+    /// @brief Advances the stream past any whitespace characters, tabs, or # comments.
     void skip_whitespaces_and_comments() {
 
         std::optional<char> ch = read_char();
@@ -281,7 +287,6 @@ export struct InputStream {
                                   ch.value() == '#')) {
 
             if (ch.value() == '#') {
-                // Keep reading till the end of the line
                 std::optional<char> comment_ch = read_char();
                 while (comment_ch.has_value() && comment_ch != '\r' && comment_ch != '\n') {
                     comment_ch = read_char();
@@ -294,9 +299,12 @@ export struct InputStream {
             }
         }
 
-        // When a non whitespace, tab, return or comment is read put the character in the saved_character
         unread_char(ch);
     }
+
+    // ==========================================================================================
+    // Helper functions for parse elements of a token
+    // ==========================================================================================
 
     std::expected<std::unique_ptr<Token>, GrammarError>_parse_string_token(SourceLocation token_location) {
         std::string res_string = "";
@@ -390,9 +398,14 @@ export struct InputStream {
 
     }
 
+    // ==========================================================================================
+
+    /// @brief Reads the next full lexical token from the stream.
+    ///
+    /// - If token was already read and saved, it reads it from saved_token
+    /// @return A unique pointer to the parsed Token, or a GrammarError if lexing fails.
     std::expected<std::unique_ptr<Token>, GrammarError> read_token() {
 
-        // If token was already read and saved, read it from saved_token
         if (saved_token.has_value()) {
             // If there was a Token saved in saved_char return that and empty saved_char
             auto result = std::move(saved_token.value());
@@ -400,19 +413,13 @@ export struct InputStream {
             return result;
         }
 
-        // First skip all whitespaces and comments
         skip_whitespaces_and_comments();
 
-        // After all whitespaces and comments have been skipped read the character
         std::optional<char> ch = read_char();
         if (!ch.has_value()) {
-            // If no character has been read, the file ended, so return the StopToken
             return std::make_unique<StopToken>(location);
         }
 
-        // Now we have to see which Token starts with ch
-
-        // Save the location of the beginning of the token for return
         SourceLocation token_location = location;
 
         if (SYMBOLS.contains(ch.value())) {
@@ -433,6 +440,8 @@ export struct InputStream {
         }
     }
 
+    /// @brief Pushes an entire token back into the stream's buffer.
+    /// @param token The Token unique_ptr to return to the stream.
     void unread_token (std::unique_ptr<Token> token){
         assert(!saved_token.has_value());
         saved_token = std::move(token);
@@ -440,6 +449,7 @@ export struct InputStream {
 };
 
 
+/// @brief Represents a fully parsed scene containing all objects needed for rendering.
 export struct Scene {
     std::unordered_map<std::string, std::shared_ptr<Material>> materials;
     World world;
@@ -450,678 +460,698 @@ export struct Scene {
 
 
 export {
-// ============================================================================================
-// EXPECT FUNCTIONS
-// ============================================================================================
 
-std::expected<void, GrammarError> expect_symbol(InputStream& input_file, char symbol) {
-    /// Read a token from `input_file` and check that it matches `symbol`.
-    auto res = input_file.read_token();
-    if (!res.has_value()) {
-        return std::unexpected(res.error());
-    }
+    // ============================================================================================
+    // EXPECT FUNCTIONS
+    // ============================================================================================
 
-    // Extract the value from the res variable
-    std::unique_ptr<Token> token = std::move(res.value());
+    /// @brief Reads a token and validates that it is a SymbolToken matching the provided char.
+    /// @param input_file The InputStream to read from.
+    /// @param symbol The exact character symbol expected (e.g., '(', ')', '=').
+    /// @return An empty expected object on success, or a GrammarError if mismatched.
+    std::expected<void, GrammarError> expect_symbol(InputStream& input_file, char symbol) {
+        /// Read a token from `input_file` and check that it matches `symbol`.
+        auto res = input_file.read_token();
+        if (!res.has_value()) {
+            return std::unexpected(res.error());
+        }
+        std::unique_ptr<Token> token = std::move(res.value());
 
-    // Is the token actually a SymbolToken?
-    auto* sym_token = dynamic_cast<SymbolToken*>(token.get());
+        auto* sym_token = dynamic_cast<SymbolToken*>(token.get());
 
-    // If it's not a symbol (it's a keyword or ...)
-    if (sym_token == nullptr) {
-        return std::unexpected(GrammarError{
-            token->location,
-            std::format("Expected symbol '{}', but got a different token type", symbol)
-        });
-    }
-    // If it's the wrong symbol, throw the GrammarError
-    if (sym_token->symbol != symbol) {
-        return std::unexpected(GrammarError{
-            token->location,
-            std::format("Expected symbol '{}', but got '{}'", symbol, sym_token->symbol)
-        });
-    }
-
-    // Success: returning empty brackets satisfies std::expected<void, ...>
-    return {};
-}
-
-std::expected<KeywordEnum, GrammarError> expect_keywords(InputStream& input_file, const std::vector<KeywordEnum>& expected_keywords) {
-    /// Read a token from `input_file` and check that it is one of the keywords in `keywords`
-
-    auto res = input_file.read_token();
-    if (!res.has_value()) {
-        return std::unexpected(res.error());
-    }
-
-    std::unique_ptr<Token> token = std::move(res.value());
-
-    // Checks if it's a KeywordToken
-    auto* kw_token = dynamic_cast<KeywordToken*>(token.get());
-    if (kw_token == nullptr) {
-        return std::unexpected(GrammarError{token->location,"Expected a keyword, but got a different token type"});
-    }
-
-    // Checks if the keyword is inside our list of allowed keywords
-    // std::ranges::find searches the vector. If it hits the end(), it didn't find it.
-    if (std::ranges::find(expected_keywords, kw_token->keyword) == expected_keywords.end()) {
-        return std::unexpected(GrammarError{token->location,"Got an unexpected keyword for this specific grammar rule"
-        });
-    }
-
-    // Success: return the specific KeywordEnum so the parser knows which one it was.
-    return kw_token->keyword;
-}
-
-std::expected<std::string, GrammarError> expect_identifier(InputStream& input_file) {
-    /// Read a token from `input_file` and check that it is an identifier.
-
-    auto res = input_file.read_token();
-    if (!res.has_value()) {
-        return std::unexpected(res.error());
-    }
-
-    std::unique_ptr<Token> token = std::move(res.value());
-    auto* id_token = dynamic_cast<IdentifierToken*>(token.get());
-    if (id_token == nullptr) {
-        return std::unexpected(GrammarError{token->location, "Expected an Identifier, but got a different kind of token."});
-    }
-
-    // Success: return the identifier
-    return id_token->identifier;
-}
-
-std::expected<std::string, GrammarError> expect_string(InputStream& input_file) {
-    /// Read a token from `input_file` and check that it is a literal string.
-    /// Returns a string
-    auto res = input_file.read_token();
-    if (!res.has_value()) {
-        return std::unexpected(res.error());
-    }
-
-    std::unique_ptr<Token> token = std::move(res.value());
-    auto* string_token = dynamic_cast<LiteralStringToken*>(token.get());
-    if (string_token == nullptr) {
-        return std::unexpected(GrammarError{token->location, "Expected an LiteralString, but got a different kind of token."});
-    }
-
-    // Success: return the string
-    return string_token->string;
-}
-
-std::expected<float, GrammarError> expect_number(InputStream& input_file, Scene& scene) {
-    /// Read a token from `input_file` and check that it is either a literal number or a variable in `scene`
-    auto res = input_file.read_token();
-    if (!res.has_value()) {
-        return std::unexpected(res.error());
-    }
-
-    std::unique_ptr<Token> token = std::move(res.value());
-
-    if (auto* num_token = dynamic_cast<LiteralNumberToken*>(token.get())) {
-        return num_token->number;
-    }
-
-    if (auto* var_token = dynamic_cast<IdentifierToken*>(token.get())) {
-        std::string var_name = var_token->identifier;
-        if (!scene.float_variables.contains(var_name)) {
-            return std::unexpected(GrammarError{token->location,std::format("Unknown variable '{}': variable not in the float_variables list", var_name)});
+        if (sym_token == nullptr) {
+            return std::unexpected(GrammarError{
+                token->location,
+                std::format("Expected symbol '{}', but got a different token type", symbol)
+            });
+        }
+        // If it's the wrong symbol, throw the GrammarError
+        if (sym_token->symbol != symbol) {
+            return std::unexpected(GrammarError{
+                token->location,
+                std::format("Expected symbol '{}', but got '{}'", symbol, sym_token->symbol)
+            });
         }
 
-        // Return the mapped float value from the dictionary
-        return scene.float_variables.at(var_name);
+        return {};
     }
 
-    return std::unexpected(GrammarError{token->location,"Expected a literal number or a variable, but got a different kind of token"});
+    /// @brief Reads a token and validates that it is a KeywordToken matching one of the options.
+    /// @param input_file The InputStream to read from.
+    /// @param expected_keywords A vector of valid KeywordEnums.
+    /// @return The specific KeywordEnum that was found.
+    std::expected<KeywordEnum, GrammarError> expect_keywords(InputStream& input_file, const std::vector<KeywordEnum>& expected_keywords) {
 
-}
+        auto res = input_file.read_token();
+        if (!res.has_value()) {
+            return std::unexpected(res.error());
+        }
 
-// =====================================================================
-// PARSE FUNCTIONS
-// =====================================================================
+        std::unique_ptr<Token> token = std::move(res.value());
 
-std::expected<Vec, GrammarError> parse_vec(InputStream& input_file, Scene& scene) {
+        auto* kw_token = dynamic_cast<KeywordToken*>(token.get());
+        if (kw_token == nullptr) {
+            return std::unexpected(GrammarError{token->location,"Expected a keyword, but got a different token type"});
+        }
 
-    auto open_square_brk = expect_symbol(input_file, '[');
-    if (!open_square_brk.has_value()) { return std::unexpected(open_square_brk.error()); }
+        if (std::ranges::find(expected_keywords, kw_token->keyword) == expected_keywords.end()) {
+            return std::unexpected(GrammarError{token->location,"Got an unexpected keyword for this specific grammar rule"
+            });
+        }
 
-    auto vx_res = expect_number(input_file, scene);
-    if (!vx_res.has_value()) { return std::unexpected(vx_res.error()); }
-    float vx = vx_res.value();
+        return kw_token->keyword;
+    }
 
-    auto comma1 = expect_symbol(input_file, ',');
-    if (!comma1.has_value()) { return std::unexpected(comma1.error()); }
+    /// @brief Reads a token and validates that it is an IdentifierToken.
+    /// @param input_file The InputStream to read from.
+    /// @return The string name of the identifier.
+    std::expected<std::string, GrammarError> expect_identifier(InputStream& input_file) {
+        /// Read a token from `input_file` and check that it is an identifier.
 
-    auto vy_res = expect_number(input_file, scene);
-    if (!vy_res.has_value()) { return std::unexpected(vy_res.error()); }
-    float vy = vy_res.value();
+        auto res = input_file.read_token();
+        if (!res.has_value()) {
+            return std::unexpected(res.error());
+        }
 
-    auto comma2 = expect_symbol(input_file, ',');
-    if (!comma2.has_value()) { return std::unexpected(comma2.error()); }
+        std::unique_ptr<Token> token = std::move(res.value());
+        auto* id_token = dynamic_cast<IdentifierToken*>(token.get());
+        if (id_token == nullptr) {
+            return std::unexpected(GrammarError{token->location, "Expected an Identifier, but got a different kind of token."});
+        }
 
-    auto vz_res = expect_number(input_file, scene);
-    if (!vz_res.has_value()) { return std::unexpected(vz_res.error()); }
-    float vz = vz_res.value();
+        return id_token->identifier;
+    }
 
-    expect_symbol(input_file, ']');
 
-    return Vec{vx, vy, vz};
+    /// @brief Reads a token and validates that it is a LiteralStringToken.
+    /// @param input_file The InputStream to read from.
+    /// @return The string value parsed from the quotes.
+    std::expected<std::string, GrammarError> expect_string(InputStream& input_file) {
 
-}
+        auto res = input_file.read_token();
+        if (!res.has_value()) {
+            return std::unexpected(res.error());
+        }
 
-std::expected<Color, GrammarError> parse_color(InputStream& input_file, Scene& scene) {
-    // Expect '<'
-    auto sym1 = expect_symbol(input_file, '<');
-    if (!sym1.has_value()) { return std::unexpected(sym1.error()); }
+        std::unique_ptr<Token> token = std::move(res.value());
+        auto* string_token = dynamic_cast<LiteralStringToken*>(token.get());
+        if (string_token == nullptr) {
+            return std::unexpected(GrammarError{token->location, "Expected an LiteralString, but got a different kind of token."});
+        }
 
-    // Expect red
-    auto red = expect_number(input_file, scene);
-    if (!red.has_value()) { return std::unexpected(red.error()); }
+        return string_token->string;
+    }
 
-    // Expect ','
-    auto sym2 = expect_symbol(input_file, ',');
-    if (!sym2.has_value()) { return std::unexpected(sym2.error()); }
+    /// @brief Reads a token and checks if it is a literal number or a previously defined float variable.
+    /// @param input_file The InputStream to read from.
+    /// @param scene The Scene dictionary containing saved variables.
+    /// @return The floating point value.
+    std::expected<float, GrammarError> expect_number(InputStream& input_file, Scene& scene) {
 
-    // Expect Green
-    auto green = expect_number(input_file, scene);
-    if (!green.has_value()) { return std::unexpected(green.error()); }
+        auto res = input_file.read_token();
+        if (!res.has_value()) {
+            return std::unexpected(res.error());
+        }
 
-    // Expect ','
-    auto sym3 = expect_symbol(input_file, ',');
-    if (!sym3.has_value()) { return std::unexpected(sym3.error()); }
+        std::unique_ptr<Token> token = std::move(res.value());
 
-    // Expect Blue
-    auto blue = expect_number(input_file, scene);
-    if (!blue.has_value()) { return std::unexpected(blue.error()); }
+        if (auto* num_token = dynamic_cast<LiteralNumberToken*>(token.get())) {
+            return num_token->number;
+        }
 
-    // Expect '>'
-    auto sym4 = expect_symbol(input_file, '>');
-    if (!sym4.has_value()) { return std::unexpected(sym4.error()); }
+        if (auto* var_token = dynamic_cast<IdentifierToken*>(token.get())) {
+            std::string var_name = var_token->identifier;
+            if (!scene.float_variables.contains(var_name)) {
+                return std::unexpected(GrammarError{token->location,std::format("Unknown variable '{}': variable not in the float_variables list", var_name)});
+            }
 
-    // Success: return the constructed Color
-    return Color{red.value(), green.value(), blue.value()};
-}
+            return scene.float_variables.at(var_name);
+        }
 
-std::expected<std::unique_ptr<Pigment>, GrammarError> parse_pigment(InputStream& input_file, Scene& scene) {
-    auto keyword_res = expect_keywords(input_file, {KeywordEnum::UNIFORM, KeywordEnum::CHECKERED, KeywordEnum::IMAGE});
-    if (!keyword_res.has_value()) { return std::unexpected(keyword_res.error()); }
-    KeywordEnum keyword = keyword_res.value();
+        return std::unexpected(GrammarError{token->location,"Expected a literal number or a variable, but got a different kind of token"});
 
-    auto open_brk_res = expect_symbol(input_file, '(');
-    if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
+    }
 
-    if (keyword == KeywordEnum::UNIFORM) {
-        auto color_res = parse_color(input_file, scene);
-        if (!color_res.has_value()) { return std::unexpected(color_res.error()); }
-        Color color = color_res.value();
+    // =====================================================================
+    // PARSE FUNCTIONS
+    // =====================================================================
 
-        // Expect the closed parenthesis after the color
+    /// @brief Parses a 3D Geometry vector enclosed in brackets `[x, y, z]`.
+    /// @param input_file The InputStream pointing to the vector text.
+    /// @param scene The Scene object (used for variable lookups).
+    /// @return The constructed Vec object.
+    std::expected<Vec, GrammarError> parse_vec(InputStream& input_file, Scene& scene) {
+
+        auto open_square_brk = expect_symbol(input_file, '[');
+        if (!open_square_brk.has_value()) { return std::unexpected(open_square_brk.error()); }
+
+        auto vx_res = expect_number(input_file, scene);
+        if (!vx_res.has_value()) { return std::unexpected(vx_res.error()); }
+        float vx = vx_res.value();
+
+        auto comma1 = expect_symbol(input_file, ',');
+        if (!comma1.has_value()) { return std::unexpected(comma1.error()); }
+
+        auto vy_res = expect_number(input_file, scene);
+        if (!vy_res.has_value()) { return std::unexpected(vy_res.error()); }
+        float vy = vy_res.value();
+
+        auto comma2 = expect_symbol(input_file, ',');
+        if (!comma2.has_value()) { return std::unexpected(comma2.error()); }
+
+        auto vz_res = expect_number(input_file, scene);
+        if (!vz_res.has_value()) { return std::unexpected(vz_res.error()); }
+        float vz = vz_res.value();
+
+        expect_symbol(input_file, ']');
+
+        return Vec{vx, vy, vz};
+
+    }
+
+    /// @brief Parses an RGB Color enclosed in angle brackets `<r, g, b>`.
+    /// @param input_file The InputStream pointing to the color text.
+    /// @param scene The Scene object (used for variable lookups).
+    /// @return The constructed Color object.
+    std::expected<Color, GrammarError> parse_color(InputStream& input_file, Scene& scene) {
+
+        auto sym1 = expect_symbol(input_file, '<');
+        if (!sym1.has_value()) { return std::unexpected(sym1.error()); }
+
+        auto red = expect_number(input_file, scene);
+        if (!red.has_value()) { return std::unexpected(red.error()); }
+
+        auto sym2 = expect_symbol(input_file, ',');
+        if (!sym2.has_value()) { return std::unexpected(sym2.error()); }
+
+        auto green = expect_number(input_file, scene);
+        if (!green.has_value()) { return std::unexpected(green.error()); }
+
+        auto sym3 = expect_symbol(input_file, ',');
+        if (!sym3.has_value()) { return std::unexpected(sym3.error()); }
+
+        auto blue = expect_number(input_file, scene);
+        if (!blue.has_value()) { return std::unexpected(blue.error()); }
+
+        auto sym4 = expect_symbol(input_file, '>');
+        if (!sym4.has_value()) { return std::unexpected(sym4.error()); }
+
+
+        return Color{red.value(), green.value(), blue.value()};
+    }
+
+    /// @brief Parses a Pigment type (uniform, checkered, or image mapping).
+    /// @param input_file The InputStream pointing to the pigment keyword.
+    /// @param scene The Scene object.
+    /// @return A unique pointer safely wrapped around the polymorphic Pigment object.
+    std::expected<std::unique_ptr<Pigment>, GrammarError> parse_pigment(InputStream& input_file, Scene& scene) {
+        auto keyword_res = expect_keywords(input_file, {KeywordEnum::UNIFORM, KeywordEnum::CHECKERED, KeywordEnum::IMAGE});
+        if (!keyword_res.has_value()) { return std::unexpected(keyword_res.error()); }
+        KeywordEnum keyword = keyword_res.value();
+
+        auto open_brk_res = expect_symbol(input_file, '(');
+        if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
+
+        if (keyword == KeywordEnum::UNIFORM) {
+            auto color_res = parse_color(input_file, scene);
+            if (!color_res.has_value()) { return std::unexpected(color_res.error()); }
+            Color color = color_res.value();
+
+            auto close_brk_res = expect_symbol(input_file, ')');
+            if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
+
+            UniformPigment pigment(color);
+
+            return std::make_unique<UniformPigment>(pigment);
+
+        } else if (keyword == KeywordEnum::CHECKERED) {
+
+            auto color_res1 = parse_color(input_file, scene);
+            if (!color_res1.has_value()) { return std::unexpected(color_res1.error()); }
+            Color color1 = color_res1.value();
+
+            auto comma_res = expect_symbol(input_file, ',');
+            if (!comma_res.has_value()) { return std::unexpected(comma_res.error()); }
+
+            auto color_res2 = parse_color(input_file, scene);
+            if (!color_res2.has_value()) { return std::unexpected(color_res2.error()); }
+            Color color2 = color_res2.value();
+
+            auto comma2_res = expect_symbol(input_file, ',');
+            if (!comma2_res.has_value()) { return std::unexpected(comma2_res.error()); }
+
+            auto subdiv_res = expect_number(input_file, scene);
+            if (!subdiv_res.has_value()) { return std::unexpected(subdiv_res.error()); }
+            int subdiv = static_cast<int>(subdiv_res.value());
+
+            auto close_brk_res = expect_symbol(input_file, ')');
+            if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
+
+            CheckeredPigment checkered_pigment(color1, color2, subdiv);
+
+            return std::make_unique<CheckeredPigment>(checkered_pigment);
+
+        } else if (keyword == KeywordEnum::IMAGE) {
+
+            auto filename_res = expect_string(input_file);
+            if (!filename_res.has_value()) { return std::unexpected(filename_res.error()); }
+            std::string filename = filename_res.value();
+
+            auto close_brk_res = expect_symbol(input_file, ')');
+            if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
+
+            auto image_res = HDRImage::read_pfm_file(filename.c_str());
+            if (!image_res.has_value()) {
+                return std::unexpected(GrammarError{
+                    input_file.location,
+                    std::format("Failed to load image '{}': {}", filename, image_res.error().message)});
+            }
+
+            return std::make_unique<ImagePigment>(std::move(image_res.value()));
+
+        }
+
+        return std::unexpected(GrammarError{input_file.location, "Failed to parse pigment keyword."});
+
+    }
+
+    /// @brief Parses a Bidirectional Reflectance Distribution Function (diffuse or specular).
+    /// @param input_file The InputStream.
+    /// @param scene The active Scene object.
+    /// @return A unique pointer to the polymorphic BRDF object.
+    std::expected<std::unique_ptr<BRDF>, GrammarError> parse_brdf(InputStream& input_file, Scene& scene) {
+
+        auto keyword_res = expect_keywords(input_file, {KeywordEnum::DIFFUSE, KeywordEnum::SPECULAR});
+        if (!keyword_res.has_value()) { return std::unexpected(keyword_res.error()); }
+        KeywordEnum keyword = keyword_res.value();
+
+        auto open_brk_res = expect_symbol(input_file, '(');
+        if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
+
+        auto pigment_res = parse_pigment(input_file, scene);
+        if (!pigment_res.has_value()) { return std::unexpected(pigment_res.error()); }
+        std::unique_ptr<Pigment> pigment = std::move(pigment_res.value());
+
         auto close_brk_res = expect_symbol(input_file, ')');
         if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
 
-        UniformPigment pigment(color);
+        if (keyword == KeywordEnum::DIFFUSE) {
+            return std::make_unique<DiffusiveBRDF>(std::move(pigment));
+        } else if (keyword == KeywordEnum::SPECULAR) {
+            return std::make_unique<SpecularBRDF>(std::move(pigment));
+        }
 
-        return std::make_unique<UniformPigment>(pigment);
+        return std::unexpected(GrammarError{input_file.location, "Failed to parse BRDF."});
 
-    } else if (keyword == KeywordEnum::CHECKERED) {
+    }
 
-        // First color
-        auto color_res1 = parse_color(input_file, scene);
-        if (!color_res1.has_value()) { return std::unexpected(color_res1.error()); }
-        Color color1 = color_res1.value();
+    /// @brief Parses a Material containing its identifier, BRDF, and Emitted Radiance pigment.
+    /// @param input_file The InputStream.
+    /// @param scene The active Scene object.
+    /// @return A key-value pair of the Material's string identifier and the constructed Material object.
+    std::expected<std::pair<std::string, Material>, GrammarError> parse_material(InputStream& input_file, Scene& scene) {
 
-        // Comma
+        auto identifier_res = expect_identifier(input_file);
+        if (!identifier_res.has_value()) { return std::unexpected(identifier_res.error()); }
+        std::string name = identifier_res.value();
+
+        auto open_brk_res = expect_symbol(input_file, '(');
+        if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
+
+        auto brdf_res = parse_brdf(input_file, scene);
+        if (!brdf_res.has_value()) { return std::unexpected(brdf_res.error()); }
+        std::unique_ptr<BRDF> brdf = std::move(brdf_res.value());
+
+        auto comma = expect_symbol(input_file, ',');
+        if (!comma.has_value()) { return std::unexpected(comma.error()); }
+
+        auto emitted_rad_res = parse_pigment(input_file, scene);
+        if (!emitted_rad_res.has_value()) { return std::unexpected(emitted_rad_res.error()); }
+        std::unique_ptr<Pigment> emitted_rad = std::move(emitted_rad_res.value());
+
+        auto close_brk_res = expect_symbol(input_file, ')');
+
+        Material material{std::move(brdf), std::move(emitted_rad)};
+
+        return std::pair<std::string, Material>{name, std::move(material)};
+    }
+
+    /// @brief Parses an LL(1) chain of affine transformations connected by '*'.
+    /// @param input_file The InputStream.
+    /// @param scene The active Scene object.
+    /// @return The aggregated composite Transformation matrix.
+    std::expected<Transformation, GrammarError> parse_transformation(InputStream& input_file, Scene& scene) {
+        auto result = Transformation{};
+
+        bool has_next_transformation = true;
+
+        while (has_next_transformation) {
+            auto kw_res = expect_keywords(input_file, std::vector<KeywordEnum>{
+                                                                             KeywordEnum::IDENTITY,
+                                                                             KeywordEnum::TRANSLATION,
+                                                                             KeywordEnum::ROTATION_X,
+                                                                             KeywordEnum::ROTATION_Y,
+                                                                             KeywordEnum::ROTATION_Z,
+                                                                             KeywordEnum::SCALING
+                                                                             });
+            if (!kw_res.has_value()) { return std::unexpected(kw_res.error()); }
+            KeywordEnum kw = kw_res.value();
+
+            if (kw == KeywordEnum::IDENTITY) {
+                // Do nothing if the transformation is identity
+            } else if (kw == KeywordEnum::TRANSLATION) {
+
+                auto open_brk_res = expect_symbol(input_file, '(');
+                if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
+
+                auto vec_res = parse_vec(input_file, scene);
+                if (!vec_res.has_value()) { return std::unexpected(vec_res.error()); }
+                Vec vec = vec_res.value();
+
+                auto close_brk_res = expect_symbol(input_file, ')');
+                if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
+
+                result = result * Trans(vec);
+
+            } else if (kw == KeywordEnum::ROTATION_X) {
+
+                auto open_brk_res = expect_symbol(input_file, '(');
+                if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
+
+                auto angle_res = expect_number(input_file, scene);
+                if (!angle_res.has_value()) { return std::unexpected(angle_res.error()); }
+                float angle = angle_res.value();
+
+                auto close_brk_res = expect_symbol(input_file, ')');
+                if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
+
+                result = result * R_x(angle);
+
+            } else if (kw == KeywordEnum::ROTATION_Y) {
+
+                auto open_brk_res = expect_symbol(input_file, '(');
+                if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
+
+                auto angle_res = expect_number(input_file, scene);
+                if (!angle_res.has_value()) { return std::unexpected(angle_res.error()); }
+                float angle = angle_res.value();
+
+                auto close_brk_res = expect_symbol(input_file, ')');
+                if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
+
+                result = result * R_y(angle);
+
+            } else if (kw == KeywordEnum::ROTATION_Z) {
+
+                auto open_brk_res = expect_symbol(input_file, '(');
+                if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
+
+                auto angle_res = expect_number(input_file, scene);
+                if (!angle_res.has_value()) { return std::unexpected(angle_res.error()); }
+                float angle = angle_res.value();
+
+                auto close_brk_res = expect_symbol(input_file, ')');
+                if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
+
+                result = result * R_z(angle);
+
+            } else if (kw == KeywordEnum::SCALING) {
+
+                auto open_brk_res = expect_symbol(input_file, '(');
+                if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
+
+                auto vec_res = parse_vec(input_file, scene);
+                if (!vec_res.has_value()) { return std::unexpected(vec_res.error()); }
+                Vec vec = vec_res.value();
+
+                auto close_brk_res = expect_symbol(input_file, ')');
+                if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
+
+                result = result * Scale(vec);
+
+            }
+
+            // Lookahead parsing logic
+            auto next_token_res = input_file.read_token();
+            if (!next_token_res.has_value()) { return std::unexpected(next_token_res.error()); }
+            std::unique_ptr<Token> next_token = std::move(next_token_res.value());
+
+            auto* sym_token = dynamic_cast<SymbolToken*>(next_token.get());
+
+            // Update the state flag instead of using break/continue
+            if (sym_token != nullptr && sym_token->symbol == '*') {
+                // A '*' was found. Keep the flag true so the while loop repeats.
+                has_next_transformation = true;
+            } else {
+                // The chain is finished. Put the token back and cleanly toggle the flag to false.
+                input_file.unread_token(std::move(next_token));
+                has_next_transformation = false;
+            }
+        }
+
+        return result;
+
+    }
+
+    /// @brief Parses a specific shape geometry and its applied material from the input stream.
+    ///
+    /// Reads the transformation matrix and material identifier for a shape.
+    /// Performs a dictionary lookup to bind the shape to an already-defined material in the scene.
+    ///
+    /// @tparam T The specific Shape class to instantiate (e.g., Sphere, Plane, Cube).
+    /// @param input_file The input stream currently pointing to the shape's parameter list.
+    /// @param scene The active Scene object containing the material dictionary.
+    /// @return A unique pointer to the newly allocated Shape.
+    /// @warning Throws a GrammarError if the material name is not found in the scene's dictionary.
+    template <typename T>
+    std::expected<std::unique_ptr<Shape>, GrammarError> parse_shape(InputStream& input_file, Scene& scene) {
+
+        auto open_brk_res = expect_symbol(input_file, '(');
+        if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
+
+        auto transformation_res = parse_transformation(input_file, scene);
+        if (!transformation_res.has_value()) { return std::unexpected(transformation_res.error()); }
+        Transformation transformation = transformation_res.value();
+
         auto comma_res = expect_symbol(input_file, ',');
         if (!comma_res.has_value()) { return std::unexpected(comma_res.error()); }
 
-        // Second color
-        auto color_res2 = parse_color(input_file, scene);
-        if (!color_res2.has_value()) { return std::unexpected(color_res2.error()); }
-        Color color2 = color_res2.value();
+        auto mat_name_res = expect_identifier(input_file);
+        if (!mat_name_res.has_value()) { return std::unexpected(mat_name_res.error()); }
+        std::string material_name = mat_name_res.value();
 
-        // Comma
-        auto comma2_res = expect_symbol(input_file, ',');
-        if (!comma2_res.has_value()) { return std::unexpected(comma2_res.error()); }
-
-        // Number of subdivisions
-        auto subdiv_res = expect_number(input_file, scene);
-        if (!subdiv_res.has_value()) { return std::unexpected(subdiv_res.error()); }
-        int subdiv = static_cast<int>(subdiv_res.value());
-
-        // Bracket close
-        auto close_brk_res = expect_symbol(input_file, ')');
-        if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
-
-        CheckeredPigment checkered_pigment(color1, color2, subdiv);
-
-        return std::make_unique<CheckeredPigment>(checkered_pigment);
-
-    } else if (keyword == KeywordEnum::IMAGE) {
-
-        auto filename_res = expect_string(input_file);
-        if (!filename_res.has_value()) { return std::unexpected(filename_res.error()); }
-        std::string filename = filename_res.value();
-
-        // Closing bracket
-        auto close_brk_res = expect_symbol(input_file, ')');
-        if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
-
-        // Load the pfm image
-        auto image_res = HDRImage::read_pfm_file(filename.c_str());
-        // If the file doesn't exist or is corrupted, convert the InvalidPfmFileFormat
-        // into a GrammarError so the parser can report it safely
-        if (!image_res.has_value()) {
+        if (!scene.materials.contains(material_name)) {
             return std::unexpected(GrammarError{
                 input_file.location,
-                std::format("Failed to load image '{}': {}", filename, image_res.error().message)});
-        }
-
-        // Using move() to transfer the HDRImage inside the ImagePigment without copying it
-        return std::make_unique<ImagePigment>(std::move(image_res.value()));
-
-    }
-
-    return std::unexpected(GrammarError{input_file.location, "Failed to parse pigment keyword."});
-
-}
-
-std::expected<std::unique_ptr<BRDF>, GrammarError> parse_brdf(InputStream& input_file, Scene& scene) {
-
-    auto keyword_res = expect_keywords(input_file, {KeywordEnum::DIFFUSE, KeywordEnum::SPECULAR});
-    if (!keyword_res.has_value()) { return std::unexpected(keyword_res.error()); }
-    KeywordEnum keyword = keyword_res.value();
-
-    auto open_brk_res = expect_symbol(input_file, '(');
-    if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
-
-    auto pigment_res = parse_pigment(input_file, scene);
-    if (!pigment_res.has_value()) { return std::unexpected(pigment_res.error()); }
-    std::unique_ptr<Pigment> pigment = std::move(pigment_res.value());
-
-    auto close_brk_res = expect_symbol(input_file, ')');
-    if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
-
-    if (keyword == KeywordEnum::DIFFUSE) {
-        return std::make_unique<DiffusiveBRDF>(std::move(pigment));
-    } else if (keyword == KeywordEnum::SPECULAR) {
-        return std::make_unique<SpecularBRDF>(std::move(pigment));
-    }
-
-    return std::unexpected(GrammarError{input_file.location, "Failed to parse BRDF."});
-
-}
-
-std::expected<std::pair<std::string, Material>, GrammarError> parse_material(InputStream& input_file, Scene& scene) {
-
-    auto identifier_res = expect_identifier(input_file);
-    if (!identifier_res.has_value()) { return std::unexpected(identifier_res.error()); }
-    std::string name = identifier_res.value();
-
-    auto open_brk_res = expect_symbol(input_file, '(');
-    if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
-
-    auto brdf_res = parse_brdf(input_file, scene);
-    if (!brdf_res.has_value()) { return std::unexpected(brdf_res.error()); }
-    std::unique_ptr<BRDF> brdf = std::move(brdf_res.value());
-
-    auto comma = expect_symbol(input_file, ',');
-    if (!comma.has_value()) { return std::unexpected(comma.error()); }
-
-    auto emitted_rad_res = parse_pigment(input_file, scene);
-    if (!emitted_rad_res.has_value()) { return std::unexpected(emitted_rad_res.error()); }
-    std::unique_ptr<Pigment> emitted_rad = std::move(emitted_rad_res.value());
-
-    auto close_brk_res = expect_symbol(input_file, ')');
-
-    Material material{std::move(brdf), std::move(emitted_rad)};
-
-    return std::pair<std::string, Material>{name, std::move(material)};
-}
-
-std::expected<Transformation, GrammarError> parse_transformation(InputStream& input_file, Scene& scene) {
-    auto result = Transformation{};
-
-    // State flag controlling the loop
-    bool has_next_transformation = true;
-
-    while (has_next_transformation) {
-        auto kw_res = expect_keywords(input_file, std::vector<KeywordEnum>{
-                                                                         KeywordEnum::IDENTITY,
-                                                                         KeywordEnum::TRANSLATION,
-                                                                         KeywordEnum::ROTATION_X,
-                                                                         KeywordEnum::ROTATION_Y,
-                                                                         KeywordEnum::ROTATION_Z,
-                                                                         KeywordEnum::SCALING
-                                                                         });
-        if (!kw_res.has_value()) { return std::unexpected(kw_res.error()); }
-        KeywordEnum kw = kw_res.value();
-
-        if (kw == KeywordEnum::IDENTITY) {
-            // Do nothing (Primitive optimization)
-        } else if (kw == KeywordEnum::TRANSLATION) {
-
-            auto open_brk_res = expect_symbol(input_file, '(');
-            if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
-
-            auto vec_res = parse_vec(input_file, scene);
-            if (!vec_res.has_value()) { return std::unexpected(vec_res.error()); }
-            Vec vec = vec_res.value();
-
-            auto close_brk_res = expect_symbol(input_file, ')');
-            if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
-
-            result = result * Trans(vec);
-
-        } else if (kw == KeywordEnum::ROTATION_X) {
-
-            auto open_brk_res = expect_symbol(input_file, '(');
-            if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
-
-            auto angle_res = expect_number(input_file, scene);
-            if (!angle_res.has_value()) { return std::unexpected(angle_res.error()); }
-            float angle = angle_res.value();
-
-            auto close_brk_res = expect_symbol(input_file, ')');
-            if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
-
-            result = result * R_x(angle);
-
-        } else if (kw == KeywordEnum::ROTATION_Y) {
-
-            auto open_brk_res = expect_symbol(input_file, '(');
-            if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
-
-            auto angle_res = expect_number(input_file, scene);
-            if (!angle_res.has_value()) { return std::unexpected(angle_res.error()); }
-            float angle = angle_res.value();
-
-            auto close_brk_res = expect_symbol(input_file, ')');
-            if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
-
-            result = result * R_y(angle);
-
-        } else if (kw == KeywordEnum::ROTATION_Z) {
-
-            auto open_brk_res = expect_symbol(input_file, '(');
-            if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
-
-            auto angle_res = expect_number(input_file, scene);
-            if (!angle_res.has_value()) { return std::unexpected(angle_res.error()); }
-            float angle = angle_res.value();
-
-            auto close_brk_res = expect_symbol(input_file, ')');
-            if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
-
-            result = result * R_z(angle);
-
-        } else if (kw == KeywordEnum::SCALING) {
-
-            auto open_brk_res = expect_symbol(input_file, '(');
-            if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
-
-            auto vec_res = parse_vec(input_file, scene);
-            if (!vec_res.has_value()) { return std::unexpected(vec_res.error()); }
-            Vec vec = vec_res.value();
-
-            auto close_brk_res = expect_symbol(input_file, ')');
-            if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
-
-            result = result * Scale(vec);
-
-        }
-
-        // We must peek the next token to check if there is another transformation that is being
-        // chained or if the sequence ends. Thus, this is a LL(1) parser
-
-        auto next_token_res = input_file.read_token();
-        if (!next_token_res.has_value()) { return std::unexpected(next_token_res.error()); }
-        std::unique_ptr<Token> next_token = std::move(next_token_res.value());
-
-        auto* sym_token = dynamic_cast<SymbolToken*>(next_token.get());
-
-        // Update the state flag instead of using break/continue
-        if (sym_token != nullptr && sym_token->symbol == '*') {
-            // A '*' was found. Keep the flag true so the while loop repeats.
-            has_next_transformation = true;
-        } else {
-            // The chain is finished. Put the token back and cleanly toggle the flag to false.
-            input_file.unread_token(std::move(next_token));
-            has_next_transformation = false;
-        }
-    }
-
-    return result;
-
-}
-
-// Use 'T' to specify which concrete shape to build (e.g., Sphere, Cube, Plane)
-template <typename T>
-std::expected<std::unique_ptr<Shape>, GrammarError> parse_shape(InputStream& input_file, Scene& scene) {
-
-    auto open_brk_res = expect_symbol(input_file, '(');
-    if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
-
-    auto transformation_res = parse_transformation(input_file, scene);
-    if (!transformation_res.has_value()) { return std::unexpected(transformation_res.error()); }
-    Transformation transformation = transformation_res.value();
-
-    auto comma_res = expect_symbol(input_file, ',');
-    if (!comma_res.has_value()) { return std::unexpected(comma_res.error()); }
-
-    // Read the material name
-    auto mat_name_res = expect_identifier(input_file);
-    if (!mat_name_res.has_value()) { return std::unexpected(mat_name_res.error()); }
-    std::string material_name = mat_name_res.value();
-
-    // Look up the name in the dictionary
-    if (!scene.materials.contains(material_name)) {
-        return std::unexpected(GrammarError{
-            input_file.location,
-            std::format("Unknown material '{}' applied to shape.", material_name)
-        });
-    }
-
-    // Grab the existing shared pointer from the dictionary
-    std::shared_ptr<Material> material = scene.materials.at(material_name);
-
-    auto close_brk_res = expect_symbol(input_file, ')');
-    if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
-
-    // Return the "T" shape and cast it to unique_ptr in order to put it in World
-    return std::make_unique<T>(transformation, material);
-}
-
-std::expected<std::unique_ptr<Camera>, GrammarError> parse_camera(InputStream& input_file, Scene& scene) {
-
-    auto open_brk_res = expect_symbol(input_file, '(');
-    if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
-
-    auto keyword_res = expect_keywords(input_file, {KeywordEnum::PERSPECTIVE, KeywordEnum::ORTHOGONAL});
-    if (!keyword_res.has_value()) { return std::unexpected(keyword_res.error()); }
-    KeywordEnum keyword = keyword_res.value();
-
-    auto comma1_res = expect_symbol(input_file, ',');
-    if (!comma1_res.has_value()) { return std::unexpected(comma1_res.error()); }
-
-    auto aspect_ratio_res = expect_number(input_file, scene);
-    if (!aspect_ratio_res.has_value()) { return std::unexpected(aspect_ratio_res.error()); }
-    float aspect_ratio = aspect_ratio_res.value();
-
-    float distance=0.0f;
-    if (keyword == KeywordEnum::PERSPECTIVE) {
-        auto comma2_res = expect_symbol(input_file, ',');
-        if (!comma2_res.has_value()) { return std::unexpected(comma2_res.error()); }
-
-        auto distance_res = expect_number(input_file, scene);
-        if (!distance_res.has_value()) { return std::unexpected(distance_res.error()); }
-        distance = distance_res.value();
-    }
-
-    auto comma3_res = expect_symbol(input_file, ',');
-    if (!comma3_res.has_value()) { return std::unexpected(comma3_res.error()); }
-
-    auto transformation_res = parse_transformation(input_file, scene);
-    if (!transformation_res.has_value()) { return std::unexpected(transformation_res.error()); }
-    Transformation transformation = transformation_res.value();
-
-    auto close_brk_res = expect_symbol(input_file, ')');
-    if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
-
-    if (keyword == KeywordEnum::ORTHOGONAL) {
-        return std::make_unique<OrthogonalCamera>(aspect_ratio, transformation);
-    } else if (keyword == KeywordEnum::PERSPECTIVE) {
-        return std::make_unique<PerspectiveCamera>(aspect_ratio, distance, transformation);
-    }
-
-    return std::unexpected(GrammarError{input_file.location, "Failed to parse Camera"});
-
-}
-
-
-// Utility function to parse different Shape types inside parse_scene
-using ShapeParserFunc = std::expected<std::unique_ptr<Shape>, GrammarError>(*)(InputStream&, Scene&);
-
-// Static lookup table linking the keyword to the correct template instantiation: this dictionary
-// associates every keyword with the specific parse_shape instantiation to use
-inline const std::unordered_map<KeywordEnum, ShapeParserFunc> SHAPE_PARSERS = {
-    {KeywordEnum::SPHERE, &parse_shape<Sphere>},
-    {KeywordEnum::PLANE,  &parse_shape<Plane>},
-    {KeywordEnum::CUBE,   &parse_shape<Cube>}
-    // To add a cylinder later, just add one line here:
-    // {KeywordEnum::CYLINDER, &parse_shape<Cylinder>}
-};
-
-std::expected<Scene, GrammarError> parse_scene(InputStream& input_file,
-                                               const std::unordered_map<std::string, float>& overridden_variables = {}) {
-
-    /// Read a scene description from a stream and return a :class:`.Scene` object
-    Scene scene;
-
-    // Initialize the scene's float variables with the overrides provided (e.g., from command line)
-    scene.float_variables = overridden_variables;
-
-    // Populate the overridden_variables set so we know which ones to protect from redefinition
-    for (const auto& [key, value] : overridden_variables) {
-        scene.overridden_variables.insert(key);
-    }
-
-    auto token_res = input_file.read_token();
-    if (!token_res.has_value()) { return std::unexpected(token_res.error()); }
-    std::unique_ptr<Token> token = std::move(token_res.value());
-
-    // While the token is not a StopToken the dynamic_cast<StopToken*> remains nullptr
-    // The moment a StopToken is read dynamic_cast<StopToken*>(token.get()) contains a pointer
-    // that is not nullptr and the while interrupts
-    while (dynamic_cast<StopToken*>(token.get()) == nullptr) {
-        // First token should always be a keyword
-        auto* kw_token = dynamic_cast<KeywordToken*>(token.get());
-        if (kw_token == nullptr) { // If what the read token is not a keyword throw an error message
-            return std::unexpected(GrammarError{token->location, "Expected a keyword token."});
-        }
-        KeywordEnum kw = kw_token->keyword;
-
-        if (kw == KeywordEnum::FLOAT) {
-
-            // I want float variables to be defined as
-            // float var_name = value;
-
-            auto variable_name_res = expect_identifier(input_file);
-            if (!variable_name_res.has_value()) { return std::unexpected(variable_name_res.error()); }
-            std::string variable_name = variable_name_res.value();
-            SourceLocation variable_location = input_file.location;
-
-            auto assign_res = expect_symbol(input_file, '=');
-            if (!assign_res.has_value()) { return std::unexpected(assign_res.error()); }
-
-            auto val_res = expect_number(input_file, scene);
-            if (!val_res.has_value()) { return std::unexpected(val_res.error()); }
-            float val = val_res.value();
-
-            // Check for illegal redefinition
-            if (scene.float_variables.contains(variable_name) && !scene.overridden_variables.contains(variable_name)) {
-                return std::unexpected(GrammarError{
-                    variable_location,
-                    std::format("Variable '{}' cannot be redefined.", variable_name)
-                });
-            }
-
-            auto semicolon_res = expect_symbol(input_file, ';');
-            if (!semicolon_res.has_value()) { return std::unexpected(semicolon_res.error()); }
-
-            // Define the variable if it wasn't overridden from the command line
-            if (!scene.overridden_variables.contains(variable_name)) {
-                scene.float_variables[variable_name] = val;
-            }
-
-        } else if (kw == KeywordEnum::MATERIAL) {
-
-            // I want materials to be defined as
-            // material material_name(brdf, emitted_radiance);
-
-            auto material_res = parse_material(input_file, scene);
-            if (!material_res.has_value()) { return std::unexpected(material_res.error()); }
-
-            std::string material_name = material_res.value().first;
-            Material material = std::move(material_res.value().second);
-
-            scene.materials[material_name] = std::make_shared<Material>(std::move(material));
-
-            auto semicolon_res = expect_symbol(input_file, ';');
-            if (!semicolon_res.has_value()) { return std::unexpected(semicolon_res.error()); }
-
-        } else if (kw == KeywordEnum::CAMERA) {
-
-            if (scene.camera) {
-                return std::unexpected(GrammarError{token->location, "You cannot define more than one Camera", });
-            }
-            auto camera_res = parse_camera(input_file, scene);
-            if (!camera_res.has_value()) { return std::unexpected(camera_res.error()); }
-
-            scene.camera = std::move(camera_res.value());
-
-            auto semicolon_res = expect_symbol(input_file, ';');
-            if (!semicolon_res.has_value()) { return std::unexpected(semicolon_res.error()); }
-
-        } else if (SHAPE_PARSERS.contains(kw)) {
-
-            // SHAPE_PARSER.at(kw) is just the particular parse_shape function with the shape indicated by the shape keyword
-            auto shape_res = SHAPE_PARSERS.at(kw)(input_file, scene);
-            if (!shape_res.has_value()) { return std::unexpected(shape_res.error()); }
-
-            scene.world.add(std::move(shape_res.value()));
-
-            auto semicolon_res = expect_symbol(input_file, ';');
-            if (!semicolon_res.has_value()) { return std::unexpected(semicolon_res.error()); }
-
-        } else {
-            // We know it is a keyword, but it's the wrong keyword for the top level
-            // For instance you cannot define uniform() by itself, it has to be inside a material or shape
-
-            // Find the string representation of this keyword by reverse-searching the dictionary
-            std::string kw_str = "unknown";
-            for (const auto& [key_string, enum_val] : KEYWORDS) {
-                if (enum_val == kw) {
-                    kw_str = key_string;
-                    break;
-                }
-            }
-
-            // Print the exact string the user typed in the error message
-            return std::unexpected(GrammarError{
-                token->location,
-                std::format("Keyword '{}' is not allowed at the top level of the scene file.", kw_str)
+                std::format("Unknown material '{}' applied to shape.", material_name)
             });
-
         }
 
-        // At the very end of the while loop read the next token to update the pointer that controls the while loop
-        token_res = input_file.read_token();
-        if (!token_res.has_value()) { return std::unexpected(token_res.error()); }
-        token = std::move(token_res.value());
+        std::shared_ptr<Material> material = scene.materials.at(material_name);
+
+        auto close_brk_res = expect_symbol(input_file, ')');
+        if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
+
+        return std::make_unique<T>(transformation, material);
+    }
+
+    /// @brief Parses a Camera declaration from the scene file.
+    /// @param input_file The InputStream.
+    /// @param scene The active Scene object.
+    /// @return A unique pointer to the Camera polymorphism wrapper.
+    std::expected<std::unique_ptr<Camera>, GrammarError> parse_camera(InputStream& input_file, Scene& scene) {
+
+        auto open_brk_res = expect_symbol(input_file, '(');
+        if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
+
+        auto keyword_res = expect_keywords(input_file, {KeywordEnum::PERSPECTIVE, KeywordEnum::ORTHOGONAL});
+        if (!keyword_res.has_value()) { return std::unexpected(keyword_res.error()); }
+        KeywordEnum keyword = keyword_res.value();
+
+        auto comma1_res = expect_symbol(input_file, ',');
+        if (!comma1_res.has_value()) { return std::unexpected(comma1_res.error()); }
+
+        auto aspect_ratio_res = expect_number(input_file, scene);
+        if (!aspect_ratio_res.has_value()) { return std::unexpected(aspect_ratio_res.error()); }
+        float aspect_ratio = aspect_ratio_res.value();
+
+        float distance=0.0f;
+        if (keyword == KeywordEnum::PERSPECTIVE) {
+            auto comma2_res = expect_symbol(input_file, ',');
+            if (!comma2_res.has_value()) { return std::unexpected(comma2_res.error()); }
+
+            auto distance_res = expect_number(input_file, scene);
+            if (!distance_res.has_value()) { return std::unexpected(distance_res.error()); }
+            distance = distance_res.value();
+        }
+
+        auto comma3_res = expect_symbol(input_file, ',');
+        if (!comma3_res.has_value()) { return std::unexpected(comma3_res.error()); }
+
+        auto transformation_res = parse_transformation(input_file, scene);
+        if (!transformation_res.has_value()) { return std::unexpected(transformation_res.error()); }
+        Transformation transformation = transformation_res.value();
+
+        auto close_brk_res = expect_symbol(input_file, ')');
+        if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
+
+        if (keyword == KeywordEnum::ORTHOGONAL) {
+            return std::make_unique<OrthogonalCamera>(aspect_ratio, transformation);
+        } else if (keyword == KeywordEnum::PERSPECTIVE) {
+            return std::make_unique<PerspectiveCamera>(aspect_ratio, distance, transformation);
+        }
+
+        return std::unexpected(GrammarError{input_file.location, "Failed to parse Camera"});
 
     }
 
-    return scene;
-}
+
+    /// @brief Type alias for a function pointer to a template instantiation of parse_shape<T>.
+    using ShapeParserFunc = std::expected<std::unique_ptr<Shape>, GrammarError>(*)(InputStream&, Scene&);
+
+    /// @brief Static lookup table linking the keyword to the correct template instantiation of `parse_shape`.
+    inline const std::unordered_map<KeywordEnum, ShapeParserFunc> SHAPE_PARSERS = {
+        {KeywordEnum::SPHERE, &parse_shape<Sphere>},
+        {KeywordEnum::PLANE,  &parse_shape<Plane>},
+        {KeywordEnum::CUBE,   &parse_shape<Cube>}
+        // To add a cylinder later, just add one line here:
+        // {KeywordEnum::CYLINDER, &parse_shape<Cylinder>}
+    };
+
+    /// @brief Parses an entire scene file from top to bottom, building the World, Camera, and Materials.
+    ///
+    /// This function acts as the root of the recursive descent parser. It sequentially reads
+    /// top-level tokens (Float variables, Materials, Cameras, and Shapes) and populates a Scene object.
+    ///
+    /// @param input_file The InputStream pointing to the .txt scene file.
+    /// @param overridden_variables An optional dictionary of float variables injected from the command line.
+    /// @return A fully populated Scene object, or a GrammarError if a syntax violation occurs.
+    std::expected<Scene, GrammarError> parse_scene(InputStream& input_file,
+                                                   const std::unordered_map<std::string, float>& overridden_variables = {}) {
+
+        Scene scene;
+
+        // Initialize the scene's float variables with the overrides provided (e.g., from command line)
+        scene.float_variables = overridden_variables;
+
+        // Populate the overridden_variables set so we know which ones to protect from redefinition
+        for (const auto& [key, value] : overridden_variables) {
+            scene.overridden_variables.insert(key);
+        }
+
+        auto token_res = input_file.read_token();
+        if (!token_res.has_value()) { return std::unexpected(token_res.error()); }
+        std::unique_ptr<Token> token = std::move(token_res.value());
+
+        // Parse top-level statements until the stream reaches EOF
+        while (dynamic_cast<StopToken*>(token.get()) == nullptr) {
+            // First token should always be a keyword
+            auto* kw_token = dynamic_cast<KeywordToken*>(token.get());
+            if (kw_token == nullptr) { // If what the read token is not a keyword throw an error message
+                return std::unexpected(GrammarError{token->location, "Expected a keyword token."});
+            }
+            KeywordEnum kw = kw_token->keyword;
+
+            if (kw == KeywordEnum::FLOAT) {
+
+                // Float variables get to be defined as
+                // float var_name = value;
+
+                auto variable_name_res = expect_identifier(input_file);
+                if (!variable_name_res.has_value()) { return std::unexpected(variable_name_res.error()); }
+                std::string variable_name = variable_name_res.value();
+                SourceLocation variable_location = input_file.location;
+
+                auto assign_res = expect_symbol(input_file, '=');
+                if (!assign_res.has_value()) { return std::unexpected(assign_res.error()); }
+
+                auto val_res = expect_number(input_file, scene);
+                if (!val_res.has_value()) { return std::unexpected(val_res.error()); }
+                float val = val_res.value();
+
+                // Check for illegal redefinition
+                if (scene.float_variables.contains(variable_name) && !scene.overridden_variables.contains(variable_name)) {
+                    return std::unexpected(GrammarError{
+                        variable_location,
+                        std::format("Variable '{}' cannot be redefined.", variable_name)
+                    });
+                }
+
+                auto semicolon_res = expect_symbol(input_file, ';');
+                if (!semicolon_res.has_value()) { return std::unexpected(semicolon_res.error()); }
+
+                // Define the variable if it wasn't overridden from the command line
+                if (!scene.overridden_variables.contains(variable_name)) {
+                    scene.float_variables[variable_name] = val;
+                }
+
+            } else if (kw == KeywordEnum::MATERIAL) {
+
+                // Materials get to be defined as
+                // material material_name(brdf, emitted_radiance);
+
+                auto material_res = parse_material(input_file, scene);
+                if (!material_res.has_value()) { return std::unexpected(material_res.error()); }
+
+                std::string material_name = material_res.value().first;
+                Material material = std::move(material_res.value().second);
+
+                scene.materials[material_name] = std::make_shared<Material>(std::move(material));
+
+                auto semicolon_res = expect_symbol(input_file, ';');
+                if (!semicolon_res.has_value()) { return std::unexpected(semicolon_res.error()); }
+
+            } else if (kw == KeywordEnum::CAMERA) {
+
+                if (scene.camera) {
+                    return std::unexpected(GrammarError{token->location, "You cannot define more than one Camera", });
+                }
+                auto camera_res = parse_camera(input_file, scene);
+                if (!camera_res.has_value()) { return std::unexpected(camera_res.error()); }
+
+                scene.camera = std::move(camera_res.value());
+
+                auto semicolon_res = expect_symbol(input_file, ';');
+                if (!semicolon_res.has_value()) { return std::unexpected(semicolon_res.error()); }
+
+            } else if (SHAPE_PARSERS.contains(kw)) {
+
+                // SHAPE_PARSER.at(kw) is just the template instantiation parse_shape function with the shape indicated by the shape keyword
+                auto shape_res = SHAPE_PARSERS.at(kw)(input_file, scene);
+                if (!shape_res.has_value()) { return std::unexpected(shape_res.error()); }
+
+                scene.world.add(std::move(shape_res.value()));
+
+                auto semicolon_res = expect_symbol(input_file, ';');
+                if (!semicolon_res.has_value()) { return std::unexpected(semicolon_res.error()); }
+
+            } else {
+                // We know it is a keyword, but it's the wrong keyword for the top level
+                // For instance you cannot define uniform() by itself, it has to be inside a material or shape
+
+                std::string kw_str = "unknown";
+                for (const auto& [key_string, enum_val] : KEYWORDS) {
+                    if (enum_val == kw) {
+                        kw_str = key_string;
+                        break;
+                    }
+                }
+
+                return std::unexpected(GrammarError{
+                    token->location,
+                    std::format("Keyword '{}' is not allowed at the top level of the scene file.", kw_str)
+                });
+
+            }
+
+            // At the very end of the while loop read the next token to update the pointer that controls the while loop
+            token_res = input_file.read_token();
+            if (!token_res.has_value()) { return std::unexpected(token_res.error()); }
+            token = std::move(token_res.value());
+
+        }
+
+        return scene;
+    }
 
 }

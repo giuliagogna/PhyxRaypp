@@ -781,4 +781,63 @@ TEST_CASE("Integration: parse_scene() from external files") {
         REQUIRE(persp_cam != nullptr);
 
     }
+
+    SUBCASE("Invalid scene - starting with something that is not a keyword") {
+        std::istringstream string_stream(R"(
+            This file starts with a comment but you forgot the '#'
+            float variable_that_should_not_be_read = 5.0;
+            )");
+
+        InputStream stream(string_stream);
+        auto res = parse_scene(stream);
+        REQUIRE_FALSE(res.has_value());
+        CHECK(res.error().message.find("Expected a keyword") != std::string::npos);
+    }
+
+    SUBCASE("Invalid scene - missing semicolon") {
+        std::istringstream string_stream(R"(
+            # This file starts with a comment
+            float you_forgot_semicolon = 5.0
+            )");
+
+        InputStream stream(string_stream);
+        auto res = parse_scene(stream);
+        REQUIRE_FALSE(res.has_value());
+        CHECK(res.error().message.find("Expected symbol") != std::string::npos);
+    }
+
+    SUBCASE("Invalid scene - variable redefinition") {
+        std::istringstream string_stream(R"(
+            # This file starts with a comment
+            float define_1 = 5.0;
+            float define_1 = 12.0;
+            )");
+
+        InputStream stream(string_stream);
+        auto res = parse_scene(stream);
+        REQUIRE_FALSE(res.has_value());
+        CHECK(res.error().message.find("cannot be redefined") != std::string::npos);
+    }
+
+    SUBCASE("Invalid scene: illegal top-level keyword") {
+        // 'diffuse' is a valid keyword, but it belongs inside a material, not out in the open!
+        std::istringstream stream("diffuse(uniform(<1.0, 1.0, 1.0>));");
+        InputStream input_stream(stream);
+
+        auto scene_res = parse_scene(input_stream);
+        REQUIRE_FALSE(scene_res.has_value());
+        CHECK(scene_res.error().message.find("Keyword 'diffuse' is not allowed at the top level") != std::string::npos);
+    }
+
+    SUBCASE("Negative: Double Camera Definition") {
+        std::istringstream stream(R"(
+            camera(perspective, 1.0, 2.0, identity);
+            camera(orthogonal, 1.0, identity);
+        )");
+        InputStream input_stream(stream);
+
+        auto scene_res = parse_scene(input_stream);
+        REQUIRE_FALSE(scene_res.has_value());
+        CHECK(scene_res.error().message.find("more than one Camera") != std::string::npos);
+    }
 }
