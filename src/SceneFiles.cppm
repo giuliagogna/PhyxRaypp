@@ -943,23 +943,42 @@ export {
     /// @param scene The active Scene object containing the material dictionary.
     /// @return A unique pointer to the newly allocated Shape.
     /// @warning Throws a GrammarError if the material name is not found in the scene's dictionary.
+    /// Transformation is an optional argument
     template <typename T>
     std::expected<std::unique_ptr<Shape>, GrammarError> parse_shape(InputStream& input_file, Scene& scene) {
 
         auto open_brk_res = expect_symbol(input_file, '(');
         if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
 
-        auto transformation_res = parse_transformation(input_file, scene);
-        if (!transformation_res.has_value()) { return std::unexpected(transformation_res.error()); }
-        Transformation transformation = transformation_res.value();
+        Transformation transformation{}; // Default identity
+        std::string material_name;
 
-        auto comma_res = expect_symbol(input_file, ',');
-        if (!comma_res.has_value()) { return std::unexpected(comma_res.error()); }
+        // Peek at the next token to see if it's an identifier or a transformation keyword
+        auto next_tok_res = input_file.read_token();
+        if (!next_tok_res.has_value()) { return std::unexpected(next_tok_res.error()); }
+        std::unique_ptr<Token> tok = std::move(next_tok_res.value());
 
-        auto mat_name_res = expect_identifier(input_file);
-        if (!mat_name_res.has_value()) { return std::unexpected(mat_name_res.error()); }
-        std::string material_name = mat_name_res.value();
+        if (auto* id_tok = dynamic_cast<IdentifierToken*>(tok.get())) {
+            // User skipped transformation and just provided the material name
+            material_name = id_tok->identifier;
+        } else {
+            // It's not an identifier, so it's a transformation: put back the token
+            input_file.unread_token(std::move(tok));
 
+            auto transformation_res = parse_transformation(input_file, scene);
+            if (!transformation_res.has_value()) { return std::unexpected(transformation_res.error()); }
+            transformation = transformation_res.value();
+
+            auto comma_res = expect_symbol(input_file, ',');
+            if (!comma_res.has_value()) { return std::unexpected(comma_res.error()); }
+
+            auto mat_name_res = expect_identifier(input_file);
+            if (!mat_name_res.has_value()) { return std::unexpected(mat_name_res.error()); }
+            material_name = mat_name_res.value();
+
+        }
+
+        // Link material
         if (!scene.materials.contains(material_name)) {
             return std::unexpected(GrammarError{
                 input_file.location,

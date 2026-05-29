@@ -788,10 +788,10 @@ TEST_CASE("Test Parser: Parse functions") {
 
     // parse_shape()
     SUBCASE("parse_shape<T>()") {
-        SUBCASE("Valid Sphere with Material Lookup") {
+        auto dummy_brdf = std::make_shared<DiffusiveBRDF>(std::make_shared<UniformPigment>(Color{1.0f,1.0f,1.0f}));
+        auto dummy_emitted = std::make_shared<UniformPigment>(Color{0.0f,0.0f,0.0f});
+        SUBCASE("Valid Sphere - All arguments") {
             // Pre-populate the scene dictionary with a dummy material so the lookup works
-            auto dummy_brdf = std::make_shared<DiffusiveBRDF>(std::make_shared<UniformPigment>(Color{1.0f,1.0f,1.0f}));
-            auto dummy_emitted = std::make_shared<UniformPigment>(Color{0.0f,0.0f,0.0f});
             scene.materials["blue_mat"] = std::make_shared<Material>(dummy_brdf, dummy_emitted);
 
             std::istringstream string_stream("(scaling([2.0, 2.0, 2.0]), blue_mat)");
@@ -809,6 +809,24 @@ TEST_CASE("Test Parser: Parse functions") {
             CHECK(res.value()->trans.m.is_close(expected_trans.m));
         }
 
+        SUBCASE("Valid Cube - 1 Argument (material)") {
+            scene.materials["blue_mat"] = std::make_shared<Material>(dummy_brdf, dummy_emitted);
+
+            std::istringstream string_stream("(blue_mat)");
+            InputStream stream(string_stream);
+
+            // Test Cube building
+            auto res = parse_shape<Cube>(stream, scene);
+            REQUIRE(res.has_value());
+
+            // Confirm the material pointer was linked to the scene dictionary
+            CHECK(res.value()->material == scene.materials["blue_mat"]);
+
+            // Confirm the transformation is correct
+            Transformation expected_trans{};
+            CHECK(res.value()->trans.m.is_close(expected_trans.m));
+        }
+
         SUBCASE("Unknown Material applied (Negative)") {
             // Because this is a fresh subcase, scene.materials is already empty here!
             std::istringstream string_stream("(identity, invisible_material)");
@@ -817,6 +835,17 @@ TEST_CASE("Test Parser: Parse functions") {
             auto res = parse_shape<Sphere>(stream, scene);
             REQUIRE_FALSE(res.has_value());
             CHECK(res.error().message.find("Unknown material 'invisible_material'") != std::string::npos);
+        }
+
+        SUBCASE("Missed comma (Negative)") {
+            scene.materials["blue_mat"] = std::make_shared<Material>(dummy_brdf, dummy_emitted);
+            std::istringstream string_stream("identity, blue_mat))");
+            InputStream stream(string_stream);
+
+            auto res = parse_shape<Sphere>(stream, scene);
+            REQUIRE_FALSE(res.has_value());
+            //MESSAGE(res.error().message);
+            CHECK(res.error().message.find("Expected symbol '('") != std::string::npos);
         }
     }
 
