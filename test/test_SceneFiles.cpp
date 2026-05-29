@@ -980,6 +980,8 @@ TEST_CASE("Integration: parse_scene() from external files") {
 
             # Here is a comment
 
+            background(<0.8, 0.6, 0.9>);
+
             material ground_material(
                 diffuse(checkered(<0.3, 0.5, 0.1>, <0.1, 0.2, 0.5>, 4)),
                 uniform(<0.0, 0.0, 0.0>)
@@ -1023,6 +1025,9 @@ TEST_CASE("Integration: parse_scene() from external files") {
         CHECK(scene.materials.at("sky_material") != nullptr);
         CHECK(scene.materials.at("sphere_material") != nullptr);
         CHECK(scene.materials.at("ground_material") != nullptr);
+
+        // Check the background color
+        CHECK(scene.background_color.is_close(Color{0.8, 0.6, 0.9}));
 
         // Check the shapes in the world
         REQUIRE(scene.world.shapes.size() == 3);

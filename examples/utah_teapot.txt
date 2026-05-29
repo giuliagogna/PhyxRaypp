@@ -1,0 +1,14 @@
+# Pre-computed rotation variable
+float pi_over_2 = 1.5707963;
+
+# The exact sky color from your old FlatRenderer block
+background(<0.01, 0.01, 1.0>);
+
+# The exact camera distance (3.0) and transformation matrix from run_demo
+camera(perspective, 1.0, 3.0, rot_z(1.0) * rot_y(0.5) * translation([-10.0, 0.0, 2.0]));
+
+# The checkered material from build_Utah_teapot_world
+material teapot_mat(diffuse(checkered(<1.0, 1.0, 1.0>, <0.0, 0.0, 0.0>, 3)));
+
+# The Teapot
+mesh("mesh/utah_teapot.obj", teapot_mat, identity);

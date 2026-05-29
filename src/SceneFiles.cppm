@@ -87,7 +87,8 @@ export enum class KeywordEnum {
 
     FLOAT,           // 20
 
-    MESH             // 21
+    MESH,            // 21
+    BACKGROUND       // 22
 };
 
 /// @brief Dictionary linking literal text strings to their corresponding KeywordEnum.
@@ -112,7 +113,8 @@ export const std::unordered_map<std::string, KeywordEnum> KEYWORDS{
     {"orthogonal", KeywordEnum::ORTHOGONAL},
     {"perspective", KeywordEnum::PERSPECTIVE},
     {"float", KeywordEnum::FLOAT},
-    {"mesh", KeywordEnum::MESH}
+    {"mesh", KeywordEnum::MESH},
+    {"background", KeywordEnum::BACKGROUND}
 };
 
 /// @brief Abstract base class representing a single lexical token.
@@ -457,6 +459,8 @@ export struct Scene {
     std::unique_ptr<Camera> camera = nullptr;
     std::unordered_map<std::string, float> float_variables;
     std::unordered_set<std::string> overridden_variables;
+
+    Color background_color{0.0f, 0.0f, 0.0f};
 };
 
 
@@ -1246,7 +1250,8 @@ export {
     inline const std::unordered_map<KeywordEnum, ShapeParserFunc> SHAPE_PARSERS = {
         {KeywordEnum::SPHERE, &parse_shape<Sphere>},
         {KeywordEnum::PLANE,  &parse_shape<Plane>},
-        {KeywordEnum::CUBE,   &parse_shape<Cube>}
+        {KeywordEnum::CUBE,   &parse_shape<Cube>},
+        {KeywordEnum::MESH, &parse_mesh}
         // To add a cylinder later, just add one line here:
         // {KeywordEnum::CYLINDER, &parse_shape<Cylinder>}
     };
@@ -1343,6 +1348,23 @@ export {
                 if (!camera_res.has_value()) { return std::unexpected(camera_res.error()); }
 
                 scene.camera = std::move(camera_res.value());
+
+                auto semicolon_res = expect_symbol(input_file, ';');
+                if (!semicolon_res.has_value()) { return std::unexpected(semicolon_res.error()); }
+
+            } else if (kw == KeywordEnum::BACKGROUND) {
+                // Backgrounds get defined as:
+                // background(<r, g, b>);
+
+                auto open_brk_res = expect_symbol(input_file, '(');
+                if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
+
+                auto bkg_color_res = parse_color(input_file, scene);
+                if (!bkg_color_res.has_value()) { return std::unexpected(bkg_color_res.error()); }
+                scene.background_color = bkg_color_res.value();
+
+                auto close_res = expect_symbol(input_file, ')');
+                if (!close_res.has_value()) { return std::unexpected(close_res.error()); }
 
                 auto semicolon_res = expect_symbol(input_file, ';');
                 if (!semicolon_res.has_value()) { return std::unexpected(semicolon_res.error()); }
