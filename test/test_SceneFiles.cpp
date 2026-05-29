@@ -150,40 +150,69 @@ void check_is_stop(const std::expected<std::unique_ptr<Token>, GrammarError>& re
 }
 
 TEST_CASE("Test Lexer: read_token()") {
-    std::istringstream string_stream(R"(
+
+    SUBCASE("Happy path") {
+        std::istringstream string_stream(R"(
         # This is a comment
         # This is another comment
         new material sky_material(
             diffuse(image("my file.pfm")),
             <5.0, 500.0, 300.0>
         ) # Comment at the end of the line
-    )");
+        )");
 
-    InputStream stream(string_stream);
+        InputStream stream(string_stream);
 
-    check_is_keyword(stream.read_token(), KeywordEnum::NEW);
-    check_is_keyword(stream.read_token(), KeywordEnum::MATERIAL);
-    check_is_identifier(stream.read_token(), "sky_material");
-    check_is_symbol(stream.read_token(), '(');
-    check_is_keyword(stream.read_token(), KeywordEnum::DIFFUSE);
-    check_is_symbol(stream.read_token(), '(');
-    check_is_keyword(stream.read_token(), KeywordEnum::IMAGE);
-    check_is_symbol(stream.read_token(), '(');
-    check_is_string(stream.read_token(), "my file.pfm");
-    check_is_symbol(stream.read_token(), ')');
-    check_is_symbol(stream.read_token(), ')');
-    check_is_symbol(stream.read_token(), ',');
-    check_is_symbol(stream.read_token(), '<');
-    check_is_number(stream.read_token(), 5.0);
-    check_is_symbol(stream.read_token(), ',');
-    check_is_number(stream.read_token(), 500.0);
-    check_is_symbol(stream.read_token(), ',');
-    check_is_number(stream.read_token(), 300.0);
-    check_is_symbol(stream.read_token(), '>');
-    check_is_symbol(stream.read_token(), ')');
+        check_is_keyword(stream.read_token(), KeywordEnum::NEW);
+        check_is_keyword(stream.read_token(), KeywordEnum::MATERIAL);
+        check_is_identifier(stream.read_token(), "sky_material");
+        check_is_symbol(stream.read_token(), '(');
+        check_is_keyword(stream.read_token(), KeywordEnum::DIFFUSE);
+        check_is_symbol(stream.read_token(), '(');
+        check_is_keyword(stream.read_token(), KeywordEnum::IMAGE);
+        check_is_symbol(stream.read_token(), '(');
+        check_is_string(stream.read_token(), "my file.pfm");
+        check_is_symbol(stream.read_token(), ')');
+        check_is_symbol(stream.read_token(), ')');
+        check_is_symbol(stream.read_token(), ',');
+        check_is_symbol(stream.read_token(), '<');
+        check_is_number(stream.read_token(), 5.0);
+        check_is_symbol(stream.read_token(), ',');
+        check_is_number(stream.read_token(), 500.0);
+        check_is_symbol(stream.read_token(), ',');
+        check_is_number(stream.read_token(), 300.0);
+        check_is_symbol(stream.read_token(), '>');
+        check_is_symbol(stream.read_token(), ')');
 
-    // Check the reader has come to the end of the stream
-    check_is_stop(stream.read_token());
+        // Check the reader has come to the end of the stream
+        check_is_stop(stream.read_token());
+    }
+
+    SUBCASE("Float Parsing with scientific notation and signs)") {
+        std::istringstream stream("-3.14 +0.5 1.0e-5 2E4");
+        InputStream input(stream);
+
+        check_is_number(input.read_token(), -3.14f);
+        check_is_number(input.read_token(), 0.5f);
+        check_is_number(input.read_token(), 1.0e-5f);
+        check_is_number(input.read_token(), 20000.0f);
+    }
+
+    SUBCASE("Negative: Unterminated String") {
+        std::istringstream stream("\"This string never ends");
+        InputStream input(stream);
+        auto res = input.read_token();
+        REQUIRE_FALSE(res.has_value());
+        CHECK(res.error().message.find("Unterminated string") != std::string::npos);
+    }
+
+    SUBCASE("Negative: Invalid Character") {
+        std::istringstream stream("@");
+        InputStream input(stream);
+        auto res = input.read_token();
+        REQUIRE_FALSE(res.has_value());
+        CHECK(res.error().message.find("Invalid character") != std::string::npos);
+    }
 
 }
 
@@ -652,6 +681,17 @@ TEST_CASE("Test Parser: Parse functions") {
             REQUIRE_FALSE(res.has_value());
             CHECK(res.error().message.find("Expected a keyword,") != std::string::npos);
         }
+
+        SUBCASE("Trailing multiplication symbol (Negative)") {
+            // The user put a '*' but forgot the next transformation keyword,
+            // so the next token is actually a symbol like ')' or ';'
+            std::istringstream string_stream("translation([1.0, 1.0, 1.0]) * )");
+            InputStream stream(string_stream);
+
+            auto res = parse_transformation(stream, scene);
+            REQUIRE_FALSE(res.has_value());
+            CHECK(res.error().message.find("Expected a keyword") != std::string::npos);
+        }
     }
 
 
@@ -1007,6 +1047,27 @@ TEST_CASE("Integration: parse_scene() from external files") {
         auto* persp_cam = dynamic_cast<PerspectiveCamera*>(scene.camera.get());
         REQUIRE(persp_cam != nullptr);
 
+    }
+
+    SUBCASE("Valid scene: Command-line variable overrides") {
+        std::istringstream stream(R"(
+            float clock = 150.0;
+            float my_var = 10.0;
+        )");
+        InputStream input_stream(stream);
+
+        // Simulate passing a CLI argument that forces 'clock' to be 42.0
+        std::unordered_map<std::string, float> overrides = {{"clock", 42.0f}};
+
+        auto scene_res = parse_scene(input_stream, overrides);
+        REQUIRE(scene_res.has_value());
+
+        Scene scene = std::move(scene_res.value());
+
+        // Ensure 'clock' was protected and kept the override value
+        CHECK(scene.float_variables.at("clock") == 42.0f);
+        // Ensure 'my_var' was read normally
+        CHECK(scene.float_variables.at("my_var") == 10.0f);
     }
 
     SUBCASE("Invalid scene - starting with something that is not a keyword") {
