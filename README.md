@@ -124,6 +124,26 @@ xmake run PhyxRadpp render utah_teapot.txt 1.0 1.0 --algorithm flat --output my_
 <img src="my_custom_output_path/custom_test_render.png" alt="OnOff spheres result" width="50%">
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
+## Scene Description Language
+
+`PhyxRadpp` uses a custom, easily readable text format to define 3D environments at runtime. You can define variables, build complex BRDF materials, and chain matrix transformations.
+
+Here is a quick example of a scene file:
+```text
+# Define variables
+float pi = 3.14159;
+
+# Set environment and camera
+background(<0.5, 0.7, 1.0>);
+camera(perspective, 1.0, 3.0, translation([0.0, 0.0, 5.0]));
+
+# Build a material and apply it to a shape
+material red_plastic(diffuse(uniform(<0.8, 0.1, 0.1>)));
+sphere(translation([0.0, 1.0, 0.0]) * scaling([2.0, 2.0, 2.0]), red_plastic);
+```
+For a complete guide on all available shapes, materials, and syntax rules, please see the Scene Language Documentation in `docs/SCENE_LANGUAGE.md`.
+
+------------------------------------------------------------------------------------------------------------------------------------------------
 ## Testing
 To build and run the `doctest` unit test suite, simply use:
 

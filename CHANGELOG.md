@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - Restructuring of main
 - Parser implementation
 - Lexer implementation
+- Add Mesh with BVH
 --------
 
 ## [0.3.0] - 2026-05-20
