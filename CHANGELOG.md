@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- Add scene files .txt
+- Restructuring of main
+- Parser implementation
 - Lexer implementation
 --------
 

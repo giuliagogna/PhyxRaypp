@@ -1,0 +1,15 @@
+# World with a sphere hovering on a checkered plane
+
+# Pre-computed variables for rotations
+float pi_over_2 = 1.5707963;
+
+background(<0.2, 0.2, 0.7>);
+
+# Materials
+material plane_mat(diffuse(checkered(<0.8, 0.0, 0.0>, <0.0, 0.8, 0.0>, 4)));
+material sphere_mat(diffuse(image("images/memorial.pfm")));
+
+plane(translation([0.0, 0.0, -1.0]) * rot_z(pi_over_2), plane_mat);
+sphere(scaling([0.3, 0.3, 0.3]), sphere_mat);
+
+camera(perspective, 1.0, 1.0);

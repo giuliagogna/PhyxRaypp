@@ -1,24 +1,20 @@
-Transformation scale_01 = Scale(Vec{0.1f, 0.1f, 0.1f});
+# A silhouette of 10 spheres seen in perspective
 
-    // Helper lambda to quickly generate a solid color material
-    auto make_solid_mat = [](Color c) {
-        auto pigment = std::make_shared<UniformPigment>(c);
-        auto brdf = std::make_shared<DiffusiveBRDF>(pigment);
-        return std::make_shared<Material>(brdf);
-    };
+# Material with diffusive brdf and uniform pigment white, with emitted radiance default to black
+material solid_material(diffuse(uniform(<1.0, 1.0, 1.0>)));
 
-    Color c = Color{0.0f, 0.0f, 0.0f};
+# 8 Spheres on the vertices of a cube, each with a different color
+sphere(translation([0.5, 0.5, 0.5]) * scaling([0.1, 0.1, 0.1]), solid_material);
+sphere(translation([0.5, 0.5, -0.5]) * scaling([0.1, 0.1, 0.1]), solid_material);
+sphere(translation([0.5, -0.5, 0.5]) * scaling([0.1, 0.1, 0.1]), solid_material);
+sphere(translation([0.5, -0.5, -0.5]) * scaling([0.1, 0.1, 0.1]), solid_material);
+sphere(translation([-0.5, 0.5, 0.5]) * scaling([0.1, 0.1, 0.1]), solid_material);
+sphere(translation([-0.5, 0.5, -0.5]) * scaling([0.1, 0.1, 0.1]), solid_material);
+sphere(translation([-0.5, -0.5, 0.5]) * scaling([0.1, 0.1, 0.1]), solid_material);
+sphere(translation([-0.5, -0.5, -0.5]) * scaling([0.1, 0.1, 0.1]), solid_material);
 
-    // 8 Spheres on the vertices of a cube, each with a different color
-    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f,  0.5f,  0.5f}) * scale_01, make_solid_mat(c)));
-    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f,  0.5f, -0.5f}) * scale_01, make_solid_mat(c)));
-    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f, -0.5f,  0.5f}) * scale_01, make_solid_mat(c)));
-    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.5f, -0.5f, -0.5f}) * scale_01, make_solid_mat(c)));
-    world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f,  0.5f,  0.5f}) * scale_01, make_solid_mat(c)));
-    world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f,  0.5f, -0.5f}) * scale_01, make_solid_mat(c)));
-    world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f, -0.5f,  0.5f}) * scale_01, make_solid_mat(c)));
-    world.add(std::make_unique<Sphere>(Trans(Vec{-0.5f, -0.5f, -0.5f}) * scale_01, make_solid_mat(c)));
+# 2 Spheres on the left and bottom faces
+sphere(translation([0.0, 0.5, 0.0]) * scaling([0.1, 0.1, 0.1]), solid_material);
+sphere(translation([0.0, 0.0, -0.5]) * scaling([0.1, 0.1, 0.1]), solid_material);
 
-    // 2 Spheres on the left and bottom faces
-    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.0f,  0.5f,  0.0f}) * scale_01, make_solid_mat(c)));
-    world.add(std::make_unique<Sphere>(Trans(Vec{ 0.0f,  0.0f, -0.5f}) * scale_01, make_solid_mat(c)));
+camera(perspective, 1.0, 3.0);

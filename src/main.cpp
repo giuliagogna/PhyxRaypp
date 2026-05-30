@@ -83,15 +83,17 @@ public:
         std::string program_name = std::filesystem::path(args[0]).filename().string();
 
         if (args.size() < 2) {
+            // Output file name is default the name of the scene file with attached all the other parameters
             return std::unexpected(std::format(
                 "Error: No command passed.\n"
-                "Available commands: pfm2png, demo\n\n"
+                "Available commands: pfm2png, render\n\n"
 
                 "Usage:\n"
-                "  xmake run {} pfm2png <INPUT_PFM> <ALPHA_FACTOR> <GAMMA> <OUTPUT_PNG>\n"
-                "  xmake run {} render  <INPUT_SCENE_TXT> <ALPHA_FACTOR> <GAMMA> <OUTPUT_PNG> [FLAGS]\n\n"
+                "  xmake run {} pfm2png <INPUT_PFM> <ALPHA> <GAMMA> [FLAGS]\n"
+                "  xmake run {} render  <INPUT_SCENE> <ALPHA> <GAMMA> [FLAGS]\n\n"
 
-                "Optional Flags for 'demo':\n"
+                "Optional Flags:\n"
+                "  --output <filename>             Override automatic naming and specify exact output path\n"
                 "  --algorithm <type>              Render engine: 'flat' or 'pathtracing' (default: 'flat')\n"
                 "  --antialiasing <N>              Apply anti-aliasing with NxN samples per pixel\n"
                 "  --dimensions <width> <height>   Set output image resolution in pixels\n"
@@ -110,10 +112,16 @@ public:
         // PARSING PFM2PNG
         // ==========================================
         if (command == "pfm2png") {
-            if (args.size() != 6) { // [xmake run] <program_name> pfm2png <input> <alpha> <gamma> <output>
-                return std::unexpected("Error: Wrong number of parameters for 'pfm2png'. Expected 4 arguments.");
+            // It is now customary for the user to specify the output filename
+            if (args.size() < 5) {
+                return std::unexpected("Error: Wrong number of parameters for 'pfm2png'. Expected at least 3 arguments.");
             }
-            input_pfm_file_name = args[2];
+
+            std::string filename = std::filesystem::path(args[2]).filename().string();
+            std::string stem = std::filesystem::path(args[2]).stem().string();
+
+            // Images to convert are stored in directory pfm_files/
+            input_pfm_file_name = "pfm_files/" + filename;
 
             auto alpha_res = parse_float(args[3]);
             auto gamma_res = parse_float(args[4]);
@@ -123,7 +131,23 @@ public:
 
             alpha = alpha_res.value();
             gamma = gamma_res.value();
-            output_png_file_name = process_output_filename(args[5]);
+
+            bool custom_output = false;
+
+            // Search for optional flags for pfm2png
+            for (int i = 5; i < args.size(); ++i) {
+                if (std::string_view(args[i]) == "--output" && i + 1 < args.size()) {
+                    output_png_file_name = args[i + 1];
+                    custom_output = true;
+                }
+            }
+
+            // Only generate the automatic name if the user didn't provide one
+            if (!custom_output) {
+                // The result of a converted pfm file ends up in png_converted
+                std::filesystem::create_directories("png_converted");
+                output_png_file_name = process_output_filename("png_converted/" + stem);
+            }
 
             return {};
         }
@@ -132,11 +156,15 @@ public:
         // PARSING RENDER
         // ==========================================
         else if (command == "render") {
-            if (args.size() < 5) { // [xmake run] <program_name> render <input> <alpha> <gamma> <output> <flags>
-                return std::unexpected("Error: Wrong number of parameters for 'render'. Expected at least 4 arguments.");
+            if (args.size() < 5) { // [xmake run] <program_name> render <input> <alpha> <gamma> <flags>
+                return std::unexpected("Error: Wrong number of parameters for 'render'. Expected at least 3 arguments.");
             }
 
-            input_scene_file_name = args[2];
+            std::string filename = std::filesystem::path(args[2]).filename().string();
+            std::string stem = std::filesystem::path(args[2]).stem().string();
+
+            // Scene files to render are stored in directory examples/
+            input_scene_file_name = "examples/" + filename;
 
             auto alpha_res = parse_float(args[3]);
             auto gamma_res = parse_float(args[4]);
@@ -146,19 +174,26 @@ public:
 
             alpha = alpha_res.value();
             gamma = gamma_res.value();
-            // Temporarily save the base string (will be processed it after the loop)
-            std::string base_output_name = args[5];
+
+            bool custom_output = false;
 
             // =========================================================
             // OPTIONAL FLAGS PARSING
             // =========================================================
             // Iterate through the remaining arguments to find optional flags.
-            // We start at index 6 because indices 0-5 are reserved for the
+            // We start at index 5 because indices 0-4 are reserved for the
             // program name, command, and mandatory file/image parameters.
 
-            for (int i = 6; i < args.size(); ++i) {
+            for (int i = 5; i < args.size(); ++i) {
 
-                if (std::string_view(args[i]) == "--algorithm" && i + 1 < args.size()) {
+                if (std::string_view(args[i]) == "--output" && i + 1 < args.size()) {
+                    // ---------------------------------------------------------
+                    // FLAG: --output <custom_output_filename>
+                    // ---------------------------------------------------------
+                    output_png_file_name = args[i + 1];
+                    custom_output = true;
+
+                } else if (std::string_view(args[i]) == "--algorithm" && i + 1 < args.size()) {
                     // ---------------------------------------------------------
                     // FLAG: --algorithm <type>
                     // ---------------------------------------------------------
@@ -211,7 +246,12 @@ public:
                 }
             }
 
-            output_png_file_name = process_output_filename(base_output_name);
+            // Only generate the automatic name if the user didn't specify the --output flag
+            if (!custom_output) {
+                // Generated images with any rendering algorithm get saved in generated_images/
+                std::filesystem::create_directories("generated_images");
+                output_png_file_name = process_output_filename("generated_images/" + stem);
+            }
 
             return {};
         }
@@ -302,7 +342,7 @@ void run_render(const Parameters& params) {
 
     // Parse the scene
     std::println("Parsing scene from file {} ...", params.input_scene_file_name);
-    InputStream input_stream(scene_file);
+    InputStream input_stream(scene_file, params.input_scene_file_name);
     auto scene_res = parse_scene(input_stream);
 
     if (!scene_res.has_value()) {
