@@ -486,29 +486,29 @@ World build_Utah_teapot_world(std::string obj_file) {
     return world;
 }
 
-World build_cat_world(std::string obj_file) {
+World build_monkey_world(std::string obj_file) {
     World world;
 
-    // Build the cat
-    std::shared_ptr<Material> cat_material;
-    std::string pfm_path = "./mesh/Cat/Cat_diffuse.pfm";
+    // Build the monkey
+    std::shared_ptr<Material> monkey_material;
+    std::string pfm_path = "./mesh/Monkey/monkey.pfm";
     auto img_res = HDRImage::read_pfm_file(pfm_path);
 
     if (img_res.has_value()) {
         // If the image loads successfully, create the ImagePigment
         auto image_pigment = std::make_shared<ImagePigment>(std::move(img_res.value()));
-        auto cat_brdf = std::make_shared<DiffusiveBRDF>(image_pigment);
-        cat_material = std::make_shared<Material>(cat_brdf);
+        auto monkey_brdf = std::make_shared<DiffusiveBRDF>(image_pigment);
+        monkey_material = std::make_shared<Material>(monkey_brdf);
     } else {
-        // Safety Fallback: If the image is missing, make the cat solid Blue
+        // Safety Fallback: If the image is missing, make the monkey solid Blue
         std::println("Warning: Could not load '{}'. Using blue fallback.", pfm_path);
         auto fallback_pigment = std::make_shared<UniformPigment>(Color{0.0f, 0.0f, 1.0f});
         auto fallback_brdf = std::make_shared<DiffusiveBRDF>(fallback_pigment);
-        cat_material = std::make_shared<Material>(fallback_brdf);
+        monkey_material = std::make_shared<Material>(fallback_brdf);
     };
 
     // Sphere is of ray 1, so keeping it on the origin should do the job
-    world.add(std::make_unique<Mesh>("./mesh/Cat/12221_Cat_v1_l3.obj", cat_material, Scale(Vec{0.3f, 0.3f, 0.3f})));
+    world.add(std::make_unique<Mesh>("./mesh/Monkey/14090_Hear_No_Evil_Monkey_v2_L1.obj", monkey_material, Scale(Vec{0.3f, 0.3f, 0.3f})));
 
     return world;
 }
@@ -565,9 +565,9 @@ void run_demo(const Parameters& params) {
         world = build_10_white_spheres_world();
         renderer = std::make_unique<OnOffRenderer>(&world);
     } else if (params.algorithm == "flat") { // Flat renderer: a checkered plane will be used
-        tracer.camera.trans = R_z(1.0f) * R_y(0.5f) * Trans(Vec{-10.0f, 0.0f, 2.0f}); // That's what the teapot file I found needs :-)
+        tracer.camera.trans = R_z(1.0f) * R_y(0.5f) * Trans(Vec{-25.0f, 0.0f, 4.0f}); // That's what the teapot file I found needs :-)
         Color sky_color{0.01f, 0.01f, 1.0f};
-        world = build_cat_world("./mesh/utah_teapot.obj");
+        world = build_monkey_world("./mesh/utah_teapot.obj");
         renderer = std::make_unique<FlatRenderer>(&world, sky_color);
     } else if (params.algorithm == "pathtracing") { // Path tracing renderer: a complex scene will be used
         Color sky_color{0.5f, 0.7f, 1.0f};

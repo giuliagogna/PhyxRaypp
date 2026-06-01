@@ -492,9 +492,7 @@ export struct Mesh : Shape {
             return std::unexpected("Problems with the .obj file");
         }
         while (line_expected.has_value()) {
-            // Clean from the / / / (if we are in the faces field of the file)
             std::string& line = line_expected.value();
-            std::replace(line.begin(), line.end(), '/', ' ');
             // Reput in a stream
             std::istringstream ss(line); // Using a string stream to parse things
             // Reading the line prefix
@@ -521,27 +519,60 @@ export struct Mesh : Shape {
                 ss >> UV.u >> UV.v;
                 uv_coordinates.push_back(UV);
             }
-            else if (prefix == "f") { // Triangles section
-                // f v1/vt1/vn1 v2/vt2/vn2 v3/vt3/vn3
-                int v1, vt1, vn1, v2, vt2, vn2, v3, vt3, vn3;
+            else if (prefix == "f") { // Supporting non-triangular mesh files, still storing as triangular mesh
+                struct ObjVertex { // Practical data structure for this scope
+                    int v = 0, vt = 0, vn = 0;
+                };
+                std::vector<ObjVertex> face_vertices;
+                std::string vertex_str;
+            
+                // Parsing all blocks
+                while (ss >> vertex_str) {
+                    ObjVertex vertex;
 
-                // Extracting indexes
-                if (!(ss >> v1 >> vt1 >> vn1 >> v2 >> vt2 >> vn2 >> v3 >> vt3 >> vn3)) {
-                    return std::unexpected("Formato faccia .obj non supportato o corrotto");
+                    // Replacing "/"" with " " for this chunk
+                    std::replace(vertex_str.begin(), vertex_str.end(), '/', ' ');
+                    // Put the chunk in a string stream
+                    std::istringstream vertex_ss(vertex_str);
+
+                    // Extract vertex v/vt/vn
+                    if (vertex_ss >> vertex.v >> vertex.vt >> vertex.vn) {
+                        face_vertices.push_back(vertex);
+                    }
                 }
+            
+                // Checking if it's at least a triangle
+                if (face_vertices.size() < 3) {
+                    return std::unexpected("Corrupted face format: less than 3 vertex for a face");
+                }
+            
+                // Index range check
+                for (auto& vertex : face_vertices) {
+                    // Controllo sui limiti usando le dimensioni attuali dei tuoi vettori di lettura temporanei
+                    if (vertex.v == 0 || vertex.v > points.size() ||
+                        vertex.vn == 0 || vertex.vn > normals.size() ||
+                        vertex.vt == 0 || vertex.vt > uv_coordinates.size()) {
+                        return std::unexpected("Problems with triangle indexing in .obj file: index out of range");
+                    }
                 
-                // Range check
-                if (v1 > points.size() || v2 > points.size() || v3 > points.size() ||
-                    vn1 > normals.size() || vn2 > normals.size() || vn3 > normals.size() ||
-                    vt1 > uv_coordinates.size() || vt2 > uv_coordinates.size() || vt3 > uv_coordinates.size()) {
-                    return std::unexpected("Problems with triangle indexing in .obj file: index out of range");
+                    //Adapting indexing to start from 0
+                    vertex.v--; 
+                    vertex.vt--; 
+                    vertex.vn--;
                 }
-                // Adapt the starting number to be zero (for this code structure)
-                v1--; vt1--; vn1--; 
-                v2--; vt2--; vn2--; 
-                v3--; vt3--; vn3--;
-
-                indexes.push_back(TriangleIndexes{v1, v2, v3, vn1, vn2, vn3, vt1, vt2, vt3});
+            
+                // Making triangles by taking diagonals from a single point (index 0 vertex)
+                for (int i = 1; i < face_vertices.size() - 1; ++i) {
+                    const auto& vA = face_vertices[0]; // Common vertex
+                    const auto& vB = face_vertices[i];
+                    const auto& vC = face_vertices[i + 1];
+                
+                    indexes.push_back(TriangleIndexes{
+                        vA.v, vB.v, vC.v,
+                        vA.vn, vB.vn, vC.vn,
+                        vA.vt, vB.vt, vC.vt
+                    });
+                }
             }
 
             line_expected = _read_line(obj_stream);

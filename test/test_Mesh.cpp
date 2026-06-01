@@ -217,7 +217,7 @@ TEST_CASE("TEST 3: Mesh test suite") {
         };
         Ray test_ray{Point{1.0001f, 1.0001f, 2.0f}, Vec{0.0f, 0.0f, -1.0f}};
         auto record = mesh.ray_intersection(test_ray);
-        CHECK(record.has_value());
+        REQUIRE(record.has_value());
         HitRecord hit_record = record.value();
         CHECK(hit_record.is_close(hit_record.hitted_shape->ray_intersection(test_ray).value()));
         CHECK(hit_record.hit_normal.is_close(Normal{0.0f, 0.0f, 1.0f}));
@@ -238,7 +238,7 @@ TEST_CASE("TEST 3: Mesh test suite") {
         };
         Ray test_ray{Point{1.0001f, 1.0001f, -3.0f}, Vec{0.0f, 0.0f, 1.0f}};
         auto record = mesh.ray_intersection(test_ray);
-        CHECK(record.has_value());
+        REQUIRE(record.has_value());
         HitRecord hit_record = record.value();
         CHECK(hit_record.is_close(hit_record.hitted_shape->ray_intersection(test_ray).value()));
         CHECK(hit_record.hit_normal.is_close(Normal{0.0f, 0.0f, -1.0f}));
@@ -253,7 +253,7 @@ TEST_CASE("TEST 3: Mesh test suite") {
         SUBCASE("Test invalid stream (empty)") {
             std::istringstream empty_stream;
             auto stream_result = mesh.read_mesh_from_obj(empty_stream);
-            CHECK(!stream_result.has_value());
+            REQUIRE(!stream_result.has_value());
             CHECK(stream_result.error() == "Problems with the .obj file");
         }
 
@@ -266,8 +266,23 @@ f 5/5/5 1/1/1 1/1/1)"};
             std::istringstream ss(out_of_range_string);
             auto result = mesh.read_mesh_from_obj(ss);
             
-            CHECK(!result.has_value());
+            REQUIRE(!result.has_value());
             CHECK(result.error() == "Problems with triangle indexing in .obj file: index out of range");
+        }
+
+        SUBCASE("Test error: not even a triangle") {
+            std::string out_of_range_string {R"(
+v 0 0 0
+v 1 1 1
+vn 0 0 1
+vn 0 0 1
+vt 1 1 1
+f 0/0/0 1/0/1)"};
+            std::istringstream ss(out_of_range_string);
+            auto result = mesh.read_mesh_from_obj(ss);
+            
+            REQUIRE(!result.has_value());
+            CHECK(result.error() == "Corrupted face format: less than 3 vertex for a face");
         }
 
         SUBCASE("Test valid stream") {
@@ -283,20 +298,42 @@ vn 0 -1 0
 vt 1 1 and stuff that will be skipped
 f 1/1/1 2/1/2 3/1/3)"};
             std::istringstream ss(parsing_test_string);
-            CHECK(mesh.read_mesh_from_obj(ss).has_value());
-            CHECK(mesh.mesh_points.size() == 3);
-            CHECK(mesh.mesh_normals.size() == 3);
-            CHECK(mesh.mesh_texture_uvs.size() == 1);
+            REQUIRE(mesh.read_mesh_from_obj(ss).has_value());
+            REQUIRE(mesh.mesh_points.size() == 3);
+            REQUIRE(mesh.mesh_normals.size() == 3);
+            REQUIRE(mesh.mesh_texture_uvs.size() == 1);
             CHECK(mesh.mesh_points[0].is_close(Point{-1.5f, 0.0f, 2.8f}));
             CHECK(mesh.mesh_normals[0].is_close(Normal{0.0f, 0.0f, 1.0f}));
             CHECK(mesh.mesh_points[1].is_close(Point{-1.515625f, -0.16875f, 2.753125f}));
             CHECK(mesh.mesh_normals[1].is_close(Normal{0.0f, -0.5999999f, 0.8000001f}));
             CHECK(mesh.mesh_points[2].is_close(Point{-1.55f, -0.225f, 2.65f}));
             CHECK(mesh.mesh_normals[2].is_close(Normal{0.0f, -1.0f, 0.0f}));
-            CHECK(mesh.triangle_points_indexes.size() == 1);
+            REQUIRE(mesh.triangle_points_indexes.size() == 1);
             CHECK(mesh.triangle_points_indexes[0].is_equal(TriangleIndexes{0, 1, 2, 0, 1, 2, 0, 0, 0})); // Indexes start from 1 in a .obj file, but in this module they start from 0
         }
+
+        SUBCASE("Test for non-triangular mesh") {
+            std::string parsing_test_string {R"(
+# Utah Teapot Model
+o Utah Teapot
+v 1 1 1
+v 2 2 2
+v 3 3 3
+v 4 4 4
+vn 0 0 1
+vt 1 1 and stuff that will be skipped
+f 1/1/1 2/1/1 3/1/1 4/1/1)"};
+            std::istringstream ss(parsing_test_string);
+            REQUIRE(mesh.read_mesh_from_obj(ss).has_value());
+            REQUIRE(mesh.mesh_points.size() == 4);
+            REQUIRE(mesh.mesh_normals.size() == 1);
+            REQUIRE(mesh.mesh_texture_uvs.size() == 1);
+            REQUIRE(mesh.triangle_points_indexes.size() == 2);
+            CHECK(mesh.triangle_points_indexes[0].is_equal(TriangleIndexes{0, 1, 2, 0, 0, 0, 0, 0, 0}));
+            CHECK(mesh.triangle_points_indexes[1].is_equal(TriangleIndexes{0, 2, 3, 0, 0, 0, 0, 0, 0}));
+        }
     }
+
 
     SUBCASE("Test Mesh::read_mesh_from_obj(std::string)") {
         Mesh mesh;
