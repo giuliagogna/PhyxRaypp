@@ -2,7 +2,7 @@
 
 PhyxRadpp is a modern C++23 ray tracer and image processing utility. Built with performance and modern standards in mind, the project heavily utilizes C++23 modules and the `xmake` build system.
 
-Currently, the engine is capable of processing High Dynamic Range (HDR) images and rendering 3D scenes featuring perspective cameras and mathematical shapes (such as spheres, planes and cubes), and physically based rendering (PBR) through path tracing.
+Currently, the engine is capable of processing High Dynamic Range (HDR) images and rendering 3D scenes featuring perspective cameras and mathematical shapes (such as spheres, planes and cubes) and meshes, and physically based rendering (PBR) through path tracing.
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 ## Features
@@ -13,6 +13,7 @@ Currently, the engine is capable of processing High Dynamic Range (HDR) images a
   - `onoff`: A fast silhouette map of ray-object intersections (default black and white image).
   - `flat`: A flat-shading renderer that resolves surface parameters (UV coordinates) to apply colors and image textures.
   - `pathtracing`: An advanced renderer that numerically solves the rendering equation using Monte Carlo integration and Russian Roulette depth control for photorealistic global illumination.
+* **OBJ meshes support:** it's possible to upload OBJ files and create meshes (still without texture). The ray intersection test is accelerated via BVH-SAH algorithm.
 * **Modern C++23 Architecture:** Fully modularized codebase (`.cppm` files), utilizing the newest features like `std::expected` for safe error handling.
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
