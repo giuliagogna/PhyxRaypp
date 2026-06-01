@@ -66,52 +66,129 @@ TEST_CASE("TEST 1: BVHAABB test suite") {
 }
 
 static BVHNode first_node{}; // Static because I want to preserve changes through the SUBCASEs
-static std::vector<TrianglePoint> triangle_points;
+static std::vector<Point> triangle_points;
+static std::vector<Normal> triangle_normals;
+static std::vector<Vec2D> texture_uv;
 static std::vector<TriangleIndexes> triangle_point_indexes;
 static std::vector<BVHNode> all_nodes;
 
-TEST_CASE("TEST 2: BVHNode test suite") {    
-
-    triangle_points.push_back({Point{ 1.0f + 0.1f,  1.0f,  1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
-    triangle_points.push_back({Point{ 1.0f + 0.1f,  1.0f, -1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
-    triangle_points.push_back({Point{ 1.0f + 0.1f, -1.0f,  1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
-    triangle_points.push_back({Point{ 1.0f + 0.1f, -1.0f, -1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
-    triangle_points.push_back({Point{-1.0f + 0.1f,  1.0f,  1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
-    triangle_points.push_back({Point{-1.0f + 0.1f,  1.0f, -1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
-    triangle_points.push_back({Point{-1.0f + 0.1f, -1.0f,  1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
-    triangle_points.push_back({Point{-1.0f + 0.1f, -1.0f, -1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
-
-    triangle_points.push_back({Point{ 1.0f,  1.0f + 0.1f,  1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
-    triangle_points.push_back({Point{ 1.0f,  1.0f + 0.1f, -1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
-    triangle_points.push_back({Point{ 1.0f, -1.0f + 0.1f,  1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
-    triangle_points.push_back({Point{ 1.0f, -1.0f + 0.1f, -1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
-    triangle_points.push_back({Point{-1.0f,  1.0f + 0.1f,  1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
-    triangle_points.push_back({Point{-1.0f,  1.0f + 0.1f, -1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
-    triangle_points.push_back({Point{-1.0f, -1.0f + 0.1f,  1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
-    triangle_points.push_back({Point{-1.0f, -1.0f + 0.1f, -1.0f}, Normal{ 0.0f,  0.0f,  1.0f}});
-
-    triangle_points.push_back({Point{ 1.0f,  1.0f,  1.0f + 0.1f}, Normal{ 0.0f,  0.0f,  1.0f}});
-    triangle_points.push_back({Point{ 1.0f,  1.0f, -1.0f + 0.1f}, Normal{ 0.0f,  0.0f,  1.0f}});
-    triangle_points.push_back({Point{ 1.0f, -1.0f,  1.0f + 0.1f}, Normal{ 0.0f,  0.0f,  1.0f}});
-    triangle_points.push_back({Point{ 1.0f, -1.0f, -1.0f + 0.1f}, Normal{ 0.0f,  0.0f,  1.0f}});
-    triangle_points.push_back({Point{-1.0f,  1.0f,  1.0f + 0.1f}, Normal{ 0.0f,  0.0f,  1.0f}});
-    triangle_points.push_back({Point{-1.0f,  1.0f, -1.0f + 0.1f}, Normal{ 0.0f,  0.0f,  1.0f}});
-    triangle_points.push_back({Point{-1.0f, -1.0f,  1.0f + 0.1f}, Normal{ 0.0f,  0.0f,  1.0f}});
-    triangle_points.push_back({Point{-1.0f, -1.0f, -1.0f + 0.1f}, Normal{ 0.0f,  0.0f,  1.0f}});
+TEST_CASE("TEST 2: BVHNode test suite") {
     
-    triangle_point_indexes.push_back(TriangleIndexes{0, 8, 16});
-    triangle_point_indexes.push_back(TriangleIndexes{1, 9, 17});
-    triangle_point_indexes.push_back(TriangleIndexes{2, 10, 18});
-    triangle_point_indexes.push_back(TriangleIndexes{3, 11, 19});
-    triangle_point_indexes.push_back(TriangleIndexes{4, 12, 20});
-    triangle_point_indexes.push_back(TriangleIndexes{5, 13, 21});
-    triangle_point_indexes.push_back(TriangleIndexes{6, 14, 22});
-    triangle_point_indexes.push_back(TriangleIndexes{7, 15, 23});
-    
+    // Generating 8 triangles placed on a cube vertices points
+
+    triangle_points.push_back(Point{ 1.0f + 0.1f,  1.0f,  1.0f});
+    triangle_normals.push_back(Normal{0.0f, 0.0f, 1.0f});
+    texture_uv.push_back(Vec2D{0.0f, 0.0f});
+
+    triangle_points.push_back(Point{ 1.0f + 0.1f,  1.0f, -1.0f});
+    triangle_normals.push_back(Normal{0.0f, 0.0f, 1.0f});
+    texture_uv.push_back(Vec2D{0.0f, 0.0f});
+        
+    triangle_points.push_back(Point{ 1.0f + 0.1f, -1.0f,  1.0f});
+    triangle_normals.push_back(Normal{0.0f, 0.0f, 1.0f});
+    texture_uv.push_back(Vec2D{0.0f, 0.0f});
+        
+    triangle_points.push_back(Point{ 1.0f + 0.1f, -1.0f, -1.0f});
+    triangle_normals.push_back(Normal{0.0f, 0.0f, 1.0f});
+    texture_uv.push_back(Vec2D{0.0f, 0.0f});
+        
+    triangle_points.push_back(Point{-1.0f + 0.1f,  1.0f,  1.0f});
+    triangle_normals.push_back(Normal{0.0f, 0.0f, 1.0f});
+    texture_uv.push_back(Vec2D{0.0f, 0.0f});
+        
+    triangle_points.push_back(Point{-1.0f + 0.1f,  1.0f, -1.0f});
+    triangle_normals.push_back(Normal{0.0f, 0.0f, 1.0f});
+    texture_uv.push_back(Vec2D{0.0f, 0.0f});
+        
+    triangle_points.push_back(Point{-1.0f + 0.1f, -1.0f,  1.0f});
+    triangle_normals.push_back(Normal{0.0f, 0.0f, 1.0f});
+    texture_uv.push_back(Vec2D{0.0f, 0.0f});
+        
+    triangle_points.push_back(Point{-1.0f + 0.1f, -1.0f, -1.0f});
+    triangle_normals.push_back(Normal{0.0f, 0.0f, 1.0f});
+    texture_uv.push_back(Vec2D{0.0f, 0.0f});
+        
+
+    triangle_points.push_back(Point{ 1.0f,  1.0f + 0.1f,  1.0f});
+    triangle_normals.push_back(Normal{0.0f, 0.0f, 1.0f});
+    texture_uv.push_back(Vec2D{1.0f, 0.0f});
+        
+    triangle_points.push_back(Point{ 1.0f,  1.0f + 0.1f, -1.0f});
+    triangle_normals.push_back(Normal{0.0f, 0.0f, 1.0f});
+    texture_uv.push_back(Vec2D{1.0f, 0.0f});
+        
+    triangle_points.push_back(Point{ 1.0f, -1.0f + 0.1f,  1.0f});
+    triangle_normals.push_back(Normal{0.0f, 0.0f, 1.0f});
+    texture_uv.push_back(Vec2D{1.0f, 0.0f});
+        
+    triangle_points.push_back(Point{ 1.0f, -1.0f + 0.1f, -1.0f});
+    triangle_normals.push_back(Normal{0.0f, 0.0f, 1.0f});
+    texture_uv.push_back(Vec2D{1.0f, 0.0f});
+        
+    triangle_points.push_back(Point{-1.0f,  1.0f + 0.1f,  1.0f});
+    triangle_normals.push_back(Normal{0.0f, 0.0f, 1.0f});
+    texture_uv.push_back(Vec2D{1.0f, 0.0f});
+        
+    triangle_points.push_back(Point{-1.0f,  1.0f + 0.1f, -1.0f});
+    triangle_normals.push_back(Normal{0.0f, 0.0f, 1.0f});
+    texture_uv.push_back(Vec2D{1.0f, 0.0f});
+        
+    triangle_points.push_back(Point{-1.0f, -1.0f + 0.1f,  1.0f});
+    triangle_normals.push_back(Normal{0.0f, 0.0f, 1.0f});
+    texture_uv.push_back(Vec2D{1.0f, 0.0f});
+        
+    triangle_points.push_back(Point{-1.0f, -1.0f + 0.1f, -1.0f});
+    triangle_normals.push_back(Normal{0.0f, 0.0f, 1.0f});
+    texture_uv.push_back(Vec2D{1.0f, 0.0f});
+        
+
+    triangle_points.push_back(Point{ 1.0f,  1.0f,  1.0f + 0.1f});
+    triangle_normals.push_back(Normal{0.0f, 0.0f, 1.0f});
+    texture_uv.push_back(Vec2D{0.0f, 1.0f});
+
+    triangle_points.push_back(Point{ 1.0f,  1.0f, -1.0f + 0.1f});
+    triangle_normals.push_back(Normal{0.0f, 0.0f, 1.0f});
+    texture_uv.push_back(Vec2D{0.0f, 1.0f});
+        
+    triangle_points.push_back(Point{ 1.0f, -1.0f,  1.0f + 0.1f});
+    triangle_normals.push_back(Normal{0.0f, 0.0f, 1.0f});
+    texture_uv.push_back(Vec2D{0.0f, 1.0f});
+        
+    triangle_points.push_back(Point{ 1.0f, -1.0f, -1.0f + 0.1f});
+    triangle_normals.push_back(Normal{0.0f, 0.0f, 1.0f});
+    texture_uv.push_back(Vec2D{0.0f, 1.0f});
+        
+    triangle_points.push_back(Point{-1.0f,  1.0f,  1.0f + 0.1f});
+    triangle_normals.push_back(Normal{0.0f, 0.0f, 1.0f});
+    texture_uv.push_back(Vec2D{0.0f, 1.0f});
+        
+    triangle_points.push_back(Point{-1.0f,  1.0f, -1.0f + 0.1f});
+    triangle_normals.push_back(Normal{0.0f, 0.0f, 1.0f});
+    texture_uv.push_back(Vec2D{0.0f, 1.0f});
+        
+    triangle_points.push_back(Point{-1.0f, -1.0f,  1.0f + 0.1f});
+    triangle_normals.push_back(Normal{0.0f, 0.0f, 1.0f});
+    texture_uv.push_back(Vec2D{0.0f, 1.0f});
+        
+    triangle_points.push_back(Point{-1.0f, -1.0f, -1.0f + 0.1f});
+    triangle_normals.push_back(Normal{0.0f, 0.0f, 1.0f});
+    texture_uv.push_back(Vec2D{0.0f, 1.0f});
+
+    // end of construction of triangles points, normals and UVs
+        
+    // Indicing
+    triangle_point_indexes.push_back(TriangleIndexes{0,  8, 16, 0,  8, 16, 0,  8, 16});
+    triangle_point_indexes.push_back(TriangleIndexes{1,  9, 17, 1,  9, 17, 1,  9, 17});
+    triangle_point_indexes.push_back(TriangleIndexes{2, 10, 18, 2, 10, 18, 2, 10, 18});
+    triangle_point_indexes.push_back(TriangleIndexes{3, 11, 19, 3, 11, 19, 3, 11, 19});
+    triangle_point_indexes.push_back(TriangleIndexes{4, 12, 20, 4, 12, 20, 4, 12, 20});
+    triangle_point_indexes.push_back(TriangleIndexes{5, 13, 21, 5, 13, 21, 5, 13, 21});
+    triangle_point_indexes.push_back(TriangleIndexes{6, 14, 22, 6, 14, 22, 6, 14, 22});
+    triangle_point_indexes.push_back(TriangleIndexes{7, 15, 23, 7, 15, 23, 7, 15, 23});    
 
     BVHAABB first_bounds;
     for (auto& point : triangle_points) {
-        first_bounds.grow(point.point);
+        first_bounds.grow(point);
     }
     REQUIRE(first_bounds.maxPoint.is_close(Point{1.1f, 1.1f, 1.1f}));   
     REQUIRE(first_bounds.minPoint.is_close(Point{-1.0f, -1.0f, -1.0f}));
@@ -131,37 +208,43 @@ TEST_CASE("TEST 3: Mesh test suite") {
     SUBCASE("Test Mesh::ray_intersection") {
         Mesh mesh {
             Transformation{}, 
-            std::make_shared<Material>(), // <--- Sostituisci Material{} con questo
-            triangle_points, 
-            triangle_point_indexes, 
+            std::make_shared<Material>(),
+            triangle_points,
+            triangle_normals,
+            texture_uv,
+            triangle_point_indexes,
             all_nodes
         };
-        Ray test_ray{Point{1.01f, 1.01f, 2.0f}, Vec{0.0f, 0.0f, -1.0f}};
+        Ray test_ray{Point{1.0001f, 1.0001f, 2.0f}, Vec{0.0f, 0.0f, -1.0f}};
         auto record = mesh.ray_intersection(test_ray);
         CHECK(record.has_value());
         HitRecord hit_record = record.value();
         CHECK(hit_record.is_close(hit_record.hitted_shape->ray_intersection(test_ray).value()));
         CHECK(hit_record.hit_normal.is_close(Normal{0.0f, 0.0f, 1.0f}));
-        CHECK(hit_record.hit_point.is_close(Point{1.01f, 1.01f, 1.08f}));
-        CHECK(aux::are_close(hit_record.t, 0.92f));
+        CHECK(hit_record.hit_point.is_close(Point{1.0001f, 1.0001f, 1.1f}, 1e-3f));
+        CHECK(aux::are_close(hit_record.t, 0.9f, 1e-3f));
+        CHECK(hit_record.surface_params.is_close(Vec2D{0.0f, 1.0f}, 1e-2f));
     }
 
     SUBCASE("Test Mesh::ray_intersection with a Transformation") {
         Mesh mesh {
             Scale(Vec{1.0f, 1.0f, 2.0f}), 
             std::make_shared<Material>(), // <--- Sostituisci Material{} con questo
-            triangle_points, 
-            triangle_point_indexes, 
+            triangle_points,
+            triangle_normals,
+            texture_uv,
+            triangle_point_indexes,
             all_nodes
         };
-        Ray test_ray{Point{1.01f, 1.01f, -3.0f}, Vec{0.0f, 0.0f, 1.0f}};
+        Ray test_ray{Point{1.0001f, 1.0001f, -3.0f}, Vec{0.0f, 0.0f, 1.0f}};
         auto record = mesh.ray_intersection(test_ray);
         CHECK(record.has_value());
         HitRecord hit_record = record.value();
         CHECK(hit_record.is_close(hit_record.hitted_shape->ray_intersection(test_ray).value()));
         CHECK(hit_record.hit_normal.is_close(Normal{0.0f, 0.0f, -1.0f}));
-        CHECK(hit_record.hit_point.is_close(Point{1.01f, 1.01f, -1.84f}));
-        CHECK(aux::are_close(hit_record.t, 1.16f));
+        CHECK(hit_record.hit_point.is_close(Point{1.0001f, 1.0001f, -1.8f}, 1e-3f));
+        CHECK(aux::are_close(hit_record.t, 1.2f, 1e-3f));
+        CHECK(hit_record.surface_params.is_close(Vec2D{0.0f, 1.0f}, 1e-2f));
     }
 
     SUBCASE("Test Mesh::read_mesh_from_obj(std::istream)") {
@@ -174,39 +257,11 @@ TEST_CASE("TEST 3: Mesh test suite") {
             CHECK(stream_result.error() == "Problems with the .obj file");
         }
 
-        SUBCASE("Test error: Points and Normals size mismatch") {
-            std::string mismatch_string {R"(
-v 0 0 0
-v 1 0 0
-v 0 1 0
-vn 0 0 1
-vn 0 0 1
-f 1/1/1 2/2/2 3/3/3)"};
-            std::istringstream ss(mismatch_string);
-            auto result = mesh.read_mesh_from_obj(ss);
-            
-            CHECK(!result.has_value());
-            CHECK(result.error() == "Points and Normals std::vector are different in size, please check the .obj file");
-        }
-
-        SUBCASE("Test error: Single triangle vertex and normal index mismatch") {
-            std::string index_mismatch_string {R"(
-v 0 0 0
-v 1 0 0
-vn 0 0 1
-vn 0 0 1
-f 1/1/2 2/2/2 1/1/1)"};
-            std::istringstream ss(index_mismatch_string);
-            auto result = mesh.read_mesh_from_obj(ss);
-            
-            CHECK(!result.has_value());
-            CHECK(result.error() == "Problems with triangle indexing in .obj file: for a single triangle Point and Normal should be under the same index");
-        }
-
         SUBCASE("Test error: Index out of range") {
             std::string out_of_range_string {R"(
 v 0 0 0
 vn 0 0 1
+vt 1 1 1
 f 5/5/5 1/1/1 1/1/1)"};
             std::istringstream ss(out_of_range_string);
             auto result = mesh.read_mesh_from_obj(ss);
@@ -225,15 +280,21 @@ v -1.55 -0.225 2.65
 vn 0 0 1
 vn 0 -0.5999999 0.8000001
 vn 0 -1 0
-f 1/1/1 2/2/2 3/3/3)"};
+vt 1 1 and stuff that will be skipped
+f 1/1/1 2/1/2 3/1/3)"};
             std::istringstream ss(parsing_test_string);
             CHECK(mesh.read_mesh_from_obj(ss).has_value());
             CHECK(mesh.mesh_points.size() == 3);
-            CHECK(mesh.mesh_points[0].is_close(TrianglePoint{Point{-1.5f, 0.0f, 2.8f}, Normal{0.0f, 0.0f, 1.0f}}));
-            CHECK(mesh.mesh_points[1].is_close(TrianglePoint{Point{-1.515625f, -0.16875f, 2.753125f}, Normal{0.0f, -0.5999999f, 0.8000001f}}));
-            CHECK(mesh.mesh_points[2].is_close(TrianglePoint{Point{-1.55f, -0.225f, 2.65f}, Normal{0.0f, -1.0f, 0.0f}}));
+            CHECK(mesh.mesh_normals.size() == 3);
+            CHECK(mesh.mesh_texture_uvs.size() == 1);
+            CHECK(mesh.mesh_points[0].is_close(Point{-1.5f, 0.0f, 2.8f}));
+            CHECK(mesh.mesh_normals[0].is_close(Normal{0.0f, 0.0f, 1.0f}));
+            CHECK(mesh.mesh_points[1].is_close(Point{-1.515625f, -0.16875f, 2.753125f}));
+            CHECK(mesh.mesh_normals[1].is_close(Normal{0.0f, -0.5999999f, 0.8000001f}));
+            CHECK(mesh.mesh_points[2].is_close(Point{-1.55f, -0.225f, 2.65f}));
+            CHECK(mesh.mesh_normals[2].is_close(Normal{0.0f, -1.0f, 0.0f}));
             CHECK(mesh.triangle_points_indexes.size() == 1);
-            CHECK(mesh.triangle_points_indexes[0].is_equal(TriangleIndexes{0, 1, 2})); // Indexes start from 1 in a .obj file, but in this module they start from 0
+            CHECK(mesh.triangle_points_indexes[0].is_equal(TriangleIndexes{0, 1, 2, 0, 1, 2, 0, 0, 0})); // Indexes start from 1 in a .obj file, but in this module they start from 0
         }
     }
 

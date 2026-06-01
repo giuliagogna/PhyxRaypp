@@ -478,10 +478,37 @@ World build_Utah_teapot_world(std::string obj_file) {
     auto checkered_pigment = std::make_shared<CheckeredPigment>(Color{1.0f, 1.0f, 1.0f}, Color{0.0f, 0.0f, 0.0f}, 3);
     auto brdf = std::make_shared<DiffusiveBRDF>(checkered_pigment);
     auto teapot_material = std::make_shared<Material>(brdf);
-\
+
     Mesh teapot_mesh(obj_file, teapot_material);
     
     world.add(std::make_unique<Mesh>(teapot_mesh));
+
+    return world;
+}
+
+World build_cat_world(std::string obj_file) {
+    World world;
+
+    // Build the cat
+    std::shared_ptr<Material> cat_material;
+    std::string pfm_path = "./mesh/Cat/Cat_diffuse.pfm";
+    auto img_res = HDRImage::read_pfm_file(pfm_path);
+
+    if (img_res.has_value()) {
+        // If the image loads successfully, create the ImagePigment
+        auto image_pigment = std::make_shared<ImagePigment>(std::move(img_res.value()));
+        auto cat_brdf = std::make_shared<DiffusiveBRDF>(image_pigment);
+        cat_material = std::make_shared<Material>(cat_brdf);
+    } else {
+        // Safety Fallback: If the image is missing, make the cat solid Blue
+        std::println("Warning: Could not load '{}'. Using blue fallback.", pfm_path);
+        auto fallback_pigment = std::make_shared<UniformPigment>(Color{0.0f, 0.0f, 1.0f});
+        auto fallback_brdf = std::make_shared<DiffusiveBRDF>(fallback_pigment);
+        cat_material = std::make_shared<Material>(fallback_brdf);
+    };
+
+    // Sphere is of ray 1, so keeping it on the origin should do the job
+    world.add(std::make_unique<Mesh>("./mesh/Cat/12221_Cat_v1_l3.obj", cat_material, Scale(Vec{0.3f, 0.3f, 0.3f})));
 
     return world;
 }
@@ -540,7 +567,7 @@ void run_demo(const Parameters& params) {
     } else if (params.algorithm == "flat") { // Flat renderer: a checkered plane will be used
         tracer.camera.trans = R_z(1.0f) * R_y(0.5f) * Trans(Vec{-10.0f, 0.0f, 2.0f}); // That's what the teapot file I found needs :-)
         Color sky_color{0.01f, 0.01f, 1.0f};
-        world = build_Utah_teapot_world("./mesh/utah_teapot.obj");
+        world = build_cat_world("./mesh/utah_teapot.obj");
         renderer = std::make_unique<FlatRenderer>(&world, sky_color);
     } else if (params.algorithm == "pathtracing") { // Path tracing renderer: a complex scene will be used
         Color sky_color{0.5f, 0.7f, 1.0f};
@@ -570,59 +597,58 @@ void run_demo(const Parameters& params) {
     std::println("Demo image \"{}\" correctly writen on disk.\n", params.output_png_file_name);
 }
 
-//void run_demo_antialiasing(const Parameters& params) {
-//
-//    // Create RNG object;
-//    PCG pcg;
-//
-//    // =============================================================
-//    // Change the function you call here to build another world
-//    //World world = build_10_white_spheres_world();
-//    World world = build_plane_world();
-//    // =============================================================
-//
-//    PerspectiveCamera camera(1.0f, 3.0f, Transformation{});
-//    //OrthogonalCamera camera(1.0f, R_z(std::numbers::pi_v<float>/3.0f));
-//    HDRImage frame(3200, 3200);
-//    ImageTracer tracer(frame, camera);
-//
-//    // =============================================================
-//    // Modify this color to have a different background color
-//    Color sky_color{0.5f, 0.7f, 1.0f};
-//    //Color sky_color(1.0f, 1.0f, 1.0f);
-//    //Color sky_color = Color{0.0f, 0.0f, 0.0f};
-//    // =============================================================
-//
-//    std::unique_ptr<Renderer> renderer;
-//
-//    if (params.algorithm == "onoff") {
-//        // By passing ONLY &world OnOffRenderer constructor automatically fills in your default Black background and White hit color
-//        // If you ever want to change it, you just add the colors back:
-//        // renderer = std::make_unique<OnOffRenderer>(&world, Color{1,0,0}, Color{0,1,0});
-//        renderer = std::make_unique<OnOffRenderer>(&world);
-//    } else if (params.algorithm == "flat") {
-//        renderer = std::make_unique<FlatRenderer>(&world, sky_color);
-//    } else {
-//        std::println("Warning: Unknown algorithm '{}'. Defaulting to flat.", params.algorithm);
-//        renderer = std::make_unique<FlatRenderer>(&world, sky_color);
-//    }
-//
-//    std::println("Rendering demo scene using '{}' algorithm...", params.algorithm);
-//    tracer.fire_all_rays( [&renderer](const Ray& ray) { return (*renderer)(ray); }, pcg, 10);
-//
-//    auto process_result = tracer.frame.normalize_image(params.alpha)
-//        .and_then([&]() { return tracer.frame.clamp_image(); })
-//        .and_then([&]() { return tracer.frame.apply_gamma_correction(params.gamma); })
-//        .and_then([&]() { return tracer.frame.write_ldr_image(params.output_png_file_name); });
-//
-//    if (!process_result.has_value()) {
-//        std::println("Error during image processing: {}", process_result.error());
-//        return;
-//    }
-//
-//    std::println("Demo image \"{}\" correctly writen on disk.\n", params.output_png_file_name);
-//}
+void run_demo_antialiasing(const Parameters& params) {
 
+    // Create RNG object;
+    PCG pcg;
+
+    // =============================================================
+    // Change the function you call here to build another world
+    //World world = build_10_white_spheres_world();
+    World world = build_plane_world();
+    // =============================================================
+
+    PerspectiveCamera camera(1.0f, 3.0f, Transformation{});
+    //OrthogonalCamera camera(1.0f, R_z(std::numbers::pi_v<float>/3.0f));
+    HDRImage frame(3200, 3200);
+    ImageTracer tracer(frame, camera);
+
+    // =============================================================
+    // Modify this color to have a different background color
+    Color sky_color{0.5f, 0.7f, 1.0f};
+    //Color sky_color(1.0f, 1.0f, 1.0f);
+    //Color sky_color = Color{0.0f, 0.0f, 0.0f};
+    // =============================================================
+
+    std::unique_ptr<Renderer> renderer;
+
+    if (params.algorithm == "onoff") {
+        // By passing ONLY &world OnOffRenderer constructor automatically fills in your default Black background and White hit color
+        // If you ever want to change it, you just add the colors back:
+        // renderer = std::make_unique<OnOffRenderer>(&world, Color{1,0,0}, Color{0,1,0});
+        renderer = std::make_unique<OnOffRenderer>(&world);
+    } else if (params.algorithm == "flat") {
+        renderer = std::make_unique<FlatRenderer>(&world, sky_color);
+    } else {
+        std::println("Warning: Unknown algorithm '{}'. Defaulting to flat.", params.algorithm);
+        renderer = std::make_unique<FlatRenderer>(&world, sky_color);
+    }
+
+    std::println("Rendering demo scene using '{}' algorithm...", params.algorithm);
+    tracer.fire_all_rays( [&renderer](const Ray& ray) { return (*renderer)(ray); }, pcg, 10);
+
+    auto process_result = tracer.frame.normalize_image(params.alpha)
+        .and_then([&]() { return tracer.frame.clamp_image(); })
+        .and_then([&]() { return tracer.frame.apply_gamma_correction(params.gamma); })
+        .and_then([&]() { return tracer.frame.write_ldr_image(params.output_png_file_name); });
+
+    if (!process_result.has_value()) {
+        std::println("Error during image processing: {}", process_result.error());
+        return;
+    }
+
+    std::println("Demo image \"{}\" correctly writen on disk.\n", params.output_png_file_name);
+}
 // ====================================
 // MAIN FUNCTION
 // ====================================

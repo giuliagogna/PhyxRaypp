@@ -771,6 +771,23 @@ struct std::formatter<Normal> {
 };
 
 export template <>
+struct std::formatter<Vec2D> {
+    std::formatter<float> float_fmt;
+
+    constexpr auto parse(std::format_parse_context& ctx) {
+        return float_fmt.parse(ctx);
+    }
+
+    auto format(const Vec2D& UV, auto& ctx) const {
+        auto it = ctx.out();
+        it = float_fmt.format(UV.u, ctx);
+        it = std::format_to(it, " ");
+        ctx.advance_to(it);
+        return float_fmt.format(UV.v, ctx);
+    }
+};
+
+export template <>
 struct std::formatter<HomMatrix> {
     std::formatter<float> float_fmt;
 
