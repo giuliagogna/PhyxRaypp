@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- Full OBJ mesh files support: triangular and non-triangular meshes (stored as triangular), UV map textures
 - OBJ mesh files support for points and normals only (no texture)
 - Mesh shape, optimized via BVH-SAH
 

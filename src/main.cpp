@@ -549,7 +549,7 @@ World build_cube_world() {
 void run_demo(const Parameters& params) {
 
     PCG pcg; //RNG object
-    PerspectiveCamera camera(1.0f, 3.0f, R_y(std::numbers::pi_v<float> / 6.0f));
+    PerspectiveCamera camera(1.0f, 3.0f);
     //OrthogonalCamera camera(1.0f, R_z(std::numbers::pi_v<float>/3.0f));
     HDRImage frame(params.image_dimension.first, params.image_dimension.second);
     ImageTracer tracer(frame, camera);
@@ -565,9 +565,8 @@ void run_demo(const Parameters& params) {
         world = build_10_white_spheres_world();
         renderer = std::make_unique<OnOffRenderer>(&world);
     } else if (params.algorithm == "flat") { // Flat renderer: a checkered plane will be used
-        tracer.camera.trans = R_z(1.0f) * R_y(0.5f) * Trans(Vec{-35.0f, 0.0f, 7.0f}); // That's what the teapot file I found needs :-)
-        Color sky_color{0.01f, 0.01f, 1.0f};
-        world = build_monkey_world("./mesh/utah_teapot.obj");
+        Color sky_color{0.5f, 0.7f, 1.0f};
+        world = build_plane_and_sphere_world();
         renderer = std::make_unique<FlatRenderer>(&world, sky_color);
     } else if (params.algorithm == "pathtracing") { // Path tracing renderer: a complex scene will be used
         Color sky_color{0.5f, 0.7f, 1.0f};

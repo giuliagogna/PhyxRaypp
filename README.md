@@ -13,7 +13,7 @@ Currently, the engine is capable of processing High Dynamic Range (HDR) images a
   - `onoff`: A fast silhouette map of ray-object intersections (default black and white image).
   - `flat`: A flat-shading renderer that resolves surface parameters (UV coordinates) to apply colors and image textures.
   - `pathtracing`: An advanced renderer that numerically solves the rendering equation using Monte Carlo integration and Russian Roulette depth control for photorealistic global illumination.
-* **OBJ file support:** Imports vertexes and normals from OBJ files to generate triangular meshes. The ray intersection method is optimized by a BVH binary tree SAH logic.
+* **OBJ file support:** Imports vertexes, normals and UV mapping textures from OBJ+PFM files to generate triangular meshes. The ray intersection method is optimized by a BVH binary tree SAH logic.
 * **Modern C++23 Architecture:** Fully modularized codebase (`.cppm` files), utilizing the newest features like `std::expected` for safe error handling.
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
@@ -98,7 +98,7 @@ To render a photorealistic Cornell Box containing diffusive and mirrored spheres
 xmake run PhyxRadpp demo 1 1 teapot --algorithm pathtracing --dimensions 400 400 --antialiasing 10 --pathtracer_params 4 4 3
 ```
 
-<img src="generated_images/Cornell_Box_Sphere_400_400_anti10_path443_alpha1_gamma1.png" alt="OnOff spheres result" width="50%">
+<img src="generated_images/teapot_alpha1_gamma1.png" alt="OnOff spheres result" width="50%">
 
 *Note: The code will automatically append _alpha1_gamma1.png to your output filename.*
 
@@ -107,7 +107,7 @@ xmake run PhyxRadpp demo 1 1 teapot --algorithm pathtracing --dimensions 400 400
 To build and run the `doctest` unit test suite, simply use:
 
 ```bash
-xmake test -v
+xmake test
 ```
 Each `.cppm` file has its own tests: to build and run tests for a specific `.cppm` file run
 ```bash
