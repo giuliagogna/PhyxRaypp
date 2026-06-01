@@ -565,7 +565,7 @@ void run_demo(const Parameters& params) {
         world = build_10_white_spheres_world();
         renderer = std::make_unique<OnOffRenderer>(&world);
     } else if (params.algorithm == "flat") { // Flat renderer: a checkered plane will be used
-        tracer.camera.trans = R_z(1.0f) * R_y(0.5f) * Trans(Vec{-25.0f, 0.0f, 4.0f}); // That's what the teapot file I found needs :-)
+        tracer.camera.trans = R_z(1.0f) * R_y(0.5f) * Trans(Vec{-35.0f, 0.0f, 7.0f}); // That's what the teapot file I found needs :-)
         Color sky_color{0.01f, 0.01f, 1.0f};
         world = build_monkey_world("./mesh/utah_teapot.obj");
         renderer = std::make_unique<FlatRenderer>(&world, sky_color);
