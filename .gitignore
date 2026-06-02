@@ -73,3 +73,5 @@ perf.data
 report.txt
 perf_stuff/*.png
 
+*.png
+
