@@ -28,6 +28,7 @@ import BRDF;
 import Renderer;
 import PCG;
 import Mesh;
+import ImageTracer;
 
 using namespace std;
 // Helper function to parse floats
@@ -149,7 +150,7 @@ public:
             for (int i = 2; i < args.size(); ++i) {
                 if (std::string_view(args[i]) == "--algorithm" && i + 1 < args.size()) {
                     algorithm = args[i + 1];
-                    if (algorithm != "flat" && algorithm != "pathtracing" && algorithm != "onoff") {
+                    if (algorithm != "flat" && algorithm != "pathtracing" && algorithm != "onoff" && algorithm != "test") {
                         return std::unexpected(std::format("Error: Invalid algorithm '{}'. Expected 'flat' or 'pathtracing'.", algorithm));
                     }
                 } else if (std::string_view(args[i]) == "--antialiasing" && i + 1 < args.size()) {
@@ -522,7 +523,7 @@ World build_cube_world() {
 void run_demo(const Parameters& params) {
 
     PCG pcg; //RNG object
-    PerspectiveCamera camera(1.0f, 3.0f, R_y(std::numbers::pi_v<float> / 6.0f));
+    PerspectiveCamera camera(1.0f, 3.0f);
     //OrthogonalCamera camera(1.0f, R_z(std::numbers::pi_v<float>/3.0f));
     HDRImage frame(params.image_dimension.first, params.image_dimension.second);
     ImageTracer tracer(frame, camera);
@@ -537,24 +538,30 @@ void run_demo(const Parameters& params) {
         Color sky_color{0.0f, 0.0f, 0.0f};
         world = build_10_white_spheres_world();
         renderer = std::make_unique<OnOffRenderer>(&world);
-    } else if (params.algorithm == "flat") { // Flat renderer: a checkered plane will be used
-        tracer.camera.trans = R_z(1.0f) * R_y(0.5f) * Trans(Vec{-10.0f, 0.0f, 2.0f}); // That's what the teapot file I found needs :-)
+    } else if (params.algorithm == "flat") {
         Color sky_color{0.01f, 0.01f, 1.0f};
-        world = build_Utah_teapot_world("./mesh/utah_teapot.obj");
+        world = build_plane_and_sphere_world();
         renderer = std::make_unique<FlatRenderer>(&world, sky_color);
     } else if (params.algorithm == "pathtracing") { // Path tracing renderer: a complex scene will be used
         Color sky_color{0.5f, 0.7f, 1.0f};
         world = build_Cornell_box_world();
         renderer = std::make_unique<PathTracer>(pcg, &world, sky_color, params.pathtracer_num_of_rays, params.pathtracer_max_depth, params.pathtracer_rr_depth);
-    } else {
-        
+    } else if (params.algorithm == "test") {
+        Color sky_color{0.01f, 0.01f, 1.0f};
+        world = build_plane_and_sphere_world();
     }
-
-    std::println("Rendering demo scene using '{}' algorithm...", params.algorithm);
-    if (params.antialiasing == "apply_AA") {
-        tracer.fire_all_rays( [&renderer](const Ray& ray) { return (*renderer)(ray); }, pcg, params.antialiasing_level);
+    
+    if (params.algorithm == "test") {
+        std::println("Testing for profiling");
+        Color sky_color{0.01f, 0.01f, 1.0f};
+        tracer.fire_all_rays_flat(pcg, world, sky_color);
     } else {
-        tracer.fire_all_rays( [&renderer](const Ray& ray) { return (*renderer)(ray); });
+        std::println("Rendering demo scene using '{}' algorithm...", params.algorithm);
+        if (params.antialiasing == "apply_AA") {
+            tracer.fire_all_rays( [&renderer](const Ray& ray) { return (*renderer)(ray); }, pcg, params.antialiasing_level);
+        } else {
+            tracer.fire_all_rays( [&renderer](const Ray& ray) { return (*renderer)(ray); });
+        }
     }
 
     auto process_result = tracer.frame.normalize_image(params.alpha)

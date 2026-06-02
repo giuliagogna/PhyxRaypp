@@ -70,3 +70,9 @@ images/test_showcase_out.pfm
 *.data.old
 perf*
 report.txt
+
+# ====================================
+# Mesh stuff
+# ====================================
+mesh/*/*.jpg
+mesh/*/*.mtl
