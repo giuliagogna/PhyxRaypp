@@ -503,7 +503,7 @@ TEST_CASE("Test 11: Object Conversions and Normalization (to_vec, to_Normal, Nor
     SUBCASE("Vec::to_norm") {
         // A vector of length 5 (3-4-5 triangle on xy plane)
         Vec v(3.0f, 4.0f, 0.0f);
-        Normal n = v.to_norm();
+        Normal n = v.normalize().to_norm(); // Normalization is needed before conversion
 
         // Expected Normalized values: x=3/5=0.6, y=4/5=0.8, z=0
         CHECK(n.is_close(Normal(0.6f, 0.8f, 0.0f)));

@@ -421,7 +421,11 @@ export struct Mesh : Shape {
                     HitRecord hit;
                     hit.t = t;
                     Vec interpolated_normal = (A.normal * (1 - u - v) + B.normal * u + C.normal * v);
-                    hit.hit_normal = (interpolated_normal * (-std::copysign(1.0f, interpolated_normal * local_ray.direction))).to_norm(); // Flip normal if it's facing the ray
+
+                    // Flip normal if it's facing the ray
+                    float dot = interpolated_normal * local_ray.direction;
+                    hit.hit_normal = (dot > 0.0f ? -interpolated_normal : interpolated_normal).to_norm();
+
                     hit.surface_params = {u, v}; // Will be updated in the future with actual UV coordinates if available
                     hit.hitted_shape = this; // Point directly to this exact mesh in memory
                     // Uodate local ray tmax
