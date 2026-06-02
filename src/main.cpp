@@ -522,7 +522,7 @@ World build_cube_world() {
 void run_demo(const Parameters& params) {
 
     PCG pcg; //RNG object
-    PerspectiveCamera camera(1.0f, 3.0f, R_y(std::numbers::pi_v<float> / 6.0f));
+    PerspectiveCamera camera(1.0f, 3.0f);
     //OrthogonalCamera camera(1.0f, R_z(std::numbers::pi_v<float>/3.0f));
     HDRImage frame(params.image_dimension.first, params.image_dimension.second);
     ImageTracer tracer(frame, camera);
