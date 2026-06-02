@@ -40,27 +40,31 @@ export struct BRDF {
         ) = 0;
 };
 
-// Pure isotropic diffusion BRDF
+// Pure isotropic diffusion BRDF. Avoiding trigonometric functions to improve performace
 export struct DiffusiveBRDF : BRDF {
     DiffusiveBRDF(std::shared_ptr<Pigment> pigment = std::make_shared<UniformPigment>(Color{1.0f, 1.0f, 1.0f})) :
-        BRDF(pigment = std::move(pigment)) {}
+        BRDF(std::move(pigment)) {}
 
     Ray scatter_ray(PCG& pcg, Vec incoming_direction, Point interaction_point, Normal normal, int depth) override {
         auto [e1, e2, e3] = create_onb_from_z(normal);
 
-        float cos_theta_sq = pcg.random_float();
-        float cos_theta = std::sqrt(cos_theta_sq);
-        float sin_theta = std::sqrt(1 - cos_theta_sq);
-        float phi = 2.0f * std::numbers::pi_v<float> * pcg.random_float();
+        float x, y, r_sq;
+        do {
+            x = 2.0f * pcg.random_float() - 1.0f;
+            y = 2.0f * pcg.random_float() - 1.0f;
+            r_sq = x * x + y * y;
+        } while (r_sq >= 1.0f);
+
+        float z = std::sqrt(1.0f - r_sq);
 
         return Ray{
             interaction_point,
-            e1*std::cos(phi)*sin_theta + e2*std::sin(phi)*sin_theta + e3*cos_theta,
+            e1 * x + e2 * y + e3 * z,
             1.0e-3f,
             std::numeric_limits<float>::infinity(),
             depth
         };
-    };
+    }
 };
 
 // Specular reflection BRDF, chosen sharpness

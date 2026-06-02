@@ -376,7 +376,8 @@ export struct Mesh : Shape {
     [[nodiscard]] std::optional<HitRecord> ray_intersection(const Ray& ray) const override {
         // Reference frame of the mesh
         Ray local_ray = ray.transform(trans.inverse());
-        auto hit_record = ray_intersection_unwrapped(local_ray);
+        std::optional<HitRecord> closest_hit = std::nullopt;
+        auto hit_record = ray_intersection_unwrapped(local_ray, closest_hit);
         if (hit_record.has_value()) {
             hit_record->ray = ray;
             hit_record->hit_point = ray.at(hit_record->t);
@@ -386,7 +387,7 @@ export struct Mesh : Shape {
 
     }
 
-    [[nodiscard]] std::optional<HitRecord> ray_intersection_unwrapped(Ray& local_ray, int starting_index = 0, std::optional<HitRecord> closest_hit = std::nullopt) const {
+    [[nodiscard]] std::optional<HitRecord> ray_intersection_unwrapped(Ray& local_ray, std::optional<HitRecord>& closest_hit,  int starting_index = 0) const {
         if (!nodes[starting_index].bounds.intersect(local_ray)) {
             return closest_hit; // No intersection with the bounding box, skip this node
         }
@@ -433,12 +434,12 @@ export struct Mesh : Shape {
         } else {
             // Recursion on children
             // 3. INTERNAL NODE: Recursive traversal
-            if (auto left_hit = ray_intersection_unwrapped(local_ray, nodes[starting_index].left_child_index, closest_hit)) {
+            if (auto left_hit = ray_intersection_unwrapped(local_ray, closest_hit, nodes[starting_index].left_child_index)) {
                 local_ray.tmax = left_hit->t; // Shrink the ray range to find closer intersections
                 closest_hit = left_hit;
             }
 
-            if (auto right_hit = ray_intersection_unwrapped(local_ray, nodes[starting_index].right_child_index, closest_hit)) {
+            if (auto right_hit = ray_intersection_unwrapped(local_ray, closest_hit, nodes[starting_index].right_child_index)) {
                 local_ray.tmax = right_hit->t; // Shrink the ray range to find closer intersections
                 closest_hit = right_hit; // Guaranteed to be closer if found because local_ray.tmax was shrunk
             }

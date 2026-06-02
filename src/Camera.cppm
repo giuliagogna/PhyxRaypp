@@ -123,7 +123,7 @@ export struct ImageTracer {
 
 
 // RAY TRANSFORM
-Ray Ray::transform(const Transformation& trans) const {
+inline Ray Ray::transform(const Transformation& trans) const {
     return Ray{
         .origin = trans * origin,
         .direction = trans * direction,
@@ -135,14 +135,14 @@ Ray Ray::transform(const Transformation& trans) const {
 
 // FIRE RAY
 // Declared this way, u and v are always between 0 and 1
-Ray OrthogonalCamera::fire_ray(const float u, const float v) const {
+inline Ray OrthogonalCamera::fire_ray(const float u, const float v) const {
     // Ray origin is on the image plane at distance d from the camera position
     const Point ray_origin{-1.0f, (1.0f - 2.0f * u) * aspect_ratio, 2.0f * v - 1.0f}; // Camera space origin
     constexpr Vec ray_direction{1.0f, 0.0f, 0.0f}; // Camera space direction (orthogonal to the image plane)
     return Ray{ray_origin, ray_direction}.transform(trans);
 }
 
-Ray PerspectiveCamera::fire_ray(const float u, const float v) const {
+inline Ray PerspectiveCamera::fire_ray(const float u, const float v) const {
     // Ray origin is the camera position (0,0,0 in camera space)
     const Point ray_origin{-d, 0.0f, 0.0f}; // Camera space origin
     const Vec ray_direction{d, (1.0f - 2.0f * u) * aspect_ratio, 2.0f * v - 1.0f}; // Camera space direction (from the camera position to the pixel on the image plane)
@@ -161,7 +161,7 @@ Ray PerspectiveCamera::fire_ray(const float u, const float v) const {
 //                            |       |           |               |
 //                            |       |           |               |
 //                            |       |           |               |
-Ray ImageTracer::fire_ray(const int row, const int col, const float u_pixel, const float v_pixel) const {
+inline Ray ImageTracer::fire_ray(const int row, const int col, const float u_pixel, const float v_pixel) const {
     const float width = static_cast<const float>(frame.width);
     const float height = static_cast<const float>(frame.height);
 
@@ -173,7 +173,7 @@ Ray ImageTracer::fire_ray(const int row, const int col, const float u_pixel, con
 
 // FIRE ALL RAYS
 
-void ImageTracer::fire_all_rays(const std::function<Color(const Ray&)>& func) {
+inline void ImageTracer::fire_all_rays(const std::function<Color(const Ray&)>& func) {
     const int width = frame.width;
     const int height = frame.height;
 
