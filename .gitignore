@@ -70,7 +70,7 @@ images/test_showcase_out.pfm
 *.data.old
 perf_stuff/*.png
 report.txt
-
+perf*
 
 # ====================================
 # Mesh stuff
@@ -79,6 +79,6 @@ mesh/*/*.jpg
 mesh/*/*.mtl
 
 # =======================
-# Garbage imagese
+# Garbage images
 # =======================
 *.png

@@ -161,50 +161,161 @@ export struct Sphere : Shape {
 // ==================================
 // PLANE
 // ==================================
+//export struct Plane : Shape {
+//    // Inherits constructors from Shape (allows passing Transformation)
+//    using Shape::Shape;
+//
+//    [[nodiscard]] std::optional<HitRecord> ray_intersection(const Ray& ray) const override {
+//
+//        // Reference frame change: form World to local Shape frame
+//        Ray local_ray = ray.transform(trans.inverse());
+//
+//        // Control parallelism: if z-component of ray direction is close to zero there is no intersection
+//        if (std::abs(local_ray.direction.z) < 1e-5f) {
+//            return std::nullopt;
+//        }
+//
+//        // Intersection: O_z + t * d_z = 0  =>  t = -O_z / d_z
+//        float t = -local_ray.origin.z / local_ray.direction.z;
+//
+//        // t limits control
+//        if (t < local_ray.tmin || t > local_ray.tmax) {
+//            return std::nullopt;
+//        }
+//
+//        // Point of intersection in the frame of reference of the plane
+//        Point local_point = local_ray.at(t);
+//
+//        // Return in the World space (apply direct transformation)
+//        HitRecord record;
+//        record.ray = ray;
+//        record.t = t;
+//        record.hit_point = trans * local_point;
+//
+//        Normal local_normal = (local_ray.direction.z < 0) ? Normal{0.0f, 0.0f, 1.0f} : Normal{0.0f, 0.0f, -1.0f};
+//        record.hit_normal = trans * local_normal;
+//
+//        // Record (u, v) coordinates on the pair (Tile Pattern: represent infinite plane as composition of finite tiles)
+//        // - floor(-3.2) = -4
+//        record.surface_params.u = local_point.x - std::floor(local_point.x);
+//        record.surface_params.v = local_point.y - std::floor(local_point.y);
+//        //record.hitted_shape = std::make_shared<Plane>(*this); // Store a shared pointer to the hit shape in the record
+//
+//        // Point directly to this exact plane in memory
+//        record.hitted_shape = this;
+//
+//        return record;
+//    }
+//};
+
+
+//// ==================================
+//// PLANE
+//// ==================================
+//export struct Plane : Shape {
+//    // Inherits constructors from Shape (allows passing Transformation)
+//    using Shape::Shape;
+//
+//    [[nodiscard]] std::optional<HitRecord> ray_intersection(const Ray& ray) const override {
+//
+//        // Reference frame change: from World to local Shape frame
+//        // Note: trans.inverse() is completely inlined and just swaps matrix roles with zero overhead
+//        Ray local_ray = ray.transform(trans.inverse());
+//
+//        float dir_z = local_ray.direction.z;
+//        float abs_dir_z = std::abs(dir_z);
+//
+//        // Control parallelism: if z-component of ray direction is close to zero there is no intersection
+//        // Optimization: Added [[unlikely]] compiler hint to optimize CPU instruction cache pipeline
+//        if (abs_dir_z < 1e-5f) [[unlikely]] {
+//            return std::nullopt;
+//        }
+//
+//        // Intersection: O_z + t * d_z = 0  =>  t = -O_z / d_z
+//        float t = -local_ray.origin.z / dir_z;
+//
+//        // t limits control
+//        if (t < local_ray.tmin || t > local_ray.tmax) {
+//            return std::nullopt;
+//        }
+//
+//        // Point of intersection in the frame of reference of the plane
+//        Point local_point = local_ray.at(t);
+//
+//        // Return in the World space (apply direct transformation)
+//        HitRecord record;
+//        record.ray = ray;
+//        record.t = t;
+//        record.hit_point = trans * local_point;
+//
+//        // Optimization: Removed ternary branch. Uses copysign for hardware-level branchless sign extraction
+//        float sign = std::copysign(1.0f, -dir_z);
+//        Normal local_normal{0.0f, 0.0f, sign};
+//        record.hit_normal = trans * local_normal;
+//
+//        // Record (u, v) coordinates on the pair (Tile Pattern: represent infinite plane as composition of finite tiles)
+//        // - floor(-3.2) = -4
+//        // Optimization: Replaced heavy std::floor with an ultra-fast branchless FPU/integer mathematical emulation
+//        record.surface_params.u = local_point.x - static_cast<float>(static_cast<int>(local_point.x) - (local_point.x < 0.0f));
+//        record.surface_params.v = local_point.y - static_cast<float>(static_cast<int>(local_point.y) - (local_point.y < 0.0f));
+//        
+//        //record.hitted_shape = std::make_shared<Plane>(*this); // Store a shared pointer to the hit shape in the record
+//
+//        // Point directly to this exact plane in memory
+//        record.hitted_shape = this;
+//
+//        return record;
+//    }
+//};
+
+// ==================================
+// PLANE - RE-OPTIMIZED (BASED ON PROFILER)
+// ==================================
 export struct Plane : Shape {
-    // Inherits constructors from Shape (allows passing Transformation)
     using Shape::Shape;
 
     [[nodiscard]] std::optional<HitRecord> ray_intersection(const Ray& ray) const override {
-
-        // Reference frame change: form World to local Shape frame
+        // 1. Inlined transformation lookup
         Ray local_ray = ray.transform(trans.inverse());
 
-        // Control parallelism: if z-component of ray direction is close to zero there is no intersection
-        if (std::abs(local_ray.direction.z) < 1e-5f) {
+        float dir_z = local_ray.direction.z;
+        float abs_dir_z = std::abs(dir_z);
+
+        // Parallel check
+        if (abs_dir_z < 1e-5f) [[unlikely]] {
             return std::nullopt;
         }
 
-        // Intersection: O_z + t * d_z = 0  =>  t = -O_z / d_z
-        float t = -local_ray.origin.z / local_ray.direction.z;
+        // Distance calculation
+        float t = -local_ray.origin.z / dir_z;
 
-        // t limits control
+        // Range check
         if (t < local_ray.tmin || t > local_ray.tmax) {
             return std::nullopt;
         }
 
-        // Point of intersection in the frame of reference of the plane
-        Point local_point = local_ray.at(t);
-
-        // Return in the World space (apply direct transformation)
+        // Allocazione preventiva sullo stack: forza il compilatore ad usare NRVO
+        // Evita l'overhead dei costruttori di copia di std::optional evidenziati nel profiler (1.86%)
         HitRecord record;
         record.ray = ray;
         record.t = t;
+
+        // Local intersection point
+        Point local_point = local_ray.at(t);
         record.hit_point = trans * local_point;
 
-        Normal local_normal = (local_ray.direction.z < 0) ? Normal{0.0f, 0.0f, 1.0f} : Normal{0.0f, 0.0f, -1.0f};
+        // Branchless normal calculation
+        float sign = std::copysign(1.0f, -dir_z);
+        Normal local_normal{0.0f, 0.0f, sign};
         record.hit_normal = trans * local_normal;
 
-        // Record (u, v) coordinates on the pair (Tile Pattern: represent infinite plane as composition of finite tiles)
-        // - floor(-3.2) = -4
-        record.surface_params.u = local_point.x - std::floor(local_point.x);
-        record.surface_params.v = local_point.y - std::floor(local_point.y);
-        //record.hitted_shape = std::make_shared<Plane>(*this); // Store a shared pointer to the hit shape in the record
-
-        // Point directly to this exact plane in memory
+        // Fast floor calculation
+        record.surface_params.u = local_point.x - static_cast<float>(static_cast<int>(local_point.x) - (local_point.x < 0.0f));
+        record.surface_params.v = local_point.y - static_cast<float>(static_cast<int>(local_point.y) - (local_point.y < 0.0f));
+        
         record.hitted_shape = this;
 
-        return record;
+        return record; // Il compilatore impacchetta l'oggetto senza fare copie intermedie
     }
 };
 
