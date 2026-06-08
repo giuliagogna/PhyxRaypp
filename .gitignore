@@ -63,4 +63,22 @@ images/test_out_le.pfm
 images/test_out_be.pfm
 images/test_showcase_out.pfm
 
+# ====================================
+# perf profiling
+# ====================================
+*.data
+*.data.old
+perf*
+report.txt
 
+
+# ====================================
+# Mesh stuff
+# ====================================
+mesh/*/*.jpg
+mesh/*/*.mtl
+
+# =======================
+# Garbage imagese
+# =======================
+*.png

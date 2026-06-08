@@ -8,14 +8,16 @@ All notable changes to this project will be documented in this file.
 - Restructuring of main
 - Parser implementation
 - Lexer implementation
-- Add Mesh with BVH
+- OBJ mesh files support for points and normals only (no texture)
+- Mesh shape, optimized via BVH-SAH
+
 --------
 
 ## [0.3.0] - 2026-05-20
 
 ### Added
 - Rendering algorithm Pathtracer
-- Antialiasing
+- Antialiasing, added flag `--antialiasing` to activate and choose the level
 - Cube shape
 - SpecularBRDF, DiffusiveBRDF
 - Added flag `--algorithm` to choose between OnOffRenderer or FlatRenderer

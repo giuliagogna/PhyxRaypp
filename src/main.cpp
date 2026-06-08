@@ -367,6 +367,7 @@ void run_render(const Parameters& params) {
     // ======================================
 
     PCG pcg; //RNG object
+
     HDRImage frame(params.image_dimension.first, params.image_dimension.second);
 
     // Pass the parsed camera (dereferenced from the unique_ptr)

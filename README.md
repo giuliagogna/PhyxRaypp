@@ -56,7 +56,7 @@ Renders a 3D scene. You can optionally specify the rendering algorithm, resoluti
 xmake run PhyxRadpp render <INPUT_SCENE_TXT> <ALPHA_FACTOR> <GAMMA> [FLAGS]
 ```
 **Optional Flags:**
-] `--output <filename>`: Bypasses the automated folder routing/naming and saves the file exactly as specified.
+* `--output <filename>`: Bypasses the automated folder routing/naming and saves the file exactly as specified.
 * `--algorithm <type>` : Render engine (`onoff`, `flat`, or `pathtracing`). Default is `flat`.
 * `--antialiasing <N>` : Apply anti-aliasing with NxN samples per pixel.
 * `--dimensions <W> <H>` : Set output image resolution in pixels (Width Height).
