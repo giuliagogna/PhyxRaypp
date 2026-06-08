@@ -15,6 +15,17 @@
  * limitations under the Licence.
  */
 
+/**
+ * @file Geometry.cppm
+ * @brief Core geometric primitives, vector algebra, and spatial transformations.
+ *
+ * This module defines points, vectors, normals, homogeneous matrices,
+ * and affine transformations used throughout the renderer.
+ *
+ * The distinction between Point, Vec, and Normal is intentional and helps
+ * prevent invalid geometric operations at compile time.
+ */
+
 module;
 
 export module Geometry;
@@ -22,47 +33,57 @@ export module Geometry;
 import auxiliary_functions;
 import std;
 
-/// @brief 2D vector (used in Shapes.cppm for parametrized coordinates (u, v))
+/// @brief 2D coordinates used for parametric surface and texture coordinates.
 export struct Vec2D {
     float u{0.0f}, v{0.0f};
+    /// @brief Check if two 2D vectors are close enough within an epsilon
     bool is_close(const Vec2D& other, float epsilon = 1e-5f) const;
 };
 
-/// @brief Normalized 3D vector (indicate directions in space)
+/// @brief Unit-length direction vector used for orientations and shading.
 export struct Normal {
     float x{0.0f}, y{0.0f}, z{0.0f};
 
-    float norm() const;  // Compute length of Normal object
-    float norm2() const; // Compute length square of Normal object
+    /// @brief Compute length of Normal object
+    float norm() const;
+    /// @brief Compute length square of Normal object
+    float norm2() const;
 
-    Normal normalize(); // normalizes the Normal object (non-const)
+    /// @brief Normalizes the Normal object (non-const)
+    Normal normalize();
 
-    bool is_close(const Normal& other, float epsilon = 1e-5f) const; // Check if two Normals are close enough
+    /// @brief Check if two Normals are close enough within an epsilon
+    bool is_close(const Normal& other, float epsilon = 1e-5f) const;
 };
 
-/// @brief 3D vector (indicate oriented displacement)
+/// @brief 3D displacement or direction vector.
 export struct Vec {
     float x{0.0f}, y{0.0f}, z{0.0f};
 
-    Normal to_norm() const; // Normalizes a Vec and returns a Norm object
-    Vec normalize() const;  // normalizes and returns a Vec
+    /// @brief Normalizes a Vec and returns a Normal object
+    Normal to_norm() const;
+    /// @brief Normalizes and returns a Vec
+    Vec normalize() const;
 
-    // Compute length and length square
+    /// @brief Compute length of Vec
     float norm() const;
+    /// @brief Compute length square of Vec
     float norm2() const;
 
+    /// @brief Check if two Vec are close enough within an epsilon
     bool is_close(const Vec& other, float epsilon = 1e-5f) const;
 };
 
-/// @brief 3D point, used for positions
+/// @brief 3D position in space.
 export struct Point {
     float x{0.0}, y{0.0}, z{0.0};
+    /// @brief Converts a Point to a Vec
     Vec to_vec() const;
-    // GG: Check if two Points are close enough: written as a method as suggested in the lecture slides
+    /// @brief Check if two Points are close enough within an epsilon
     bool is_close(const Point& other, float epsilon = 1e-5f) const;
 };
 
-/// @brief Data structure to store a 4x4 matricial like dataset, used for homogeneous transformations
+/// @brief 4x4 homogeneous transformation matrix.
 /// This is only the basic object that stores a 4x4 Homogeneous Matrix (inverse matrix
 /// and consistency checks are implemented inside Transformation struct)
 export struct HomMatrix {
@@ -74,7 +95,7 @@ export struct HomMatrix {
     bool is_close(const HomMatrix& other, float epsilon = 1e-5f) const;
 };
 
-/// @brief Data structure to store transformations.
+/// @brief Affine transformation storing both a matrix and its inverse.
 /// It stores the direct matrix of the transformation and its inverse: when applying transformation to a
 /// Point or Vec one should use the direct matrix.
 /// One often wants to apply the inverse transformation: to do so  we implement a method
@@ -177,23 +198,18 @@ export {
     Point operator+ (const Point& p, const Vec& v) {
         return _sum<Point, Vec, Point>(p, v);
     }
-
-    // GG: Technically given the sum is commutative one could decide to sum Vec + Point, but I would
-    // avoid it for logical coherence
-
     /// Vec += Vec -> Vec
     Vec& operator+= (Vec& v, const Vec& other) {
         v = _sum<Vec, Vec, Vec>(v, other);
         return v;
     }
-
     /// Vec + Vec -> Vec
     Vec operator+ (const Vec& v, const Vec& other) {
         return _sum<Vec, Vec, Vec>(v, other);
     }
 
-    // Differences
 
+    // Differences
     /// Point-=Vec -> Point
     Point& operator-= (Point& p, const Vec& v) {
         p = _difference<Point, Vec, Point>(p, v);
@@ -203,18 +219,15 @@ export {
     Point operator- (const Point& p, const Vec& v) {
         return _difference<Point, Vec, Point>(p, v);
     }
-
     /// Vec -= Vec -> Vec
     Vec& operator-= (Vec& v, const Vec& other) {
         v = _difference<Vec, Vec, Vec>(v, other);
         return v;
     }
-
     /// Vec - Vec -> Vec
     Vec operator- (const Vec& v, const Vec& other) {
         return _difference<Vec, Vec, Vec>(v, other);
     }
-
     /// Point - Point -> Vec
     Vec operator- (const Point& p, const Point& other) {
         return _difference<Point, Point, Vec>(p, other);
@@ -226,37 +239,33 @@ export {
     Vec operator- (const Vec& v) {
         return _negate<Vec, void, Vec>(v);
     }
-
     /// -Point -> Point
     Point operator- (const Point& p) {
         return _negate<Point, void, Point>(p);
     }
-
     /// -Normal -> Normal
     Normal operator- (const Normal& n) {
         return _negate<Normal, void, Normal>(n);
     }
-    
-    // Scalar products
 
-    /// Point * scalar -> Point
+
+    // Scalar products
+    /// Point *= scalar -> Point
     Point operator*= (Point& p, float scalar) {
         // GG: Need to assign the result to the calling object
         p = _scalar_multiply<Point, float, Point>(p, scalar);
         return p;
     }
-
+    /// Point * scalar -> Point
     Point operator* (const Point& p, float scalar) {
         return _scalar_multiply<Point, float, Point>(p, scalar);
     }
-
+    /// Scalar * Point -> Point
     Point operator* (float scalar, const Point& p) {
         return _scalar_multiply<Point, float, Point>(p, scalar);
     }
-
-    /// Vec*=scalar -> Vec
+    /// Vec *= scalar -> Vec
     Vec& operator*= (Vec& v, float scalar) {
-        // GG: Need to assign the result to the calling object
         v = _scalar_multiply<Vec, float, Vec>(v, scalar);
         return v;
     }
@@ -268,7 +277,6 @@ export {
     Vec operator* (float scalar, const Vec& v) {
         return _scalar_multiply<Vec, float, Vec>(v, scalar);
     }
-
     ///Normal * scalar -> Vec
     Vec operator* (const Normal& n, float scalar) {
         return _scalar_multiply<Normal, float, Vec>(n, scalar);
@@ -278,39 +286,28 @@ export {
         return _scalar_multiply<Normal, float, Vec>(n, scalar);
     }
 
-    // Scalar division
 
-    /// Scalar division between a Vec and a scalar
+    // Scalar division
+    /// Vec /= scalar -> Vec
     Vec& operator/= (Vec& v, float scalar) {
         v = _scalar_divide<Vec, float, Vec>(v, scalar);
         return v;
     }
-
-    /// Scalar division between a Vec and a scalar
+    /// Vec / scalar -> Vec
     Vec operator/ (const Vec& v, float scalar) {
         return _scalar_divide<Vec, float, Vec>(v, scalar);
     }
-
-    // GG: Note that if you divide a Normal for a scalar it is not a normal anymore
-    //     becomes a vector
-    /// Scalar division between a Normal and a scalar
-    //Normal& operator/= (Normal& n, float scalar) {
-    //    n = _scalar_divide<Normal, float, Normal>(n, scalar);
-    //    return n;
-    //}
-    /// Scalar division between a Normal and a scalar
+    /// Normal / scalar -> Vec
     Vec operator/ (const Normal& n, float scalar) {
         return _scalar_divide<Normal, float, Vec>(n, scalar);
     }
-
-    // needed for homogeneous division in Point operator* (const HomMatrix& M, const Point& p)
-    /// Scalar division between a Point and a scalar
+    /// Point / scalar -> Point
     Point operator/ (const Point& p, float scalar) {
         return _scalar_divide<Point, float, Point>(p, scalar);
     }
 
-    // Dot products
 
+    // Dot products
     /// Dot product between two Vec
     float operator* (const Vec& v, const Vec& other) {
         auto res = _elementwise_product<Vec, Vec, Vec>(v, other);
@@ -332,32 +329,28 @@ export {
         return res.x + res.y + res.z;
     }
 
-    // Cross products
 
+    // Cross products
     /// Cross product between two Vec
     Vec operator% (const Vec& v, const Vec& other) {
         return _cross_product<Vec, Vec, Vec>(v, other);
     }
-
-    /// Cross product between a Vec and a Normal  
+    /// Cross product between a Vec and a Normal
     Vec operator% (const Vec& v, const Normal& n) {
         return _cross_product<Vec, Normal, Vec>(v, n);
     }
-
     /// Cross product between a Normal and a Vec
     Vec operator% (const Normal& n, const Vec& v) {
         return _cross_product<Normal, Vec, Vec>(n, v);
     }
-
     /// Cross product between two Normal
     Vec operator% (const Normal& n, const Normal& other) {
         return _cross_product<Normal, Normal, Vec>(n, other);
     }
 
+
     // Matrix multiplication
-
-    // Homogeneous matrix multiplication with Point, Vec and Normal (returns a Point, Vec or Normal with the same type of the first argument)
-
+    /// Matrix * Point -> Point
     Point operator* (const HomMatrix& M, const Point& p) {
 
         float px = p.x; float py = p.y; float pz = p.z; // This should be optimized by the compiler to avoid overhead of multiple accesses to p.x, p.y and p.z
@@ -370,16 +363,13 @@ export {
 
         float w = M.mat[12] * px + M.mat[13] * py + M.mat[14] * pz + M.mat[15];
 
-        // RP: Is w==1.f likely to happen after all the roundings and stuff? I'll leave this commented then we will see.
-        // GG: yes it is possible since the basic transformations we are going to use are affine transformations (which
-        // last row is going to be exactly 0.0 0.0 0.0 1.0)
         if (w==1.f) {
             return res;
         }
-        
+
         return res / w; // homogeneous division
     }
-
+    /// Matrix * Vec -> Vec
     Vec operator* (const HomMatrix& M, const Vec& v) {
         return Vec{
             M.mat[0] * v.x + M.mat[1] * v.y + M.mat[2] * v.z,
@@ -387,10 +377,9 @@ export {
             M.mat[8] * v.x + M.mat[9] * v.y + M.mat[10] * v.z
         };
     }
-
-
+    /// Matrix * Matrix -> Matrix
     HomMatrix operator* (const HomMatrix& M1, const HomMatrix& M2) {
-        
+
         return HomMatrix{
             M1.mat[0] * M2.mat[0] + M1.mat[1] * M2.mat[4] + M1.mat[2] * M2.mat[8] + M1.mat[3] * M2.mat[12],
             M1.mat[0] * M2.mat[1] + M1.mat[1] * M2.mat[5] + M1.mat[2] * M2.mat[9] + M1.mat[3] * M2.mat[13],
@@ -426,17 +415,14 @@ export {
             T2.invm * T1.invm   // Inverse transformation multiplies switched
         };
     }
-
     /// Transformation of a Point
     Point operator*(const Transformation& T, const Point& p) {
         return T.m * p;
     }
-
     /// Transformation of a Vec
     Vec operator*(const Transformation& T, const Vec& v) {
         return T.m * v;
     }
-
     /// Transformation of a Normal
     Normal operator* (const Transformation& T, const Normal& n) {
         return Normal{
@@ -452,11 +438,10 @@ export {
     // TRANSFORMATION GENERATORS
     // ================================================
 
-    /// Generates a translation Transformation
+    /** @brief Create a translation transformation. */
     Transformation Trans(const Vec& v) {
         Transformation t; // Starts as Identity
-        // M
-        // Sets the last column to the components of the vector
+        // Set the last column to the components of the vector
         t.m.mat[3] = v.x;
         t.m.mat[7] = v.y;
         t.m.mat[11] = v.z;
@@ -467,11 +452,10 @@ export {
         return t;
     }
 
-    /// Generates a scaling Transformation
+    /** @brief Create a non-uniform scaling transformation. */
     Transformation Scale(const Vec& v) {
         Transformation t; // Starts as Identity
-        // M
-        // Sets diagonal elements to components of the scaling vector
+        // Set diagonal elements to components of the scaling vector
         t.m.mat[0] = v.x;
         t.m.mat[5] = v.y;
         t.m.mat[10] = v.z;
@@ -484,12 +468,11 @@ export {
 
 
     // Euler angles rotations (intrinsic rotations around the axes of the reference system, applied in order Z, Y, X)
-    /// Generates a rotation around the X axis
+    /** @brief Create a rotation around the X axis (radians). */
     Transformation R_x(float angle_rad) {
         Transformation t;
         float c = std::cos(angle_rad);
         float s = std::sin(angle_rad);
-        // M
         // Already has 1 as mat[0]
         t.m.mat[5] = c;  t.m.mat[6] = -s;
         t.m.mat[9] = s;  t.m.mat[10] = c;
@@ -499,13 +482,12 @@ export {
         return t;
     }
 
-    /// Generates a rotation around the Y axis
+    /** @brief Create a rotation around the Y axis (radians). */
     Transformation R_y(float angle_rad) {
         Transformation t;
         float c = std::cos(angle_rad);
         float s = std::sin(angle_rad);
-        // M
-        // already has 1 in mat[5]
+        // Already has 1 in mat[5]
         t.m.mat[0] = c;  t.m.mat[2] = s;
         t.m.mat[8] = -s; t.m.mat[10] = c;
         // Inverse
@@ -514,13 +496,12 @@ export {
         return t;
     }
 
-    /// Generates a rotation around the Z axis
+    /** @brief Create a rotation around the Z axis (radians). */
     Transformation R_z(float angle_rad) {
         Transformation t;
         float c = std::cos(angle_rad);
         float s = std::sin(angle_rad);
-        // M
-        // already has 1 in mat[10]
+        // Already has 1 in mat[10]
         t.m.mat[0] = c;  t.m.mat[1] = -s;
         t.m.mat[4] = s;  t.m.mat[5] = c;
         // Inverse
@@ -529,12 +510,13 @@ export {
         return t;
     }
 
-    // ===============================================
-    // Min and Max functions for BVH/AAB purpose
-    // ===============================================
+    // =============================================================
+    // Component-wise min/max utilities used for AABB construction
+    // =============================================================
 
-    // Template
-    template<typename Curr, typename Res> Res min_v (const Curr& left, const Curr& right) {
+    /// Return the component-wise minimum of two 3D objects.
+    template<typename Curr, typename Res>
+    Res min_v(const Curr& left, const Curr& right) {
         return Res{
             std::min(left.x, right.x),
             std::min(left.y, right.y),
@@ -542,8 +524,9 @@ export {
         };
     }
 
-    // Template
-    template<typename Curr, typename Res> Res max_v (const Curr& left, const Curr& right) {
+    /// Return the component-wise maximum of two 3D objects.
+    template<typename Curr, typename Res>
+    Res max_v(const Curr& left, const Curr& right) {
         return Res{
             std::max(left.x, right.x),
             std::max(left.y, right.y),
@@ -551,13 +534,15 @@ export {
         };
     }
 
-    // Min for each index
-    Point min (const Point& left, const Point& right) {
+    /// @brief Compute the Point with coordinates the minimum among the coordinates of
+    /// the two input points
+    Point min(const Point& left, const Point& right) {
         return min_v<Point, Point>(left, right);
     }
 
-    // Max for each index
-    Point max (const Point& left, const Point& right) {
+    /// @brief Compute the Point with coordinates the maximum among the coordinates of
+    /// the two input points
+    Point max(const Point& left, const Point& right) {
         return max_v<Point, Point>(left, right);
     }
 };
@@ -651,18 +636,31 @@ bool Transformation::is_consistent() const {
     return result.is_close(identity);
 }
 
-/// Inversion
+/// @brief Trasformation inversion:
+/// Creates a new transformation exchanging the matrix and the inverse
 Transformation Transformation::inverse() const {
-    // Crea una nuova Transformation scambiando mat e invm!
     return Transformation{invm, m};
 }
 
 // ============================================================
-// std::formatter struct for Point, Vec, Normal and HomMatrix
+// std::format support
 // ============================================================
 
-// Formatting via context and custom formatter to enable std::format support for Point, Vec and Normal (and HomMatrix)
-// For example, std::stirng s = std::format("Point({:.2f})", Point{1.0f, 2.0f, 3.0f}) will produce the string "Point(1.00, 2.00, 3.00)"
+/**
+ * Custom formatter specializations enabling std::format() support
+ * for the geometry types defined in this module.
+ *
+ * The formatting specification used for float values is propagated
+ * to all components. For example:
+ *
+ * std::format("{:.2f}", Point{1.f, 2.f, 3.f})
+ *
+ * produces:
+ *
+ * 1.00 2.00 3.00
+ */
+
+/// Enable std::format() support for Point.
 export template <>
 struct std::formatter<Point> {
     std::formatter<float> float_fmt;
@@ -683,6 +681,7 @@ struct std::formatter<Point> {
     }
 };
 
+/// Enable std::format() support for Vec.
 export template <>
 struct std::formatter<Vec> {
     std::formatter<float> float_fmt;
@@ -703,11 +702,64 @@ struct std::formatter<Vec> {
     }
 };
 
+/// Enable std::format() support for Normal.
+export template <>
+struct std::formatter<Normal> {
+    std::formatter<float> float_fmt;
+
+    constexpr auto parse(std::format_parse_context& ctx) {
+        return float_fmt.parse(ctx);
+    }
+
+    auto format(const Normal& n, auto& ctx) const {
+        auto it = ctx.out();
+        it = float_fmt.format(n.x, ctx);
+        it = std::format_to(it, " ");
+        ctx.advance_to(it);
+        it = float_fmt.format(n.y, ctx);
+        it = std::format_to(it, " ");
+        ctx.advance_to(it);
+        return float_fmt.format(n.z, ctx);
+    }
+};
+
+/// Enable std::format() support for HomMatrix.
+export template <>
+struct std::formatter<HomMatrix> {
+    std::formatter<float> float_fmt;
+
+    constexpr auto parse(std::format_parse_context& ctx) {
+        return float_fmt.parse(ctx);
+    }
+
+    auto format(const HomMatrix& M, auto& ctx) const {
+        auto it = ctx.out();
+        for (int i = 0; i < 16; ++i) {
+            it = float_fmt.format(M.mat[i], ctx);
+            if ((i + 1) % 4 == 0) {
+                it = std::format_to(it, "\n");
+            } else {
+                it = std::format_to(it, " ");
+            }
+            ctx.advance_to(it);
+        }
+        return it;
+    }
+};
+
 // ================================================
 // TEMPLATE ORTHONORMAL BASIS GENERATOR
 // ================================================
 
-/// Using a template allows this function to accept both Normal and Vec
+/**
+ * @brief Build an orthonormal basis from a normalized direction.
+ *
+ * The input vector becomes the local z-axis of the generated basis.
+ *
+ * @tparam VectorType Vec or Normal.
+ * @param normal Normalized direction.
+ * @return Array containing {e1, e2, e3}.
+ */
 /// Create a orthonormal basis (ONB) from a vector representing the z axis (normalized)
 /// Return a tuple containing the three vectors (e1, e2, e3) of the basis. The result is such
 /// that e3 = normal.
@@ -744,47 +796,3 @@ std::array<Vec, 3> create_onb_from_z(const VectorType& normal) {
     // To unpack use auto [e1, e2, e3] = create_onb_from_z()
     return std::array<Vec, 3>{e1, e2, e3};
 }
-
-
-export template <>
-struct std::formatter<Normal> {
-    std::formatter<float> float_fmt;
-
-    constexpr auto parse(std::format_parse_context& ctx) {
-        return float_fmt.parse(ctx);
-    }
-
-    auto format(const Normal& n, auto& ctx) const {
-        auto it = ctx.out();
-        it = float_fmt.format(n.x, ctx);
-        it = std::format_to(it, " ");
-        ctx.advance_to(it);
-        it = float_fmt.format(n.y, ctx);
-        it = std::format_to(it, " ");
-        ctx.advance_to(it);
-        return float_fmt.format(n.z, ctx);
-    }
-};
-
-export template <>
-struct std::formatter<HomMatrix> {
-    std::formatter<float> float_fmt;
-
-    constexpr auto parse(std::format_parse_context& ctx) {
-        return float_fmt.parse(ctx);
-    }
-
-    auto format(const HomMatrix& M, auto& ctx) const {
-        auto it = ctx.out();
-        for (int i = 0; i < 16; ++i) {
-            it = float_fmt.format(M.mat[i], ctx);
-            if ((i + 1) % 4 == 0) {
-                it = std::format_to(it, "\n");
-            } else {
-                it = std::format_to(it, " ");
-            }
-            ctx.advance_to(it);
-        }
-        return it;
-    }
-};
