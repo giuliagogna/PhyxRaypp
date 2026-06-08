@@ -220,7 +220,7 @@ Functions</h2></td></tr>
 <tr class="memitem:a6a8ac7d09c5ecca2666298c8ba0d7da6" id="r_a6a8ac7d09c5ecca2666298c8ba0d7da6"><td class="memItemLeft"><a class="el" href="test___color_8cpp.html#a3b69631535313e83809cd7746027cc62">std::expected</a>&lt; std::unique_ptr&lt; <a class="el" href="struct_b_r_d_f.html">BRDF</a> &gt;, <a class="el" href="struct_grammar_error.html">GrammarError</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a6a8ac7d09c5ecca2666298c8ba0d7da6">parse_brdf</a> (<a class="el" href="struct_input_stream.html">InputStream</a> &amp;input_file, <a class="el" href="struct_scene.html">Scene</a> &amp;scene)</td></tr>
 <tr class="memdesc:a6a8ac7d09c5ecca2666298c8ba0d7da6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a Bidirectional Reflectance Distribution Function (diffuse or specular).  <br /></td></tr>
 <tr class="memitem:aa1b56857642d296078c116737f49e8e6" id="r_aa1b56857642d296078c116737f49e8e6"><td class="memItemLeft"><a class="el" href="test___color_8cpp.html#a3b69631535313e83809cd7746027cc62">std::expected</a>&lt; std::pair&lt; std::string, <a class="el" href="struct_material.html">Material</a> &gt;, <a class="el" href="struct_grammar_error.html">GrammarError</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#aa1b56857642d296078c116737f49e8e6">parse_material</a> (<a class="el" href="struct_input_stream.html">InputStream</a> &amp;input_file, <a class="el" href="struct_scene.html">Scene</a> &amp;scene)</td></tr>
-<tr class="memdesc:aa1b56857642d296078c116737f49e8e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a <a class="el" href="struct_material.html">Material</a> containing its identifier, <a class="el" href="struct_b_r_d_f.html">BRDF</a>, and Emitted Radiance pigment.  <br /></td></tr>
+<tr class="memdesc:aa1b56857642d296078c116737f49e8e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a <a class="el" href="struct_material.html" title="Surface material.">Material</a> containing its identifier, <a class="el" href="struct_b_r_d_f.html">BRDF</a>, and Emitted Radiance pigment.  <br /></td></tr>
 <tr class="memitem:ac178462a022ac5ddd83575a48a71e96a" id="r_ac178462a022ac5ddd83575a48a71e96a"><td class="memItemLeft"><a class="el" href="test___color_8cpp.html#a3b69631535313e83809cd7746027cc62">std::expected</a>&lt; <a class="el" href="struct_transformation.html">Transformation</a>, <a class="el" href="struct_grammar_error.html">GrammarError</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ac178462a022ac5ddd83575a48a71e96a">parse_transformation</a> (<a class="el" href="struct_input_stream.html">InputStream</a> &amp;input_file, <a class="el" href="struct_scene.html">Scene</a> &amp;scene)</td></tr>
 <tr class="memdesc:ac178462a022ac5ddd83575a48a71e96a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses an LL(1) chain of affine transformations connected by '*'.  <br /></td></tr>
 <tr class="memitem:a2663e9baaf254e6dd177881e9b1981a3" id="r_a2663e9baaf254e6dd177881e9b1981a3"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
@@ -677,7 +677,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Parses a <a class="el" href="struct_material.html">Material</a> containing its identifier, <a class="el" href="struct_b_r_d_f.html">BRDF</a>, and Emitted Radiance pigment. </p>
+<p>Parses a <a class="el" href="struct_material.html" title="Surface material.">Material</a> containing its identifier, <a class="el" href="struct_b_r_d_f.html">BRDF</a>, and Emitted Radiance pigment. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">input_file</td><td>The <a class="el" href="struct_input_stream.html" title="A high-level stream wrapper used to safely parse scene files.">InputStream</a>. </td></tr>
@@ -685,7 +685,7 @@ Variables</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A key-value pair of the <a class="el" href="struct_material.html">Material</a>'s string identifier and the constructed <a class="el" href="struct_material.html">Material</a> object. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A key-value pair of the <a class="el" href="struct_material.html" title="Surface material.">Material</a>'s string identifier and the constructed <a class="el" href="struct_material.html" title="Surface material.">Material</a> object. </dd></dl>
 
 </div>
 </div>
