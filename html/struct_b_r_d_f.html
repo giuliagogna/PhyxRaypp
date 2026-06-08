@@ -118,28 +118,38 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('struct_b_r_d_f
   <div class="headertitle"><div class="title">BRDF Struct Reference<span class="mlabels"><span class="mlabel abstract">abstract</span><span class="mlabel export">export</span></span><div class="ingroups">module <a class="el" href="module___b_r_d_f.html">BRDF</a></div></div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Base class for surface scattering models.  
+ <a href="#details">More...</a></p>
 <div class="dynheader">
 Inheritance diagram for BRDF:</div>
 <div class="dyncontent">
  <div class="center">
   <img src="struct_b_r_d_f.png" usemap="#BRDF_map" alt=""/>
   <map id="BRDF_map" name="BRDF_map">
-<area href="struct_diffusive_b_r_d_f.html" alt="DiffusiveBRDF" shape="rect" coords="0,56,96,80"/>
-<area href="struct_specular_b_r_d_f.html" alt="SpecularBRDF" shape="rect" coords="106,56,202,80"/>
+<area href="struct_diffusive_b_r_d_f.html" title="Ideal diffuse BRDF." alt="DiffusiveBRDF" shape="rect" coords="0,56,96,80"/>
+<area href="struct_specular_b_r_d_f.html" title="Ideal specular reflection BRDF." alt="SpecularBRDF" shape="rect" coords="106,56,202,80"/>
   </map>
 </div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a4da45d131421d42cfaa56fc0e1579e1c" id="r_a4da45d131421d42cfaa56fc0e1579e1c"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a4da45d131421d42cfaa56fc0e1579e1c">BRDF</a> (std::shared_ptr&lt; <a class="el" href="struct_pigment.html">Pigment</a> &gt; pigment)</td></tr>
+<tr class="memdesc:a4da45d131421d42cfaa56fc0e1579e1c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct a <a class="el" href="struct_b_r_d_f.html" title="Base class for surface scattering models.">BRDF</a> with the given pigment.  <br /></td></tr>
 <tr class="memitem:ad8a24abcd40ea1f843e164fb40105dbc" id="r_ad8a24abcd40ea1f843e164fb40105dbc"><td class="memItemLeft">virtual <a class="el" href="struct_ray.html">Ray</a>&#160;</td><td class="memItemRight"><a class="el" href="#ad8a24abcd40ea1f843e164fb40105dbc">scatter_ray</a> (<a class="el" href="struct_p_c_g.html">PCG</a> &amp;pcg, <a class="el" href="struct_vec.html">Vec</a> incoming_direction, <a class="el" href="struct_point.html">Point</a> interaction_point, <a class="el" href="struct_normal.html">Normal</a> normal, int depth)=0</td></tr>
+<tr class="memdesc:ad8a24abcd40ea1f843e164fb40105dbc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate a scattered ray.  <br /></td></tr>
 <tr class="memitem:a10e8d79f301861a33a18eaaf0ef4733f" id="r_a10e8d79f301861a33a18eaaf0ef4733f"><td class="memItemLeft">virtual&#160;</td><td class="memItemRight"><a class="el" href="#a10e8d79f301861a33a18eaaf0ef4733f">~BRDF</a> ()=default</td></tr>
+<tr class="memdesc:a10e8d79f301861a33a18eaaf0ef4733f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Virtual destructor.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a239ca7a654e830ce9232a37c61b4caea" id="r_a239ca7a654e830ce9232a37c61b4caea"><td class="memItemLeft">std::shared_ptr&lt; <a class="el" href="struct_pigment.html">Pigment</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a239ca7a654e830ce9232a37c61b4caea">pigment</a></td></tr>
+<tr class="memdesc:a239ca7a654e830ce9232a37c61b4caea"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="struct_pigment.html">Pigment</a> controlling the surface reflectance.  <br /></td></tr>
 </table>
-<a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Base class for surface scattering models. </p>
+<p>A <a class="el" href="struct_b_r_d_f.html" title="Base class for surface scattering models.">BRDF</a> determines the direction of rays scattered by a surface after an interaction. The associated pigment defines the surface color or reflectance. </p>
+</div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a4da45d131421d42cfaa56fc0e1579e1c" name="a4da45d131421d42cfaa56fc0e1579e1c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4da45d131421d42cfaa56fc0e1579e1c">&#9670;&#160;</a></span>BRDF()</h2>
 
@@ -162,6 +172,8 @@ Public Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Construct a <a class="el" href="struct_b_r_d_f.html" title="Base class for surface scattering models.">BRDF</a> with the given pigment. </p>
 
 </div>
 </div>
@@ -187,6 +199,8 @@ Public Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Virtual destructor. </p>
 
 </div>
 </div>
@@ -233,6 +247,20 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Generate a scattered ray. </p>
+<p>Computes a new ray originating from the interaction point according to the scattering model implemented by the <a class="el" href="struct_b_r_d_f.html" title="Base class for surface scattering models.">BRDF</a>.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pcg</td><td>Random number generator used for sampling. </td></tr>
+    <tr><td class="paramname">incoming_direction</td><td>Direction of the incoming ray. </td></tr>
+    <tr><td class="paramname">interaction_point</td><td>Surface interaction point. </td></tr>
+    <tr><td class="paramname">normal</td><td>Surface normal at the interaction point. </td></tr>
+    <tr><td class="paramname">depth</td><td>Recursion depth carried by the generated ray.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Scattered ray. </dd></dl>
+
 <p>Implemented in <a class="el" href="struct_diffusive_b_r_d_f.html#a2828d8eb3ff2dd815b5ea497c3837724">DiffusiveBRDF</a>, and <a class="el" href="struct_specular_b_r_d_f.html#a4e49b2f0fc7f8429e7c71f44223e1362">SpecularBRDF</a>.</p>
 
 </div>
@@ -249,6 +277,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p><a class="el" href="struct_pigment.html">Pigment</a> controlling the surface reflectance. </p>
 
 </div>
 </div>

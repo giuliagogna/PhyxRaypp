@@ -129,7 +129,7 @@ var NAVTREEINDEX =
 "functions_r.html",
 "struct_h_d_r_image.html#a044f086c2fcaa43ca80268e4d31a58b3a999a58c75466038ed7fbeaf3bd45e6e9",
 "struct_path_tracer.html#aaefed6b7b2623f08a75489ed941c79d2",
-"test___b_r_d_f_8cpp.html#aea7609dd52e56c1181f46f536e8b7659"
+"test___camera_8cpp.html#a34b072c0ecdc1820b4e66842c53f34bf"
 ];
 
 const SYNCONMSG = 'click to disable panel synchronization';

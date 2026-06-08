@@ -25,7 +25,7 @@ var searchData=
   ['skip_5fwhitespaces_5fand_5fcomments_22',['skip_whitespaces_and_comments',['../struct_input_stream.html#a37780f5a0c380d952deb0dc44c3d780f',1,'InputStream']]],
   ['sourcelocation_23',['SourceLocation',['../struct_source_location.html',1,'']]],
   ['specular_24',['SPECULAR',['../_scene_files_8cppm.html#a0a395672924ac94ef998770a52e49f42a0df54c320628149300093da5e2ff693d',1,'SceneFiles.cppm']]],
-  ['specularbrdf_25',['SpecularBRDF',['../struct_specular_b_r_d_f.html',1,'SpecularBRDF'],['../struct_specular_b_r_d_f.html#a396c39f305a5406091db3c1c79c6e684',1,'SpecularBRDF::SpecularBRDF()']]],
+  ['specularbrdf_25',['SpecularBRDF',['../struct_specular_b_r_d_f.html',1,'SpecularBRDF'],['../struct_specular_b_r_d_f.html#afe12c651d4f2c687e335b62e6e1fee9b',1,'SpecularBRDF::SpecularBRDF()']]],
   ['sphere_26',['SPHERE',['../_scene_files_8cppm.html#a0a395672924ac94ef998770a52e49f42a6f7cea7381e843e2ee0338b4a92b0d43',1,'SceneFiles.cppm']]],
   ['sphere_27',['Sphere',['../struct_sphere.html',1,'']]],
   ['state_28',['state',['../struct_p_c_g.html#a23d60c27dd35c02878ecb8bf0516e37a',1,'PCG']]],

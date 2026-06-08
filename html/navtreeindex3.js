@@ -105,12 +105,10 @@ var NAVTREEINDEX3 =
 "struct_source_location.html#acfd70af573d2867061901cdb0daa19aa":[5,0,41,1],
 "struct_specular_b_r_d_f.html":[3,0,1,2],
 "struct_specular_b_r_d_f.html":[5,0,42],
-"struct_specular_b_r_d_f.html#a107daa546bf40c8057c2dbdb1cd3cf83":[3,0,1,2,2],
-"struct_specular_b_r_d_f.html#a107daa546bf40c8057c2dbdb1cd3cf83":[5,0,42,2],
-"struct_specular_b_r_d_f.html#a396c39f305a5406091db3c1c79c6e684":[3,0,1,2,0],
-"struct_specular_b_r_d_f.html#a396c39f305a5406091db3c1c79c6e684":[5,0,42,0],
 "struct_specular_b_r_d_f.html#a4e49b2f0fc7f8429e7c71f44223e1362":[3,0,1,2,1],
 "struct_specular_b_r_d_f.html#a4e49b2f0fc7f8429e7c71f44223e1362":[5,0,42,1],
+"struct_specular_b_r_d_f.html#afe12c651d4f2c687e335b62e6e1fee9b":[3,0,1,2,0],
+"struct_specular_b_r_d_f.html#afe12c651d4f2c687e335b62e6e1fee9b":[5,0,42,0],
 "struct_sphere.html":[3,0,12,2],
 "struct_sphere.html":[5,0,43],
 "struct_sphere.html#a1f29c0230551f5146adef25b06512985":[3,0,12,2,0],
@@ -249,5 +247,7 @@ var NAVTREEINDEX3 =
 "structstd_1_1formatter_3_01_vec_01_4.html#a938e369e13aea81d4f40e7b1478c3e53":[5,0,0,4,1],
 "test___b_r_d_f_8cpp.html":[6,0,2,1],
 "test___b_r_d_f_8cpp.html#a623b8690a262536536a43eab2d7df03d":[6,0,2,1,0],
-"test___b_r_d_f_8cpp.html#a919efeb7664ebf7e155142f3ab1cdf66":[6,0,2,1,2]
+"test___b_r_d_f_8cpp.html#a919efeb7664ebf7e155142f3ab1cdf66":[6,0,2,1,2],
+"test___b_r_d_f_8cpp.html#aea7609dd52e56c1181f46f536e8b7659":[6,0,2,1,1],
+"test___camera_8cpp.html":[6,0,2,2]
 };

@@ -118,30 +118,41 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('struct_diffusi
   <div class="headertitle"><div class="title">DiffusiveBRDF Struct Reference<span class="mlabels"><span class="mlabel export">export</span></span><div class="ingroups">module <a class="el" href="module___b_r_d_f.html">BRDF</a></div></div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Ideal diffuse <a class="el" href="struct_b_r_d_f.html" title="Base class for surface scattering models.">BRDF</a>.  
+ <a href="#details">More...</a></p>
 <div class="dynheader">
 Inheritance diagram for DiffusiveBRDF:</div>
 <div class="dyncontent">
  <div class="center">
   <img src="struct_diffusive_b_r_d_f.png" usemap="#DiffusiveBRDF_map" alt=""/>
   <map id="DiffusiveBRDF_map" name="DiffusiveBRDF_map">
-<area href="struct_b_r_d_f.html" alt="BRDF" shape="rect" coords="0,0,95,24"/>
+<area href="struct_b_r_d_f.html" title="Base class for surface scattering models." alt="BRDF" shape="rect" coords="0,0,95,24"/>
   </map>
 </div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a2f25056a70a2f815e20afea2de1569e4" id="r_a2f25056a70a2f815e20afea2de1569e4"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a2f25056a70a2f815e20afea2de1569e4">DiffusiveBRDF</a> (std::shared_ptr&lt; <a class="el" href="struct_pigment.html">Pigment</a> &gt; pigment=std::make_shared&lt; <a class="el" href="struct_uniform_pigment.html">UniformPigment</a> &gt;(<a class="el" href="struct_color.html">Color</a>{1.0f, 1.0f, 1.0f}))</td></tr>
+<tr class="memdesc:a2f25056a70a2f815e20afea2de1569e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct a diffusive <a class="el" href="struct_b_r_d_f.html" title="Base class for surface scattering models.">BRDF</a>.  <br /></td></tr>
 <tr class="memitem:a2828d8eb3ff2dd815b5ea497c3837724" id="r_a2828d8eb3ff2dd815b5ea497c3837724"><td class="memItemLeft"><a class="el" href="struct_ray.html">Ray</a>&#160;</td><td class="memItemRight"><a class="el" href="#a2828d8eb3ff2dd815b5ea497c3837724">scatter_ray</a> (<a class="el" href="struct_p_c_g.html">PCG</a> &amp;pcg, <a class="el" href="struct_vec.html">Vec</a> incoming_direction, <a class="el" href="struct_point.html">Point</a> interaction_point, <a class="el" href="struct_normal.html">Normal</a> normal, int depth) override</td></tr>
+<tr class="memdesc:a2828d8eb3ff2dd815b5ea497c3837724"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate a scattered ray.  <br /></td></tr>
 <tr class="inherit_header pub_methods_struct_b_r_d_f"><td colspan="2">Public Member Functions inherited from <a class="el" href="struct_b_r_d_f.html">BRDF</a></td></tr>
 <tr class="memitem:a4da45d131421d42cfaa56fc0e1579e1c pub_methods_struct_b_r_d_f" id="r_a4da45d131421d42cfaa56fc0e1579e1c"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="struct_b_r_d_f.html#a4da45d131421d42cfaa56fc0e1579e1c">BRDF</a> (std::shared_ptr&lt; <a class="el" href="struct_pigment.html">Pigment</a> &gt; pigment)</td></tr>
+<tr class="memdesc:a4da45d131421d42cfaa56fc0e1579e1c pub_methods_struct_b_r_d_f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct a <a class="el" href="struct_b_r_d_f.html" title="Base class for surface scattering models.">BRDF</a> with the given pigment.  <br /></td></tr>
 <tr class="memitem:a10e8d79f301861a33a18eaaf0ef4733f pub_methods_struct_b_r_d_f" id="r_a10e8d79f301861a33a18eaaf0ef4733f"><td class="memItemLeft">virtual&#160;</td><td class="memItemRight"><a class="el" href="struct_b_r_d_f.html#a10e8d79f301861a33a18eaaf0ef4733f">~BRDF</a> ()=default</td></tr>
+<tr class="memdesc:a10e8d79f301861a33a18eaaf0ef4733f pub_methods_struct_b_r_d_f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Virtual destructor.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-inherited" class="groupheader"><a id="inherited" name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
 <tr class="inherit_header pub_attribs_struct_b_r_d_f"><td colspan="2">Public Attributes inherited from <a class="el" href="struct_b_r_d_f.html">BRDF</a></td></tr>
 <tr class="memitem:a239ca7a654e830ce9232a37c61b4caea pub_attribs_struct_b_r_d_f" id="r_a239ca7a654e830ce9232a37c61b4caea"><td class="memItemLeft">std::shared_ptr&lt; <a class="el" href="struct_pigment.html">Pigment</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="struct_b_r_d_f.html#a239ca7a654e830ce9232a37c61b4caea">pigment</a></td></tr>
+<tr class="memdesc:a239ca7a654e830ce9232a37c61b4caea pub_attribs_struct_b_r_d_f"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="struct_pigment.html">Pigment</a> controlling the surface reflectance.  <br /></td></tr>
 </table>
-<a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Ideal diffuse <a class="el" href="struct_b_r_d_f.html" title="Base class for surface scattering models.">BRDF</a>. </p>
+<p>Scatters rays uniformly over the hemisphere centered on the surface normal. </p>
+</div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a2f25056a70a2f815e20afea2de1569e4" name="a2f25056a70a2f815e20afea2de1569e4"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2f25056a70a2f815e20afea2de1569e4">&#9670;&#160;</a></span>DiffusiveBRDF()</h2>
 
@@ -164,6 +175,9 @@ Additional Inherited Members</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Construct a diffusive <a class="el" href="struct_b_r_d_f.html" title="Base class for surface scattering models.">BRDF</a>. </p>
+<p>By default, creates a perfectly diffusive white material. </p>
 
 </div>
 </div>
@@ -209,6 +223,20 @@ Additional Inherited Members</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Generate a scattered ray. </p>
+<p>Computes a new ray originating from the interaction point according to the scattering model implemented by the <a class="el" href="struct_b_r_d_f.html" title="Base class for surface scattering models.">BRDF</a>.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pcg</td><td>Random number generator used for sampling. </td></tr>
+    <tr><td class="paramname">incoming_direction</td><td>Direction of the incoming ray. </td></tr>
+    <tr><td class="paramname">interaction_point</td><td>Surface interaction point. </td></tr>
+    <tr><td class="paramname">normal</td><td>Surface normal at the interaction point. </td></tr>
+    <tr><td class="paramname">depth</td><td>Recursion depth carried by the generated ray.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Scattered ray. </dd></dl>
 
 <p>Implements <a class="el" href="struct_b_r_d_f.html#ad8a24abcd40ea1f843e164fb40105dbc">BRDF</a>.</p>
 
