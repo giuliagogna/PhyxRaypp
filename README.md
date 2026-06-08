@@ -12,6 +12,7 @@ Scenes and rendering parameters are parsed dynamically at runtime using a custom
   * `onoff`: Binary hit/miss visibility testing (generates a black-and-white silhouette).
   * `flat`: Flat shading that resolves surface coordinates to apply solid colors or UV-mapped HDR textures without calculating light bounces.
   * `pathtracing`: Physically based rendering using Monte Carlo integration and Russian Roulette depth control to calculate global illumination.
+* **OBJ meshes support:** it's possible to upload OBJ files and create meshes (still without texture). The ray intersection test is accelerated via BVH-SAH algorithm.
 * **Material System:** Supports uniform colors, procedural checkerboards, and HDR image texture mapping attached to diffusive or specular BRDFs.
 * **HDR Image Processing:** Converts `.pfm` files to standard `.png` files, applying normalization (alpha) and gamma correction.
 
