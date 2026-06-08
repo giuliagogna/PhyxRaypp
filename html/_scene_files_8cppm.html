@@ -231,9 +231,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ad893913aed8d22802cbb60168d2a81e8" id="r_ad893913aed8d22802cbb60168d2a81e8"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#ad893913aed8d22802cbb60168d2a81e8">is_transformation_keyword</a> (<a class="el" href="#a0a395672924ac94ef998770a52e49f42">KeywordEnum</a> kw)</td></tr>
 <tr class="memdesc:ad893913aed8d22802cbb60168d2a81e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function to check if a keyword belongs to the <a class="el" href="struct_transformation.html" title="Affine transformation storing both a matrix and its inverse. It stores the direct matrix of the trans...">Transformation</a> family.  <br /></td></tr>
 <tr class="memitem:aa772d56c92b7d423100443d51de1f697" id="r_aa772d56c92b7d423100443d51de1f697"><td class="memItemLeft"><a class="el" href="test___color_8cpp.html#a3b69631535313e83809cd7746027cc62">std::expected</a>&lt; std::unique_ptr&lt; <a class="el" href="struct_camera.html">Camera</a> &gt;, <a class="el" href="struct_grammar_error.html">GrammarError</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#aa772d56c92b7d423100443d51de1f697">parse_camera</a> (<a class="el" href="struct_input_stream.html">InputStream</a> &amp;input_file, <a class="el" href="struct_scene.html">Scene</a> &amp;scene)</td></tr>
-<tr class="memdesc:aa772d56c92b7d423100443d51de1f697"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a <a class="el" href="struct_camera.html">Camera</a> declaration from the scene file.  <br /></td></tr>
+<tr class="memdesc:aa772d56c92b7d423100443d51de1f697"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a <a class="el" href="struct_camera.html" title="Base class for camera models.">Camera</a> declaration from the scene file.  <br /></td></tr>
 <tr class="memitem:a54a27b45b7d0718e8280322697e3fa14" id="r_a54a27b45b7d0718e8280322697e3fa14"><td class="memItemLeft"><a class="el" href="test___color_8cpp.html#a3b69631535313e83809cd7746027cc62">std::expected</a>&lt; <a class="el" href="struct_scene.html">Scene</a>, <a class="el" href="struct_grammar_error.html">GrammarError</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a54a27b45b7d0718e8280322697e3fa14">parse_scene</a> (<a class="el" href="struct_input_stream.html">InputStream</a> &amp;input_file, const std::unordered_map&lt; std::string, float &gt; &amp;overridden_variables={})</td></tr>
-<tr class="memdesc:a54a27b45b7d0718e8280322697e3fa14"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses an entire scene file from top to bottom, building the <a class="el" href="struct_world.html">World</a>, <a class="el" href="struct_camera.html">Camera</a>, and Materials.  <br /></td></tr>
+<tr class="memdesc:a54a27b45b7d0718e8280322697e3fa14"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses an entire scene file from top to bottom, building the <a class="el" href="struct_world.html">World</a>, <a class="el" href="struct_camera.html" title="Base class for camera models.">Camera</a>, and Materials.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
@@ -599,7 +599,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Parses a <a class="el" href="struct_camera.html">Camera</a> declaration from the scene file. </p>
+<p>Parses a <a class="el" href="struct_camera.html" title="Base class for camera models.">Camera</a> declaration from the scene file. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">input_file</td><td>The <a class="el" href="struct_input_stream.html" title="A high-level stream wrapper used to safely parse scene files.">InputStream</a>. </td></tr>
@@ -607,7 +607,7 @@ Variables</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A unique pointer to the <a class="el" href="struct_camera.html">Camera</a> polymorphism wrapper. Aspect ratio, distance, and transformation are all optional. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A unique pointer to the <a class="el" href="struct_camera.html" title="Base class for camera models.">Camera</a> polymorphism wrapper. Aspect ratio, distance, and transformation are all optional. </dd></dl>
 
 </div>
 </div>
@@ -796,7 +796,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Parses an entire scene file from top to bottom, building the <a class="el" href="struct_world.html">World</a>, <a class="el" href="struct_camera.html">Camera</a>, and Materials. </p>
+<p>Parses an entire scene file from top to bottom, building the <a class="el" href="struct_world.html">World</a>, <a class="el" href="struct_camera.html" title="Base class for camera models.">Camera</a>, and Materials. </p>
 <p>This function acts as the root of the recursive descent parser. It sequentially reads top-level tokens (Float variables, Materials, Cameras, and Shapes) and populates a <a class="el" href="struct_scene.html" title="Represents a fully parsed scene containing all objects needed for rendering.">Scene</a> object.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">

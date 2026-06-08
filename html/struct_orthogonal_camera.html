@@ -118,31 +118,43 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('struct_orthogo
   <div class="headertitle"><div class="title">OrthogonalCamera Struct Reference<span class="mlabels"><span class="mlabel export">export</span></span><div class="ingroups">module <a class="el" href="module___camera.html">Camera</a></div></div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Orthographic camera.  
+ <a href="#details">More...</a></p>
 <div class="dynheader">
 Inheritance diagram for OrthogonalCamera:</div>
 <div class="dyncontent">
  <div class="center">
   <img src="struct_orthogonal_camera.png" usemap="#OrthogonalCamera_map" alt=""/>
   <map id="OrthogonalCamera_map" name="OrthogonalCamera_map">
-<area href="struct_camera.html" alt="Camera" shape="rect" coords="0,0,119,24"/>
+<area href="struct_camera.html" title="Base class for camera models." alt="Camera" shape="rect" coords="0,0,119,24"/>
   </map>
 </div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ada7b6045ef5b38d8cb7841ffbfdacf73" id="r_ada7b6045ef5b38d8cb7841ffbfdacf73"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#ada7b6045ef5b38d8cb7841ffbfdacf73">OrthogonalCamera</a> (float aspect_ratio=1.0f, const <a class="el" href="struct_transformation.html">Transformation</a> &amp;trans=<a class="el" href="struct_transformation.html">Transformation</a>{})</td></tr>
+<tr class="memdesc:ada7b6045ef5b38d8cb7841ffbfdacf73"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct an orthogonal camera.  <br /></td></tr>
 <tr class="memitem:ab728d7a7863fb77d2ef9acea9fba91bb" id="r_ab728d7a7863fb77d2ef9acea9fba91bb"><td class="memItemLeft"><a class="el" href="struct_ray.html">Ray</a>&#160;</td><td class="memItemRight"><a class="el" href="#ab728d7a7863fb77d2ef9acea9fba91bb">fire_ray</a> (float u, float v) const override</td></tr>
+<tr class="memdesc:ab728d7a7863fb77d2ef9acea9fba91bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate a ray through a normalized image-plane position.  <br /></td></tr>
 <tr class="inherit_header pub_methods_struct_camera"><td colspan="2">Public Member Functions inherited from <a class="el" href="struct_camera.html">Camera</a></td></tr>
 <tr class="memitem:a30b28e673f0e4acda69ac8cefcd49acd pub_methods_struct_camera" id="r_a30b28e673f0e4acda69ac8cefcd49acd"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="struct_camera.html#a30b28e673f0e4acda69ac8cefcd49acd">Camera</a> (float aspect_ratio=1.0f, const <a class="el" href="struct_transformation.html">Transformation</a> &amp;trans=<a class="el" href="struct_transformation.html">Transformation</a>{})</td></tr>
+<tr class="memdesc:a30b28e673f0e4acda69ac8cefcd49acd pub_methods_struct_camera"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct a camera.  <br /></td></tr>
 <tr class="memitem:ad3ed0c5e02c46f73ba92673598e40514 pub_methods_struct_camera" id="r_ad3ed0c5e02c46f73ba92673598e40514"><td class="memItemLeft">virtual&#160;</td><td class="memItemRight"><a class="el" href="struct_camera.html#ad3ed0c5e02c46f73ba92673598e40514">~Camera</a> ()=default</td></tr>
+<tr class="memdesc:ad3ed0c5e02c46f73ba92673598e40514 pub_methods_struct_camera"><td class="mdescLeft">&#160;</td><td class="mdescRight">Virtual destructor.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-inherited" class="groupheader"><a id="inherited" name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
 <tr class="inherit_header pub_attribs_struct_camera"><td colspan="2">Public Attributes inherited from <a class="el" href="struct_camera.html">Camera</a></td></tr>
 <tr class="memitem:a5742c2c47c7afc5a6d49b6e5759db3cd pub_attribs_struct_camera" id="r_a5742c2c47c7afc5a6d49b6e5759db3cd"><td class="memItemLeft">float&#160;</td><td class="memItemRight"><a class="el" href="struct_camera.html#a5742c2c47c7afc5a6d49b6e5759db3cd">aspect_ratio</a></td></tr>
+<tr class="memdesc:a5742c2c47c7afc5a6d49b6e5759db3cd pub_attribs_struct_camera"><td class="mdescLeft">&#160;</td><td class="mdescRight">Image aspect ratio (width / height).  <br /></td></tr>
 <tr class="memitem:a71b93b9cc81697c205acc1619c2ba8bc pub_attribs_struct_camera" id="r_a71b93b9cc81697c205acc1619c2ba8bc"><td class="memItemLeft"><a class="el" href="struct_transformation.html">Transformation</a>&#160;</td><td class="memItemRight"><a class="el" href="struct_camera.html#a71b93b9cc81697c205acc1619c2ba8bc">trans</a></td></tr>
+<tr class="memdesc:a71b93b9cc81697c205acc1619c2ba8bc pub_attribs_struct_camera"><td class="mdescLeft">&#160;</td><td class="mdescRight">Camera-to-world transformation.  <br /></td></tr>
 </table>
-<a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Orthographic camera. </p>
+<p>Generates parallel rays orthogonal to the image plane. </p>
+</div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ada7b6045ef5b38d8cb7841ffbfdacf73" name="ada7b6045ef5b38d8cb7841ffbfdacf73"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ada7b6045ef5b38d8cb7841ffbfdacf73">&#9670;&#160;</a></span>OrthogonalCamera()</h2>
 
@@ -169,6 +181,15 @@ Additional Inherited Members</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Construct an orthogonal camera. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">aspect_ratio</td><td>Image aspect ratio. </td></tr>
+    <tr><td class="paramname">trans</td><td>Camera-to-world transformation. Defaults to identity. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -199,6 +220,17 @@ Additional Inherited Members</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Generate a ray through a normalized image-plane position. </p>
+<p>The coordinates (u,v) lie in the unit square [0,1] × [0,1].</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">u</td><td>Horizontal image coordinate. </td></tr>
+    <tr><td class="paramname">v</td><td>Vertical image coordinate.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Generated ray. </dd></dl>
 
 <p>Implements <a class="el" href="struct_camera.html#ab3f33a5da64a656530d91bc19e689dfe">Camera</a>.</p>
 

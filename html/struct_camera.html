@@ -118,29 +118,40 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('struct_camera.
   <div class="headertitle"><div class="title">Camera Struct Reference<span class="mlabels"><span class="mlabel abstract">abstract</span><span class="mlabel export">export</span></span><div class="ingroups">module <a class="el" href="module___camera.html">Camera</a></div></div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Base class for camera models.  
+ <a href="#details">More...</a></p>
 <div class="dynheader">
 Inheritance diagram for Camera:</div>
 <div class="dyncontent">
  <div class="center">
   <img src="struct_camera.png" usemap="#Camera_map" alt=""/>
   <map id="Camera_map" name="Camera_map">
-<area href="struct_orthogonal_camera.html" alt="OrthogonalCamera" shape="rect" coords="0,56,123,80"/>
-<area href="struct_perspective_camera.html" alt="PerspectiveCamera" shape="rect" coords="133,56,256,80"/>
+<area href="struct_orthogonal_camera.html" title="Orthographic camera." alt="OrthogonalCamera" shape="rect" coords="0,56,123,80"/>
+<area href="struct_perspective_camera.html" title="Perspective camera." alt="PerspectiveCamera" shape="rect" coords="133,56,256,80"/>
   </map>
 </div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a30b28e673f0e4acda69ac8cefcd49acd" id="r_a30b28e673f0e4acda69ac8cefcd49acd"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a30b28e673f0e4acda69ac8cefcd49acd">Camera</a> (float aspect_ratio=1.0f, const <a class="el" href="struct_transformation.html">Transformation</a> &amp;trans=<a class="el" href="struct_transformation.html">Transformation</a>{})</td></tr>
+<tr class="memdesc:a30b28e673f0e4acda69ac8cefcd49acd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct a camera.  <br /></td></tr>
 <tr class="memitem:ab3f33a5da64a656530d91bc19e689dfe" id="r_ab3f33a5da64a656530d91bc19e689dfe"><td class="memItemLeft">virtual <a class="el" href="struct_ray.html">Ray</a>&#160;</td><td class="memItemRight"><a class="el" href="#ab3f33a5da64a656530d91bc19e689dfe">fire_ray</a> (float u, float v) const =0</td></tr>
+<tr class="memdesc:ab3f33a5da64a656530d91bc19e689dfe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate a ray through a normalized image-plane position.  <br /></td></tr>
 <tr class="memitem:ad3ed0c5e02c46f73ba92673598e40514" id="r_ad3ed0c5e02c46f73ba92673598e40514"><td class="memItemLeft">virtual&#160;</td><td class="memItemRight"><a class="el" href="#ad3ed0c5e02c46f73ba92673598e40514">~Camera</a> ()=default</td></tr>
+<tr class="memdesc:ad3ed0c5e02c46f73ba92673598e40514"><td class="mdescLeft">&#160;</td><td class="mdescRight">Virtual destructor.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a5742c2c47c7afc5a6d49b6e5759db3cd" id="r_a5742c2c47c7afc5a6d49b6e5759db3cd"><td class="memItemLeft">float&#160;</td><td class="memItemRight"><a class="el" href="#a5742c2c47c7afc5a6d49b6e5759db3cd">aspect_ratio</a></td></tr>
+<tr class="memdesc:a5742c2c47c7afc5a6d49b6e5759db3cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Image aspect ratio (width / height).  <br /></td></tr>
 <tr class="memitem:a71b93b9cc81697c205acc1619c2ba8bc" id="r_a71b93b9cc81697c205acc1619c2ba8bc"><td class="memItemLeft"><a class="el" href="struct_transformation.html">Transformation</a>&#160;</td><td class="memItemRight"><a class="el" href="#a71b93b9cc81697c205acc1619c2ba8bc">trans</a></td></tr>
+<tr class="memdesc:a71b93b9cc81697c205acc1619c2ba8bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Camera-to-world transformation.  <br /></td></tr>
 </table>
-<a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Base class for camera models. </p>
+<p>Cameras generate rays passing through points on the image plane. The generated rays are expressed in camera space and then transformed into world space through the associated transformation. </p>
+</div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a30b28e673f0e4acda69ac8cefcd49acd" name="a30b28e673f0e4acda69ac8cefcd49acd"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a30b28e673f0e4acda69ac8cefcd49acd">&#9670;&#160;</a></span>Camera()</h2>
 
@@ -168,6 +179,15 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Construct a camera. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">aspect_ratio</td><td>Image aspect ratio. </td></tr>
+    <tr><td class="paramname">trans</td><td>Optional camera-to-world transformation. Defaults to the identity transformation. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="ad3ed0c5e02c46f73ba92673598e40514" name="ad3ed0c5e02c46f73ba92673598e40514"></a>
@@ -192,6 +212,8 @@ Public Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Virtual destructor. </p>
 
 </div>
 </div>
@@ -223,6 +245,17 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Generate a ray through a normalized image-plane position. </p>
+<p>The coordinates (u,v) lie in the unit square [0,1] × [0,1].</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">u</td><td>Horizontal image coordinate. </td></tr>
+    <tr><td class="paramname">v</td><td>Vertical image coordinate.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Generated ray. </dd></dl>
+
 <p>Implemented in <a class="el" href="struct_orthogonal_camera.html#ab728d7a7863fb77d2ef9acea9fba91bb">OrthogonalCamera</a>, and <a class="el" href="struct_perspective_camera.html#acf6c34191c3f0eb70693ec8f166c386d">PerspectiveCamera</a>.</p>
 
 </div>
@@ -240,6 +273,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Image aspect ratio (width / height). </p>
+
 </div>
 </div>
 <a id="a71b93b9cc81697c205acc1619c2ba8bc" name="a71b93b9cc81697c205acc1619c2ba8bc"></a>
@@ -253,6 +288,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Camera-to-world transformation. </p>
 
 </div>
 </div>

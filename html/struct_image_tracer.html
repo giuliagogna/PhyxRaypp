@@ -118,20 +118,31 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('struct_image_t
   <div class="headertitle"><div class="title">ImageTracer Struct Reference<span class="mlabels"><span class="mlabel export">export</span></span><div class="ingroups">module <a class="el" href="module___camera.html">Camera</a></div></div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Converts image pixels into camera rays.  
+ <a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ab998a0e30cfec7b5e195f0e2d59247f7" id="r_ab998a0e30cfec7b5e195f0e2d59247f7"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#ab998a0e30cfec7b5e195f0e2d59247f7">ImageTracer</a> (<a class="el" href="struct_h_d_r_image.html">HDRImage</a> &amp;frame, <a class="el" href="struct_camera.html">Camera</a> &amp;camera)</td></tr>
 <tr class="memitem:aeeea16c73c8e9c50c6ba3d235ac6c13d" id="r_aeeea16c73c8e9c50c6ba3d235ac6c13d"><td class="memItemLeft"><a class="el" href="struct_ray.html">Ray</a>&#160;</td><td class="memItemRight"><a class="el" href="#aeeea16c73c8e9c50c6ba3d235ac6c13d">fire_ray</a> (int row, int col, float u_pixel=0.5f, float v_pixel=0.5f) const</td></tr>
+<tr class="memdesc:aeeea16c73c8e9c50c6ba3d235ac6c13d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate the ray associated with a pixel.  <br /></td></tr>
 <tr class="memitem:a822fc5897328d8e6d5ccd66f2d0275f3" id="r_a822fc5897328d8e6d5ccd66f2d0275f3"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a822fc5897328d8e6d5ccd66f2d0275f3">fire_all_rays</a> (const std::function&lt; <a class="el" href="struct_color.html">Color</a>(const <a class="el" href="struct_ray.html">Ray</a> &amp;)&gt; &amp;func)</td></tr>
+<tr class="memdesc:a822fc5897328d8e6d5ccd66f2d0275f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Render the image using one sample per pixel.  <br /></td></tr>
 <tr class="memitem:a2f8e8c03ea9cbde035fda8e09014339f" id="r_a2f8e8c03ea9cbde035fda8e09014339f"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a2f8e8c03ea9cbde035fda8e09014339f">fire_all_rays</a> (const std::function&lt; <a class="el" href="struct_color.html">Color</a>(const <a class="el" href="struct_ray.html">Ray</a> &amp;)&gt; &amp;func, <a class="el" href="struct_p_c_g.html">PCG</a> &amp;pcg, int antialiasing_level=1)</td></tr>
+<tr class="memdesc:a2f8e8c03ea9cbde035fda8e09014339f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Render the image using stratified supersampling.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a1cf1505362530cc319674fd198b2e755" id="r_a1cf1505362530cc319674fd198b2e755"><td class="memItemLeft"><a class="el" href="struct_camera.html">Camera</a> &amp;&#160;</td><td class="memItemRight"><a class="el" href="#a1cf1505362530cc319674fd198b2e755">camera</a></td></tr>
+<tr class="memdesc:a1cf1505362530cc319674fd198b2e755"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="struct_camera.html" title="Base class for camera models.">Camera</a> used to generate rays.  <br /></td></tr>
 <tr class="memitem:a9bf3ff439fcfeb8d05e594912b09cdf8" id="r_a9bf3ff439fcfeb8d05e594912b09cdf8"><td class="memItemLeft"><a class="el" href="struct_h_d_r_image.html">HDRImage</a>&#160;</td><td class="memItemRight"><a class="el" href="#a9bf3ff439fcfeb8d05e594912b09cdf8">frame</a></td></tr>
+<tr class="memdesc:a9bf3ff439fcfeb8d05e594912b09cdf8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Output image.  <br /></td></tr>
 </table>
-<a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Converts image pixels into camera rays. </p>
+<p>The <a class="el" href="struct_image_tracer.html" title="Converts image pixels into camera rays.">ImageTracer</a> maps pixel coordinates to image-plane coordinates, generates the corresponding camera rays, and stores the computed colors in the output image. </p>
+</div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ab998a0e30cfec7b5e195f0e2d59247f7" name="ab998a0e30cfec7b5e195f0e2d59247f7"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab998a0e30cfec7b5e195f0e2d59247f7">&#9670;&#160;</a></span>ImageTracer()</h2>
 
@@ -177,6 +188,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Render the image using one sample per pixel. </p>
+<p>The supplied function evaluates the color associated with each ray. </p>
+
 </div>
 </div>
 <a id="a2f8e8c03ea9cbde035fda8e09014339f" name="a2f8e8c03ea9cbde035fda8e09014339f"></a>
@@ -202,6 +216,17 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Render the image using stratified supersampling. </p>
+<p>Multiple rays are generated per pixel and their contributions are averaged to reduce aliasing artifacts (e.g. Moiré fringes).</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">func</td><td>Rendering function. </td></tr>
+    <tr><td class="paramname">pcg</td><td>Random number generator. </td></tr>
+    <tr><td class="paramname">antialiasing_level</td><td>Number of subdivisions per pixel axis. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -242,6 +267,19 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Generate the ray associated with a pixel. </p>
+<p>Subpixel offsets can be specified for anti-aliasing and stochastic sampling.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">row</td><td>Pixel row. </td></tr>
+    <tr><td class="paramname">col</td><td>Pixel column. </td></tr>
+    <tr><td class="paramname">u_pixel</td><td>Horizontal subpixel offset. </td></tr>
+    <tr><td class="paramname">v_pixel</td><td>Vertical subpixel offset.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Generated ray. </dd></dl>
+
 </div>
 </div>
 <a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
@@ -257,6 +295,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p><a class="el" href="struct_camera.html" title="Base class for camera models.">Camera</a> used to generate rays. </p>
+
 </div>
 </div>
 <a id="a9bf3ff439fcfeb8d05e594912b09cdf8" name="a9bf3ff439fcfeb8d05e594912b09cdf8"></a>
@@ -270,6 +310,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Output image. </p>
 
 </div>
 </div>

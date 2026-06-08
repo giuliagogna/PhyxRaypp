@@ -118,22 +118,36 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('struct_ray.htm
   <div class="headertitle"><div class="title">Ray Struct Reference<span class="mlabels"><span class="mlabel export">export</span></span><div class="ingroups">module <a class="el" href="module___camera.html">Camera</a></div></div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><a class="el" href="struct_ray.html" title="Ray used for visibility and light transport queries.">Ray</a> used for visibility and light transport queries.  
+ <a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a1974e01019be41f3f425d31d5edf61bb" id="r_a1974e01019be41f3f425d31d5edf61bb"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a1974e01019be41f3f425d31d5edf61bb">is_close</a> (const <a class="el" href="struct_ray.html">Ray</a> &amp;other_ray, float tolerance=1e-5f) const</td></tr>
+<tr class="memdesc:a1974e01019be41f3f425d31d5edf61bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compare two rays within a tolerance.  <br /></td></tr>
 <tr class="memitem:a7c5c0fe406c1905af428929cca11206f" id="r_a7c5c0fe406c1905af428929cca11206f"><td class="memItemLeft"><a class="el" href="struct_point.html">Point</a>&#160;</td><td class="memItemRight"><a class="el" href="#a7c5c0fe406c1905af428929cca11206f">at</a> (float t) const</td></tr>
+<tr class="memdesc:a7c5c0fe406c1905af428929cca11206f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate a point along the ray.  <br /></td></tr>
 <tr class="memitem:a67d20c58e1fa7ba4573545113eb091ec" id="r_a67d20c58e1fa7ba4573545113eb091ec"><td class="memItemLeft"><a class="el" href="struct_ray.html">Ray</a>&#160;</td><td class="memItemRight"><a class="el" href="#a67d20c58e1fa7ba4573545113eb091ec">transform</a> (const <a class="el" href="struct_transformation.html">Transformation</a> &amp;trans) const</td></tr>
+<tr class="memdesc:a67d20c58e1fa7ba4573545113eb091ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply a geometric transformation to the ray.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a57c8d5214c2cf378dea72f07c0c54c35" id="r_a57c8d5214c2cf378dea72f07c0c54c35"><td class="memItemLeft"><a class="el" href="struct_point.html">Point</a>&#160;</td><td class="memItemRight"><a class="el" href="#a57c8d5214c2cf378dea72f07c0c54c35">origin</a> {0.0f, 0.0f, 0.0f}</td></tr>
+<tr class="memdesc:a57c8d5214c2cf378dea72f07c0c54c35"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="struct_ray.html" title="Ray used for visibility and light transport queries.">Ray</a> origin.  <br /></td></tr>
 <tr class="memitem:a454a25327b7741a9b8683ba8bc1ebc3b" id="r_a454a25327b7741a9b8683ba8bc1ebc3b"><td class="memItemLeft"><a class="el" href="struct_vec.html">Vec</a>&#160;</td><td class="memItemRight"><a class="el" href="#a454a25327b7741a9b8683ba8bc1ebc3b">direction</a> {0.0f, 0.0f, 0.0f}</td></tr>
+<tr class="memdesc:a454a25327b7741a9b8683ba8bc1ebc3b"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="struct_ray.html" title="Ray used for visibility and light transport queries.">Ray</a> direction.  <br /></td></tr>
 <tr class="memitem:a6a0a2346b82854fa203552c200bc654f" id="r_a6a0a2346b82854fa203552c200bc654f"><td class="memItemLeft">float&#160;</td><td class="memItemRight"><a class="el" href="#a6a0a2346b82854fa203552c200bc654f">tmin</a> {1e-5f}</td></tr>
+<tr class="memdesc:a6a0a2346b82854fa203552c200bc654f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum valid ray parameter.  <br /></td></tr>
 <tr class="memitem:a603b9ffee3760225c80b13eaf30c5441" id="r_a603b9ffee3760225c80b13eaf30c5441"><td class="memItemLeft">float&#160;</td><td class="memItemRight"><a class="el" href="#a603b9ffee3760225c80b13eaf30c5441">tmax</a> {std::numeric_limits&lt;float&gt;::infinity()}</td></tr>
+<tr class="memdesc:a603b9ffee3760225c80b13eaf30c5441"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum valid ray parameter.  <br /></td></tr>
 <tr class="memitem:ae50cf8ba7ff9a8d640dfc508d4826412" id="r_ae50cf8ba7ff9a8d640dfc508d4826412"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ae50cf8ba7ff9a8d640dfc508d4826412">depth</a> {0}</td></tr>
+<tr class="memdesc:ae50cf8ba7ff9a8d640dfc508d4826412"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of bounces undergone by the ray.  <br /></td></tr>
 </table>
-<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p><a class="el" href="struct_ray.html" title="Ray used for visibility and light transport queries.">Ray</a> used for visibility and light transport queries. </p>
+<p>A ray is defined by an origin, a direction, and a valid parameter interval [tmin, tmax]. </p>
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
 <a id="a7c5c0fe406c1905af428929cca11206f" name="a7c5c0fe406c1905af428929cca11206f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7c5c0fe406c1905af428929cca11206f">&#9670;&#160;</a></span>at()</h2>
 
@@ -156,6 +170,16 @@ Public Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Evaluate a point along the ray. </p>
+<p>Computes: origin + t * direction</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">t</td><td><a class="el" href="struct_ray.html" title="Ray used for visibility and light transport queries.">Ray</a> parameter. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="struct_point.html" title="3D position in space.">Point</a> located at parameter t. </dd></dl>
 
 </div>
 </div>
@@ -186,6 +210,8 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Compare two rays within a tolerance. </p>
+
 </div>
 </div>
 <a id="a67d20c58e1fa7ba4573545113eb091ec" name="a67d20c58e1fa7ba4573545113eb091ec"></a>
@@ -203,6 +229,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Apply a geometric transformation to the ray. </p>
+
 </div>
 </div>
 <a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
@@ -218,6 +246,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Number of bounces undergone by the ray. </p>
+
 </div>
 </div>
 <a id="a454a25327b7741a9b8683ba8bc1ebc3b" name="a454a25327b7741a9b8683ba8bc1ebc3b"></a>
@@ -231,6 +261,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p><a class="el" href="struct_ray.html" title="Ray used for visibility and light transport queries.">Ray</a> direction. </p>
 
 </div>
 </div>
@@ -246,6 +278,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p><a class="el" href="struct_ray.html" title="Ray used for visibility and light transport queries.">Ray</a> origin. </p>
+
 </div>
 </div>
 <a id="a603b9ffee3760225c80b13eaf30c5441" name="a603b9ffee3760225c80b13eaf30c5441"></a>
@@ -260,6 +294,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Maximum valid ray parameter. </p>
+
 </div>
 </div>
 <a id="a6a0a2346b82854fa203552c200bc654f" name="a6a0a2346b82854fa203552c200bc654f"></a>
@@ -273,6 +309,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Minimum valid ray parameter. </p>
 
 </div>
 </div>
