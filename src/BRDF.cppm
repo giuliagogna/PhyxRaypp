@@ -38,6 +38,8 @@ export struct BRDF {
         Normal normal,
         int depth
         ) = 0;
+
+    virtual ~BRDF() = default;
 };
 
 // Pure isotropic diffusion BRDF
