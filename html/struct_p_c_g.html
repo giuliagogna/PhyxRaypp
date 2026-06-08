@@ -118,19 +118,30 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('struct_p_c_g.h
   <div class="headertitle"><div class="title">PCG Struct Reference<span class="mlabels"><span class="mlabel export">export</span></span><div class="ingroups">module <a class="el" href="module___p_c_g.html">PCG</a></div></div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>PCG-based pseudo-random number generator.  
+ <a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:aa93107967930917db3f4b3606ab80485" id="r_aa93107967930917db3f4b3606ab80485"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#aa93107967930917db3f4b3606ab80485">PCG</a> (std::uint64_t init_state=42, std::uint64_t init_seq=54)</td></tr>
+<tr class="memdesc:aa93107967930917db3f4b3606ab80485"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct a generator with the given seed and sequence.  <br /></td></tr>
 <tr class="memitem:abfa201c997e8d01d01466d3bc1f38a97" id="r_abfa201c997e8d01d01466d3bc1f38a97"><td class="memItemLeft">std::uint32_t&#160;</td><td class="memItemRight"><a class="el" href="#abfa201c997e8d01d01466d3bc1f38a97">random</a> ()</td></tr>
+<tr class="memdesc:abfa201c997e8d01d01466d3bc1f38a97"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate a uniformly distributed 32-bit integer.  <br /></td></tr>
 <tr class="memitem:ab8e8708261f5c877928dc20dc734c165" id="r_ab8e8708261f5c877928dc20dc734c165"><td class="memItemLeft">float&#160;</td><td class="memItemRight"><a class="el" href="#ab8e8708261f5c877928dc20dc734c165">random_float</a> ()</td></tr>
+<tr class="memdesc:ab8e8708261f5c877928dc20dc734c165"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate a uniformly distributed float in [0,1).  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a23d60c27dd35c02878ecb8bf0516e37a" id="r_a23d60c27dd35c02878ecb8bf0516e37a"><td class="memItemLeft">std::uint64_t&#160;</td><td class="memItemRight"><a class="el" href="#a23d60c27dd35c02878ecb8bf0516e37a">state</a></td></tr>
+<tr class="memdesc:a23d60c27dd35c02878ecb8bf0516e37a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Internal generator state.  <br /></td></tr>
 <tr class="memitem:a9c1ace8b63a193e17d6989d1d31cbcb0" id="r_a9c1ace8b63a193e17d6989d1d31cbcb0"><td class="memItemLeft">std::uint64_t&#160;</td><td class="memItemRight"><a class="el" href="#a9c1ace8b63a193e17d6989d1d31cbcb0">inc</a></td></tr>
+<tr class="memdesc:a9c1ace8b63a193e17d6989d1d31cbcb0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stream selector used to generate independent sequences.  <br /></td></tr>
 </table>
-<a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>PCG-based pseudo-random number generator. </p>
+<p>Generates uniformly distributed 32-bit integers and floating-point values in the interval [0,1). </p>
+</div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="aa93107967930917db3f4b3606ab80485" name="aa93107967930917db3f4b3606ab80485"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa93107967930917db3f4b3606ab80485">&#9670;&#160;</a></span>PCG()</h2>
 
@@ -158,6 +169,16 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Construct a generator with the given seed and sequence. </p>
+<p>Different sequence values produce independent random streams.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">init_state</td><td>Initial seed value. </td></tr>
+    <tr><td class="paramname">init_seq</td><td>Sequence identifier. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
@@ -184,6 +205,9 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Generate a uniformly distributed 32-bit integer. </p>
+<dl class="section return"><dt>Returns</dt><dd>Random unsigned integer. </dd></dl>
+
 </div>
 </div>
 <a id="ab8e8708261f5c877928dc20dc734c165" name="ab8e8708261f5c877928dc20dc734c165"></a>
@@ -209,6 +233,9 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Generate a uniformly distributed float in [0,1). </p>
+<dl class="section return"><dt>Returns</dt><dd>Random floating-point value. </dd></dl>
+
 </div>
 </div>
 <a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
@@ -224,6 +251,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Stream selector used to generate independent sequences. </p>
+
 </div>
 </div>
 <a id="a23d60c27dd35c02878ecb8bf0516e37a" name="a23d60c27dd35c02878ecb8bf0516e37a"></a>
@@ -237,6 +266,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Internal generator state. </p>
 
 </div>
 </div>
