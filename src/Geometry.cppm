@@ -17,20 +17,18 @@
 
 module;
 
-//#include <format>
-
 export module Geometry;
 
 import auxiliary_functions;
 import std;
 
-// 2D vector (used in Shapes.cppm for parametrized coordinates (u, v))
+/// @brief 2D vector (used in Shapes.cppm for parametrized coordinates (u, v))
 export struct Vec2D {
     float u{0.0f}, v{0.0f};
     bool is_close(const Vec2D& other, float epsilon = 1e-5f) const;
 };
 
-// Normalized 3D vector, used for normals (and directions???)
+/// @brief Normalized 3D vector (indicate directions in space)
 export struct Normal {
     float x{0.0f}, y{0.0f}, z{0.0f};
 
@@ -42,22 +40,21 @@ export struct Normal {
     bool is_close(const Normal& other, float epsilon = 1e-5f) const; // Check if two Normals are close enough
 };
 
-// 3D vector, used for distances (and directions???)
+/// @brief 3D vector (indicate oriented displacement)
 export struct Vec {
     float x{0.0f}, y{0.0f}, z{0.0f};
 
-    Normal to_norm() const; // 
-    Vec normalize() const; // normalizes and returns a Vec
+    Normal to_norm() const; // Normalizes a Vec and returns a Norm object
+    Vec normalize() const;  // normalizes and returns a Vec
 
     // Compute length and length square
     float norm() const;
     float norm2() const;
 
-    // GG: Check if two vectors are close enough: written as a method as suggested in the lecture slides
     bool is_close(const Vec& other, float epsilon = 1e-5f) const;
 };
 
-// 3D point, used for positions
+/// @brief 3D point, used for positions
 export struct Point {
     float x{0.0}, y{0.0}, z{0.0};
     Vec to_vec() const;
@@ -65,30 +62,29 @@ export struct Point {
     bool is_close(const Point& other, float epsilon = 1e-5f) const;
 };
 
-// Data structure to store a 4x4 matricial like dataset, used for homogeneous transformations
+/// @brief Data structure to store a 4x4 matricial like dataset, used for homogeneous transformations
+/// This is only the basic object that stores a 4x4 Homogeneous Matrix (inverse matrix
+/// and consistency checks are implemented inside Transformation struct)
 export struct HomMatrix {
-    // GG: This is only the basic object that stores a 4x4 Homogeneous Matrix (inverse matrix
-    // and consistency checks will be implemented inside Transformation struct)
     std::array<float, 16> mat = {1.0f, 0.0f, 0.0f, 0.0f,
                                  0.0f, 1.0f, 0.0f, 0.0f,
                                  0.0f, 0.0f, 1.0f, 0.0f,
                                  0.0f, 0.0f, 0.0f, 1.0f};
 
-    // GG: checks if two matrixes are equal
     bool is_close(const HomMatrix& other, float epsilon = 1e-5f) const;
 };
 
+/// @brief Data structure to store transformations.
+/// It stores the direct matrix of the transformation and its inverse: when applying transformation to a
+/// Point or Vec one should use the direct matrix.
+/// One often wants to apply the inverse transformation: to do so  we implement a method
+/// `inverse()` that simply  switches the two matrixes, so that now the inverse is the direct and vice-versa.
 export struct Transformation {
     HomMatrix m;
     HomMatrix invm;
 
     bool is_consistent() const;
 
-    // Method to apply the inverse transformation
-    // GG: Note that when we apply transformation to a Point or Vec we use the direct matrix.
-    //     As pointed out in lecture, we often want to apply the inverse transformation: to do so
-    //     we implement a method that simply switches the two matrixes, so that now the inverse is
-    //     the direct and vice-versa
     Transformation inverse() const;
 };
 
