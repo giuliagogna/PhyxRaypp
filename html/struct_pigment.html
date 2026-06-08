@@ -118,24 +118,33 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('struct_pigment
   <div class="headertitle"><div class="title">Pigment Struct Reference<span class="mlabels"><span class="mlabel abstract">abstract</span><span class="mlabel export">export</span></span><div class="ingroups">module <a class="el" href="module___pigment.html">Pigment</a></div></div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Base class for surface pigments.  
+ <a href="#details">More...</a></p>
 <div class="dynheader">
 Inheritance diagram for Pigment:</div>
 <div class="dyncontent">
  <div class="center">
   <img src="struct_pigment.png" usemap="#Pigment_map" alt=""/>
   <map id="Pigment_map" name="Pigment_map">
-<area href="struct_checkered_pigment.html" alt="CheckeredPigment" shape="rect" coords="0,56,118,80"/>
-<area href="struct_image_pigment.html" alt="ImagePigment" shape="rect" coords="128,56,246,80"/>
-<area href="struct_uniform_pigment.html" alt="UniformPigment" shape="rect" coords="256,56,374,80"/>
+<area href="struct_checkered_pigment.html" title="Checkerboard pigment." alt="CheckeredPigment" shape="rect" coords="0,56,118,80"/>
+<area href="struct_image_pigment.html" title="Image-based pigment." alt="ImagePigment" shape="rect" coords="128,56,246,80"/>
+<area href="struct_uniform_pigment.html" title="Pigment with a constant color." alt="UniformPigment" shape="rect" coords="256,56,374,80"/>
   </map>
 </div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a98580eb1b1fe6b7221a78ce50fcddcf9" id="r_a98580eb1b1fe6b7221a78ce50fcddcf9"><td class="memItemLeft">virtual&#160;</td><td class="memItemRight"><a class="el" href="#a98580eb1b1fe6b7221a78ce50fcddcf9">~Pigment</a> ()=default</td></tr>
+<tr class="memdesc:a98580eb1b1fe6b7221a78ce50fcddcf9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Virtual destructor.  <br /></td></tr>
 <tr class="memitem:a71cd488c4b4012005ff9ea39d2f6a389" id="r_a71cd488c4b4012005ff9ea39d2f6a389"><td class="memItemLeft">virtual <a class="el" href="struct_color.html">Color</a>&#160;</td><td class="memItemRight"><a class="el" href="#a71cd488c4b4012005ff9ea39d2f6a389">get_color</a> (const <a class="el" href="struct_vec2_d.html">Vec2D</a> &amp;surface_params) const =0</td></tr>
+<tr class="memdesc:a71cd488c4b4012005ff9ea39d2f6a389"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate the pigment at a surface location.  <br /></td></tr>
 </table>
-<a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Base class for surface pigments. </p>
+<p>A pigment defines how color varies across a surface as a function of its parametric coordinates (u,v).</p>
+<p>Pigments can be constant, procedural, or image-based. </p>
+</div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a98580eb1b1fe6b7221a78ce50fcddcf9" name="a98580eb1b1fe6b7221a78ce50fcddcf9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a98580eb1b1fe6b7221a78ce50fcddcf9">&#9670;&#160;</a></span>~Pigment()</h2>
 
@@ -158,6 +167,8 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Virtual destructor. </p>
 
 </div>
 </div>
@@ -184,6 +195,15 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Evaluate the pigment at a surface location. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">surface_params</td><td>Surface parametric coordinates (u,v). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="struct_color.html" title="RGB color.">Color</a> associated with the specified coordinates. </dd></dl>
 
 <p>Implemented in <a class="el" href="struct_checkered_pigment.html#aa22b8993ca89550243014b6c05877347">CheckeredPigment</a>, <a class="el" href="struct_image_pigment.html#afd4406c141dae82149cfadf5ce57b880">ImagePigment</a>, and <a class="el" href="struct_uniform_pigment.html#afe04d105ea4b03d644a0585825e64467">UniformPigment</a>.</p>
 

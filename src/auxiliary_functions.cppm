@@ -93,7 +93,7 @@ export namespace aux {
 
         return stream;
     }
-    
+
     /**
      * @brief Open an output file in binary mode.
      *

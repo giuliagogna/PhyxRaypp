@@ -118,28 +118,38 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('struct_image_p
   <div class="headertitle"><div class="title">ImagePigment Struct Reference<span class="mlabels"><span class="mlabel export">export</span></span><div class="ingroups">module <a class="el" href="module___pigment.html">Pigment</a></div></div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Image-based pigment.  
+ <a href="#details">More...</a></p>
 <div class="dynheader">
 Inheritance diagram for ImagePigment:</div>
 <div class="dyncontent">
  <div class="center">
   <img src="struct_image_pigment.png" usemap="#ImagePigment_map" alt=""/>
   <map id="ImagePigment_map" name="ImagePigment_map">
-<area href="struct_pigment.html" alt="Pigment" shape="rect" coords="0,0,89,24"/>
+<area href="struct_pigment.html" title="Base class for surface pigments." alt="Pigment" shape="rect" coords="0,0,89,24"/>
   </map>
 </div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a52b8be2186e9caa10cc755f7d33ce17d" id="r_a52b8be2186e9caa10cc755f7d33ce17d"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a52b8be2186e9caa10cc755f7d33ce17d">ImagePigment</a> (const <a class="el" href="struct_h_d_r_image.html">HDRImage</a> &amp;image)</td></tr>
+<tr class="memdesc:a52b8be2186e9caa10cc755f7d33ce17d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct a pigment from an image texture.  <br /></td></tr>
 <tr class="memitem:afd4406c141dae82149cfadf5ce57b880" id="r_afd4406c141dae82149cfadf5ce57b880"><td class="memItemLeft"><a class="el" href="struct_color.html">Color</a>&#160;</td><td class="memItemRight"><a class="el" href="#afd4406c141dae82149cfadf5ce57b880">get_color</a> (const <a class="el" href="struct_vec2_d.html">Vec2D</a> &amp;surface_params) const override</td></tr>
+<tr class="memdesc:afd4406c141dae82149cfadf5ce57b880"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate the pigment at a surface location.  <br /></td></tr>
 <tr class="inherit_header pub_methods_struct_pigment"><td colspan="2">Public Member Functions inherited from <a class="el" href="struct_pigment.html">Pigment</a></td></tr>
 <tr class="memitem:a98580eb1b1fe6b7221a78ce50fcddcf9 pub_methods_struct_pigment" id="r_a98580eb1b1fe6b7221a78ce50fcddcf9"><td class="memItemLeft">virtual&#160;</td><td class="memItemRight"><a class="el" href="struct_pigment.html#a98580eb1b1fe6b7221a78ce50fcddcf9">~Pigment</a> ()=default</td></tr>
+<tr class="memdesc:a98580eb1b1fe6b7221a78ce50fcddcf9 pub_methods_struct_pigment"><td class="mdescLeft">&#160;</td><td class="mdescRight">Virtual destructor.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a5855d17cadcdd70aba8ce91e730270ea" id="r_a5855d17cadcdd70aba8ce91e730270ea"><td class="memItemLeft"><a class="el" href="struct_h_d_r_image.html">HDRImage</a>&#160;</td><td class="memItemRight"><a class="el" href="#a5855d17cadcdd70aba8ce91e730270ea">image</a></td></tr>
+<tr class="memdesc:a5855d17cadcdd70aba8ce91e730270ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Texture image.  <br /></td></tr>
 </table>
-<a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Image-based pigment. </p>
+<p>Samples colors from an image using surface coordinates. </p>
+</div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a52b8be2186e9caa10cc755f7d33ce17d" name="a52b8be2186e9caa10cc755f7d33ce17d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a52b8be2186e9caa10cc755f7d33ce17d">&#9670;&#160;</a></span>ImagePigment()</h2>
 
@@ -162,6 +172,8 @@ Public Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Construct a pigment from an image texture. </p>
 
 </div>
 </div>
@@ -189,6 +201,15 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Evaluate the pigment at a surface location. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">surface_params</td><td>Surface parametric coordinates (u,v). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="struct_color.html" title="RGB color.">Color</a> associated with the specified coordinates. </dd></dl>
+
 <p>Implements <a class="el" href="struct_pigment.html#a71cd488c4b4012005ff9ea39d2f6a389">Pigment</a>.</p>
 
 </div>
@@ -205,6 +226,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Texture image. </p>
 
 </div>
 </div>

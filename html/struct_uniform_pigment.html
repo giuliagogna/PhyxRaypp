@@ -118,28 +118,38 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('struct_uniform
   <div class="headertitle"><div class="title">UniformPigment Struct Reference<span class="mlabels"><span class="mlabel export">export</span></span><div class="ingroups">module <a class="el" href="module___pigment.html">Pigment</a></div></div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><a class="el" href="struct_pigment.html" title="Base class for surface pigments.">Pigment</a> with a constant color.  
+ <a href="#details">More...</a></p>
 <div class="dynheader">
 Inheritance diagram for UniformPigment:</div>
 <div class="dyncontent">
  <div class="center">
   <img src="struct_uniform_pigment.png" usemap="#UniformPigment_map" alt=""/>
   <map id="UniformPigment_map" name="UniformPigment_map">
-<area href="struct_pigment.html" alt="Pigment" shape="rect" coords="0,0,99,24"/>
+<area href="struct_pigment.html" title="Base class for surface pigments." alt="Pigment" shape="rect" coords="0,0,99,24"/>
   </map>
 </div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a282b82af7335e20cbc98c1eca3bc1a9b" id="r_a282b82af7335e20cbc98c1eca3bc1a9b"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a282b82af7335e20cbc98c1eca3bc1a9b">UniformPigment</a> (const <a class="el" href="struct_color.html">Color</a> &amp;c)</td></tr>
+<tr class="memdesc:a282b82af7335e20cbc98c1eca3bc1a9b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct a uniform pigment.  <br /></td></tr>
 <tr class="memitem:afe04d105ea4b03d644a0585825e64467" id="r_afe04d105ea4b03d644a0585825e64467"><td class="memItemLeft"><a class="el" href="struct_color.html">Color</a>&#160;</td><td class="memItemRight"><a class="el" href="#afe04d105ea4b03d644a0585825e64467">get_color</a> (const <a class="el" href="struct_vec2_d.html">Vec2D</a> &amp;surface_params) const override</td></tr>
+<tr class="memdesc:afe04d105ea4b03d644a0585825e64467"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate the pigment at a surface location.  <br /></td></tr>
 <tr class="inherit_header pub_methods_struct_pigment"><td colspan="2">Public Member Functions inherited from <a class="el" href="struct_pigment.html">Pigment</a></td></tr>
 <tr class="memitem:a98580eb1b1fe6b7221a78ce50fcddcf9 pub_methods_struct_pigment" id="r_a98580eb1b1fe6b7221a78ce50fcddcf9"><td class="memItemLeft">virtual&#160;</td><td class="memItemRight"><a class="el" href="struct_pigment.html#a98580eb1b1fe6b7221a78ce50fcddcf9">~Pigment</a> ()=default</td></tr>
+<tr class="memdesc:a98580eb1b1fe6b7221a78ce50fcddcf9 pub_methods_struct_pigment"><td class="mdescLeft">&#160;</td><td class="mdescRight">Virtual destructor.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a96d11b7b12b62d319ca0b16e3990369e" id="r_a96d11b7b12b62d319ca0b16e3990369e"><td class="memItemLeft"><a class="el" href="struct_color.html">Color</a>&#160;</td><td class="memItemRight"><a class="el" href="#a96d11b7b12b62d319ca0b16e3990369e">color</a></td></tr>
+<tr class="memdesc:a96d11b7b12b62d319ca0b16e3990369e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constant pigment color.  <br /></td></tr>
 </table>
-<a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p><a class="el" href="struct_pigment.html" title="Base class for surface pigments.">Pigment</a> with a constant color. </p>
+<p>Returns the same color regardless of surface coordinates. </p>
+</div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a282b82af7335e20cbc98c1eca3bc1a9b" name="a282b82af7335e20cbc98c1eca3bc1a9b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a282b82af7335e20cbc98c1eca3bc1a9b">&#9670;&#160;</a></span>UniformPigment()</h2>
 
@@ -162,6 +172,8 @@ Public Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Construct a uniform pigment. </p>
 
 </div>
 </div>
@@ -189,6 +201,15 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Evaluate the pigment at a surface location. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">surface_params</td><td>Surface parametric coordinates (u,v). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="struct_color.html" title="RGB color.">Color</a> associated with the specified coordinates. </dd></dl>
+
 <p>Implements <a class="el" href="struct_pigment.html#a71cd488c4b4012005ff9ea39d2f6a389">Pigment</a>.</p>
 
 </div>
@@ -205,6 +226,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Constant pigment color. </p>
 
 </div>
 </div>

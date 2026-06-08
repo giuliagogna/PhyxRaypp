@@ -15,6 +15,13 @@
  * limitations under the Licence.
  */
 
+/**
+ * @file Pigment.cppm
+ * @brief Surface color sources used by materials.
+ *
+ * This module defines pigments, which map surface coordinates
+ * to colors and are used by materials and BRDFs.
+ */
 
 module;
 
@@ -24,34 +31,77 @@ import Color;
 import Geometry;
 import HDRImage;
 
+/**
+ * @brief Base class for surface pigments.
+ *
+ * A pigment defines how color varies across a surface as a function
+ * of its parametric coordinates (u,v).
+ *
+ * Pigments can be constant, procedural, or image-based.
+ */
 export struct Pigment {
+    /// Virtual destructor
     virtual ~Pigment() = default;
+
+    /**
+     * @brief Evaluate the pigment at a surface location.
+     *
+     * @param surface_params Surface parametric coordinates (u,v).
+     * @return Color associated with the specified coordinates.
+     */
     [[nodiscard]] virtual Color get_color(const Vec2D& surface_params) const = 0;
 };
 
+/**
+ * @brief Pigment with a constant color.
+ *
+ * Returns the same color regardless of surface coordinates.
+ */
 export struct UniformPigment : Pigment {
+
+    /// Constant pigment color.
     Color color;
 
+    /// Construct a uniform pigment.
     UniformPigment(const Color& c) : color{c} {};
 
     [[nodiscard]] Color get_color(const Vec2D& surface_params) const override {
-        return color; // ignore the (u, v) coordinates, color is the same everywhere
+        return color;     // Ignore surface coordinates: the color is constant.
     }
 };
 
+/**
+ * @brief Checkerboard pigment.
+ *
+ * Alternates two colors over a regular grid in texture space.
+ */
 export struct CheckeredPigment : Pigment {
-    Color color1;
-    Color color2;
-    int num_steps; // Defines number of subdivisions in the grid
 
+    /// First checkerboard color.
+    Color color1;
+
+    /// Second checkerboard color.
+    Color color2;
+
+    /// Number of subdivisions along each texture axis.
+    int num_steps;
+
+    /**
+     * @brief Construct a checkerboard pigment.
+     *
+     * @param color1 First color.
+     * @param color2 Second color.
+     * @param num_steps Number of grid subdivisions.
+     */
     CheckeredPigment(const Color& color1, const Color& color2, int num_steps) : color1{color1}, color2{color2}, num_steps {num_steps} {};
 
     [[nodiscard]] Color get_color(const Vec2D& surface_params) const override {
-        // Scale the (u, v) coordinates to find the coordinates in the grid cell
+
+        // Determine the checkerboard cell containing (u,v).
         int row = static_cast<int>(std::floor(surface_params.u * num_steps));
         int col = static_cast<int>(std::floor(surface_params.v * num_steps));
 
-        // If row and col are both even or odd give a color, otherwise give the other
+        // Alternate colors between neighboring cells.
         if (std::abs(row%2) == std::abs(col%2)) {
             return color1;
         } else {
@@ -60,15 +110,26 @@ export struct CheckeredPigment : Pigment {
     }
 };
 
+/**
+ * @brief Image-based pigment.
+ *
+ * Samples colors from an image using surface coordinates.
+ */
 export struct ImagePigment : Pigment {
+
+    /// Texture image
     HDRImage image;
 
+    /// Construct a pigment from an image texture.
     ImagePigment(const HDRImage& image) : image{image} {};
 
     [[nodiscard]] Color get_color(const Vec2D& surface_params) const override {
+
+        // Convert normalized texture coordinates to image pixels.
         int col = static_cast<int>(surface_params.u * image.width);
         int row = static_cast<int>(surface_params.v * image.height);
 
+        // Clamp coordinates to the image boundaries.
         col = std::clamp(col, 0, image.width - 1);
         row = std::clamp(row, 0, image.height - 1);
 
