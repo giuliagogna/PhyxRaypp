@@ -118,16 +118,25 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('namespaceaux.h
   <div class="headertitle"><div class="title">aux Namespace Reference<span class="mlabels"><span class="mlabel export">export</span></span></div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Auxiliary utility functions.  
+<a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:a7ae3305517f14bdf1a6dcd9a390f23c2" id="r_a7ae3305517f14bdf1a6dcd9a390f23c2"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a7ae3305517f14bdf1a6dcd9a390f23c2">are_close</a> (float x, float y, float tolerance=1e-5f)</td></tr>
+<tr class="memdesc:a7ae3305517f14bdf1a6dcd9a390f23c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compare two floating-point values within a tolerance.  <br /></td></tr>
 <tr class="memitem:a83e9f034d53d052434baa275aa15716b" id="r_a83e9f034d53d052434baa275aa15716b"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
 <tr class="memitem:a83e9f034d53d052434baa275aa15716b template"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a83e9f034d53d052434baa275aa15716b">are_xyz_close</a> (const T &amp;a, const T &amp;b, float epsilon=1e-5f)</td></tr>
+<tr class="memdesc:a83e9f034d53d052434baa275aa15716b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compare two 3D objects component-wise.  <br /></td></tr>
 <tr class="memitem:a4ec0cac7679a71244ca6fe61e59e1b8c" id="r_a4ec0cac7679a71244ca6fe61e59e1b8c"><td class="memItemLeft">std::expected&lt; std::ifstream, std::string &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a4ec0cac7679a71244ca6fe61e59e1b8c">open_input_file</a> (const std::string &amp;filename)</td></tr>
+<tr class="memdesc:a4ec0cac7679a71244ca6fe61e59e1b8c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Open an input file in binary mode.  <br /></td></tr>
 <tr class="memitem:a79e8d4f94dcd15eeafd334a06415e13e" id="r_a79e8d4f94dcd15eeafd334a06415e13e"><td class="memItemLeft">std::expected&lt; std::ofstream, std::string &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a79e8d4f94dcd15eeafd334a06415e13e">open_output_file</a> (const std::string &amp;filename)</td></tr>
+<tr class="memdesc:a79e8d4f94dcd15eeafd334a06415e13e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Open an output file in binary mode.  <br /></td></tr>
 </table>
-<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Auxiliary utility functions. </p>
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
 <a id="a7ae3305517f14bdf1a6dcd9a390f23c2" name="a7ae3305517f14bdf1a6dcd9a390f23c2"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7ae3305517f14bdf1a6dcd9a390f23c2">&#9670;&#160;</a></span>are_close()</h2>
 
@@ -159,6 +168,17 @@ Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Compare two floating-point values within a tolerance. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">x</td><td>First value. </td></tr>
+    <tr><td class="paramname">y</td><td>Second value. </td></tr>
+    <tr><td class="paramname">tolerance</td><td>Maximum allowed difference.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if the values are sufficiently close. </dd></dl>
 
 </div>
 </div>
@@ -196,6 +216,18 @@ template&lt;typename T&gt; </div>
 </table>
 </div><div class="memdoc">
 
+<p>Compare two 3D objects component-wise. </p>
+<p>The type T must expose x, y and z members.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">a</td><td>First object. </td></tr>
+    <tr><td class="paramname">b</td><td>Second object. </td></tr>
+    <tr><td class="paramname">epsilon</td><td>Maximum allowed difference per component.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if all corresponding components are sufficiently close. </dd></dl>
+
 </div>
 </div>
 <a id="a4ec0cac7679a71244ca6fe61e59e1b8c" name="a4ec0cac7679a71244ca6fe61e59e1b8c"></a>
@@ -221,6 +253,16 @@ template&lt;typename T&gt; </div>
 </table>
 </div><div class="memdoc">
 
+<p>Open an input file in binary mode. </p>
+<p>Returns an error message if the file cannot be opened.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">filename</td><td>Path to the file. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Input stream or error description. </dd></dl>
+
 </div>
 </div>
 <a id="a79e8d4f94dcd15eeafd334a06415e13e" name="a79e8d4f94dcd15eeafd334a06415e13e"></a>
@@ -245,6 +287,16 @@ template&lt;typename T&gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Open an output file in binary mode. </p>
+<p>Returns an error message if the file cannot be created.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">filename</td><td>Path to the file. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Output stream or error description. </dd></dl>
 
 </div>
 </div>

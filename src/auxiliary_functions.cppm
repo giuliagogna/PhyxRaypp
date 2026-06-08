@@ -15,18 +15,33 @@
  * limitations under the Licence.
  */
 
+/**
+ * @file auxiliary_functions.cppm
+ * @brief Collection of utility functions used throughout the renderer.
+ *
+ * This module provides helpers for numerical comparisons and
+ * file stream management.
+ */
+
 module;
 
 export module auxiliary_functions;
 import std;
 
-
+/**
+ * @brief Auxiliary utility functions.
+ */
 export namespace aux {
 
-    // =========================================================
-    // Checks if two numerical values are close
-    // =========================================================
-
+    /**
+     * @brief Compare two floating-point values within a tolerance.
+     *
+     * @param x First value.
+     * @param y Second value.
+     * @param tolerance Maximum allowed difference.
+     *
+     * @return True if the values are sufficiently close.
+     */
     bool are_close(float x, float y, float tolerance=1e-5f) {
         return std::abs(x - y) <= tolerance;
         
@@ -35,6 +50,18 @@ export namespace aux {
     // ===================================================================
     // Checks if two objects with three coordinates x, y and z are close
     // ===================================================================
+
+    /**
+     * @brief Compare two 3D objects component-wise.
+     *
+     * The type T must expose x, y and z members.
+     *
+     * @param a First object.
+     * @param b Second object.
+     * @param epsilon Maximum allowed difference per component.
+     *
+     * @return True if all corresponding components are sufficiently close.
+     */
     template<typename T>
     bool are_xyz_close(const T& a, const T& b, float epsilon = 1e-5f) {
         return aux::are_close(a.x, b.x, epsilon) &&
@@ -42,16 +69,22 @@ export namespace aux {
                aux::are_close(a.z, b.z, epsilon);
     }
 
+
+
     // =========================================================
-    // Managing of input/output file opening
+    // File stream helpers
     // =========================================================
 
-    // No need to worry about closing streams: ifstream and ofstream close the stream automatically
-    // just before they get out of scope wherever they are
-
-    // Opens an input file and checks for anomalies
+    /**
+     * @brief Open an input file in binary mode.
+     *
+     * Returns an error message if the file cannot be opened.
+     *
+     * @param filename Path to the file.
+     * @return Input stream or error description.
+     */
     std::expected<std::ifstream, std::string> open_input_file(const std::string& filename) {
-        // Opens the input file in binary mode: the data in the file will be read as raw bytes
+        // Read file as raw binary data.
         std::ifstream stream(filename, std::ios::binary);
 
         if (!stream.is_open()) {
@@ -60,8 +93,15 @@ export namespace aux {
 
         return stream;
     }
-
-    // Opens an output file and checks for anomalies
+    
+    /**
+     * @brief Open an output file in binary mode.
+     *
+     * Returns an error message if the file cannot be created.
+     *
+     * @param filename Path to the file.
+     * @return Output stream or error description.
+     */
     std::expected<std::ofstream, std::string> open_output_file(const std::string& filename) {
         // Opens the input file in binary mode: the data in the file will be read as raw bytes
         std::ofstream stream(filename, std::ios::binary);

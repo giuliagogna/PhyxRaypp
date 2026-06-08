@@ -134,81 +134,75 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('auxiliary__fun
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * See the Licence for the specific language governing permissions and</span></div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> * limitations under the Licence.</span></div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> */</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="keyword">module</span>;</div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="keyword">export</span> <span class="keyword">module</span> <a class="code" href="module__auxiliary__functions.html">auxiliary_functions</a>;</div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="keyword">import</span> std;</div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
-<div class="foldopen" id="foldopen00024" data-start="{" data-end="}">
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="namespaceaux.html">   24</a></span><span class="keyword">export</span> <span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceaux.html">aux</a> {</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span></div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <span class="comment">// =========================================================</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    <span class="comment">// Checks if two numerical values are close</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    <span class="comment">// =========================================================</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
-<div class="foldopen" id="foldopen00030" data-start="{" data-end="}">
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="namespaceaux.html#a7ae3305517f14bdf1a6dcd9a390f23c2">   30</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="namespaceaux.html#a7ae3305517f14bdf1a6dcd9a390f23c2">are_close</a>(<span class="keywordtype">float</span> x, <span class="keywordtype">float</span> y, <span class="keywordtype">float</span> tolerance=1e-5f) {</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>        <span class="keywordflow">return</span> std::abs(x - y) &lt;= tolerance;</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        </div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    }</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="keyword">module</span>;</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="keyword">export</span> <span class="keyword">module</span> <a class="code" href="module__auxiliary__functions.html">auxiliary_functions</a>;</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="keyword">import</span> std;</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span></div>
+<div class="foldopen" id="foldopen00034" data-start="{" data-end="}">
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="namespaceaux.html">   34</a></span><span class="keyword">export</span> <span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceaux.html">aux</a> {</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span></div>
+<div class="foldopen" id="foldopen00045" data-start="{" data-end="}">
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="namespaceaux.html#a7ae3305517f14bdf1a6dcd9a390f23c2">   45</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="namespaceaux.html#a7ae3305517f14bdf1a6dcd9a390f23c2">are_close</a>(<span class="keywordtype">float</span> x, <span class="keywordtype">float</span> y, <span class="keywordtype">float</span> tolerance=1e-5f) {</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>        <span class="keywordflow">return</span> std::abs(x - y) &lt;= tolerance;</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>        </div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    }</div>
 </div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <span class="comment">// ===================================================================</span></div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <span class="comment">// Checks if two objects with three coordinates x, y and z are close</span></div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="comment">// ===================================================================</span></div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="foldopen" id="foldopen00039" data-start="{" data-end="}">
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="namespaceaux.html#a83e9f034d53d052434baa275aa15716b">   39</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="namespaceaux.html#a83e9f034d53d052434baa275aa15716b">are_xyz_close</a>(<span class="keyword">const</span> T&amp; a, <span class="keyword">const</span> T&amp; b, <span class="keywordtype">float</span> epsilon = 1e-5f) {</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="namespaceaux.html#a7ae3305517f14bdf1a6dcd9a390f23c2">aux::are_close</a>(a.x, b.x, epsilon) &amp;&amp;</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>               <a class="code hl_function" href="namespaceaux.html#a7ae3305517f14bdf1a6dcd9a390f23c2">aux::are_close</a>(a.y, b.y, epsilon) &amp;&amp;</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>               <a class="code hl_function" href="namespaceaux.html#a7ae3305517f14bdf1a6dcd9a390f23c2">aux::are_close</a>(a.z, b.z, epsilon);</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    }</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <span class="comment">// ===================================================================</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <span class="comment">// Checks if two objects with three coordinates x, y and z are close</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="comment">// ===================================================================</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span></div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="foldopen" id="foldopen00066" data-start="{" data-end="}">
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="namespaceaux.html#a83e9f034d53d052434baa275aa15716b">   66</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="namespaceaux.html#a83e9f034d53d052434baa275aa15716b">are_xyz_close</a>(<span class="keyword">const</span> T&amp; a, <span class="keyword">const</span> T&amp; b, <span class="keywordtype">float</span> epsilon = 1e-5f) {</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="namespaceaux.html#a7ae3305517f14bdf1a6dcd9a390f23c2">aux::are_close</a>(a.x, b.x, epsilon) &amp;&amp;</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>               <a class="code hl_function" href="namespaceaux.html#a7ae3305517f14bdf1a6dcd9a390f23c2">aux::are_close</a>(a.y, b.y, epsilon) &amp;&amp;</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>               <a class="code hl_function" href="namespaceaux.html#a7ae3305517f14bdf1a6dcd9a390f23c2">aux::are_close</a>(a.z, b.z, epsilon);</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    }</div>
 </div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <span class="comment">// =========================================================</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="comment">// Managing of input/output file opening</span></div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    <span class="comment">// =========================================================</span></div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="comment">// No need to worry about closing streams: ifstream and ofstream close the stream automatically</span></div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <span class="comment">// just before they get out of scope wherever they are</span></div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="comment">// Opens an input file and checks for anomalies</span></div>
-<div class="foldopen" id="foldopen00053" data-start="{" data-end="}">
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="namespaceaux.html#a4ec0cac7679a71244ca6fe61e59e1b8c">   53</a></span>    std::expected&lt;std::ifstream, std::string&gt; <a class="code hl_function" href="namespaceaux.html#a4ec0cac7679a71244ca6fe61e59e1b8c">open_input_file</a>(<span class="keyword">const</span> std::string&amp; filename) {</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>        <span class="comment">// Opens the input file in binary mode: the data in the file will be read as raw bytes</span></div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>        std::ifstream stream(filename, std::ios::binary);</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>        <span class="keywordflow">if</span> (!stream.is_open()) {</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>            <span class="keywordflow">return</span> std::unexpected(std::format(<span class="stringliteral">&quot;Error in opening input file &#39;{}&#39;&quot;</span>, filename));</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>        }</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>        <span class="keywordflow">return</span> stream;</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    }</div>
-</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <span class="comment">// Opens an output file and checks for anomalies</span></div>
-<div class="foldopen" id="foldopen00065" data-start="{" data-end="}">
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="namespaceaux.html#a79e8d4f94dcd15eeafd334a06415e13e">   65</a></span>    std::expected&lt;std::ofstream, std::string&gt; <a class="code hl_function" href="namespaceaux.html#a79e8d4f94dcd15eeafd334a06415e13e">open_output_file</a>(<span class="keyword">const</span> std::string&amp; filename) {</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        <span class="comment">// Opens the input file in binary mode: the data in the file will be read as raw bytes</span></div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        std::ofstream stream(filename, std::ios::binary);</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        <span class="keywordflow">if</span> (!stream.is_open()) {</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>            <span class="keywordflow">return</span> std::unexpected(std::format(<span class="stringliteral">&quot;Error in opening output file &#39;{}&#39;&quot;</span>, filename));</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        }</div>
 <div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>        <span class="keywordflow">return</span> stream;</div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    }</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    <span class="comment">// =========================================================</span></div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    <span class="comment">// File stream helpers</span></div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    <span class="comment">// =========================================================</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span></div>
+<div class="foldopen" id="foldopen00086" data-start="{" data-end="}">
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="namespaceaux.html#a4ec0cac7679a71244ca6fe61e59e1b8c">   86</a></span>    std::expected&lt;std::ifstream, std::string&gt; <a class="code hl_function" href="namespaceaux.html#a4ec0cac7679a71244ca6fe61e59e1b8c">open_input_file</a>(<span class="keyword">const</span> std::string&amp; filename) {</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>        <span class="comment">// Read file as raw binary data.</span></div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>        std::ifstream stream(filename, std::ios::binary);</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>        <span class="keywordflow">if</span> (!stream.is_open()) {</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>            <span class="keywordflow">return</span> std::unexpected(std::format(<span class="stringliteral">&quot;Error in opening input file &#39;{}&#39;&quot;</span>, filename));</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>        }</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>        <span class="keywordflow">return</span> stream;</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    }</div>
 </div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>}</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    </div>
+<div class="foldopen" id="foldopen00105" data-start="{" data-end="}">
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno"><a class="line" href="namespaceaux.html#a79e8d4f94dcd15eeafd334a06415e13e">  105</a></span>    std::expected&lt;std::ofstream, std::string&gt; <a class="code hl_function" href="namespaceaux.html#a79e8d4f94dcd15eeafd334a06415e13e">open_output_file</a>(<span class="keyword">const</span> std::string&amp; filename) {</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>        <span class="comment">// Opens the input file in binary mode: the data in the file will be read as raw bytes</span></div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>        std::ofstream stream(filename, std::ios::binary);</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>        <span class="keywordflow">if</span> (!stream.is_open()) {</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>            <span class="keywordflow">return</span> std::unexpected(std::format(<span class="stringliteral">&quot;Error in opening output file &#39;{}&#39;&quot;</span>, filename));</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>        }</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span> </div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>        <span class="keywordflow">return</span> stream;</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>    }</div>
+</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span> </div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>}</div>
 </div>
 <div class="ttc" id="amodule__auxiliary__functions_html"><div class="ttname"><a href="module__auxiliary__functions.html">auxiliary_functions</a></div></div>
-<div class="ttc" id="anamespaceaux_html"><div class="ttname"><a href="namespaceaux.html">aux</a></div><div class="ttdef"><b>Definition</b> auxiliary_functions.cppm:24</div></div>
-<div class="ttc" id="anamespaceaux_html_a4ec0cac7679a71244ca6fe61e59e1b8c"><div class="ttname"><a href="namespaceaux.html#a4ec0cac7679a71244ca6fe61e59e1b8c">aux::open_input_file</a></div><div class="ttdeci">std::expected&lt; std::ifstream, std::string &gt; open_input_file(const std::string &amp;filename)</div><div class="ttdef"><b>Definition</b> auxiliary_functions.cppm:53</div></div>
-<div class="ttc" id="anamespaceaux_html_a79e8d4f94dcd15eeafd334a06415e13e"><div class="ttname"><a href="namespaceaux.html#a79e8d4f94dcd15eeafd334a06415e13e">aux::open_output_file</a></div><div class="ttdeci">std::expected&lt; std::ofstream, std::string &gt; open_output_file(const std::string &amp;filename)</div><div class="ttdef"><b>Definition</b> auxiliary_functions.cppm:65</div></div>
-<div class="ttc" id="anamespaceaux_html_a7ae3305517f14bdf1a6dcd9a390f23c2"><div class="ttname"><a href="namespaceaux.html#a7ae3305517f14bdf1a6dcd9a390f23c2">aux::are_close</a></div><div class="ttdeci">bool are_close(float x, float y, float tolerance=1e-5f)</div><div class="ttdef"><b>Definition</b> auxiliary_functions.cppm:30</div></div>
-<div class="ttc" id="anamespaceaux_html_a83e9f034d53d052434baa275aa15716b"><div class="ttname"><a href="namespaceaux.html#a83e9f034d53d052434baa275aa15716b">aux::are_xyz_close</a></div><div class="ttdeci">bool are_xyz_close(const T &amp;a, const T &amp;b, float epsilon=1e-5f)</div><div class="ttdef"><b>Definition</b> auxiliary_functions.cppm:39</div></div>
+<div class="ttc" id="anamespaceaux_html"><div class="ttname"><a href="namespaceaux.html">aux</a></div><div class="ttdoc">Auxiliary utility functions.</div><div class="ttdef"><b>Definition</b> auxiliary_functions.cppm:34</div></div>
+<div class="ttc" id="anamespaceaux_html_a4ec0cac7679a71244ca6fe61e59e1b8c"><div class="ttname"><a href="namespaceaux.html#a4ec0cac7679a71244ca6fe61e59e1b8c">aux::open_input_file</a></div><div class="ttdeci">std::expected&lt; std::ifstream, std::string &gt; open_input_file(const std::string &amp;filename)</div><div class="ttdoc">Open an input file in binary mode.</div><div class="ttdef"><b>Definition</b> auxiliary_functions.cppm:86</div></div>
+<div class="ttc" id="anamespaceaux_html_a79e8d4f94dcd15eeafd334a06415e13e"><div class="ttname"><a href="namespaceaux.html#a79e8d4f94dcd15eeafd334a06415e13e">aux::open_output_file</a></div><div class="ttdeci">std::expected&lt; std::ofstream, std::string &gt; open_output_file(const std::string &amp;filename)</div><div class="ttdoc">Open an output file in binary mode.</div><div class="ttdef"><b>Definition</b> auxiliary_functions.cppm:105</div></div>
+<div class="ttc" id="anamespaceaux_html_a7ae3305517f14bdf1a6dcd9a390f23c2"><div class="ttname"><a href="namespaceaux.html#a7ae3305517f14bdf1a6dcd9a390f23c2">aux::are_close</a></div><div class="ttdeci">bool are_close(float x, float y, float tolerance=1e-5f)</div><div class="ttdoc">Compare two floating-point values within a tolerance.</div><div class="ttdef"><b>Definition</b> auxiliary_functions.cppm:45</div></div>
+<div class="ttc" id="anamespaceaux_html_a83e9f034d53d052434baa275aa15716b"><div class="ttname"><a href="namespaceaux.html#a83e9f034d53d052434baa275aa15716b">aux::are_xyz_close</a></div><div class="ttdeci">bool are_xyz_close(const T &amp;a, const T &amp;b, float epsilon=1e-5f)</div><div class="ttdoc">Compare two 3D objects component-wise.</div><div class="ttdef"><b>Definition</b> auxiliary_functions.cppm:66</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->
