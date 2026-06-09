@@ -1,0 +1,18 @@
+# A scene containing a cat with its custom texture on
+
+# Pre-computed rotation variable
+float pi_over_2 = 1.5707963;
+
+# Background sky color
+background(<0.01, 0.2, 0.9>);
+
+camera(perspective, 1.0, 3.0, rot_z(1.0) * rot_y(0.5) * translation([-10.0, 0.0, 2.2]));
+
+# Textured material for the cat
+material cat_mat(diffuse(image("mesh/Cat/Cat_diffuse.pfm")));
+
+# The Cat
+mesh("mesh/Cat/12221_Cat_v1_l3.obj", cat_mat, scaling([0.1, 0.1, 0.1]));
+
+# Command to render:
+# xmake run PhyxRadpp render examples/cat.txt 0.3 1.0 --algorithm flat

@@ -81,4 +81,10 @@ mesh/*/*.mtl
 # =======================
 # Garbage imagese
 # =======================
-*.png
+# This ignores PNGs only at the root of the project
+/*.png
+
+# ==============
+# HTML
+# ==============
+html*
