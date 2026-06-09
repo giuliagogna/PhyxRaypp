@@ -214,22 +214,53 @@ TEST_CASE("Antialiasing") {
          }
       }
    }
+}
 
-   SUBCASE("Complete mapping (fire_all_rays_antialiasing_parallel())") {
-      auto func = [&](const Ray& ray) {
-         auto hit = plane.ray_intersection(ray);
-         if(!hit) return Color{0.0f, 0.0f, 0.0f}; // Return black if the ray misses the plane
-         return pigment.get_color(hit->surface_params);
-      };
+TEST_CASE("Parallel Rendering with Intel TBB") {
 
-      tracer.fire_all_rays_antialiasing_parallel(func, 100);
+   HDRImage image = HDRImage(4, 2);
+   OrthogonalCamera camera = OrthogonalCamera(2.0f, R_y(std::numbers::pi_v<float> / 2.0f));
+   ImageTracer tracer = ImageTracer(image, camera);
+   Plane plane;
+   // High frequency checkered pattern (50% white, 50% blue)
+   CheckeredPigment pigment (Color{1.0f, 1.0f, 1.0f}, Color{0.0f, 0.0f, 1.0f}, 10000);
+
+   // Flat renderer
+   auto func = [&](const Ray& ray) {
+      auto hit = plane.ray_intersection(ray);
+      if(!hit) return Color{0.0f, 0.0f, 0.0f}; 
+      return pigment.get_color(hit->surface_params);
+   };
+
+   SUBCASE("Parallel execution without Antialiasing") {
+
+      tracer.fire_all_rays_parallel(func);
 
       const int width = tracer.frame.width;
       const int height = tracer.frame.height;
-      // Check that every pixel of the image has been correctly colored
+
       for (int col = 0; col < width; col++) {
          for (int row = 0; row < height; row++) {
-            std::println ("Pixel ({}, {}) : {}", col, row, tracer.frame.get_pixel(col, row));
+            Color pixel = tracer.frame.get_pixel(col, row);
+            bool is_white = pixel.is_close(Color{1.0f, 1.0f, 1.0f}, 1e-3f);
+            bool is_blue  = pixel.is_close(Color{0.0f, 0.0f, 1.0f}, 1e-3f);
+            CHECK((is_white || is_blue));
+         }
+      }
+   }
+
+   SUBCASE("Parallel execution with Antialiasing (Thread-local PCG)") {
+
+      // High antialiasing level
+      PCG pcg;
+      tracer.fire_all_rays_parallel(func, pcg, 100);
+
+      const int width = tracer.frame.width;
+      const int height = tracer.frame.height;
+      
+      // Statistical check
+      for (int col = 0; col < width; col++) {
+         for (int row = 0; row < height; row++) {
             CHECK(tracer.frame.get_pixel(col, row).is_close(Color{0.5f, 0.5f, 1.0f}, 2e-2f));
          }
       }

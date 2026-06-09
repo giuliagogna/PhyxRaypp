@@ -17,7 +17,7 @@
 
 module;
 
-#include <tbb/parallel_reduce.h>
+#include <tbb/parallel_for.h>
 #include <tbb/blocked_range.h>
 
 export module Camera;
@@ -195,8 +195,29 @@ export struct ImageTracer {
         }
     }
 
-    // Antialiasing on a single pixel is performed via shared memory parallelization
-    void fire_all_rays_antialiasing_parallel(const std::function<Color(const Ray&)>& func, int antialiasing_level = 1) {
+    // Renders the image without antialiasing, parallelized across rows using Intel TBB.
+    // Fires a single ray through the center of each pixel.
+    void fire_all_rays_parallel(const std::function<Color(const Ray&)>& func) {
+        const int width = frame.width;
+        const int height = frame.height;
+
+        // Parallelization over image rows
+        tbb::parallel_for(tbb::blocked_range<int>(0, height), [&](const tbb::blocked_range<int>& range) {
+            for (int row = range.begin(); row < range.end(); ++row) {
+                for (int col = 0; col < width; ++col) {
+                    // Fire a single ray through the center of the pixel
+                    Ray ray = fire_ray(row, col, 0.5f, 0.5f);
+                    Color color = func(ray);
+                    // Update the pixel
+                    frame.set_pixel(col, row, color);
+                }
+            }
+        });
+    }
+
+
+    // Renders the image with antialiasing, parallelized across rows using Intel TBB.
+    void fire_all_rays_parallel(const std::function<Color(const Ray&)>& func, PCG& pcg, int antialiasing_level = 1) {
         const int width = frame.width;
         const int height = frame.height;
         if (antialiasing_level < 1) antialiasing_level = 1;
@@ -204,41 +225,30 @@ export struct ImageTracer {
         const int total_samples = antialiasing_level * antialiasing_level;
         const float antialiasing_level_reciprocal = 1.0f / float(total_samples);
 
-        // Cycle on each pixel
-        for (int row = 0; row < height; ++row) {
-            for (int col = 0; col < width; ++col) {
+        // Parallelization over the image rows
+        tbb::parallel_for(tbb::blocked_range<int>(0, height), [&](const tbb::blocked_range<int>& range) {
+            PCG local_pcg(range.begin() * width + 1, range.begin() * width + 2); // Tricky enough, still deterministic
+            for (int row = range.begin(); row < range.end(); ++row) {
+                for (int col = 0; col < width; ++col) {
 
-                Color pixel_color_sum = tbb::parallel_reduce(
-                    tbb::blocked_range<int>(0, total_samples),
-                    Color{0.0f, 0.0f, 0.0f}, // TTB stuff: default cumulator
-                    
-                    // TTB stuff: Mapping Lambda computes a portion of the samples
-                    [&](const tbb::blocked_range<int>& range, Color local_sum) -> Color {
-                        // Each thread will use its own uncorrelated PCG
-                        PCG local_pcg(row * width + col + range.begin(), row * width - col + range.end()); // Differing seeding strategy
-                        
-                        for (int i = range.begin(); i < range.end(); i++) {
-                            // Inter-pixel indexes
-                            int iu = i / antialiasing_level;
-                            int iv = i % antialiasing_level;
+                    Color pixel_color_sum{0.0f, 0.0f, 0.0f};
 
-                            float u = (float(iu) + local_pcg.random_float()) / antialiasing_level;
-                            float v = (float(iv) + local_pcg.random_float()) / antialiasing_level;
+                    for (int i = 0; i < total_samples; ++i) {
+                        // Inter-pixel sub-grid coordinates
+                        int iu = i / antialiasing_level;
+                        int iv = i % antialiasing_level;
 
-                            Ray ray = fire_ray(row, col, u, v);
-                            local_sum += func(ray);
-                        }
-                        return local_sum;
-                    },
-                    
-                    // TTB stuff: Reducing Lambda merges the Color sums from the threads
-                    [](Color a, Color b) -> Color {
-                        return a + b;
+                        // Pixel relative coordinates
+                        float u = (float(iu) + local_pcg.random_float()) / antialiasing_level;
+                        float v = (float(iv) + local_pcg.random_float()) / antialiasing_level;
+
+                        Ray ray = fire_ray(row, col, u, v);
+                        pixel_color_sum += func(ray);
                     }
-                );
-
-                frame.set_pixel(col, row, pixel_color_sum * antialiasing_level_reciprocal); // Takes the average for that pixel
+                    // Update the pixel
+                    frame.set_pixel(col, row, pixel_color_sum * antialiasing_level_reciprocal);
+                }
             }
-        }
+        });
     }
 };

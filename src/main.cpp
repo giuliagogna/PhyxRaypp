@@ -69,6 +69,7 @@ public:
     float gamma = 1.0f;
     std::string algorithm = "flat";
     std::string antialiasing = "no_antialiasing";
+    std::string parallel = "no_parallel";
     int antialiasing_level = 0;
     std::string output_png_file_name = "";
     std::pair<int, int> image_dimension{800, 800};
@@ -211,6 +212,12 @@ public:
                     if(!parse_antialiasing_level) return std::unexpected(parse_antialiasing_level.error());
                     // Clamp the value: AA level cannot be less than 1
                     antialiasing_level = parse_antialiasing_level.value() < 1 ? 1 : parse_antialiasing_level.value();
+
+                } else if (std::string_view(args[i]) == "--parallel") {
+                    // ---------------------------------------------------------
+                    // FLAG: --parallel
+                    // ---------------------------------------------------------
+                    parallel = "parallel";
 
                 } else if (std::string_view(args[i]) == "--dimensions" && i + 2 < args.size()) {
                     // ---------------------------------------------------------
@@ -388,9 +395,16 @@ void run_render(const Parameters& params) {
     }
 
     std::println("Rendering demo scene using '{}' algorithm...", params.algorithm);
-    if (params.antialiasing == "apply_AA") {
+    if (params.antialiasing == "apply_AA" && params.parallel == "parallel") {
+        tracer.fire_all_rays_parallel( [&renderer](const Ray& ray) { return (*renderer)(ray); }, pcg, params.antialiasing_level);
+    }
+    else if (params.antialiasing == "no_antialiasing" && params.parallel == "parallel") {
+        tracer.fire_all_rays_parallel( [&renderer](const Ray& ray) { return (*renderer)(ray); });
+    }
+    else if (params.antialiasing == "apply_AA" && params.parallel == "no_parallel") {
         tracer.fire_all_rays( [&renderer](const Ray& ray) { return (*renderer)(ray); }, pcg, params.antialiasing_level);
-    } else {
+    }
+    else if (params.antialiasing == "no_antialiasing" && params.parallel == "no_parallel") {
         tracer.fire_all_rays( [&renderer](const Ray& ray) { return (*renderer)(ray); });
     }
 
