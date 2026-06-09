@@ -95,6 +95,7 @@ public:
 
                 "Optional Flags:\n"
                 "  --output <filename>             Override automatic naming and specify exact output path\n"
+                "  --parallel                      Use TBB parallelization to render the image\n"
                 "  --algorithm <type>              Render engine: 'flat' or 'pathtracing' (default: 'flat')\n"
                 "  --antialiasing <N>              Apply anti-aliasing with NxN samples per pixel\n"
                 "  --dimensions <width> <height>   Set output image resolution in pixels\n"
