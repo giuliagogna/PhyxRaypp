@@ -38,66 +38,71 @@ import Camera;
 import Geometry;
 import HDRImage;
 import Mesh;
+import auxiliary_functions;
 
-/// @brief A string view containing all single-character symbols recognized by the language lexer.
+/// A string view containing all single-character symbols recognized by the language lexer.
 export constexpr std::string_view SYMBOLS = "()<>[],*=;";
 
-/// @brief Represents a specific position within a source file.
-/// Used to precisely locate syntax errors for the user.
-/// This class has the following fields:
-///
-/// - file_name: the name of the file, or the empty string if there is no file associated with this location
-/// (e.g., because the source code was provided as a memory stream, or through a network connection)
-/// - line_num: number of the line (starting from 1)
-/// - col_num: number of the column (starting from 1)
+/**
+ * @brief Represents a position inside a scene source file.
+ *
+ * Used by the lexer and parser to report precise error locations.
+ *
+ * Line and column numbers start from 1.
+ *
+ * If the source is not associated with a physical file, filename may be empty.
+ */
 export struct SourceLocation {
     std::string filename = "";
     int line_num = 0;
     int col_num = 0;
 };
 
-/// @brief Enumeration of all reserved keywords in the scene description language.
+/// Enumeration of all reserved keywords in the scene language.
 export enum class KeywordEnum {
-    NEW,            // 1
-    // Shapes and BRDFs
-    MATERIAL,       // 2
-    PLANE,          // 3
-    SPHERE,         // 4
-    CUBE,           // 5
-    DIFFUSE,        // 6
-    SPECULAR,       // 7
+    NEW,
+    // Shapes
+    MATERIAL,
+    PLANE,
+    SPHERE,
+    CUBE,
+    MESH,
+
+    // BRDFs
+    DIFFUSE,
+    SPECULAR,
 
     // Pigments
-    UNIFORM,        // 8
-    CHECKERED,      // 9
-    IMAGE,          // 10
+    UNIFORM,
+    CHECKERED,
+    IMAGE,
 
     // Transformations
-    IDENTITY,       // 11
-    TRANSLATION,    // 12
-    ROTATION_X,     // 13
-    ROTATION_Y,     // 14
-    ROTATION_Z,     // 15
-    SCALING,        // 16
+    IDENTITY,
+    TRANSLATION,
+    ROTATION_X,
+    ROTATION_Y,
+    ROTATION_Z,
+    SCALING,
 
     // Camera
-    CAMERA,         // 17
-    ORTHOGONAL,     // 18
-    PERSPECTIVE,    // 19
+    CAMERA,
+    ORTHOGONAL,
+    PERSPECTIVE,
 
-    FLOAT,           // 20
-
-    MESH,            // 21
-    BACKGROUND       // 22
+    // General
+    FLOAT,
+    BACKGROUND
 };
 
-/// @brief Dictionary linking literal text strings to their corresponding KeywordEnum.
+/// Maps textual keywords appearing in a scene file to their corresponding KeywordEnum values.
 export const std::unordered_map<std::string, KeywordEnum> KEYWORDS{
     {"new", KeywordEnum::NEW},
     {"material", KeywordEnum:: MATERIAL},
     {"plane", KeywordEnum:: PLANE},
     {"sphere", KeywordEnum::SPHERE},
     {"cube", KeywordEnum::CUBE},
+    {"mesh", KeywordEnum::MESH},
     {"diffuse", KeywordEnum::DIFFUSE},
     {"specular", KeywordEnum::SPECULAR},
     {"uniform", KeywordEnum::UNIFORM},
@@ -113,11 +118,14 @@ export const std::unordered_map<std::string, KeywordEnum> KEYWORDS{
     {"orthogonal", KeywordEnum::ORTHOGONAL},
     {"perspective", KeywordEnum::PERSPECTIVE},
     {"float", KeywordEnum::FLOAT},
-    {"mesh", KeywordEnum::MESH},
     {"background", KeywordEnum::BACKGROUND}
 };
 
-/// @brief Abstract base class representing a single lexical token.
+/**
+ * @brief Base class for all lexical tokens.
+ *
+ * Every token stores the source location from which it was read.
+ */
 export struct Token {
     SourceLocation location;
     Token(SourceLocation loc) : location{loc} {}
@@ -125,12 +133,12 @@ export struct Token {
     virtual ~Token() = default;
 };
 
-/// @brief Token signaling the end of the input stream (EOF).
+/// Token signaling the end of the input stream (EOF).
 export struct StopToken : Token {
     StopToken(SourceLocation location) : Token{location} {}
 };
 
-/// @brief Token containing an identifier (e.g., custom variable or material names).
+/// Token containing a user-defined identifier (e.g., custom variable or material names).
 export struct IdentifierToken : Token {
     std::string identifier;
     IdentifierToken(SourceLocation location, std::string id) : Token{location}, identifier{id} {}
@@ -140,7 +148,7 @@ export struct IdentifierToken : Token {
     }
 };
 
-/// @brief Token containing a reserved language keyword.
+/// Token containing a reserved language keyword.
 export struct KeywordToken : Token {
     KeywordEnum keyword;
     KeywordToken(SourceLocation location, KeywordEnum kw) : Token{location}, keyword{kw} {}
@@ -150,19 +158,18 @@ export struct KeywordToken : Token {
     }
 };
 
-/// @brief Token containing a syntax symbol (e.g., brackets, commas, equals signs).
+/// Token containing a syntax symbol (e.g., brackets, commas, equals signs).
 export struct SymbolToken : Token {
     char symbol;
     SymbolToken(SourceLocation location, char symbol) : Token{location}, symbol{symbol} {}
 
-    // Calling SymbolToken() it returns the string symbol inside it
     char get(){
         return symbol;
     }
 };
 
 /// @brief Token containing a literal floating-point number.
-///  NOTE: other numerical types are not supported
+/// @note: other numerical types are not supported
 export struct LiteralNumberToken : Token {
     float number;
     LiteralNumberToken(SourceLocation location, float num) : Token{location}, number{num} {}
@@ -172,7 +179,7 @@ export struct LiteralNumberToken : Token {
     }
 };
 
-/// @brief Token containing a literal string enclosed in quotes (e.g., file paths).
+/// Token containing a literal string enclosed in quotes "" (e.g., file paths).
 export struct LiteralStringToken : Token {
     std::string string;
     LiteralStringToken(SourceLocation location, std::string str) : Token{location}, string{str} {}
@@ -183,42 +190,72 @@ export struct LiteralStringToken : Token {
 
 };
 
-
 /// @brief An error found by the lexer or parser while reading a scene file.
 /// Contains the location of the error and a user-friendly message.
 export struct GrammarError {
-
     SourceLocation location;
     std::string message;
 };
 
-/// @brief A high-level stream wrapper used to safely parse scene files.
-///
-/// This struct tracks line and column numbers automatically and allows the parser
-/// to "unread" characters and tokens, a requirement for LL(1) lookahead parsing.
+/**
+ * @brief Stream wrapper used by the lexer and parser.
+ *
+ * Besides reading characters from an std::istream, this class:
+ *
+ * - tracks line and column numbers,
+ * - supports one-character pushback,
+ * - supports one-token lookahead,
+ * - provides source locations for diagnostics.
+ *
+ * This functionality is required by the recursive-descent parser.
+ */
 export struct InputStream {
+    /// Underlying source stream.
     std::istream& ifs;
+
+    /// Current reading position in the source.
     SourceLocation location;
 
-    // saved_char is optional: there could be or not a previously saved character
+    /// Character buffered by unread_char(), if any.
     std::optional<char> saved_char;
+
+    /// Source location associated with the buffered character.
     SourceLocation saved_location;
 
+    /// Token returned by unread_token() for LL(1) parser lookahead, if any.
     std::optional<std::unique_ptr<Token>> saved_token;
 
+    /// Number of columns advanced when a tab character is encountered.
     int tabulations;
 
+    /**
+     * @brief Construct an input stream wrapper.
+     *
+     * Initializes source location tracking and lookahead buffers.
+     * Line and column numbering start from 1.
+     *
+     * @param ifs Input stream from which characters are read.
+     * @param filename Optional source filename used in diagnostics.
+     * @param tabulations Number of columns advanced when a tab
+     *        character ('\t') is encountered. Defaults to 8.
+     */
     InputStream(std::istream& ifs, const std::string& filename="", int tabulations=8) :
         ifs(ifs),
-        location{filename, 1, 1},
+        location{filename, 1, 1}, // initialize line and column to 1
         tabulations(tabulations),
-        saved_location{filename, 1, 1} {}
+        saved_location{filename, 1, 1}  // keep unread state consistent with initial position
+    {}
 
 
-    // Internal helper to keep track of columns and lines
+    /**
+     * @brief Updates the current source location after consuming a character.
+     *
+     * Newlines advance the line counter and reset the column number.
+     * Tabs advance by the configured tab width.
+     * All other characters advance the column by one.
+     */
     void _update_location(std::optional<char> ch) {
         if (!ch.has_value()) {
-            // If no character is read, do nothing
             return;
         }
         if (ch.value() == '\n') {
@@ -232,16 +269,17 @@ export struct InputStream {
         }
     }
 
-    /// @brief Reads the next character from the stream or the unread buffer.
-    ///
-    ///- If there was a character saved in `saved_char` return that and empty saved_char
-    ///- If `saved_char` is empty get the new character from the stream
-    ///- If end of file has not been reached save the new character into ch
-    ///- If no character is read ch is filled with null
-    ///- Save the current location and update it
-    /// @return An optional containing the char, or `nullopt` if the stream is empty.
+    /**
+     * @brief Reads the next character from the input.
+     *
+     * Characters previously pushed back with unread_char()
+     * are returned before reading from the underlying stream.
+     *
+     * The source location is updated automatically.
+     *
+     * @return The next character, or std::nullopt at end-of-file.
+     */
     std::optional<char> read_char() {
-        /// Read a new character from the stream
         std::optional<char> ch;
         if (saved_char.has_value()) {
             ch = saved_char.value();
@@ -260,14 +298,21 @@ export struct InputStream {
         return ch;
     }
 
-    /// @brief Pushes a character back into the stream's buffer.
-    ///
-    /// The next call to read_char() will consume this saved character instead of pulling
-    /// from the physical file and returns to the location where it was before reading.
-    /// If an empty character (nullopt) is passed, this function silently does nothing.
-    ///
-    /// @param ch The character to unread.
-    /// @warning Calling this when a character is already buffered is a fatal programmer error (use assert).
+    /**
+     * @brief Pushes a character back into the input stream.
+     *
+     * The next call to read_char() will return this character instead of reading from the underlying stream.
+     *
+     * The source location is restored to the position that preceded the original read operation.
+     *
+     * Passing std::nullopt has no effect.
+     *
+     * @param ch Character to push back.
+     *
+     * @warning Only one character of pushback is supported.
+     *          Calling this while another character is already
+     *          buffered is a programmer error and triggers an assert.
+     */
     void unread_char(std::optional<char> ch) {
         if (ch.has_value()) {
             assert(!saved_char.has_value());
@@ -278,7 +323,14 @@ export struct InputStream {
         }
     }
 
-    /// @brief Advances the stream past any whitespace characters, tabs, or # comments.
+    /**
+     * @brief Skips whitespace and comment lines.
+     *
+     * Consumes spaces, tabs, newlines, carriage returns, and comments starting with '#'.
+     *
+     * When the function returns, the next call to read_char() will yield the first non-whitespace, non-comment
+     * character in the stream.
+     */
     void skip_whitespaces_and_comments() {
 
         std::optional<char> ch = read_char();
@@ -309,6 +361,18 @@ export struct InputStream {
     // Helper functions for parse elements of a token
     // ==========================================================================================
 
+    /**
+     * @brief Parses a string literal token.
+     *
+     * Assumes the opening quotation mark has already been consumed by the caller.
+     *
+     * Characters are collected until the matching closing quotation mark is found.
+     *
+     * @param token_location Source location of the opening quote.
+     *
+     * @return A LiteralStringToken containing the extracted text,
+     *         or a GrammarError if the string is not terminated before end-of-file.
+     */
     std::expected<std::unique_ptr<Token>, GrammarError>_parse_string_token(SourceLocation token_location) {
         std::string res_string = "";
         std::optional<char> ch = read_char();
@@ -326,6 +390,23 @@ export struct InputStream {
         return std::make_unique<LiteralStringToken>(token_location, res_string);
     }
 
+    /**
+     * @brief Parses a floating-point literal.
+     *
+     * Assumes the first character of the number has already been consumed by the caller.
+     *
+     * Characters compatible with scientific notation are accumulated and then converted using std::strtof().
+     *
+     * Parsing stops at the first character that cannot belong to a floating-point literal.
+     * That character is pushed back into the stream for subsequent parsing.
+     *
+     * @param first_char First character of the numeric literal.
+     * @param token_location Source location of the first character.
+     *
+     * @return A LiteralNumberToken containing the parsed value,
+     *         or a GrammarError if the number is malformed or
+     *         outside the representable float range.
+     */
     std::expected<std::unique_ptr<Token>, GrammarError> _parse_float_token(char first_char, SourceLocation token_location) {
         std::string float_string = "";
         float_string.push_back(first_char);
@@ -376,7 +457,23 @@ export struct InputStream {
 
     }
 
-    std::expected<std::unique_ptr<Token>, GrammarError> _parse_keyword_or_identifier_token(char first_char, SourceLocation token_location) {
+    /**
+     * @brief Parses either a keyword or an identifier.
+     *
+     * Assumes the first character has already been consumed.
+     *
+     * Alphanumeric characters and underscores are collected until a non-identifier character is encountered.
+     * The terminating character is pushed back into the stream.
+     *
+     * The resulting lexeme is compared against the language keyword table. If a match is found a KeywordToken is
+     * produced; otherwise an IdentifierToken is returned.
+     *
+     * @param first_char First character of the lexeme.
+     * @param token_location Source location of the first character.
+     *
+     * @return A KeywordToken or IdentifierToken.
+     */
+    std::unique_ptr<Token> _parse_keyword_or_identifier_token(char first_char, SourceLocation token_location) {
         std::string res_string = "";
         res_string.push_back(first_char);
 
@@ -402,15 +499,32 @@ export struct InputStream {
     }
 
     // ==========================================================================================
+    // Reader functions
+    // ==========================================================================================
 
-    /// @brief Reads the next full lexical token from the stream.
-    ///
-    /// - If token was already read and saved, it reads it from saved_token
-    /// @return A unique pointer to the parsed Token, or a GrammarError if lexing fails.
+    /**
+     * @brief Reads the next lexical token from the input stream.
+     *
+     * Leading whitespace and comments are skipped automatically.
+     * The function recognizes:
+     *
+     * - symbols (e.g. '(', ')', ',', '=')
+     * - string literals enclosed in double quotes ""
+     * - floating-point literals
+     * - identifiers
+     * - reserved keywords
+     * - end-of-file markers
+     *
+     * If a token was previously returned to the stream through unread_token(),
+     * that token is returned instead of reading new characters from the underlying stream.
+     *
+     * @return A parsed Token on success, or a GrammarError if an
+     *         invalid character or malformed token is encountered.
+     */
     std::expected<std::unique_ptr<Token>, GrammarError> read_token() {
 
         if (saved_token.has_value()) {
-            // If there was a Token saved in saved_char return that and empty saved_char
+            // Return the token stored by unread_token() without reading from the stream.
             auto result = std::move(saved_token.value());
             saved_token = std::nullopt;
             return result;
@@ -443,8 +557,20 @@ export struct InputStream {
         }
     }
 
-    /// @brief Pushes an entire token back into the stream's buffer.
-    /// @param token The Token unique_ptr to return to the stream.
+    /**
+     * @brief Pushes a token back into the stream.
+     *
+     * The next call to read_token() will return this token
+     * instead of lexing a new one from the underlying stream.
+     *
+     * Only one token can be buffered at a time.
+     *
+     * @param token Ownership of the token to be returned.
+     *
+     * @warning Only one token of pushback is supported.
+     *          Calling this function when another token is already
+     *          buffered is a programmer error and triggers an assert.
+     */
     void unread_token (std::unique_ptr<Token> token){
         assert(!saved_token.has_value());
         saved_token = std::move(token);
@@ -452,14 +578,36 @@ export struct InputStream {
 };
 
 
-/// @brief Represents a fully parsed scene containing all objects needed for rendering.
+/**
+ * @brief Represents a fully parsed scene ready for rendering.
+ *
+ * A Scene contains all data extracted from a scene description file,
+ * including geometry, materials, camera configuration, user-defined
+ * variables, and rendering parameters.
+ *
+ * The parser progressively fills the World field while processing the scene file.
+ */
 export struct Scene {
+
+    /// Materials declared in the scene, indexed by their symbolic name.
     std::unordered_map<std::string, std::shared_ptr<Material>> materials;
+
+    /// Collection of all geometric objects composing the scene.
     World world;
+
+    /// Active camera used to generate primary rays.
+    /// May be null until a camera declaration is parsed.
     std::unique_ptr<Camera> camera = nullptr;
+
+    /// User-defined floating-point variables available during parsing.
     std::unordered_map<std::string, float> float_variables;
+
+    /// Names of variables whose values were overridden from the command line.
+    /// These variables cannot be redefined by assignments inside the scene file.
     std::unordered_set<std::string> overridden_variables;
 
+    /// Environment color returned when a ray leaves the scene without
+    /// intersecting any object.
     Color background_color{0.0f, 0.0f, 0.0f};
 };
 
@@ -470,12 +618,21 @@ export {
     // EXPECT FUNCTIONS
     // ============================================================================================
 
-    /// @brief Reads a token and validates that it is a SymbolToken matching the provided char.
-    /// @param input_file The InputStream to read from.
-    /// @param symbol The exact character symbol expected (e.g., '(', ')', '=').
-    /// @return An empty expected object on success, or a GrammarError if mismatched.
+    /**
+     * @brief Reads the next token and verifies that it is the expected symbol.
+     *
+     * This helper is typically used to validate punctuation required by
+     * the grammar, such as parentheses, commas, assignment operators,
+     * or angle brackets.
+     *
+     * @param input_file Stream from which the next token is read.
+     * @param symbol The symbol expected by the grammar rule.
+     *
+     * @return Success if the next token is a SymbolToken matching
+     *         the requested character; otherwise a GrammarError.
+     */
     std::expected<void, GrammarError> expect_symbol(InputStream& input_file, char symbol) {
-        /// Read a token from `input_file` and check that it matches `symbol`.
+
         auto res = input_file.read_token();
         if (!res.has_value()) {
             return std::unexpected(res.error());
@@ -484,6 +641,7 @@ export {
 
         auto* sym_token = dynamic_cast<SymbolToken*>(token.get());
 
+        // If what comes next is not a Symbol token, throw the GrammarError
         if (sym_token == nullptr) {
             return std::unexpected(GrammarError{
                 token->location,
@@ -501,10 +659,21 @@ export {
         return {};
     }
 
-    /// @brief Reads a token and validates that it is a KeywordToken matching one of the options.
-    /// @param input_file The InputStream to read from.
-    /// @param expected_keywords A vector of valid KeywordEnums.
-    /// @return The specific KeywordEnum that was found.
+    /**
+     * @brief Reads the next token and verifies that it is one of the
+     *        expected keywords.
+     *
+     * This helper is useful when a grammar rule accepts multiple
+     * alternatives, such as different shape types, pigments,
+     * transformations, or camera models.
+     *
+     * @param input_file Stream from which the next token is read.
+     * @param expected_keywords Set of keywords accepted by the current
+     *        grammar rule.
+     *
+     * @return The keyword that was found, or a GrammarError if the next
+     *         token is not a keyword or does not belong to the allowed set.
+     */
     std::expected<KeywordEnum, GrammarError> expect_keywords(InputStream& input_file, const std::vector<KeywordEnum>& expected_keywords) {
 
         auto res = input_file.read_token();
@@ -527,11 +696,18 @@ export {
         return kw_token->keyword;
     }
 
-    /// @brief Reads a token and validates that it is an IdentifierToken.
-    /// @param input_file The InputStream to read from.
-    /// @return The string name of the identifier.
+    /**
+     * @brief Reads the next token and verifies that it is an identifier.
+     *
+     * Identifiers are user-defined names appearing in the scene file,
+     * such as material names or variable names.
+     *
+     * @param input_file Stream from which the next token is read.
+     *
+     * @return The identifier string, or a GrammarError if the next
+     *         token is not an IdentifierToken.
+     */
     std::expected<std::string, GrammarError> expect_identifier(InputStream& input_file) {
-        /// Read a token from `input_file` and check that it is an identifier.
 
         auto res = input_file.read_token();
         if (!res.has_value()) {
@@ -548,9 +724,17 @@ export {
     }
 
 
-    /// @brief Reads a token and validates that it is a LiteralStringToken.
-    /// @param input_file The InputStream to read from.
-    /// @return The string value parsed from the quotes.
+    /**
+     * @brief Reads the next token and verifies that it is a string literal.
+     *
+     * String literals are enclosed in double quotes "" and are typically
+     * used for file paths or external resource names.
+     *
+     * @param input_file Stream from which the next token is read.
+     *
+     * @return The string value without quotation marks, or a
+     *         GrammarError if the next token is not a LiteralStringToken.
+     */
     std::expected<std::string, GrammarError> expect_string(InputStream& input_file) {
 
         auto res = input_file.read_token();
@@ -567,10 +751,22 @@ export {
         return string_token->string;
     }
 
-    /// @brief Reads a token and checks if it is a literal number or a previously defined float variable.
-    /// @param input_file The InputStream to read from.
-    /// @param scene The Scene dictionary containing saved variables.
-    /// @return The floating point value.
+    /**
+     * @brief Reads the next token and resolves it to a floating-point value.
+     *
+     * The token may be either:
+     * - a numeric literal directly appearing in the scene file, or
+     * - an identifier referring to a previously defined float variable.
+     *
+     * If an identifier is encountered, its value is looked up in the
+     * scene's variable table.
+     *
+     * @param input_file Stream from which the next token is read.
+     * @param scene Scene containing the currently defined float variables.
+     *
+     * @return The resolved floating-point value, or a GrammarError if
+     *         the token is neither a number nor a valid variable name.
+     */
     std::expected<float, GrammarError> expect_number(InputStream& input_file, Scene& scene) {
 
         auto res = input_file.read_token();
@@ -601,10 +797,21 @@ export {
     // PARSE FUNCTIONS
     // =====================================================================
 
-    /// @brief Parses a 3D Geometry vector enclosed in brackets `[x, y, z]`.
-    /// @param input_file The InputStream pointing to the vector text.
-    /// @param scene The Scene object (used for variable lookups).
-    /// @return The constructed Vec object.
+    /**
+     * @brief Parse a 3D vector from the scene description language.
+     *
+     * Expected grammar:
+     *
+     *     [ number , number , number ]
+     *
+     * where each component may be either a numeric literal or a previously defined float variable.
+     *
+     * @param input_file Source stream currently positioned at '['.
+     * @param scene Scene containing variable definitions.
+     *
+     * @return The parsed Vec object, or a GrammarError if the
+     *         syntax is invalid.
+     */
     std::expected<Vec, GrammarError> parse_vec(InputStream& input_file, Scene& scene) {
 
         auto open_square_brk = expect_symbol(input_file, '[');
@@ -634,10 +841,21 @@ export {
 
     }
 
-    /// @brief Parses an RGB Color enclosed in angle brackets `<r, g, b>`.
-    /// @param input_file The InputStream pointing to the color text.
-    /// @param scene The Scene object (used for variable lookups).
-    /// @return The constructed Color object.
+    /**
+     * @brief Parse an RGB color from the scene description language.
+     *
+     * Expected grammar:
+     *
+     *     < number , number , number >
+     *
+     * where each component may be either a numeric literal or a previously defined float variable.
+     *
+     * @param input_file Source stream currently positioned at '<'.
+     * @param scene Scene containing variable definitions.
+     *
+     * @return The parsed Color object, or a GrammarError if the
+     *         syntax is invalid.
+     */
     std::expected<Color, GrammarError> parse_color(InputStream& input_file, Scene& scene) {
 
         auto sym1 = expect_symbol(input_file, '<');
@@ -665,10 +883,25 @@ export {
         return Color{red.value(), green.value(), blue.value()};
     }
 
-    /// @brief Parses a Pigment type (uniform, checkered, or image mapping).
-    /// @param input_file The InputStream pointing to the pigment keyword.
-    /// @param scene The Scene object.
-    /// @return A unique pointer safely wrapped around the polymorphic Pigment object.
+    /**
+     * @brief Parse a pigment definition.
+     *
+     * Supported grammar:
+     *
+     *     uniform(<r,g,b>)
+     *     checkered(<r,g,b>, <r,g,b>, subdivisions)
+     *     image("filename.pfm")
+     *
+     * Depending on the keyword, constructs the corresponding Pigment-derived object.
+     *
+     * Image pigments load the referenced PFM image immediately.
+     *
+     * @param input_file Source stream positioned at a pigment keyword.
+     * @param scene Scene context used for variable lookup.
+     *
+     * @return A polymorphic Pigment instance, or a GrammarError
+     *         if the syntax is invalid or an image cannot be loaded.
+     */
     std::expected<std::unique_ptr<Pigment>, GrammarError> parse_pigment(InputStream& input_file, Scene& scene) {
         auto keyword_res = expect_keywords(input_file, {KeywordEnum::UNIFORM, KeywordEnum::CHECKERED, KeywordEnum::IMAGE});
         if (!keyword_res.has_value()) { return std::unexpected(keyword_res.error()); }
@@ -740,10 +973,22 @@ export {
 
     }
 
-    /// @brief Parses a Bidirectional Reflectance Distribution Function (diffuse or specular).
-    /// @param input_file The InputStream.
-    /// @param scene The active Scene object.
-    /// @return A unique pointer to the polymorphic BRDF object.
+    /**
+     * @brief Parse a BRDF definition.
+     *
+     * Supported grammar:
+     *
+     *     diffuse(pigment)
+     *     specular(pigment)
+     *
+     * where pigment is any valid pigment definition accepted by parse_pigment().
+     *
+     * @param input_file Source stream positioned at a BRDF keyword.
+     * @param scene Scene context used for variable lookup.
+     *
+     * @return A polymorphic BRDF instance, or a GrammarError
+     *         if the syntax is invalid.
+     */
     std::expected<std::unique_ptr<BRDF>, GrammarError> parse_brdf(InputStream& input_file, Scene& scene) {
 
         auto keyword_res = expect_keywords(input_file, {KeywordEnum::DIFFUSE, KeywordEnum::SPECULAR});
@@ -770,12 +1015,34 @@ export {
 
     }
 
-    /// @brief Parses a Material containing its identifier, BRDF, and Emitted Radiance pigment.
-    /// @param input_file The InputStream.
-    /// @param scene The active Scene object.
-    /// In the scene definition the `emitted_radiance` can be omitted: if none is provided, the default
-    /// black will be applied.
-    /// @return A key-value pair of the Material's string identifier and the constructed Material object.
+    /**
+     * @brief Parse a material definition.
+     *
+     * Expected grammar:
+     *
+     *     identifier ( brdf [, emitted_radiance] )
+     *
+     * The BRDF definition is mandatory. The emitted radiance pigment
+     * is optional; if omitted, the material is created with the default emitted radiance.
+     *
+     * Example:
+     *
+     *     my_mat(diffuse(uniform(<1,0,0>)))
+     *
+     *     lamp(diffuse(uniform(<1,1,1>)),
+     *          uniform(<10,10,10>))
+     *
+     * @param input_file Input stream containing the material definition.
+     * @param scene Scene currently being constructed. Used to resolve
+     *              variables and nested scene elements.
+     *
+     * @return A pair containing:
+     *         - the material identifier
+     *         - the constructed Material object
+     *
+     * @retval std::unexpected If the material syntax is invalid or any
+     *         nested element (BRDF or pigment) cannot be parsed.
+     */
     std::expected<std::pair<std::string, Material>, GrammarError> parse_material(InputStream& input_file, Scene& scene) {
 
         auto identifier_res = expect_identifier(input_file);
@@ -820,10 +1087,45 @@ export {
         }
     }
 
-    /// @brief Parses an LL(1) chain of affine transformations connected by '*'.
-    /// @param input_file The InputStream.
-    /// @param scene The active Scene object.
-    /// @return The aggregated composite Transformation matrix.
+    /**
+     * @brief Parse a chain of affine transformations.
+     *
+     * Expected grammar:
+     *
+     *     transformation ::= elementary_transformation
+     *                      | elementary_transformation
+     *                        * elementary_transformation
+     *                        * ...
+     *
+     * Supported elementary transformations:
+     *
+     *     identity
+     *     translation([x,y,z])
+     *     scaling([x,y,z])
+     *     rot_x(angle)
+     *     rot_y(angle)
+     *     rot_z(angle)
+     *
+     * Consecutive transformations are combined through matrix multiplication in the
+     * same order in which they appear in the scene description.
+     *
+     * The parser uses one-token lookahead to determine whether additional transformations follow in the chain.
+     *
+     * Example:
+     *
+     *     translation([1,0,0])
+     *     * rot_y(45)
+     *     * scaling([2,2,2])
+     *
+     * @param input_file Input stream containing the transformation chain.
+     * @param scene Scene currently being constructed. Used to resolve
+     *              numerical variables appearing in parameters.
+     *
+     * @return The composed Transformation.
+     *
+     * @retval std::unexpected If the transformation syntax is invalid
+     *         or one of the parameters cannot be parsed.
+     */
     std::expected<Transformation, GrammarError> parse_transformation(InputStream& input_file, Scene& scene) {
         auto result = Transformation{};
 
@@ -927,7 +1229,7 @@ export {
                 // A '*' was found. Keep the flag true so the while loop repeats.
                 has_next_transformation = true;
             } else {
-                // The chain is finished. Put the token back and cleanly toggle the flag to false.
+                // The chain is finished. Put the token back and toggle the flag to false.
                 input_file.unread_token(std::move(next_token));
                 has_next_transformation = false;
             }
@@ -937,17 +1239,39 @@ export {
 
     }
 
-    /// @brief Parses a specific shape geometry and its applied material from the input stream.
-    ///
-    /// Reads the transformation matrix and material identifier for a shape.
-    /// Performs a dictionary lookup to bind the shape to an already-defined material in the scene.
-    ///
-    /// @tparam T The specific Shape class to instantiate (e.g., Sphere, Plane, Cube).
-    /// @param input_file The input stream currently pointing to the shape's parameter list.
-    /// @param scene The active Scene object containing the material dictionary.
-    /// @return A unique pointer to the newly allocated Shape.
-    /// @warning Throws a GrammarError if the material name is not found in the scene's dictionary.
-    /// Transformation is an optional argument
+    /**
+     * @brief Parse a geometric shape instance and bind it to a material.
+     *
+     * Expected grammar:
+     *
+     *     shape ::= '(' material_name ')'
+     *             | '(' transformation ',' material_name ')'
+     *
+     * The transformation is optional. If omitted, the identity transformation is used.
+     *
+     * The material identifier must refer to a material that has already been defined in the scene.
+     *
+     * Examples:
+     *
+     *     sphere(red_material)
+     *
+     *     sphere(
+     *         translation([1,0,0]) * rot_y(45),
+     *         red_material
+     *     )
+     *
+     * @tparam T Concrete Shape type to instantiate
+     *           (e.g. Sphere, Plane, Cube).
+     *
+     * @param input_file Input stream containing the shape definition.
+     * @param scene Scene currently being constructed. Used to resolve
+     *              material references.
+     *
+     * @return A polymorphic Shape instance of type T.
+     *
+     * @retval std::unexpected If the shape syntax is invalid or the
+     *         referenced material does not exist.
+     */
     template <typename T>
     std::expected<std::unique_ptr<Shape>, GrammarError> parse_shape(InputStream& input_file, Scene& scene) {
 
@@ -998,15 +1322,51 @@ export {
         return std::make_unique<T>(transformation, material);
     }
 
-    /// @brief Parses a 3D Mesh object from an external .obj file.
-    ///
-    /// Reads the transformation, material identifier, and the file path.
-    /// Optionally accepts two additional integer parameters for the BVH builder: (n_bins, leaf_threshold).
-    ///
-    /// @param input_file The InputStream pointing to the mesh parameters.
-    /// @param scene The active Scene object containing the material dictionary.
-    /// @return A unique pointer to the constructed Mesh safely upcast to Shape.
-    /// @warning Throws a GrammarError if the material is unknown or the file cannot be opened.
+    /**
+     * @brief Parse a mesh loaded from an external OBJ file.
+     *
+     * Expected grammar:
+     *
+     *     mesh(
+     *         "filename.obj",
+     *         material_name,
+     *         transformation
+     *     )
+     *
+     * Optional BVH parameters may also be provided:
+     *
+     *     mesh(
+     *         "filename.obj",
+     *         material_name,
+     *         transformation,
+     *         n_bins
+     *     )
+     *
+     *     mesh(
+     *         "filename.obj",
+     *         material_name,
+     *         transformation,
+     *         n_bins,
+     *         leaf_threshold
+     *     )
+     *
+     * If BVH parameters are omitted, the Mesh constructor applies its default values.
+     *
+     * Before constructing the mesh, the parser verifies that:
+     *
+     *  - the OBJ file can be opened;
+     *  - the referenced material exists in the scene.
+     *
+     * @param input_file Input stream containing the mesh definition.
+     * @param scene Scene currently being constructed.
+     *
+     * @return A Mesh instance safely upcast to Shape.
+     *
+     * @retval std::unexpected If:
+     *         - the mesh syntax is invalid;
+     *         - the OBJ file cannot be opened;
+     *         - the referenced material does not exist.
+     */
     std::expected<std::unique_ptr<Shape>, GrammarError> parse_mesh(InputStream& input_file, Scene& scene) {
 
         auto open_brk_res = expect_symbol(input_file, '(');
@@ -1017,14 +1377,13 @@ export {
         std::string filename = file_res.value();
 
         // Safety Check: Prevent the constructor from throwing an uncatchable exception
-        std::ifstream fs(filename);
-        if (!fs.is_open()) {
+        auto open_file_res = aux::open_input_file(filename);
+        if (!open_file_res.has_value()) {
             return std::unexpected(GrammarError{
                 input_file.location,
-                std::format("Cannot open mesh file '{}'", filename)
+                open_file_res.error()
             });
         }
-        fs.close();
 
         auto comma1 = expect_symbol(input_file, ',');
         if (!comma1.has_value()) { return std::unexpected(comma1.error()); }
@@ -1080,7 +1439,7 @@ export {
                 return std::make_unique<Mesh>(filename, material, transformation, bvh_n_bins);
             }
             else if (sym_tok2 != nullptr && sym_tok2->symbol == ',') {
-                // Case 3: A 5th argument was provided (threshold)
+                // A 5th argument was provided (threshold)
                 auto thresh_res = expect_number(input_file, scene);
                 if (!thresh_res.has_value()) { return std::unexpected(thresh_res.error()); }
                 int bvh_threshold = static_cast<int>(thresh_res.value());
@@ -1100,7 +1459,15 @@ export {
         }
     }
 
-    /// @brief Helper function to check if a keyword belongs to the Transformation family.
+    /**
+     * @brief Checks whether a keyword can start a transformation expression.
+     *
+     * Used during LL(1) lookahead parsing to distinguish optional transformation arguments
+     * from numerical camera parameters.
+     *
+     * @param kw Keyword to test.
+     * @return true if the keyword belongs to the transformation family.
+     */
     bool is_transformation_keyword(KeywordEnum kw) {
         return kw == KeywordEnum::IDENTITY ||
                kw == KeywordEnum::TRANSLATION ||
@@ -1110,11 +1477,35 @@ export {
                kw == KeywordEnum::SCALING;
     }
 
-    /// @brief Parses a Camera declaration from the scene file.
-    /// @param input_file The InputStream.
-    /// @param scene The active Scene object.
-    /// @return A unique pointer to the Camera polymorphism wrapper.
-    /// Aspect ratio, distance, and transformation are all optional.
+    /**
+     * @brief Parses a camera declaration.
+     *
+     * Supported syntax:
+     *
+     *   camera(orthogonal)
+     *   camera(orthogonal, aspect_ratio)
+     *   camera(orthogonal, aspect_ratio, transformation)
+     *   camera(orthogonal, transformation)
+     *
+     *   camera(perspective)
+     *   camera(perspective, aspect_ratio)
+     *   camera(perspective, aspect_ratio, distance)
+     *   camera(perspective, aspect_ratio, distance, transformation)
+     *   camera(perspective, aspect_ratio, transformation)
+     *   camera(perspective, transformation)
+     *
+     * Any omitted parameter is replaced with the corresponding camera class default value.
+     *
+     * The parser uses LL(1) lookahead to distinguish whether the next argument represents a
+     * numerical parameter or the start of a transformation chain.
+     *
+     * @param input_file Input stream currently positioned at the
+     *                   camera parameter list.
+     * @param scene Scene context used for variable resolution.
+     *
+     * @return A dynamically allocated Camera instance wrapped in a std::unique_ptr,
+     *         or a GrammarError if the syntax is invalid.
+     */
     std::expected<std::unique_ptr<Camera>, GrammarError> parse_camera(InputStream& input_file, Scene& scene) {
 
         auto open_brk_res = expect_symbol(input_file, '(');
@@ -1127,8 +1518,7 @@ export {
         // Query the structs for their exact defaults
         float aspect_ratio = PerspectiveCamera{}.aspect_ratio;
         float distance = PerspectiveCamera{}.d;
-        Transformation transformation{};
-
+        Transformation transformation{}; // Transformation i always defaulted to identity
 
         // Peek at the next token
         auto tok1_res = input_file.read_token();
@@ -1138,7 +1528,7 @@ export {
 
         if (sym1 != nullptr && sym1->symbol == ')') {
             if (keyword == KeywordEnum::ORTHOGONAL) return std::make_unique<OrthogonalCamera>();
-            else return std::make_unique<PerspectiveCamera>();
+            else if (keyword == KeywordEnum::PERSPECTIVE) return std::make_unique<PerspectiveCamera>();
         }
         if (sym1 == nullptr || sym1->symbol != ',') {
             return std::unexpected(GrammarError{tok1->location, "Expected ',' or ')' after camera type."});
@@ -1159,7 +1549,7 @@ export {
             if (!close_res.has_value()) return std::unexpected(close_res.error());
 
             if (keyword == KeywordEnum::ORTHOGONAL) return std::make_unique<OrthogonalCamera>(aspect_ratio, trans_res.value());
-            else return std::make_unique<PerspectiveCamera>(aspect_ratio, distance, trans_res.value());
+            else if (keyword == KeywordEnum::PERSPECTIVE) return std::make_unique<PerspectiveCamera>(aspect_ratio, distance, trans_res.value());
         }
 
         // It wasn't a transformation, so it must be the aspect ratio
@@ -1176,14 +1566,14 @@ export {
 
         if (sym2 != nullptr && sym2->symbol == ')') {
             if (keyword == KeywordEnum::ORTHOGONAL) return std::make_unique<OrthogonalCamera>(aspect_ratio);
-            else return std::make_unique<PerspectiveCamera>(aspect_ratio);
+            else if (keyword == KeywordEnum::PERSPECTIVE) return std::make_unique<PerspectiveCamera>(aspect_ratio);
         }
         if (sym2 == nullptr || sym2->symbol != ',') {
             return std::unexpected(GrammarError{tok2->location, "Expected ',' or ')' after aspect ratio."});
         }
 
         if (keyword == KeywordEnum::ORTHOGONAL) {
-            // Orthogonal doesn't have distance, so this MUST be a transformation
+            // Orthogonal doesn't have distance, so this must be a transformation
             auto trans_res = parse_transformation(input_file, scene);
             if (!trans_res.has_value()) return std::unexpected(trans_res.error());
 
@@ -1192,7 +1582,7 @@ export {
 
             return std::make_unique<OrthogonalCamera>(aspect_ratio, trans_res.value());
         }
-        else {
+        else if (keyword == KeywordEnum::PERSPECTIVE) {
             // Perspective: is it distance or transformation?
             auto peek3_res = input_file.read_token();
             if (!peek3_res.has_value()) { return std::unexpected(peek3_res.error()); }
@@ -1243,10 +1633,13 @@ export {
     }
 
 
-    /// @brief Type alias for a function pointer to a template instantiation of parse_shape<T>.
+    /// Type alias for a function pointer to a template instantiation of parse_shape<T>.
     using ShapeParserFunc = std::expected<std::unique_ptr<Shape>, GrammarError>(*)(InputStream&, Scene&);
 
-    /// @brief Static lookup table linking the keyword to the correct template instantiation of `parse_shape`.
+    /// Maps shape-related keywords to the parser responsible for constructing the corresponding Shape instance.
+    ///
+    /// This table centralizes top-level shape dispatch and avoids long chains of if/else
+    /// statements when new shape types are added.
     inline const std::unordered_map<KeywordEnum, ShapeParserFunc> SHAPE_PARSERS = {
         {KeywordEnum::SPHERE, &parse_shape<Sphere>},
         {KeywordEnum::PLANE,  &parse_shape<Plane>},
@@ -1256,14 +1649,43 @@ export {
         // {KeywordEnum::CYLINDER, &parse_shape<Cylinder>}
     };
 
-    /// @brief Parses an entire scene file from top to bottom, building the World, Camera, and Materials.
-    ///
-    /// This function acts as the root of the recursive descent parser. It sequentially reads
-    /// top-level tokens (Float variables, Materials, Cameras, and Shapes) and populates a Scene object.
-    ///
-    /// @param input_file The InputStream pointing to the .txt scene file.
-    /// @param overridden_variables An optional dictionary of float variables injected from the command line.
-    /// @return A fully populated Scene object, or a GrammarError if a syntax violation occurs.
+    /**
+     * @brief Parses a complete scene description file.
+     *
+     * This is the root entry point of the recursive-descent parser.
+     * It repeatedly reads top-level declarations until the end of the input stream is reached
+     * and constructs the corresponding Scene object.
+     *
+     * Supported top-level declarations are:
+     *
+     *   float
+     *   material
+     *   camera
+     *   background
+     *   sphere
+     *   plane
+     *   cube
+     *   mesh
+     *
+     * Declarations may appear in any order, subject to the following
+     * constraints:
+     *
+     *  - Materials must be defined before they are referenced by shapes or meshes.
+     *  - Float variables must be defined before they are used.
+     *  - At most one camera may be defined.
+     *  - Command-line overridden variables cannot be redefined inside the scene file.
+     *
+     * The parser performs semantic validation while parsing, including material lookup,
+     * variable lookup, duplicate definitions, and top-level grammar checks.
+     *
+     * @param input_file Input stream containing the scene description.
+     * @param overridden_variables Optional dictionary of variables
+     *        supplied externally (e.g. from command-line arguments).
+     *
+     * @return A fully populated Scene object on success, or a
+     *         GrammarError describing the first parsing or semantic
+     *         error encountered.
+     */
     std::expected<Scene, GrammarError> parse_scene(InputStream& input_file,
                                                    const std::unordered_map<std::string, float>& overridden_variables = {}) {
 

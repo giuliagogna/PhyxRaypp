@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('struct_source_
 </div><!--header-->
 <div class="contents">
 
-<p>Represents a specific position within a source file. Used to precisely locate syntax errors for the user. This class has the following fields:  
+<p>Represents a position inside a scene source file.  
  <a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
@@ -129,12 +129,10 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a863acd0a98972a641cf33477931edce7" id="r_a863acd0a98972a641cf33477931edce7"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a863acd0a98972a641cf33477931edce7">col_num</a> = 0</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Represents a specific position within a source file. Used to precisely locate syntax errors for the user. This class has the following fields: </p>
-<ul>
-<li>file_name: the name of the file, or the empty string if there is no file associated with this location (e.g., because the source code was provided as a memory stream, or through a network connection)</li>
-<li>line_num: number of the line (starting from 1)</li>
-<li>col_num: number of the column (starting from 1) </li>
-</ul>
+<div class="textblock"><p>Represents a position inside a scene source file. </p>
+<p>Used by the lexer and parser to report precise error locations.</p>
+<p>Line and column numbers start from 1.</p>
+<p>If the source is not associated with a physical file, filename may be empty. </p>
 </div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
 <a id="a863acd0a98972a641cf33477931edce7" name="a863acd0a98972a641cf33477931edce7"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a863acd0a98972a641cf33477931edce7">&#9670;&#160;</a></span>col_num</h2>

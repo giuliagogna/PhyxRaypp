@@ -88,7 +88,7 @@ export namespace aux {
         std::ifstream stream(filename, std::ios::binary);
 
         if (!stream.is_open()) {
-            return std::unexpected(std::format("Error in opening input file '{}'", filename));
+            return std::unexpected(std::format("Error in opening file '{}'", filename));
         }
 
         return stream;

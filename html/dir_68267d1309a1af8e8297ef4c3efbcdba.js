@@ -14,5 +14,5 @@ var dir_68267d1309a1af8e8297ef4c3efbcdba =
     [ "Renderer.cppm", "_renderer_8cppm.html", "_renderer_8cppm" ],
     [ "SceneFiles.cppm", "_scene_files_8cppm.html", "_scene_files_8cppm" ],
     [ "Shape.cppm", "_shape_8cppm.html", "_shape_8cppm" ],
-    [ "std_impl.cpp", "std__impl_8cpp.html", "std__impl_8cpp" ]
+    [ "stb_implementation.cpp", "stb__implementation_8cpp.html", "stb__implementation_8cpp" ]
 ];

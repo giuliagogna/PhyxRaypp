@@ -119,39 +119,57 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('struct_input_s
 </div><!--header-->
 <div class="contents">
 
-<p>A high-level stream wrapper used to safely parse scene files.  
+<p>Stream wrapper used by the lexer and parser.  
  <a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a4986fc84da57bfef1710d312ee257710" id="r_a4986fc84da57bfef1710d312ee257710"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a4986fc84da57bfef1710d312ee257710">InputStream</a> (std::istream &amp;ifs, const std::string &amp;filename=&quot;&quot;, int tabulations=8)</td></tr>
+<tr class="memdesc:a4986fc84da57bfef1710d312ee257710"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct an input stream wrapper.  <br /></td></tr>
 <tr class="memitem:a62af616bf48b24d634fff12c8a601136" id="r_a62af616bf48b24d634fff12c8a601136"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a62af616bf48b24d634fff12c8a601136">_update_location</a> (std::optional&lt; char &gt; ch)</td></tr>
+<tr class="memdesc:a62af616bf48b24d634fff12c8a601136"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the current source location after consuming a character.  <br /></td></tr>
 <tr class="memitem:a2ccf15c4fd0df43ec95003db7730d031" id="r_a2ccf15c4fd0df43ec95003db7730d031"><td class="memItemLeft">std::optional&lt; char &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a2ccf15c4fd0df43ec95003db7730d031">read_char</a> ()</td></tr>
-<tr class="memdesc:a2ccf15c4fd0df43ec95003db7730d031"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads the next character from the stream or the unread buffer.  <br /></td></tr>
+<tr class="memdesc:a2ccf15c4fd0df43ec95003db7730d031"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads the next character from the input.  <br /></td></tr>
 <tr class="memitem:ab490bb1a12ee5259486197739e0f8994" id="r_ab490bb1a12ee5259486197739e0f8994"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#ab490bb1a12ee5259486197739e0f8994">unread_char</a> (std::optional&lt; char &gt; ch)</td></tr>
-<tr class="memdesc:ab490bb1a12ee5259486197739e0f8994"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pushes a character back into the stream's buffer.  <br /></td></tr>
+<tr class="memdesc:ab490bb1a12ee5259486197739e0f8994"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pushes a character back into the input stream.  <br /></td></tr>
 <tr class="memitem:a37780f5a0c380d952deb0dc44c3d780f" id="r_a37780f5a0c380d952deb0dc44c3d780f"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a37780f5a0c380d952deb0dc44c3d780f">skip_whitespaces_and_comments</a> ()</td></tr>
-<tr class="memdesc:a37780f5a0c380d952deb0dc44c3d780f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advances the stream past any whitespace characters, tabs, or # comments.  <br /></td></tr>
+<tr class="memdesc:a37780f5a0c380d952deb0dc44c3d780f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Skips whitespace and comment lines.  <br /></td></tr>
 <tr class="memitem:a8047d9da5de694abe020532a1b723d7f" id="r_a8047d9da5de694abe020532a1b723d7f"><td class="memItemLeft">std::expected&lt; std::unique_ptr&lt; <a class="el" href="struct_token.html">Token</a> &gt;, <a class="el" href="struct_grammar_error.html">GrammarError</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a8047d9da5de694abe020532a1b723d7f">_parse_string_token</a> (<a class="el" href="struct_source_location.html">SourceLocation</a> token_location)</td></tr>
+<tr class="memdesc:a8047d9da5de694abe020532a1b723d7f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a string literal token.  <br /></td></tr>
 <tr class="memitem:a51d5cd5c81f4334666f4177c8b1518c8" id="r_a51d5cd5c81f4334666f4177c8b1518c8"><td class="memItemLeft">std::expected&lt; std::unique_ptr&lt; <a class="el" href="struct_token.html">Token</a> &gt;, <a class="el" href="struct_grammar_error.html">GrammarError</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a51d5cd5c81f4334666f4177c8b1518c8">_parse_float_token</a> (char first_char, <a class="el" href="struct_source_location.html">SourceLocation</a> token_location)</td></tr>
-<tr class="memitem:a570bac5dc65d6b5949eff1cce00c5df4" id="r_a570bac5dc65d6b5949eff1cce00c5df4"><td class="memItemLeft">std::expected&lt; std::unique_ptr&lt; <a class="el" href="struct_token.html">Token</a> &gt;, <a class="el" href="struct_grammar_error.html">GrammarError</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a570bac5dc65d6b5949eff1cce00c5df4">_parse_keyword_or_identifier_token</a> (char first_char, <a class="el" href="struct_source_location.html">SourceLocation</a> token_location)</td></tr>
+<tr class="memdesc:a51d5cd5c81f4334666f4177c8b1518c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a floating-point literal.  <br /></td></tr>
+<tr class="memitem:af17ef001d87a53b538f3ff671858a20e" id="r_af17ef001d87a53b538f3ff671858a20e"><td class="memItemLeft">std::unique_ptr&lt; <a class="el" href="struct_token.html">Token</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#af17ef001d87a53b538f3ff671858a20e">_parse_keyword_or_identifier_token</a> (char first_char, <a class="el" href="struct_source_location.html">SourceLocation</a> token_location)</td></tr>
+<tr class="memdesc:af17ef001d87a53b538f3ff671858a20e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses either a keyword or an identifier.  <br /></td></tr>
 <tr class="memitem:a89e527c1bc3b977566dde983d6aa47a3" id="r_a89e527c1bc3b977566dde983d6aa47a3"><td class="memItemLeft">std::expected&lt; std::unique_ptr&lt; <a class="el" href="struct_token.html">Token</a> &gt;, <a class="el" href="struct_grammar_error.html">GrammarError</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a89e527c1bc3b977566dde983d6aa47a3">read_token</a> ()</td></tr>
-<tr class="memdesc:a89e527c1bc3b977566dde983d6aa47a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads the next full lexical token from the stream.  <br /></td></tr>
+<tr class="memdesc:a89e527c1bc3b977566dde983d6aa47a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads the next lexical token from the input stream.  <br /></td></tr>
 <tr class="memitem:a086d0371da3b0f751cde20e1b56b64c7" id="r_a086d0371da3b0f751cde20e1b56b64c7"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a086d0371da3b0f751cde20e1b56b64c7">unread_token</a> (std::unique_ptr&lt; <a class="el" href="struct_token.html">Token</a> &gt; token)</td></tr>
-<tr class="memdesc:a086d0371da3b0f751cde20e1b56b64c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pushes an entire token back into the stream's buffer.  <br /></td></tr>
+<tr class="memdesc:a086d0371da3b0f751cde20e1b56b64c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pushes a token back into the stream.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a79f146fe332c5152ad50abde155d8992" id="r_a79f146fe332c5152ad50abde155d8992"><td class="memItemLeft">std::istream &amp;&#160;</td><td class="memItemRight"><a class="el" href="#a79f146fe332c5152ad50abde155d8992">ifs</a></td></tr>
+<tr class="memdesc:a79f146fe332c5152ad50abde155d8992"><td class="mdescLeft">&#160;</td><td class="mdescRight">Underlying source stream.  <br /></td></tr>
 <tr class="memitem:af3b7859b8e632e510258cba21a25c2e5" id="r_af3b7859b8e632e510258cba21a25c2e5"><td class="memItemLeft"><a class="el" href="struct_source_location.html">SourceLocation</a>&#160;</td><td class="memItemRight"><a class="el" href="#af3b7859b8e632e510258cba21a25c2e5">location</a></td></tr>
+<tr class="memdesc:af3b7859b8e632e510258cba21a25c2e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current reading position in the source.  <br /></td></tr>
 <tr class="memitem:a788871fe4ff9a8e38f0cdcca2240ae81" id="r_a788871fe4ff9a8e38f0cdcca2240ae81"><td class="memItemLeft">std::optional&lt; char &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a788871fe4ff9a8e38f0cdcca2240ae81">saved_char</a></td></tr>
+<tr class="memdesc:a788871fe4ff9a8e38f0cdcca2240ae81"><td class="mdescLeft">&#160;</td><td class="mdescRight">Character buffered by <a class="el" href="#ab490bb1a12ee5259486197739e0f8994" title="Pushes a character back into the input stream.">unread_char()</a>, if any.  <br /></td></tr>
 <tr class="memitem:ac5795a3d0ebadc8177b2b107cddf89d2" id="r_ac5795a3d0ebadc8177b2b107cddf89d2"><td class="memItemLeft"><a class="el" href="struct_source_location.html">SourceLocation</a>&#160;</td><td class="memItemRight"><a class="el" href="#ac5795a3d0ebadc8177b2b107cddf89d2">saved_location</a></td></tr>
+<tr class="memdesc:ac5795a3d0ebadc8177b2b107cddf89d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Source location associated with the buffered character.  <br /></td></tr>
 <tr class="memitem:aac9499aa3b609a46db0d40728ba0c47a" id="r_aac9499aa3b609a46db0d40728ba0c47a"><td class="memItemLeft">std::optional&lt; std::unique_ptr&lt; <a class="el" href="struct_token.html">Token</a> &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#aac9499aa3b609a46db0d40728ba0c47a">saved_token</a></td></tr>
+<tr class="memdesc:aac9499aa3b609a46db0d40728ba0c47a"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="struct_token.html" title="Base class for all lexical tokens.">Token</a> returned by <a class="el" href="#a086d0371da3b0f751cde20e1b56b64c7" title="Pushes a token back into the stream.">unread_token()</a> for LL(1) parser lookahead, if any.  <br /></td></tr>
 <tr class="memitem:a069a7c865fb1cb5ee82ae3653b8f1b67" id="r_a069a7c865fb1cb5ee82ae3653b8f1b67"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a069a7c865fb1cb5ee82ae3653b8f1b67">tabulations</a></td></tr>
+<tr class="memdesc:a069a7c865fb1cb5ee82ae3653b8f1b67"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of columns advanced when a tab character is encountered.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>A high-level stream wrapper used to safely parse scene files. </p>
-<p>This struct tracks line and column numbers automatically and allows the parser to "unread" characters and tokens, a requirement for LL(1) lookahead parsing. </p>
+<div class="textblock"><p>Stream wrapper used by the lexer and parser. </p>
+<p>Besides reading characters from an std::istream, this class:</p>
+<ul>
+<li>tracks line and column numbers,</li>
+<li>supports one-character pushback,</li>
+<li>supports one-token lookahead,</li>
+<li>provides source locations for diagnostics.</li>
+</ul>
+<p>This functionality is required by the recursive-descent parser. </p>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a4986fc84da57bfef1710d312ee257710" name="a4986fc84da57bfef1710d312ee257710"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4986fc84da57bfef1710d312ee257710">&#9670;&#160;</a></span>InputStream()</h2>
@@ -185,6 +203,17 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Construct an input stream wrapper. </p>
+<p>Initializes source location tracking and lookahead buffers. Line and column numbering start from 1.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ifs</td><td>Input stream from which characters are read. </td></tr>
+    <tr><td class="paramname">filename</td><td>Optional source filename used in diagnostics. </td></tr>
+    <tr><td class="paramname">tabulations</td><td>Number of columns advanced when a tab character ('\t') is encountered. Defaults to 8. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
@@ -215,10 +244,23 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Parses a floating-point literal. </p>
+<p>Assumes the first character of the number has already been consumed by the caller.</p>
+<p>Characters compatible with scientific notation are accumulated and then converted using std::strtof().</p>
+<p>Parsing stops at the first character that cannot belong to a floating-point literal. That character is pushed back into the stream for subsequent parsing.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">first_char</td><td>First character of the numeric literal. </td></tr>
+    <tr><td class="paramname">token_location</td><td>Source location of the first character.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A <a class="el" href="struct_literal_number_token.html" title="Token containing a literal floating-point number.">LiteralNumberToken</a> containing the parsed value, or a <a class="el" href="struct_grammar_error.html" title="An error found by the lexer or parser while reading a scene file. Contains the location of the error ...">GrammarError</a> if the number is malformed or outside the representable float range. </dd></dl>
+
 </div>
 </div>
-<a id="a570bac5dc65d6b5949eff1cce00c5df4" name="a570bac5dc65d6b5949eff1cce00c5df4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a570bac5dc65d6b5949eff1cce00c5df4">&#9670;&#160;</a></span>_parse_keyword_or_identifier_token()</h2>
+<a id="af17ef001d87a53b538f3ff671858a20e" name="af17ef001d87a53b538f3ff671858a20e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af17ef001d87a53b538f3ff671858a20e">&#9670;&#160;</a></span>_parse_keyword_or_identifier_token()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -227,7 +269,7 @@ Public Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::expected&lt; std::unique_ptr&lt; <a class="el" href="struct_token.html">Token</a> &gt;, <a class="el" href="struct_grammar_error.html">GrammarError</a> &gt; InputStream::_parse_keyword_or_identifier_token </td>
+          <td class="memname">std::unique_ptr&lt; <a class="el" href="struct_token.html">Token</a> &gt; InputStream::_parse_keyword_or_identifier_token </td>
           <td>(</td>
           <td class="paramtype">char</td>          <td class="paramname"><span class="paramname"><em>first_char</em></span>, </td>
         </tr>
@@ -243,6 +285,19 @@ Public Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Parses either a keyword or an identifier. </p>
+<p>Assumes the first character has already been consumed.</p>
+<p>Alphanumeric characters and underscores are collected until a non-identifier character is encountered. The terminating character is pushed back into the stream.</p>
+<p>The resulting lexeme is compared against the language keyword table. If a match is found a <a class="el" href="struct_keyword_token.html" title="Token containing a reserved language keyword.">KeywordToken</a> is produced; otherwise an <a class="el" href="struct_identifier_token.html" title="Token containing a user-defined identifier (e.g., custom variable or material names).">IdentifierToken</a> is returned.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">first_char</td><td>First character of the lexeme. </td></tr>
+    <tr><td class="paramname">token_location</td><td>Source location of the first character.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A <a class="el" href="struct_keyword_token.html" title="Token containing a reserved language keyword.">KeywordToken</a> or <a class="el" href="struct_identifier_token.html" title="Token containing a user-defined identifier (e.g., custom variable or material names).">IdentifierToken</a>. </dd></dl>
 
 </div>
 </div>
@@ -269,6 +324,17 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Parses a string literal token. </p>
+<p>Assumes the opening quotation mark has already been consumed by the caller.</p>
+<p>Characters are collected until the matching closing quotation mark is found.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">token_location</td><td>Source location of the opening quote.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A <a class="el" href="struct_literal_string_token.html" title="Token containing a literal string enclosed in quotes &quot;&quot; (e.g., file paths).">LiteralStringToken</a> containing the extracted text, or a <a class="el" href="struct_grammar_error.html" title="An error found by the lexer or parser while reading a scene file. Contains the location of the error ...">GrammarError</a> if the string is not terminated before end-of-file. </dd></dl>
+
 </div>
 </div>
 <a id="a62af616bf48b24d634fff12c8a601136" name="a62af616bf48b24d634fff12c8a601136"></a>
@@ -293,6 +359,9 @@ Public Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Updates the current source location after consuming a character. </p>
+<p>Newlines advance the line counter and reset the column number. Tabs advance by the configured tab width. All other characters advance the column by one. </p>
 
 </div>
 </div>
@@ -319,16 +388,10 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Reads the next character from the stream or the unread buffer. </p>
-<ul>
-<li>If there was a character saved in <span class="tt"><a class="el" href="#a788871fe4ff9a8e38f0cdcca2240ae81">saved_char</a></span> return that and empty saved_char</li>
-<li>If <span class="tt"><a class="el" href="#a788871fe4ff9a8e38f0cdcca2240ae81">saved_char</a></span> is empty get the new character from the stream</li>
-<li>If end of file has not been reached save the new character into ch</li>
-<li>If no character is read ch is filled with null</li>
-<li>Save the current location and update it <dl class="section return"><dt>Returns</dt><dd>An optional containing the char, or <span class="tt">nullopt</span> if the stream is empty. </dd></dl>
-</li>
-</ul>
-<p>Read a new character from the stream</p>
+<p>Reads the next character from the input. </p>
+<p>Characters previously pushed back with <a class="el" href="#ab490bb1a12ee5259486197739e0f8994" title="Pushes a character back into the input stream.">unread_char()</a> are returned before reading from the underlying stream.</p>
+<p>The source location is updated automatically.</p>
+<dl class="section return"><dt>Returns</dt><dd>The next character, or std::nullopt at end-of-file. </dd></dl>
 
 </div>
 </div>
@@ -355,11 +418,18 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Reads the next full lexical token from the stream. </p>
+<p>Reads the next lexical token from the input stream. </p>
+<p>Leading whitespace and comments are skipped automatically. The function recognizes:</p>
 <ul>
-<li>If token was already read and saved, it reads it from saved_token <dl class="section return"><dt>Returns</dt><dd>A unique pointer to the parsed <a class="el" href="struct_token.html" title="Abstract base class representing a single lexical token.">Token</a>, or a <a class="el" href="struct_grammar_error.html" title="An error found by the lexer or parser while reading a scene file. Contains the location of the error ...">GrammarError</a> if lexing fails. </dd></dl>
-</li>
+<li>symbols (e.g. '(', ')', ',', '=')</li>
+<li>string literals enclosed in double quotes ""</li>
+<li>floating-point literals</li>
+<li>identifiers</li>
+<li>reserved keywords</li>
+<li>end-of-file markers</li>
 </ul>
+<p>If a token was previously returned to the stream through <a class="el" href="#a086d0371da3b0f751cde20e1b56b64c7" title="Pushes a token back into the stream.">unread_token()</a>, that token is returned instead of reading new characters from the underlying stream.</p>
+<dl class="section return"><dt>Returns</dt><dd>A parsed <a class="el" href="struct_token.html" title="Base class for all lexical tokens.">Token</a> on success, or a <a class="el" href="struct_grammar_error.html" title="An error found by the lexer or parser while reading a scene file. Contains the location of the error ...">GrammarError</a> if an invalid character or malformed token is encountered. </dd></dl>
 
 </div>
 </div>
@@ -386,7 +456,9 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Advances the stream past any whitespace characters, tabs, or # comments. </p>
+<p>Skips whitespace and comment lines. </p>
+<p>Consumes spaces, tabs, newlines, carriage returns, and comments starting with '#'.</p>
+<p>When the function returns, the next call to <a class="el" href="#a2ccf15c4fd0df43ec95003db7730d031" title="Reads the next character from the input.">read_char()</a> will yield the first non-whitespace, non-comment character in the stream. </p>
 
 </div>
 </div>
@@ -413,15 +485,17 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Pushes a character back into the stream's buffer. </p>
-<p>The next call to <a class="el" href="#a2ccf15c4fd0df43ec95003db7730d031" title="Reads the next character from the stream or the unread buffer.">read_char()</a> will consume this saved character instead of pulling from the physical file and returns to the location where it was before reading. If an empty character (nullopt) is passed, this function silently does nothing.</p>
+<p>Pushes a character back into the input stream. </p>
+<p>The next call to <a class="el" href="#a2ccf15c4fd0df43ec95003db7730d031" title="Reads the next character from the input.">read_char()</a> will return this character instead of reading from the underlying stream.</p>
+<p>The source location is restored to the position that preceded the original read operation.</p>
+<p>Passing std::nullopt has no effect.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">ch</td><td>The character to unread. </td></tr>
+    <tr><td class="paramname">ch</td><td>Character to push back.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section warning"><dt>Warning</dt><dd>Calling this when a character is already buffered is a fatal programmer error (use assert). </dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>Only one character of pushback is supported. Calling this while another character is already buffered is a programmer error and triggers an assert. </dd></dl>
 
 </div>
 </div>
@@ -448,13 +522,16 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Pushes an entire token back into the stream's buffer. </p>
+<p>Pushes a token back into the stream. </p>
+<p>The next call to <a class="el" href="#a89e527c1bc3b977566dde983d6aa47a3" title="Reads the next lexical token from the input stream.">read_token()</a> will return this token instead of lexing a new one from the underlying stream.</p>
+<p>Only one token can be buffered at a time.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">token</td><td>The <a class="el" href="struct_token.html" title="Abstract base class representing a single lexical token.">Token</a> unique_ptr to return to the stream. </td></tr>
+    <tr><td class="paramname">token</td><td>Ownership of the token to be returned.</td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section warning"><dt>Warning</dt><dd>Only one token of pushback is supported. Calling this function when another token is already buffered is a programmer error and triggers an assert. </dd></dl>
 
 </div>
 </div>
@@ -471,6 +548,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Underlying source stream. </p>
+
 </div>
 </div>
 <a id="af3b7859b8e632e510258cba21a25c2e5" name="af3b7859b8e632e510258cba21a25c2e5"></a>
@@ -484,6 +563,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Current reading position in the source. </p>
 
 </div>
 </div>
@@ -499,6 +580,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Character buffered by <a class="el" href="#ab490bb1a12ee5259486197739e0f8994" title="Pushes a character back into the input stream.">unread_char()</a>, if any. </p>
+
 </div>
 </div>
 <a id="ac5795a3d0ebadc8177b2b107cddf89d2" name="ac5795a3d0ebadc8177b2b107cddf89d2"></a>
@@ -512,6 +595,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Source location associated with the buffered character. </p>
 
 </div>
 </div>
@@ -527,6 +612,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p><a class="el" href="struct_token.html" title="Base class for all lexical tokens.">Token</a> returned by <a class="el" href="#a086d0371da3b0f751cde20e1b56b64c7" title="Pushes a token back into the stream.">unread_token()</a> for LL(1) parser lookahead, if any. </p>
+
 </div>
 </div>
 <a id="a069a7c865fb1cb5ee82ae3653b8f1b67" name="a069a7c865fb1cb5ee82ae3653b8f1b67"></a>
@@ -540,6 +627,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Number of columns advanced when a tab character is encountered. </p>
 
 </div>
 </div>

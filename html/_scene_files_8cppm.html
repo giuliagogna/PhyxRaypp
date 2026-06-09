@@ -131,6 +131,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('_scene_files_8
 <code>import <a class="el" href="_color_8cppm_source.html">Color</a>;</code><br />
 <code>import <a class="el" href="_b_r_d_f_8cppm_source.html">BRDF</a>;</code><br />
 <code>import <a class="el" href="_shape_8cppm_source.html">Shape</a>;</code><br />
+<code>import <a class="el" href="auxiliary__functions_8cppm_source.html">auxiliary_functions</a>;</code><br />
 <code>import std;</code><br />
 </div>
 <p><a href="_scene_files_8cppm_source.html">Go to the source code of this file.</a></p>
@@ -138,27 +139,27 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('_scene_files_8
 <tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:SourceLocation" id="r_SourceLocation"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_source_location.html">SourceLocation</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Represents a specific position within a source file. Used to precisely locate syntax errors for the user. This class has the following fields:  <a href="struct_source_location.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Represents a position inside a scene source file.  <a href="struct_source_location.html#details">More...</a><br /></td></tr>
 <tr class="memitem:Token" id="r_Token"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_token.html">Token</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Abstract base class representing a single lexical token.  <a href="struct_token.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base class for all lexical tokens.  <a href="struct_token.html#details">More...</a><br /></td></tr>
 <tr class="memitem:StopToken" id="r_StopToken"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_stop_token.html">StopToken</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="struct_token.html" title="Abstract base class representing a single lexical token.">Token</a> signaling the end of the input stream (EOF).  <a href="struct_stop_token.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="struct_token.html" title="Base class for all lexical tokens.">Token</a> signaling the end of the input stream (EOF).  <a href="struct_stop_token.html#details">More...</a><br /></td></tr>
 <tr class="memitem:IdentifierToken" id="r_IdentifierToken"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_identifier_token.html">IdentifierToken</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="struct_token.html" title="Abstract base class representing a single lexical token.">Token</a> containing an identifier (e.g., custom variable or material names).  <a href="struct_identifier_token.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="struct_token.html" title="Base class for all lexical tokens.">Token</a> containing a user-defined identifier (e.g., custom variable or material names).  <a href="struct_identifier_token.html#details">More...</a><br /></td></tr>
 <tr class="memitem:KeywordToken" id="r_KeywordToken"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_keyword_token.html">KeywordToken</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="struct_token.html" title="Abstract base class representing a single lexical token.">Token</a> containing a reserved language keyword.  <a href="struct_keyword_token.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="struct_token.html" title="Base class for all lexical tokens.">Token</a> containing a reserved language keyword.  <a href="struct_keyword_token.html#details">More...</a><br /></td></tr>
 <tr class="memitem:SymbolToken" id="r_SymbolToken"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_symbol_token.html">SymbolToken</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="struct_token.html" title="Abstract base class representing a single lexical token.">Token</a> containing a syntax symbol (e.g., brackets, commas, equals signs).  <a href="struct_symbol_token.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="struct_token.html" title="Base class for all lexical tokens.">Token</a> containing a syntax symbol (e.g., brackets, commas, equals signs).  <a href="struct_symbol_token.html#details">More...</a><br /></td></tr>
 <tr class="memitem:LiteralNumberToken" id="r_LiteralNumberToken"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_literal_number_token.html">LiteralNumberToken</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="struct_token.html" title="Abstract base class representing a single lexical token.">Token</a> containing a literal floating-point number. NOTE: other numerical types are not supported.  <a href="struct_literal_number_token.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="struct_token.html" title="Base class for all lexical tokens.">Token</a> containing a literal floating-point number.  <a href="struct_literal_number_token.html#details">More...</a><br /></td></tr>
 <tr class="memitem:LiteralStringToken" id="r_LiteralStringToken"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_literal_string_token.html">LiteralStringToken</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="struct_token.html" title="Abstract base class representing a single lexical token.">Token</a> containing a literal string enclosed in quotes (e.g., file paths).  <a href="struct_literal_string_token.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="struct_token.html" title="Base class for all lexical tokens.">Token</a> containing a literal string enclosed in quotes "" (e.g., file paths).  <a href="struct_literal_string_token.html#details">More...</a><br /></td></tr>
 <tr class="memitem:GrammarError" id="r_GrammarError"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_grammar_error.html">GrammarError</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">An error found by the lexer or parser while reading a scene file. Contains the location of the error and a user-friendly message.  <a href="struct_grammar_error.html#details">More...</a><br /></td></tr>
 <tr class="memitem:InputStream" id="r_InputStream"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_input_stream.html">InputStream</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A high-level stream wrapper used to safely parse scene files.  <a href="struct_input_stream.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stream wrapper used by the lexer and parser.  <a href="struct_input_stream.html#details">More...</a><br /></td></tr>
 <tr class="memitem:Scene" id="r_Scene"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_scene.html">Scene</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Represents a fully parsed scene containing all objects needed for rendering.  <a href="struct_scene.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Represents a fully parsed scene ready for rendering.  <a href="struct_scene.html#details">More...</a><br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-typedef-members" class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
@@ -174,75 +175,74 @@ Enumerations</h2></td></tr>
 , <a class="el" href="#a0a395672924ac94ef998770a52e49f42a6f7cea7381e843e2ee0338b4a92b0d43">SPHERE</a>
 , <br />
 &#160;&#160;<a class="el" href="#a0a395672924ac94ef998770a52e49f42afbfd6568f88d940b586c9ddf8f68236d">CUBE</a>
+, <a class="el" href="#a0a395672924ac94ef998770a52e49f42a5b65fe46c5dd90ebcec69c472c3be1d9">MESH</a>
 , <a class="el" href="#a0a395672924ac94ef998770a52e49f42a84a9d8c4d046cae1f87af62f45f07e68">DIFFUSE</a>
 , <a class="el" href="#a0a395672924ac94ef998770a52e49f42a0df54c320628149300093da5e2ff693d">SPECULAR</a>
-, <a class="el" href="#a0a395672924ac94ef998770a52e49f42a891f35a29c3d51d02ffd42dd6dcc69b2">UNIFORM</a>
 , <br />
-&#160;&#160;<a class="el" href="#a0a395672924ac94ef998770a52e49f42ab54cd96ca6d7e95bfb9e8c521fea8b4d">CHECKERED</a>
+&#160;&#160;<a class="el" href="#a0a395672924ac94ef998770a52e49f42a891f35a29c3d51d02ffd42dd6dcc69b2">UNIFORM</a>
+, <a class="el" href="#a0a395672924ac94ef998770a52e49f42ab54cd96ca6d7e95bfb9e8c521fea8b4d">CHECKERED</a>
 , <a class="el" href="#a0a395672924ac94ef998770a52e49f42a23a12f67f614b5518c7f1c2465bf95e3">IMAGE</a>
 , <a class="el" href="#a0a395672924ac94ef998770a52e49f42ad8156d3c6735d75d8a1b8dedd0e79c8b">IDENTITY</a>
-, <a class="el" href="#a0a395672924ac94ef998770a52e49f42a0da044e5b37e6bcb3a8d01dc7362b276">TRANSLATION</a>
 , <br />
-&#160;&#160;<a class="el" href="#a0a395672924ac94ef998770a52e49f42a4e9fde10670d3dff27e4c1bca00ccdc3">ROTATION_X</a>
+&#160;&#160;<a class="el" href="#a0a395672924ac94ef998770a52e49f42a0da044e5b37e6bcb3a8d01dc7362b276">TRANSLATION</a>
+, <a class="el" href="#a0a395672924ac94ef998770a52e49f42a4e9fde10670d3dff27e4c1bca00ccdc3">ROTATION_X</a>
 , <a class="el" href="#a0a395672924ac94ef998770a52e49f42af6ba618135753308cb063b9e2f7802ac">ROTATION_Y</a>
 , <a class="el" href="#a0a395672924ac94ef998770a52e49f42a0ec93ad3e8bf6ae41bb200e3b36cdf0b">ROTATION_Z</a>
-, <a class="el" href="#a0a395672924ac94ef998770a52e49f42ae4738c2e8d13809f2e73485a6c53c24b">SCALING</a>
 , <br />
-&#160;&#160;<a class="el" href="#a0a395672924ac94ef998770a52e49f42addf0d6b21537d984fea6544f58101fa8">CAMERA</a>
+&#160;&#160;<a class="el" href="#a0a395672924ac94ef998770a52e49f42ae4738c2e8d13809f2e73485a6c53c24b">SCALING</a>
+, <a class="el" href="#a0a395672924ac94ef998770a52e49f42addf0d6b21537d984fea6544f58101fa8">CAMERA</a>
 , <a class="el" href="#a0a395672924ac94ef998770a52e49f42ac9643b6ef9ceab12abacac795c0543ec">ORTHOGONAL</a>
 , <a class="el" href="#a0a395672924ac94ef998770a52e49f42ad46c97be63d6c4cb887419a4a3df5347">PERSPECTIVE</a>
-, <a class="el" href="#a0a395672924ac94ef998770a52e49f42ae738c26bf4ce1037fa81b039a915cbf6">FLOAT</a>
 , <br />
-&#160;&#160;<a class="el" href="#a0a395672924ac94ef998770a52e49f42a5b65fe46c5dd90ebcec69c472c3be1d9">MESH</a>
+&#160;&#160;<a class="el" href="#a0a395672924ac94ef998770a52e49f42ae738c26bf4ce1037fa81b039a915cbf6">FLOAT</a>
 , <a class="el" href="#a0a395672924ac94ef998770a52e49f42a87ed58ce5596142e11cb65deb049bb4b">BACKGROUND</a>
 <br />
  }</td></tr>
-<tr class="memdesc:a0a395672924ac94ef998770a52e49f42"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enumeration of all reserved keywords in the scene description language.  <a href="#a0a395672924ac94ef998770a52e49f42">More...</a><br /></td></tr>
+<tr class="memdesc:a0a395672924ac94ef998770a52e49f42"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enumeration of all reserved keywords in the scene language.  <a href="#a0a395672924ac94ef998770a52e49f42">More...</a><br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:a0ab6c249fca580fabeefad42d6cc1633" id="r_a0ab6c249fca580fabeefad42d6cc1633"><td class="memItemLeft"><a class="el" href="test___color_8cpp.html#a3b69631535313e83809cd7746027cc62">std::expected</a>&lt; void, <a class="el" href="struct_grammar_error.html">GrammarError</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a0ab6c249fca580fabeefad42d6cc1633">expect_symbol</a> (<a class="el" href="struct_input_stream.html">InputStream</a> &amp;input_file, char symbol)</td></tr>
-<tr class="memdesc:a0ab6c249fca580fabeefad42d6cc1633"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads a token and validates that it is a <a class="el" href="struct_symbol_token.html" title="Token containing a syntax symbol (e.g., brackets, commas, equals signs).">SymbolToken</a> matching the provided char.  <br /></td></tr>
+<tr class="memdesc:a0ab6c249fca580fabeefad42d6cc1633"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads the next token and verifies that it is the expected symbol.  <br /></td></tr>
 <tr class="memitem:aa32a90a677767ff1bfedaa23ddada8db" id="r_aa32a90a677767ff1bfedaa23ddada8db"><td class="memItemLeft"><a class="el" href="test___color_8cpp.html#a3b69631535313e83809cd7746027cc62">std::expected</a>&lt; <a class="el" href="#a0a395672924ac94ef998770a52e49f42">KeywordEnum</a>, <a class="el" href="struct_grammar_error.html">GrammarError</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#aa32a90a677767ff1bfedaa23ddada8db">expect_keywords</a> (<a class="el" href="struct_input_stream.html">InputStream</a> &amp;input_file, const std::vector&lt; <a class="el" href="#a0a395672924ac94ef998770a52e49f42">KeywordEnum</a> &gt; &amp;expected_keywords)</td></tr>
-<tr class="memdesc:aa32a90a677767ff1bfedaa23ddada8db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads a token and validates that it is a <a class="el" href="struct_keyword_token.html" title="Token containing a reserved language keyword.">KeywordToken</a> matching one of the options.  <br /></td></tr>
+<tr class="memdesc:aa32a90a677767ff1bfedaa23ddada8db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads the next token and verifies that it is one of the expected keywords.  <br /></td></tr>
 <tr class="memitem:a8281e4b5b87feea09b739a44fcbaacd2" id="r_a8281e4b5b87feea09b739a44fcbaacd2"><td class="memItemLeft"><a class="el" href="test___color_8cpp.html#a3b69631535313e83809cd7746027cc62">std::expected</a>&lt; std::string, <a class="el" href="struct_grammar_error.html">GrammarError</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a8281e4b5b87feea09b739a44fcbaacd2">expect_identifier</a> (<a class="el" href="struct_input_stream.html">InputStream</a> &amp;input_file)</td></tr>
-<tr class="memdesc:a8281e4b5b87feea09b739a44fcbaacd2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads a token and validates that it is an <a class="el" href="struct_identifier_token.html" title="Token containing an identifier (e.g., custom variable or material names).">IdentifierToken</a>.  <br /></td></tr>
+<tr class="memdesc:a8281e4b5b87feea09b739a44fcbaacd2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads the next token and verifies that it is an identifier.  <br /></td></tr>
 <tr class="memitem:a337275f57212f0abea68fa9dd992ee87" id="r_a337275f57212f0abea68fa9dd992ee87"><td class="memItemLeft"><a class="el" href="test___color_8cpp.html#a3b69631535313e83809cd7746027cc62">std::expected</a>&lt; std::string, <a class="el" href="struct_grammar_error.html">GrammarError</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a337275f57212f0abea68fa9dd992ee87">expect_string</a> (<a class="el" href="struct_input_stream.html">InputStream</a> &amp;input_file)</td></tr>
-<tr class="memdesc:a337275f57212f0abea68fa9dd992ee87"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads a token and validates that it is a <a class="el" href="struct_literal_string_token.html" title="Token containing a literal string enclosed in quotes (e.g., file paths).">LiteralStringToken</a>.  <br /></td></tr>
+<tr class="memdesc:a337275f57212f0abea68fa9dd992ee87"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads the next token and verifies that it is a string literal.  <br /></td></tr>
 <tr class="memitem:a9447a872f7d2f5738cc26b15386b799d" id="r_a9447a872f7d2f5738cc26b15386b799d"><td class="memItemLeft"><a class="el" href="test___color_8cpp.html#a3b69631535313e83809cd7746027cc62">std::expected</a>&lt; float, <a class="el" href="struct_grammar_error.html">GrammarError</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a9447a872f7d2f5738cc26b15386b799d">expect_number</a> (<a class="el" href="struct_input_stream.html">InputStream</a> &amp;input_file, <a class="el" href="struct_scene.html">Scene</a> &amp;scene)</td></tr>
-<tr class="memdesc:a9447a872f7d2f5738cc26b15386b799d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads a token and checks if it is a literal number or a previously defined float variable.  <br /></td></tr>
+<tr class="memdesc:a9447a872f7d2f5738cc26b15386b799d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads the next token and resolves it to a floating-point value.  <br /></td></tr>
 <tr class="memitem:a959b07a38a3e2dfc6f579ff583e88966" id="r_a959b07a38a3e2dfc6f579ff583e88966"><td class="memItemLeft"><a class="el" href="test___color_8cpp.html#a3b69631535313e83809cd7746027cc62">std::expected</a>&lt; <a class="el" href="struct_vec.html">Vec</a>, <a class="el" href="struct_grammar_error.html">GrammarError</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a959b07a38a3e2dfc6f579ff583e88966">parse_vec</a> (<a class="el" href="struct_input_stream.html">InputStream</a> &amp;input_file, <a class="el" href="struct_scene.html">Scene</a> &amp;scene)</td></tr>
-<tr class="memdesc:a959b07a38a3e2dfc6f579ff583e88966"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a 3D <a class="el" href="module___geometry.html">Geometry</a> vector enclosed in brackets <span class="tt">[x, y, z]</span>.  <br /></td></tr>
+<tr class="memdesc:a959b07a38a3e2dfc6f579ff583e88966"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse a 3D vector from the scene description language.  <br /></td></tr>
 <tr class="memitem:a7882db80f8e121daccd11ba679e46af8" id="r_a7882db80f8e121daccd11ba679e46af8"><td class="memItemLeft"><a class="el" href="test___color_8cpp.html#a3b69631535313e83809cd7746027cc62">std::expected</a>&lt; <a class="el" href="struct_color.html">Color</a>, <a class="el" href="struct_grammar_error.html">GrammarError</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a7882db80f8e121daccd11ba679e46af8">parse_color</a> (<a class="el" href="struct_input_stream.html">InputStream</a> &amp;input_file, <a class="el" href="struct_scene.html">Scene</a> &amp;scene)</td></tr>
-<tr class="memdesc:a7882db80f8e121daccd11ba679e46af8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses an RGB <a class="el" href="struct_color.html" title="RGB color.">Color</a> enclosed in angle brackets <span class="tt">&lt;r, g, b&gt;</span>.  <br /></td></tr>
+<tr class="memdesc:a7882db80f8e121daccd11ba679e46af8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse an RGB color from the scene description language.  <br /></td></tr>
 <tr class="memitem:a04e5e8a93c8a341801b1e1ca96afb486" id="r_a04e5e8a93c8a341801b1e1ca96afb486"><td class="memItemLeft"><a class="el" href="test___color_8cpp.html#a3b69631535313e83809cd7746027cc62">std::expected</a>&lt; std::unique_ptr&lt; <a class="el" href="struct_pigment.html">Pigment</a> &gt;, <a class="el" href="struct_grammar_error.html">GrammarError</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a04e5e8a93c8a341801b1e1ca96afb486">parse_pigment</a> (<a class="el" href="struct_input_stream.html">InputStream</a> &amp;input_file, <a class="el" href="struct_scene.html">Scene</a> &amp;scene)</td></tr>
-<tr class="memdesc:a04e5e8a93c8a341801b1e1ca96afb486"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a <a class="el" href="struct_pigment.html" title="Base class for surface pigments.">Pigment</a> type (uniform, checkered, or image mapping).  <br /></td></tr>
+<tr class="memdesc:a04e5e8a93c8a341801b1e1ca96afb486"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse a pigment definition.  <br /></td></tr>
 <tr class="memitem:a6a8ac7d09c5ecca2666298c8ba0d7da6" id="r_a6a8ac7d09c5ecca2666298c8ba0d7da6"><td class="memItemLeft"><a class="el" href="test___color_8cpp.html#a3b69631535313e83809cd7746027cc62">std::expected</a>&lt; std::unique_ptr&lt; <a class="el" href="struct_b_r_d_f.html">BRDF</a> &gt;, <a class="el" href="struct_grammar_error.html">GrammarError</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a6a8ac7d09c5ecca2666298c8ba0d7da6">parse_brdf</a> (<a class="el" href="struct_input_stream.html">InputStream</a> &amp;input_file, <a class="el" href="struct_scene.html">Scene</a> &amp;scene)</td></tr>
-<tr class="memdesc:a6a8ac7d09c5ecca2666298c8ba0d7da6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a Bidirectional Reflectance Distribution Function (diffuse or specular).  <br /></td></tr>
+<tr class="memdesc:a6a8ac7d09c5ecca2666298c8ba0d7da6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse a <a class="el" href="struct_b_r_d_f.html" title="Base class for surface scattering models.">BRDF</a> definition.  <br /></td></tr>
 <tr class="memitem:aa1b56857642d296078c116737f49e8e6" id="r_aa1b56857642d296078c116737f49e8e6"><td class="memItemLeft"><a class="el" href="test___color_8cpp.html#a3b69631535313e83809cd7746027cc62">std::expected</a>&lt; std::pair&lt; std::string, <a class="el" href="struct_material.html">Material</a> &gt;, <a class="el" href="struct_grammar_error.html">GrammarError</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#aa1b56857642d296078c116737f49e8e6">parse_material</a> (<a class="el" href="struct_input_stream.html">InputStream</a> &amp;input_file, <a class="el" href="struct_scene.html">Scene</a> &amp;scene)</td></tr>
-<tr class="memdesc:aa1b56857642d296078c116737f49e8e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a <a class="el" href="struct_material.html" title="Surface material.">Material</a> containing its identifier, <a class="el" href="struct_b_r_d_f.html" title="Base class for surface scattering models.">BRDF</a>, and Emitted Radiance pigment.  <br /></td></tr>
+<tr class="memdesc:aa1b56857642d296078c116737f49e8e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse a material definition.  <br /></td></tr>
 <tr class="memitem:ac178462a022ac5ddd83575a48a71e96a" id="r_ac178462a022ac5ddd83575a48a71e96a"><td class="memItemLeft"><a class="el" href="test___color_8cpp.html#a3b69631535313e83809cd7746027cc62">std::expected</a>&lt; <a class="el" href="struct_transformation.html">Transformation</a>, <a class="el" href="struct_grammar_error.html">GrammarError</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ac178462a022ac5ddd83575a48a71e96a">parse_transformation</a> (<a class="el" href="struct_input_stream.html">InputStream</a> &amp;input_file, <a class="el" href="struct_scene.html">Scene</a> &amp;scene)</td></tr>
-<tr class="memdesc:ac178462a022ac5ddd83575a48a71e96a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses an LL(1) chain of affine transformations connected by '*'.  <br /></td></tr>
+<tr class="memdesc:ac178462a022ac5ddd83575a48a71e96a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse a chain of affine transformations.  <br /></td></tr>
 <tr class="memitem:a2663e9baaf254e6dd177881e9b1981a3" id="r_a2663e9baaf254e6dd177881e9b1981a3"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
 <tr class="memitem:a2663e9baaf254e6dd177881e9b1981a3 template"><td class="memItemLeft"><a class="el" href="test___color_8cpp.html#a3b69631535313e83809cd7746027cc62">std::expected</a>&lt; std::unique_ptr&lt; <a class="el" href="struct_shape.html">Shape</a> &gt;, <a class="el" href="struct_grammar_error.html">GrammarError</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a2663e9baaf254e6dd177881e9b1981a3">parse_shape</a> (<a class="el" href="struct_input_stream.html">InputStream</a> &amp;input_file, <a class="el" href="struct_scene.html">Scene</a> &amp;scene)</td></tr>
-<tr class="memdesc:a2663e9baaf254e6dd177881e9b1981a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a specific shape geometry and its applied material from the input stream.  <br /></td></tr>
+<tr class="memdesc:a2663e9baaf254e6dd177881e9b1981a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse a geometric shape instance and bind it to a material.  <br /></td></tr>
 <tr class="memitem:a3f72540b120e931cd66bfeb481a85ead" id="r_a3f72540b120e931cd66bfeb481a85ead"><td class="memItemLeft"><a class="el" href="test___color_8cpp.html#a3b69631535313e83809cd7746027cc62">std::expected</a>&lt; std::unique_ptr&lt; <a class="el" href="struct_shape.html">Shape</a> &gt;, <a class="el" href="struct_grammar_error.html">GrammarError</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a3f72540b120e931cd66bfeb481a85ead">parse_mesh</a> (<a class="el" href="struct_input_stream.html">InputStream</a> &amp;input_file, <a class="el" href="struct_scene.html">Scene</a> &amp;scene)</td></tr>
-<tr class="memdesc:a3f72540b120e931cd66bfeb481a85ead"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a 3D <a class="el" href="struct_mesh.html">Mesh</a> object from an external .obj file.  <br /></td></tr>
+<tr class="memdesc:a3f72540b120e931cd66bfeb481a85ead"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse a mesh loaded from an external OBJ file.  <br /></td></tr>
 <tr class="memitem:ad893913aed8d22802cbb60168d2a81e8" id="r_ad893913aed8d22802cbb60168d2a81e8"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#ad893913aed8d22802cbb60168d2a81e8">is_transformation_keyword</a> (<a class="el" href="#a0a395672924ac94ef998770a52e49f42">KeywordEnum</a> kw)</td></tr>
-<tr class="memdesc:ad893913aed8d22802cbb60168d2a81e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function to check if a keyword belongs to the <a class="el" href="struct_transformation.html" title="Affine transformation storing both a matrix and its inverse. It stores the direct matrix of the trans...">Transformation</a> family.  <br /></td></tr>
+<tr class="memdesc:ad893913aed8d22802cbb60168d2a81e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks whether a keyword can start a transformation expression.  <br /></td></tr>
 <tr class="memitem:aa772d56c92b7d423100443d51de1f697" id="r_aa772d56c92b7d423100443d51de1f697"><td class="memItemLeft"><a class="el" href="test___color_8cpp.html#a3b69631535313e83809cd7746027cc62">std::expected</a>&lt; std::unique_ptr&lt; <a class="el" href="struct_camera.html">Camera</a> &gt;, <a class="el" href="struct_grammar_error.html">GrammarError</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#aa772d56c92b7d423100443d51de1f697">parse_camera</a> (<a class="el" href="struct_input_stream.html">InputStream</a> &amp;input_file, <a class="el" href="struct_scene.html">Scene</a> &amp;scene)</td></tr>
-<tr class="memdesc:aa772d56c92b7d423100443d51de1f697"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a <a class="el" href="struct_camera.html" title="Base class for camera models.">Camera</a> declaration from the scene file.  <br /></td></tr>
+<tr class="memdesc:aa772d56c92b7d423100443d51de1f697"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a camera declaration.  <br /></td></tr>
 <tr class="memitem:a54a27b45b7d0718e8280322697e3fa14" id="r_a54a27b45b7d0718e8280322697e3fa14"><td class="memItemLeft"><a class="el" href="test___color_8cpp.html#a3b69631535313e83809cd7746027cc62">std::expected</a>&lt; <a class="el" href="struct_scene.html">Scene</a>, <a class="el" href="struct_grammar_error.html">GrammarError</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a54a27b45b7d0718e8280322697e3fa14">parse_scene</a> (<a class="el" href="struct_input_stream.html">InputStream</a> &amp;input_file, const std::unordered_map&lt; std::string, float &gt; &amp;overridden_variables={})</td></tr>
-<tr class="memdesc:a54a27b45b7d0718e8280322697e3fa14"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses an entire scene file from top to bottom, building the <a class="el" href="struct_world.html" title="Collection of shapes forming a scene.">World</a>, <a class="el" href="struct_camera.html" title="Base class for camera models.">Camera</a>, and Materials.  <br /></td></tr>
+<tr class="memdesc:a54a27b45b7d0718e8280322697e3fa14"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a complete scene description file.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
 <tr class="memitem:ad7ea7f20846527e6b46d643d5afb201c" id="r_ad7ea7f20846527e6b46d643d5afb201c"><td class="memItemLeft">constexpr std::string_view&#160;</td><td class="memItemRight"><a class="el" href="#ad7ea7f20846527e6b46d643d5afb201c">SYMBOLS</a> = &quot;()&lt;&gt;[],*=;&quot;</td></tr>
 <tr class="memdesc:ad7ea7f20846527e6b46d643d5afb201c"><td class="mdescLeft">&#160;</td><td class="mdescRight">A string view containing all single-character symbols recognized by the language lexer.  <br /></td></tr>
 <tr class="memitem:a49794ee995e44a75b8c71f66eeb75b24" id="r_a49794ee995e44a75b8c71f66eeb75b24"><td class="memItemLeft">const std::unordered_map&lt; std::string, <a class="el" href="#a0a395672924ac94ef998770a52e49f42">KeywordEnum</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a49794ee995e44a75b8c71f66eeb75b24">KEYWORDS</a></td></tr>
-<tr class="memdesc:a49794ee995e44a75b8c71f66eeb75b24"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dictionary linking literal text strings to their corresponding <a class="el" href="#a0a395672924ac94ef998770a52e49f42" title="Enumeration of all reserved keywords in the scene description language.">KeywordEnum</a>.  <br /></td></tr>
+<tr class="memdesc:a49794ee995e44a75b8c71f66eeb75b24"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maps textual keywords appearing in a scene file to their corresponding <a class="el" href="#a0a395672924ac94ef998770a52e49f42" title="Enumeration of all reserved keywords in the scene language.">KeywordEnum</a> values.  <br /></td></tr>
 <tr class="memitem:ae2aac8762a37bb2864f0f19939c19b02" id="r_ae2aac8762a37bb2864f0f19939c19b02"><td class="memItemLeft">const std::unordered_map&lt; <a class="el" href="#a0a395672924ac94ef998770a52e49f42">KeywordEnum</a>, <a class="el" href="#aa10d9f133b86bd516be82adaf0427982">ShapeParserFunc</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ae2aac8762a37bb2864f0f19939c19b02">SHAPE_PARSERS</a></td></tr>
-<tr class="memdesc:ae2aac8762a37bb2864f0f19939c19b02"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static lookup table linking the keyword to the correct template instantiation of <span class="tt"><a class="el" href="#a2663e9baaf254e6dd177881e9b1981a3" title="Parses a specific shape geometry and its applied material from the input stream.">parse_shape</a></span>.  <br /></td></tr>
 </table>
 <a name="doc-typedef-members" id="doc-typedef-members"></a><h2 id="header-doc-typedef-members" class="groupheader">Typedef Documentation</h2>
 <a id="aa10d9f133b86bd516be82adaf0427982" name="aa10d9f133b86bd516be82adaf0427982"></a>
@@ -290,13 +290,14 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Enumeration of all reserved keywords in the scene description language. </p>
+<p>Enumeration of all reserved keywords in the scene language. </p>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a0a395672924ac94ef998770a52e49f42a24d459a81449d7210c8f9a86c2913034" name="a0a395672924ac94ef998770a52e49f42a24d459a81449d7210c8f9a86c2913034"></a>NEW&#160;</td><td class="fielddoc"></td></tr>
 <tr><td class="fieldname"><a id="a0a395672924ac94ef998770a52e49f42ac740ce1ae95095daaa5eb2362f3151b3" name="a0a395672924ac94ef998770a52e49f42ac740ce1ae95095daaa5eb2362f3151b3"></a>MATERIAL&#160;</td><td class="fielddoc"></td></tr>
 <tr><td class="fieldname"><a id="a0a395672924ac94ef998770a52e49f42aad6990fc23cd957328515fde2db852a3" name="a0a395672924ac94ef998770a52e49f42aad6990fc23cd957328515fde2db852a3"></a>PLANE&#160;</td><td class="fielddoc"></td></tr>
 <tr><td class="fieldname"><a id="a0a395672924ac94ef998770a52e49f42a6f7cea7381e843e2ee0338b4a92b0d43" name="a0a395672924ac94ef998770a52e49f42a6f7cea7381e843e2ee0338b4a92b0d43"></a>SPHERE&#160;</td><td class="fielddoc"></td></tr>
 <tr><td class="fieldname"><a id="a0a395672924ac94ef998770a52e49f42afbfd6568f88d940b586c9ddf8f68236d" name="a0a395672924ac94ef998770a52e49f42afbfd6568f88d940b586c9ddf8f68236d"></a>CUBE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a0a395672924ac94ef998770a52e49f42a5b65fe46c5dd90ebcec69c472c3be1d9" name="a0a395672924ac94ef998770a52e49f42a5b65fe46c5dd90ebcec69c472c3be1d9"></a>MESH&#160;</td><td class="fielddoc"></td></tr>
 <tr><td class="fieldname"><a id="a0a395672924ac94ef998770a52e49f42a84a9d8c4d046cae1f87af62f45f07e68" name="a0a395672924ac94ef998770a52e49f42a84a9d8c4d046cae1f87af62f45f07e68"></a>DIFFUSE&#160;</td><td class="fielddoc"></td></tr>
 <tr><td class="fieldname"><a id="a0a395672924ac94ef998770a52e49f42a0df54c320628149300093da5e2ff693d" name="a0a395672924ac94ef998770a52e49f42a0df54c320628149300093da5e2ff693d"></a>SPECULAR&#160;</td><td class="fielddoc"></td></tr>
 <tr><td class="fieldname"><a id="a0a395672924ac94ef998770a52e49f42a891f35a29c3d51d02ffd42dd6dcc69b2" name="a0a395672924ac94ef998770a52e49f42a891f35a29c3d51d02ffd42dd6dcc69b2"></a>UNIFORM&#160;</td><td class="fielddoc"></td></tr>
@@ -312,7 +313,6 @@ Variables</h2></td></tr>
 <tr><td class="fieldname"><a id="a0a395672924ac94ef998770a52e49f42ac9643b6ef9ceab12abacac795c0543ec" name="a0a395672924ac94ef998770a52e49f42ac9643b6ef9ceab12abacac795c0543ec"></a>ORTHOGONAL&#160;</td><td class="fielddoc"></td></tr>
 <tr><td class="fieldname"><a id="a0a395672924ac94ef998770a52e49f42ad46c97be63d6c4cb887419a4a3df5347" name="a0a395672924ac94ef998770a52e49f42ad46c97be63d6c4cb887419a4a3df5347"></a>PERSPECTIVE&#160;</td><td class="fielddoc"></td></tr>
 <tr><td class="fieldname"><a id="a0a395672924ac94ef998770a52e49f42ae738c26bf4ce1037fa81b039a915cbf6" name="a0a395672924ac94ef998770a52e49f42ae738c26bf4ce1037fa81b039a915cbf6"></a>FLOAT&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a0a395672924ac94ef998770a52e49f42a5b65fe46c5dd90ebcec69c472c3be1d9" name="a0a395672924ac94ef998770a52e49f42a5b65fe46c5dd90ebcec69c472c3be1d9"></a>MESH&#160;</td><td class="fielddoc"></td></tr>
 <tr><td class="fieldname"><a id="a0a395672924ac94ef998770a52e49f42a87ed58ce5596142e11cb65deb049bb4b" name="a0a395672924ac94ef998770a52e49f42a87ed58ce5596142e11cb65deb049bb4b"></a>BACKGROUND&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
@@ -342,15 +342,15 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Reads a token and validates that it is an <a class="el" href="struct_identifier_token.html" title="Token containing an identifier (e.g., custom variable or material names).">IdentifierToken</a>. </p>
+<p>Reads the next token and verifies that it is an identifier. </p>
+<p>Identifiers are user-defined names appearing in the scene file, such as material names or variable names.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">input_file</td><td>The <a class="el" href="struct_input_stream.html" title="A high-level stream wrapper used to safely parse scene files.">InputStream</a> to read from. </td></tr>
+    <tr><td class="paramname">input_file</td><td>Stream from which the next token is read.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>The string name of the identifier. </dd></dl>
-<p>Read a token from <span class="tt">input_file</span> and check that it is an identifier.</p>
+<dl class="section return"><dt>Returns</dt><dd>The identifier string, or a <a class="el" href="struct_grammar_error.html" title="An error found by the lexer or parser while reading a scene file. Contains the location of the error ...">GrammarError</a> if the next token is not an <a class="el" href="struct_identifier_token.html" title="Token containing a user-defined identifier (e.g., custom variable or material names).">IdentifierToken</a>. </dd></dl>
 
 </div>
 </div>
@@ -381,15 +381,16 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Reads a token and validates that it is a <a class="el" href="struct_keyword_token.html" title="Token containing a reserved language keyword.">KeywordToken</a> matching one of the options. </p>
+<p>Reads the next token and verifies that it is one of the expected keywords. </p>
+<p>This helper is useful when a grammar rule accepts multiple alternatives, such as different shape types, pigments, transformations, or camera models.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">input_file</td><td>The <a class="el" href="struct_input_stream.html" title="A high-level stream wrapper used to safely parse scene files.">InputStream</a> to read from. </td></tr>
-    <tr><td class="paramname">expected_keywords</td><td>A vector of valid KeywordEnums. </td></tr>
+    <tr><td class="paramname">input_file</td><td>Stream from which the next token is read. </td></tr>
+    <tr><td class="paramname">expected_keywords</td><td>Set of keywords accepted by the current grammar rule.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>The specific <a class="el" href="#a0a395672924ac94ef998770a52e49f42" title="Enumeration of all reserved keywords in the scene description language.">KeywordEnum</a> that was found. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>The keyword that was found, or a <a class="el" href="struct_grammar_error.html" title="An error found by the lexer or parser while reading a scene file. Contains the location of the error ...">GrammarError</a> if the next token is not a keyword or does not belong to the allowed set. </dd></dl>
 
 </div>
 </div>
@@ -420,15 +421,20 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Reads a token and checks if it is a literal number or a previously defined float variable. </p>
+<p>Reads the next token and resolves it to a floating-point value. </p>
+<p>The token may be either:</p><ul>
+<li>a numeric literal directly appearing in the scene file, or</li>
+<li>an identifier referring to a previously defined float variable.</li>
+</ul>
+<p>If an identifier is encountered, its value is looked up in the scene's variable table.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">input_file</td><td>The <a class="el" href="struct_input_stream.html" title="A high-level stream wrapper used to safely parse scene files.">InputStream</a> to read from. </td></tr>
-    <tr><td class="paramname">scene</td><td>The <a class="el" href="struct_scene.html" title="Represents a fully parsed scene containing all objects needed for rendering.">Scene</a> dictionary containing saved variables. </td></tr>
+    <tr><td class="paramname">input_file</td><td>Stream from which the next token is read. </td></tr>
+    <tr><td class="paramname">scene</td><td><a class="el" href="struct_scene.html" title="Represents a fully parsed scene ready for rendering.">Scene</a> containing the currently defined float variables.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>The floating point value. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>The resolved floating-point value, or a <a class="el" href="struct_grammar_error.html" title="An error found by the lexer or parser while reading a scene file. Contains the location of the error ...">GrammarError</a> if the token is neither a number nor a valid variable name. </dd></dl>
 
 </div>
 </div>
@@ -455,14 +461,15 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Reads a token and validates that it is a <a class="el" href="struct_literal_string_token.html" title="Token containing a literal string enclosed in quotes (e.g., file paths).">LiteralStringToken</a>. </p>
+<p>Reads the next token and verifies that it is a string literal. </p>
+<p>String literals are enclosed in double quotes "" and are typically used for file paths or external resource names.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">input_file</td><td>The <a class="el" href="struct_input_stream.html" title="A high-level stream wrapper used to safely parse scene files.">InputStream</a> to read from. </td></tr>
+    <tr><td class="paramname">input_file</td><td>Stream from which the next token is read.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>The string value parsed from the quotes. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>The string value without quotation marks, or a <a class="el" href="struct_grammar_error.html" title="An error found by the lexer or parser while reading a scene file. Contains the location of the error ...">GrammarError</a> if the next token is not a <a class="el" href="struct_literal_string_token.html" title="Token containing a literal string enclosed in quotes &quot;&quot; (e.g., file paths).">LiteralStringToken</a>. </dd></dl>
 
 </div>
 </div>
@@ -493,16 +500,16 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Reads a token and validates that it is a <a class="el" href="struct_symbol_token.html" title="Token containing a syntax symbol (e.g., brackets, commas, equals signs).">SymbolToken</a> matching the provided char. </p>
+<p>Reads the next token and verifies that it is the expected symbol. </p>
+<p>This helper is typically used to validate punctuation required by the grammar, such as parentheses, commas, assignment operators, or angle brackets.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">input_file</td><td>The <a class="el" href="struct_input_stream.html" title="A high-level stream wrapper used to safely parse scene files.">InputStream</a> to read from. </td></tr>
-    <tr><td class="paramname">symbol</td><td>The exact character symbol expected (e.g., '(', ')', '='). </td></tr>
+    <tr><td class="paramname">input_file</td><td>Stream from which the next token is read. </td></tr>
+    <tr><td class="paramname">symbol</td><td>The symbol expected by the grammar rule.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>An empty expected object on success, or a <a class="el" href="struct_grammar_error.html" title="An error found by the lexer or parser while reading a scene file. Contains the location of the error ...">GrammarError</a> if mismatched. </dd></dl>
-<p>Read a token from <span class="tt">input_file</span> and check that it matches <span class="tt">symbol</span>.</p>
+<dl class="section return"><dt>Returns</dt><dd>Success if the next token is a <a class="el" href="struct_symbol_token.html" title="Token containing a syntax symbol (e.g., brackets, commas, equals signs).">SymbolToken</a> matching the requested character; otherwise a <a class="el" href="struct_grammar_error.html" title="An error found by the lexer or parser while reading a scene file. Contains the location of the error ...">GrammarError</a>. </dd></dl>
 
 </div>
 </div>
@@ -529,7 +536,15 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Helper function to check if a keyword belongs to the <a class="el" href="struct_transformation.html" title="Affine transformation storing both a matrix and its inverse. It stores the direct matrix of the trans...">Transformation</a> family. </p>
+<p>Checks whether a keyword can start a transformation expression. </p>
+<p>Used during LL(1) lookahead parsing to distinguish optional transformation arguments from numerical camera parameters.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">kw</td><td>Keyword to test. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true if the keyword belongs to the transformation family. </dd></dl>
 
 </div>
 </div>
@@ -560,15 +575,18 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Parses a Bidirectional Reflectance Distribution Function (diffuse or specular). </p>
+<p>Parse a <a class="el" href="struct_b_r_d_f.html" title="Base class for surface scattering models.">BRDF</a> definition. </p>
+<p>Supported grammar: </p><pre class="fragment">diffuse(pigment)
+specular(pigment)
+</pre><p>where pigment is any valid pigment definition accepted by <a class="el" href="#a04e5e8a93c8a341801b1e1ca96afb486" title="Parse a pigment definition.">parse_pigment()</a>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">input_file</td><td>The <a class="el" href="struct_input_stream.html" title="A high-level stream wrapper used to safely parse scene files.">InputStream</a>. </td></tr>
-    <tr><td class="paramname">scene</td><td>The active <a class="el" href="struct_scene.html" title="Represents a fully parsed scene containing all objects needed for rendering.">Scene</a> object. </td></tr>
+    <tr><td class="paramname">input_file</td><td>Source stream positioned at a <a class="el" href="struct_b_r_d_f.html" title="Base class for surface scattering models.">BRDF</a> keyword. </td></tr>
+    <tr><td class="paramname">scene</td><td><a class="el" href="struct_scene.html" title="Represents a fully parsed scene ready for rendering.">Scene</a> context used for variable lookup.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A unique pointer to the polymorphic <a class="el" href="struct_b_r_d_f.html" title="Base class for surface scattering models.">BRDF</a> object. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A polymorphic <a class="el" href="struct_b_r_d_f.html" title="Base class for surface scattering models.">BRDF</a> instance, or a <a class="el" href="struct_grammar_error.html" title="An error found by the lexer or parser while reading a scene file. Contains the location of the error ...">GrammarError</a> if the syntax is invalid. </dd></dl>
 
 </div>
 </div>
@@ -599,15 +617,20 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Parses a <a class="el" href="struct_camera.html" title="Base class for camera models.">Camera</a> declaration from the scene file. </p>
+<p>Parses a camera declaration. </p>
+<p>Supported syntax:</p>
+<p>camera(orthogonal) camera(orthogonal, aspect_ratio) camera(orthogonal, aspect_ratio, transformation) camera(orthogonal, transformation)</p>
+<p>camera(perspective) camera(perspective, aspect_ratio) camera(perspective, aspect_ratio, distance) camera(perspective, aspect_ratio, distance, transformation) camera(perspective, aspect_ratio, transformation) camera(perspective, transformation)</p>
+<p>Any omitted parameter is replaced with the corresponding camera class default value.</p>
+<p>The parser uses LL(1) lookahead to distinguish whether the next argument represents a numerical parameter or the start of a transformation chain.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">input_file</td><td>The <a class="el" href="struct_input_stream.html" title="A high-level stream wrapper used to safely parse scene files.">InputStream</a>. </td></tr>
-    <tr><td class="paramname">scene</td><td>The active <a class="el" href="struct_scene.html" title="Represents a fully parsed scene containing all objects needed for rendering.">Scene</a> object. </td></tr>
+    <tr><td class="paramname">input_file</td><td>Input stream currently positioned at the camera parameter list. </td></tr>
+    <tr><td class="paramname">scene</td><td><a class="el" href="struct_scene.html" title="Represents a fully parsed scene ready for rendering.">Scene</a> context used for variable resolution.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A unique pointer to the <a class="el" href="struct_camera.html" title="Base class for camera models.">Camera</a> polymorphism wrapper. Aspect ratio, distance, and transformation are all optional. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A dynamically allocated <a class="el" href="struct_camera.html" title="Base class for camera models.">Camera</a> instance wrapped in a std::unique_ptr, or a <a class="el" href="struct_grammar_error.html" title="An error found by the lexer or parser while reading a scene file. Contains the location of the error ...">GrammarError</a> if the syntax is invalid. </dd></dl>
 
 </div>
 </div>
@@ -638,15 +661,17 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Parses an RGB <a class="el" href="struct_color.html" title="RGB color.">Color</a> enclosed in angle brackets <span class="tt">&lt;r, g, b&gt;</span>. </p>
+<p>Parse an RGB color from the scene description language. </p>
+<p>Expected grammar: </p><pre class="fragment">&lt; number , number , number &gt;
+</pre><p>where each component may be either a numeric literal or a previously defined float variable.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">input_file</td><td>The <a class="el" href="struct_input_stream.html" title="A high-level stream wrapper used to safely parse scene files.">InputStream</a> pointing to the color text. </td></tr>
-    <tr><td class="paramname">scene</td><td>The <a class="el" href="struct_scene.html" title="Represents a fully parsed scene containing all objects needed for rendering.">Scene</a> object (used for variable lookups). </td></tr>
+    <tr><td class="paramname">input_file</td><td>Source stream currently positioned at '&lt;'. </td></tr>
+    <tr><td class="paramname">scene</td><td><a class="el" href="struct_scene.html" title="Represents a fully parsed scene ready for rendering.">Scene</a> containing variable definitions.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>The constructed <a class="el" href="struct_color.html" title="RGB color.">Color</a> object. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>The parsed <a class="el" href="struct_color.html" title="RGB color.">Color</a> object, or a <a class="el" href="struct_grammar_error.html" title="An error found by the lexer or parser while reading a scene file. Contains the location of the error ...">GrammarError</a> if the syntax is invalid. </dd></dl>
 
 </div>
 </div>
@@ -677,15 +702,31 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Parses a <a class="el" href="struct_material.html" title="Surface material.">Material</a> containing its identifier, <a class="el" href="struct_b_r_d_f.html" title="Base class for surface scattering models.">BRDF</a>, and Emitted Radiance pigment. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Parse a material definition. </p>
+<p>Expected grammar: </p><pre class="fragment">identifier ( brdf [, emitted_radiance] )
+</pre><p>The <a class="el" href="struct_b_r_d_f.html" title="Base class for surface scattering models.">BRDF</a> definition is mandatory. The emitted radiance pigment is optional; if omitted, the material is created with the default emitted radiance.</p>
+<p>Example: </p><pre class="fragment">my_mat(diffuse(uniform(&lt;1,0,0&gt;)))
+
+lamp(diffuse(uniform(&lt;1,1,1&gt;)),
+     uniform(&lt;10,10,10&gt;))
+</pre><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">input_file</td><td>The <a class="el" href="struct_input_stream.html" title="A high-level stream wrapper used to safely parse scene files.">InputStream</a>. </td></tr>
-    <tr><td class="paramname">scene</td><td>The active <a class="el" href="struct_scene.html" title="Represents a fully parsed scene containing all objects needed for rendering.">Scene</a> object. In the scene definition the <span class="tt">emitted_radiance</span> can be omitted: if none is provided, the default black will be applied. </td></tr>
+    <tr><td class="paramname">input_file</td><td>Input stream containing the material definition. </td></tr>
+    <tr><td class="paramname">scene</td><td><a class="el" href="struct_scene.html" title="Represents a fully parsed scene ready for rendering.">Scene</a> currently being constructed. Used to resolve variables and nested scene elements.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A key-value pair of the <a class="el" href="struct_material.html" title="Surface material.">Material</a>'s string identifier and the constructed <a class="el" href="struct_material.html" title="Surface material.">Material</a> object. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A pair containing:<ul>
+<li>the material identifier</li>
+<li>the constructed <a class="el" href="struct_material.html" title="Surface material.">Material</a> object</li>
+</ul>
+</dd></dl>
+<dl class="retval"><dt>Return values</dt><dd>
+  <table class="retval">
+    <tr><td class="paramname">std::unexpected</td><td>If the material syntax is invalid or any nested element (<a class="el" href="struct_b_r_d_f.html" title="Base class for surface scattering models.">BRDF</a> or pigment) cannot be parsed. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -716,17 +757,51 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Parses a 3D <a class="el" href="struct_mesh.html">Mesh</a> object from an external .obj file. </p>
-<p>Reads the transformation, material identifier, and the file path. Optionally accepts two additional integer parameters for the BVH builder: (n_bins, leaf_threshold).</p>
+<p>Parse a mesh loaded from an external OBJ file. </p>
+<p>Expected grammar: </p><pre class="fragment">mesh(
+    "filename.obj",
+    material_name,
+    transformation
+)
+</pre><p>Optional BVH parameters may also be provided: </p><pre class="fragment">mesh(
+    "filename.obj",
+    material_name,
+    transformation,
+    n_bins
+)
+
+mesh(
+    "filename.obj",
+    material_name,
+    transformation,
+    n_bins,
+    leaf_threshold
+)
+</pre><p>If BVH parameters are omitted, the <a class="el" href="struct_mesh.html">Mesh</a> constructor applies its default values.</p>
+<p>Before constructing the mesh, the parser verifies that:</p>
+<ul>
+<li>the OBJ file can be opened;</li>
+<li>the referenced material exists in the scene.</li>
+</ul>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">input_file</td><td>The <a class="el" href="struct_input_stream.html" title="A high-level stream wrapper used to safely parse scene files.">InputStream</a> pointing to the mesh parameters. </td></tr>
-    <tr><td class="paramname">scene</td><td>The active <a class="el" href="struct_scene.html" title="Represents a fully parsed scene containing all objects needed for rendering.">Scene</a> object containing the material dictionary. </td></tr>
+    <tr><td class="paramname">input_file</td><td>Input stream containing the mesh definition. </td></tr>
+    <tr><td class="paramname">scene</td><td><a class="el" href="struct_scene.html" title="Represents a fully parsed scene ready for rendering.">Scene</a> currently being constructed.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A unique pointer to the constructed <a class="el" href="struct_mesh.html">Mesh</a> safely upcast to <a class="el" href="struct_shape.html" title="Base class for all geometric primitives.">Shape</a>. </dd></dl>
-<dl class="section warning"><dt>Warning</dt><dd>Throws a <a class="el" href="struct_grammar_error.html" title="An error found by the lexer or parser while reading a scene file. Contains the location of the error ...">GrammarError</a> if the material is unknown or the file cannot be opened. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A <a class="el" href="struct_mesh.html">Mesh</a> instance safely upcast to <a class="el" href="struct_shape.html" title="Base class for all geometric primitives.">Shape</a>.</dd></dl>
+<dl class="retval"><dt>Return values</dt><dd>
+  <table class="retval">
+    <tr><td class="paramname">std::unexpected</td><td>If:<ul>
+<li>the mesh syntax is invalid;</li>
+<li>the OBJ file cannot be opened;</li>
+<li>the referenced material does not exist. </li>
+</ul>
+</td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -757,15 +832,20 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Parses a <a class="el" href="struct_pigment.html" title="Base class for surface pigments.">Pigment</a> type (uniform, checkered, or image mapping). </p>
+<p>Parse a pigment definition. </p>
+<p>Supported grammar: </p><pre class="fragment">uniform(&lt;r,g,b&gt;)
+checkered(&lt;r,g,b&gt;, &lt;r,g,b&gt;, subdivisions)
+image("filename.pfm")
+</pre><p>Depending on the keyword, constructs the corresponding Pigment-derived object.</p>
+<p>Image pigments load the referenced PFM image immediately.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">input_file</td><td>The <a class="el" href="struct_input_stream.html" title="A high-level stream wrapper used to safely parse scene files.">InputStream</a> pointing to the pigment keyword. </td></tr>
-    <tr><td class="paramname">scene</td><td>The <a class="el" href="struct_scene.html" title="Represents a fully parsed scene containing all objects needed for rendering.">Scene</a> object. </td></tr>
+    <tr><td class="paramname">input_file</td><td>Source stream positioned at a pigment keyword. </td></tr>
+    <tr><td class="paramname">scene</td><td><a class="el" href="struct_scene.html" title="Represents a fully parsed scene ready for rendering.">Scene</a> context used for variable lookup.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A unique pointer safely wrapped around the polymorphic <a class="el" href="struct_pigment.html" title="Base class for surface pigments.">Pigment</a> object. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A polymorphic <a class="el" href="struct_pigment.html" title="Base class for surface pigments.">Pigment</a> instance, or a <a class="el" href="struct_grammar_error.html" title="An error found by the lexer or parser while reading a scene file. Contains the location of the error ...">GrammarError</a> if the syntax is invalid or an image cannot be loaded. </dd></dl>
 
 </div>
 </div>
@@ -796,16 +876,26 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Parses an entire scene file from top to bottom, building the <a class="el" href="struct_world.html" title="Collection of shapes forming a scene.">World</a>, <a class="el" href="struct_camera.html" title="Base class for camera models.">Camera</a>, and Materials. </p>
-<p>This function acts as the root of the recursive descent parser. It sequentially reads top-level tokens (Float variables, Materials, Cameras, and Shapes) and populates a <a class="el" href="struct_scene.html" title="Represents a fully parsed scene containing all objects needed for rendering.">Scene</a> object.</p>
+<p>Parses a complete scene description file. </p>
+<p>This is the root entry point of the recursive-descent parser. It repeatedly reads top-level declarations until the end of the input stream is reached and constructs the corresponding <a class="el" href="struct_scene.html" title="Represents a fully parsed scene ready for rendering.">Scene</a> object.</p>
+<p>Supported top-level declarations are:</p>
+<p>float material camera background sphere plane cube mesh</p>
+<p>Declarations may appear in any order, subject to the following constraints:</p>
+<ul>
+<li>Materials must be defined before they are referenced by shapes or meshes.</li>
+<li>Float variables must be defined before they are used.</li>
+<li>At most one camera may be defined.</li>
+<li>Command-line overridden variables cannot be redefined inside the scene file.</li>
+</ul>
+<p>The parser performs semantic validation while parsing, including material lookup, variable lookup, duplicate definitions, and top-level grammar checks.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">input_file</td><td>The <a class="el" href="struct_input_stream.html" title="A high-level stream wrapper used to safely parse scene files.">InputStream</a> pointing to the .txt scene file. </td></tr>
-    <tr><td class="paramname">overridden_variables</td><td>An optional dictionary of float variables injected from the command line. </td></tr>
+    <tr><td class="paramname">input_file</td><td>Input stream containing the scene description. </td></tr>
+    <tr><td class="paramname">overridden_variables</td><td>Optional dictionary of variables supplied externally (e.g. from command-line arguments).</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A fully populated <a class="el" href="struct_scene.html" title="Represents a fully parsed scene containing all objects needed for rendering.">Scene</a> object, or a <a class="el" href="struct_grammar_error.html" title="An error found by the lexer or parser while reading a scene file. Contains the location of the error ...">GrammarError</a> if a syntax violation occurs. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A fully populated <a class="el" href="struct_scene.html" title="Represents a fully parsed scene ready for rendering.">Scene</a> object on success, or a <a class="el" href="struct_grammar_error.html" title="An error found by the lexer or parser while reading a scene file. Contains the location of the error ...">GrammarError</a> describing the first parsing or semantic error encountered. </dd></dl>
 
 </div>
 </div>
@@ -838,23 +928,37 @@ template&lt;typename T&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Parses a specific shape geometry and its applied material from the input stream. </p>
-<p>Reads the transformation matrix and material identifier for a shape. Performs a dictionary lookup to bind the shape to an already-defined material in the scene.</p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
+<p>Parse a geometric shape instance and bind it to a material. </p>
+<p>Expected grammar: </p><pre class="fragment">shape ::= '(' material_name ')'
+        | '(' transformation ',' material_name ')'
+</pre><p>The transformation is optional. If omitted, the identity transformation is used.</p>
+<p>The material identifier must refer to a material that has already been defined in the scene.</p>
+<p>Examples: </p><pre class="fragment">sphere(red_material)
+
+sphere(
+    translation([1,0,0]) * rot_y(45),
+    red_material
+)
+</pre><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">T</td><td>The specific <a class="el" href="struct_shape.html" title="Base class for all geometric primitives.">Shape</a> class to instantiate (e.g., <a class="el" href="struct_sphere.html" title="Unit sphere centered at the local origin.">Sphere</a>, <a class="el" href="struct_plane.html" title="Infinite plane lying on the local z = 0 plane.">Plane</a>, <a class="el" href="struct_cube.html" title="Axis-aligned cube spanning [-1,1]^3 in local space.">Cube</a>). </td></tr>
+    <tr><td class="paramname">T</td><td>Concrete <a class="el" href="struct_shape.html" title="Base class for all geometric primitives.">Shape</a> type to instantiate (e.g. <a class="el" href="struct_sphere.html" title="Unit sphere centered at the local origin.">Sphere</a>, <a class="el" href="struct_plane.html" title="Infinite plane lying on the local z = 0 plane.">Plane</a>, <a class="el" href="struct_cube.html" title="Axis-aligned cube spanning [-1,1]^3 in local space.">Cube</a>).</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">input_file</td><td>The input stream currently pointing to the shape's parameter list. </td></tr>
-    <tr><td class="paramname">scene</td><td>The active <a class="el" href="struct_scene.html" title="Represents a fully parsed scene containing all objects needed for rendering.">Scene</a> object containing the material dictionary. </td></tr>
+    <tr><td class="paramname">input_file</td><td>Input stream containing the shape definition. </td></tr>
+    <tr><td class="paramname">scene</td><td><a class="el" href="struct_scene.html" title="Represents a fully parsed scene ready for rendering.">Scene</a> currently being constructed. Used to resolve material references.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A unique pointer to the newly allocated <a class="el" href="struct_shape.html" title="Base class for all geometric primitives.">Shape</a>. </dd></dl>
-<dl class="section warning"><dt>Warning</dt><dd>Throws a <a class="el" href="struct_grammar_error.html" title="An error found by the lexer or parser while reading a scene file. Contains the location of the error ...">GrammarError</a> if the material name is not found in the scene's dictionary. <a class="el" href="struct_transformation.html" title="Affine transformation storing both a matrix and its inverse. It stores the direct matrix of the trans...">Transformation</a> is an optional argument </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A polymorphic <a class="el" href="struct_shape.html" title="Base class for all geometric primitives.">Shape</a> instance of type T.</dd></dl>
+<dl class="retval"><dt>Return values</dt><dd>
+  <table class="retval">
+    <tr><td class="paramname">std::unexpected</td><td>If the shape syntax is invalid or the referenced material does not exist. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -885,15 +989,36 @@ template&lt;typename T&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Parses an LL(1) chain of affine transformations connected by '*'. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Parse a chain of affine transformations. </p>
+<p>Expected grammar: </p><pre class="fragment">transformation ::= elementary_transformation
+                 | elementary_transformation
+                   * elementary_transformation
+                   * ...
+</pre><p>Supported elementary transformations: </p><pre class="fragment">identity
+translation([x,y,z])
+scaling([x,y,z])
+rot_x(angle)
+rot_y(angle)
+rot_z(angle)
+</pre><p>Consecutive transformations are combined through matrix multiplication in the same order in which they appear in the scene description.</p>
+<p>The parser uses one-token lookahead to determine whether additional transformations follow in the chain.</p>
+<p>Example: </p><pre class="fragment">translation([1,0,0])
+* rot_y(45)
+* scaling([2,2,2])
+</pre><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">input_file</td><td>The <a class="el" href="struct_input_stream.html" title="A high-level stream wrapper used to safely parse scene files.">InputStream</a>. </td></tr>
-    <tr><td class="paramname">scene</td><td>The active <a class="el" href="struct_scene.html" title="Represents a fully parsed scene containing all objects needed for rendering.">Scene</a> object. </td></tr>
+    <tr><td class="paramname">input_file</td><td>Input stream containing the transformation chain. </td></tr>
+    <tr><td class="paramname">scene</td><td><a class="el" href="struct_scene.html" title="Represents a fully parsed scene ready for rendering.">Scene</a> currently being constructed. Used to resolve numerical variables appearing in parameters.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>The aggregated composite <a class="el" href="struct_transformation.html" title="Affine transformation storing both a matrix and its inverse. It stores the direct matrix of the trans...">Transformation</a> matrix. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>The composed <a class="el" href="struct_transformation.html" title="Affine transformation storing both a matrix and its inverse. It stores the direct matrix of the trans...">Transformation</a>.</dd></dl>
+<dl class="retval"><dt>Return values</dt><dd>
+  <table class="retval">
+    <tr><td class="paramname">std::unexpected</td><td>If the transformation syntax is invalid or one of the parameters cannot be parsed. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -924,15 +1049,17 @@ template&lt;typename T&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Parses a 3D <a class="el" href="module___geometry.html">Geometry</a> vector enclosed in brackets <span class="tt">[x, y, z]</span>. </p>
+<p>Parse a 3D vector from the scene description language. </p>
+<p>Expected grammar: </p><pre class="fragment">[ number , number , number ]
+</pre><p>where each component may be either a numeric literal or a previously defined float variable.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">input_file</td><td>The <a class="el" href="struct_input_stream.html" title="A high-level stream wrapper used to safely parse scene files.">InputStream</a> pointing to the vector text. </td></tr>
-    <tr><td class="paramname">scene</td><td>The <a class="el" href="struct_scene.html" title="Represents a fully parsed scene containing all objects needed for rendering.">Scene</a> object (used for variable lookups). </td></tr>
+    <tr><td class="paramname">input_file</td><td>Source stream currently positioned at '['. </td></tr>
+    <tr><td class="paramname">scene</td><td><a class="el" href="struct_scene.html" title="Represents a fully parsed scene ready for rendering.">Scene</a> containing variable definitions.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>The constructed <a class="el" href="struct_vec.html" title="3D displacement or direction vector.">Vec</a> object. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>The parsed <a class="el" href="struct_vec.html" title="3D displacement or direction vector.">Vec</a> object, or a <a class="el" href="struct_grammar_error.html" title="An error found by the lexer or parser while reading a scene file. Contains the location of the error ...">GrammarError</a> if the syntax is invalid. </dd></dl>
 
 </div>
 </div>
@@ -962,6 +1089,7 @@ template&lt;typename T&gt; </div>
 <div class="line">    {<span class="stringliteral">&quot;plane&quot;</span>, <a class="code hl_enumvalue" href="#a0a395672924ac94ef998770a52e49f42aad6990fc23cd957328515fde2db852a3">KeywordEnum:: PLANE</a>},</div>
 <div class="line">    {<span class="stringliteral">&quot;sphere&quot;</span>, <a class="code hl_enumvalue" href="#a0a395672924ac94ef998770a52e49f42a6f7cea7381e843e2ee0338b4a92b0d43">KeywordEnum::SPHERE</a>},</div>
 <div class="line">    {<span class="stringliteral">&quot;cube&quot;</span>, <a class="code hl_enumvalue" href="#a0a395672924ac94ef998770a52e49f42afbfd6568f88d940b586c9ddf8f68236d">KeywordEnum::CUBE</a>},</div>
+<div class="line">    {<span class="stringliteral">&quot;mesh&quot;</span>, <a class="code hl_enumvalue" href="#a0a395672924ac94ef998770a52e49f42a5b65fe46c5dd90ebcec69c472c3be1d9">KeywordEnum::MESH</a>},</div>
 <div class="line">    {<span class="stringliteral">&quot;diffuse&quot;</span>, <a class="code hl_enumvalue" href="#a0a395672924ac94ef998770a52e49f42a84a9d8c4d046cae1f87af62f45f07e68">KeywordEnum::DIFFUSE</a>},</div>
 <div class="line">    {<span class="stringliteral">&quot;specular&quot;</span>, <a class="code hl_enumvalue" href="#a0a395672924ac94ef998770a52e49f42a0df54c320628149300093da5e2ff693d">KeywordEnum::SPECULAR</a>},</div>
 <div class="line">    {<span class="stringliteral">&quot;uniform&quot;</span>, <a class="code hl_enumvalue" href="#a0a395672924ac94ef998770a52e49f42a891f35a29c3d51d02ffd42dd6dcc69b2">KeywordEnum::UNIFORM</a>},</div>
@@ -977,33 +1105,32 @@ template&lt;typename T&gt; </div>
 <div class="line">    {<span class="stringliteral">&quot;orthogonal&quot;</span>, <a class="code hl_enumvalue" href="#a0a395672924ac94ef998770a52e49f42ac9643b6ef9ceab12abacac795c0543ec">KeywordEnum::ORTHOGONAL</a>},</div>
 <div class="line">    {<span class="stringliteral">&quot;perspective&quot;</span>, <a class="code hl_enumvalue" href="#a0a395672924ac94ef998770a52e49f42ad46c97be63d6c4cb887419a4a3df5347">KeywordEnum::PERSPECTIVE</a>},</div>
 <div class="line">    {<span class="stringliteral">&quot;float&quot;</span>, <a class="code hl_enumvalue" href="#a0a395672924ac94ef998770a52e49f42ae738c26bf4ce1037fa81b039a915cbf6">KeywordEnum::FLOAT</a>},</div>
-<div class="line">    {<span class="stringliteral">&quot;mesh&quot;</span>, <a class="code hl_enumvalue" href="#a0a395672924ac94ef998770a52e49f42a5b65fe46c5dd90ebcec69c472c3be1d9">KeywordEnum::MESH</a>},</div>
 <div class="line">    {<span class="stringliteral">&quot;background&quot;</span>, <a class="code hl_enumvalue" href="#a0a395672924ac94ef998770a52e49f42a87ed58ce5596142e11cb65deb049bb4b">KeywordEnum::BACKGROUND</a>}</div>
 <div class="line">}</div>
-<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42a0da044e5b37e6bcb3a8d01dc7362b276"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42a0da044e5b37e6bcb3a8d01dc7362b276">KeywordEnum::TRANSLATION</a></div><div class="ttdeci">@ TRANSLATION</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:77</div></div>
-<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42a0df54c320628149300093da5e2ff693d"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42a0df54c320628149300093da5e2ff693d">KeywordEnum::SPECULAR</a></div><div class="ttdeci">@ SPECULAR</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:68</div></div>
-<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42a0ec93ad3e8bf6ae41bb200e3b36cdf0b"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42a0ec93ad3e8bf6ae41bb200e3b36cdf0b">KeywordEnum::ROTATION_Z</a></div><div class="ttdeci">@ ROTATION_Z</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:80</div></div>
-<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42a23a12f67f614b5518c7f1c2465bf95e3"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42a23a12f67f614b5518c7f1c2465bf95e3">KeywordEnum::IMAGE</a></div><div class="ttdeci">@ IMAGE</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:73</div></div>
-<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42a24d459a81449d7210c8f9a86c2913034"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42a24d459a81449d7210c8f9a86c2913034">KeywordEnum::NEW</a></div><div class="ttdeci">@ NEW</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:61</div></div>
-<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42a4e9fde10670d3dff27e4c1bca00ccdc3"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42a4e9fde10670d3dff27e4c1bca00ccdc3">KeywordEnum::ROTATION_X</a></div><div class="ttdeci">@ ROTATION_X</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:78</div></div>
-<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42a5b65fe46c5dd90ebcec69c472c3be1d9"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42a5b65fe46c5dd90ebcec69c472c3be1d9">KeywordEnum::MESH</a></div><div class="ttdeci">@ MESH</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:90</div></div>
-<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42a6f7cea7381e843e2ee0338b4a92b0d43"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42a6f7cea7381e843e2ee0338b4a92b0d43">KeywordEnum::SPHERE</a></div><div class="ttdeci">@ SPHERE</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:65</div></div>
-<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42a84a9d8c4d046cae1f87af62f45f07e68"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42a84a9d8c4d046cae1f87af62f45f07e68">KeywordEnum::DIFFUSE</a></div><div class="ttdeci">@ DIFFUSE</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:67</div></div>
-<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42a87ed58ce5596142e11cb65deb049bb4b"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42a87ed58ce5596142e11cb65deb049bb4b">KeywordEnum::BACKGROUND</a></div><div class="ttdeci">@ BACKGROUND</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:91</div></div>
-<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42a891f35a29c3d51d02ffd42dd6dcc69b2"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42a891f35a29c3d51d02ffd42dd6dcc69b2">KeywordEnum::UNIFORM</a></div><div class="ttdeci">@ UNIFORM</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:71</div></div>
-<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42aad6990fc23cd957328515fde2db852a3"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42aad6990fc23cd957328515fde2db852a3">KeywordEnum::PLANE</a></div><div class="ttdeci">@ PLANE</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:64</div></div>
-<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42ab54cd96ca6d7e95bfb9e8c521fea8b4d"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42ab54cd96ca6d7e95bfb9e8c521fea8b4d">KeywordEnum::CHECKERED</a></div><div class="ttdeci">@ CHECKERED</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:72</div></div>
-<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42ac740ce1ae95095daaa5eb2362f3151b3"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42ac740ce1ae95095daaa5eb2362f3151b3">KeywordEnum::MATERIAL</a></div><div class="ttdeci">@ MATERIAL</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:63</div></div>
-<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42ac9643b6ef9ceab12abacac795c0543ec"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42ac9643b6ef9ceab12abacac795c0543ec">KeywordEnum::ORTHOGONAL</a></div><div class="ttdeci">@ ORTHOGONAL</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:85</div></div>
-<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42ad46c97be63d6c4cb887419a4a3df5347"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42ad46c97be63d6c4cb887419a4a3df5347">KeywordEnum::PERSPECTIVE</a></div><div class="ttdeci">@ PERSPECTIVE</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:86</div></div>
-<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42ad8156d3c6735d75d8a1b8dedd0e79c8b"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42ad8156d3c6735d75d8a1b8dedd0e79c8b">KeywordEnum::IDENTITY</a></div><div class="ttdeci">@ IDENTITY</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:76</div></div>
-<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42addf0d6b21537d984fea6544f58101fa8"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42addf0d6b21537d984fea6544f58101fa8">KeywordEnum::CAMERA</a></div><div class="ttdeci">@ CAMERA</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:84</div></div>
-<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42ae4738c2e8d13809f2e73485a6c53c24b"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42ae4738c2e8d13809f2e73485a6c53c24b">KeywordEnum::SCALING</a></div><div class="ttdeci">@ SCALING</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:81</div></div>
-<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42ae738c26bf4ce1037fa81b039a915cbf6"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42ae738c26bf4ce1037fa81b039a915cbf6">KeywordEnum::FLOAT</a></div><div class="ttdeci">@ FLOAT</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:88</div></div>
-<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42af6ba618135753308cb063b9e2f7802ac"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42af6ba618135753308cb063b9e2f7802ac">KeywordEnum::ROTATION_Y</a></div><div class="ttdeci">@ ROTATION_Y</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:79</div></div>
-<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42afbfd6568f88d940b586c9ddf8f68236d"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42afbfd6568f88d940b586c9ddf8f68236d">KeywordEnum::CUBE</a></div><div class="ttdeci">@ CUBE</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:66</div></div>
+<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42a0da044e5b37e6bcb3a8d01dc7362b276"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42a0da044e5b37e6bcb3a8d01dc7362b276">KeywordEnum::TRANSLATION</a></div><div class="ttdeci">@ TRANSLATION</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:82</div></div>
+<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42a0df54c320628149300093da5e2ff693d"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42a0df54c320628149300093da5e2ff693d">KeywordEnum::SPECULAR</a></div><div class="ttdeci">@ SPECULAR</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:73</div></div>
+<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42a0ec93ad3e8bf6ae41bb200e3b36cdf0b"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42a0ec93ad3e8bf6ae41bb200e3b36cdf0b">KeywordEnum::ROTATION_Z</a></div><div class="ttdeci">@ ROTATION_Z</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:85</div></div>
+<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42a23a12f67f614b5518c7f1c2465bf95e3"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42a23a12f67f614b5518c7f1c2465bf95e3">KeywordEnum::IMAGE</a></div><div class="ttdeci">@ IMAGE</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:78</div></div>
+<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42a24d459a81449d7210c8f9a86c2913034"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42a24d459a81449d7210c8f9a86c2913034">KeywordEnum::NEW</a></div><div class="ttdeci">@ NEW</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:63</div></div>
+<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42a4e9fde10670d3dff27e4c1bca00ccdc3"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42a4e9fde10670d3dff27e4c1bca00ccdc3">KeywordEnum::ROTATION_X</a></div><div class="ttdeci">@ ROTATION_X</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:83</div></div>
+<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42a5b65fe46c5dd90ebcec69c472c3be1d9"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42a5b65fe46c5dd90ebcec69c472c3be1d9">KeywordEnum::MESH</a></div><div class="ttdeci">@ MESH</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:69</div></div>
+<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42a6f7cea7381e843e2ee0338b4a92b0d43"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42a6f7cea7381e843e2ee0338b4a92b0d43">KeywordEnum::SPHERE</a></div><div class="ttdeci">@ SPHERE</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:67</div></div>
+<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42a84a9d8c4d046cae1f87af62f45f07e68"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42a84a9d8c4d046cae1f87af62f45f07e68">KeywordEnum::DIFFUSE</a></div><div class="ttdeci">@ DIFFUSE</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:72</div></div>
+<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42a87ed58ce5596142e11cb65deb049bb4b"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42a87ed58ce5596142e11cb65deb049bb4b">KeywordEnum::BACKGROUND</a></div><div class="ttdeci">@ BACKGROUND</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:95</div></div>
+<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42a891f35a29c3d51d02ffd42dd6dcc69b2"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42a891f35a29c3d51d02ffd42dd6dcc69b2">KeywordEnum::UNIFORM</a></div><div class="ttdeci">@ UNIFORM</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:76</div></div>
+<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42aad6990fc23cd957328515fde2db852a3"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42aad6990fc23cd957328515fde2db852a3">KeywordEnum::PLANE</a></div><div class="ttdeci">@ PLANE</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:66</div></div>
+<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42ab54cd96ca6d7e95bfb9e8c521fea8b4d"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42ab54cd96ca6d7e95bfb9e8c521fea8b4d">KeywordEnum::CHECKERED</a></div><div class="ttdeci">@ CHECKERED</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:77</div></div>
+<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42ac740ce1ae95095daaa5eb2362f3151b3"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42ac740ce1ae95095daaa5eb2362f3151b3">KeywordEnum::MATERIAL</a></div><div class="ttdeci">@ MATERIAL</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:65</div></div>
+<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42ac9643b6ef9ceab12abacac795c0543ec"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42ac9643b6ef9ceab12abacac795c0543ec">KeywordEnum::ORTHOGONAL</a></div><div class="ttdeci">@ ORTHOGONAL</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:90</div></div>
+<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42ad46c97be63d6c4cb887419a4a3df5347"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42ad46c97be63d6c4cb887419a4a3df5347">KeywordEnum::PERSPECTIVE</a></div><div class="ttdeci">@ PERSPECTIVE</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:91</div></div>
+<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42ad8156d3c6735d75d8a1b8dedd0e79c8b"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42ad8156d3c6735d75d8a1b8dedd0e79c8b">KeywordEnum::IDENTITY</a></div><div class="ttdeci">@ IDENTITY</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:81</div></div>
+<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42addf0d6b21537d984fea6544f58101fa8"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42addf0d6b21537d984fea6544f58101fa8">KeywordEnum::CAMERA</a></div><div class="ttdeci">@ CAMERA</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:89</div></div>
+<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42ae4738c2e8d13809f2e73485a6c53c24b"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42ae4738c2e8d13809f2e73485a6c53c24b">KeywordEnum::SCALING</a></div><div class="ttdeci">@ SCALING</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:86</div></div>
+<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42ae738c26bf4ce1037fa81b039a915cbf6"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42ae738c26bf4ce1037fa81b039a915cbf6">KeywordEnum::FLOAT</a></div><div class="ttdeci">@ FLOAT</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:94</div></div>
+<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42af6ba618135753308cb063b9e2f7802ac"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42af6ba618135753308cb063b9e2f7802ac">KeywordEnum::ROTATION_Y</a></div><div class="ttdeci">@ ROTATION_Y</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:84</div></div>
+<div class="ttc" id="a_scene_files_8cppm_html_a0a395672924ac94ef998770a52e49f42afbfd6568f88d940b586c9ddf8f68236d"><div class="ttname"><a href="#a0a395672924ac94ef998770a52e49f42afbfd6568f88d940b586c9ddf8f68236d">KeywordEnum::CUBE</a></div><div class="ttdeci">@ CUBE</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:68</div></div>
 </div><!-- fragment -->
-<p>Dictionary linking literal text strings to their corresponding <a class="el" href="#a0a395672924ac94ef998770a52e49f42" title="Enumeration of all reserved keywords in the scene description language.">KeywordEnum</a>. </p>
+<p>Maps textual keywords appearing in a scene file to their corresponding <a class="el" href="#a0a395672924ac94ef998770a52e49f42" title="Enumeration of all reserved keywords in the scene language.">KeywordEnum</a> values. </p>
 
 </div>
 </div>
@@ -1034,10 +1161,10 @@ template&lt;typename T&gt; </div>
 <div class="line">    </div>
 <div class="line">    </div>
 <div class="line">}</div>
-<div class="ttc" id="a_scene_files_8cppm_html_a2663e9baaf254e6dd177881e9b1981a3"><div class="ttname"><a href="#a2663e9baaf254e6dd177881e9b1981a3">parse_shape</a></div><div class="ttdeci">std::expected&lt; std::unique_ptr&lt; Shape &gt;, GrammarError &gt; parse_shape(InputStream &amp;input_file, Scene &amp;scene)</div><div class="ttdoc">Parses a specific shape geometry and its applied material from the input stream.</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:952</div></div>
-<div class="ttc" id="a_scene_files_8cppm_html_a3f72540b120e931cd66bfeb481a85ead"><div class="ttname"><a href="#a3f72540b120e931cd66bfeb481a85ead">parse_mesh</a></div><div class="ttdeci">std::expected&lt; std::unique_ptr&lt; Shape &gt;, GrammarError &gt; parse_mesh(InputStream &amp;input_file, Scene &amp;scene)</div><div class="ttdoc">Parses a 3D Mesh object from an external .obj file.</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:1010</div></div>
-</div><!-- fragment -->
-<p>Static lookup table linking the keyword to the correct template instantiation of <span class="tt"><a class="el" href="#a2663e9baaf254e6dd177881e9b1981a3" title="Parses a specific shape geometry and its applied material from the input stream.">parse_shape</a></span>. </p>
+<div class="ttc" id="a_scene_files_8cppm_html_a2663e9baaf254e6dd177881e9b1981a3"><div class="ttname"><a href="#a2663e9baaf254e6dd177881e9b1981a3">parse_shape</a></div><div class="ttdeci">std::expected&lt; std::unique_ptr&lt; Shape &gt;, GrammarError &gt; parse_shape(InputStream &amp;input_file, Scene &amp;scene)</div><div class="ttdoc">Parse a geometric shape instance and bind it to a material.</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:1276</div></div>
+<div class="ttc" id="a_scene_files_8cppm_html_a3f72540b120e931cd66bfeb481a85ead"><div class="ttname"><a href="#a3f72540b120e931cd66bfeb481a85ead">parse_mesh</a></div><div class="ttdeci">std::expected&lt; std::unique_ptr&lt; Shape &gt;, GrammarError &gt; parse_mesh(InputStream &amp;input_file, Scene &amp;scene)</div><div class="ttdoc">Parse a mesh loaded from an external OBJ file.</div><div class="ttdef"><b>Definition</b> SceneFiles.cppm:1370</div></div>
+</div><!-- fragment --><p>Maps shape-related keywords to the parser responsible for constructing the corresponding <a class="el" href="struct_shape.html" title="Base class for all geometric primitives.">Shape</a> instance.</p>
+<p>This table centralizes top-level shape dispatch and avoids long chains of if/else statements when new shape types are added. </p>
 
 </div>
 </div>

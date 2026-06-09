@@ -7,7 +7,7 @@ var searchData=
   ['_5fparse_5fendianness_4',['_parse_endianness',['../struct_h_d_r_image.html#aa364cc6fc031876d74bdc3d463b540e9',1,'HDRImage']]],
   ['_5fparse_5ffloat_5ftoken_5',['_parse_float_token',['../struct_input_stream.html#a51d5cd5c81f4334666f4177c8b1518c8',1,'InputStream']]],
   ['_5fparse_5fimg_5fsize_6',['_parse_img_size',['../struct_h_d_r_image.html#a5d4c93330e13b5e0ac77cc4fc5054d04',1,'HDRImage']]],
-  ['_5fparse_5fkeyword_5for_5fidentifier_5ftoken_7',['_parse_keyword_or_identifier_token',['../struct_input_stream.html#a570bac5dc65d6b5949eff1cce00c5df4',1,'InputStream']]],
+  ['_5fparse_5fkeyword_5for_5fidentifier_5ftoken_7',['_parse_keyword_or_identifier_token',['../struct_input_stream.html#af17ef001d87a53b538f3ff671858a20e',1,'InputStream']]],
   ['_5fparse_5fstring_5ftoken_8',['_parse_string_token',['../struct_input_stream.html#a8047d9da5de694abe020532a1b723d7f',1,'InputStream']]],
   ['_5fpixel_5foffset_9',['_pixel_offset',['../struct_h_d_r_image.html#a9544dbc651c27dbe1145c1a0e120c4de',1,'HDRImage']]],
   ['_5fread_5ffloat_10',['_read_float',['../struct_h_d_r_image.html#a0e97a986cc649ef56433d19ff61913c7',1,'HDRImage']]],

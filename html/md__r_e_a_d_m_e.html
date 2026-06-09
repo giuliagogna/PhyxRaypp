@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('md__r_e_a_d_m_
  <h1 class="doxsection"><a class="anchor" id="autotoc_md28"></a>
 Features</h1>
 <ul>
-<li><b><a class="el" href="struct_scene.html" title="Represents a fully parsed scene containing all objects needed for rendering.">Scene</a> Parsing:</b> Scenes are loaded at runtime from <span class="tt">.txt</span> files, supporting custom variables, material definitions, transformations, and camera positioning.</li>
+<li><b><a class="el" href="struct_scene.html" title="Represents a fully parsed scene ready for rendering.">Scene</a> Parsing:</b> Scenes are loaded at runtime from <span class="tt">.txt</span> files, supporting custom variables, material definitions, transformations, and camera positioning.</li>
 <li><b>Rendering Algorithms:</b><ul>
 <li><span class="tt">onoff</span>: Binary hit/miss visibility testing (generates a black-and-white silhouette).</li>
 <li><span class="tt">flat</span>: Flat shading that resolves surface coordinates to apply solid colors or UV-mapped HDR textures without calculating light bounces.</li>
@@ -217,7 +217,7 @@ Scene Description Language</h1>
 <div class="line"># Build a material and apply it to a shape</div>
 <div class="line">material red_plastic(diffuse(uniform(&lt;0.8, 0.1, 0.1&gt;)));</div>
 <div class="line">sphere(translation([0.0, 1.0, 0.0]) * scaling([2.0, 2.0, 2.0]), red_plastic);</div>
-</div><!-- fragment --><p> For a complete guide on all available shapes, materials, and syntax rules, please see the <a class="el" href="struct_scene.html" title="Represents a fully parsed scene containing all objects needed for rendering.">Scene</a> Language Documentation in <span class="tt"><a class="el" href="_s_c_e_n_e___l_a_n_g_u_a_g_e_8md.html">docs/SCENE_LANGUAGE.md</a></span>.</p>
+</div><!-- fragment --><p> For a complete guide on all available shapes, materials, and syntax rules, please see the <a class="el" href="struct_scene.html" title="Represents a fully parsed scene ready for rendering.">Scene</a> Language Documentation in <span class="tt"><a class="el" href="_s_c_e_n_e___l_a_n_g_u_a_g_e_8md.html">docs/SCENE_LANGUAGE.md</a></span>.</p>
 <hr  />
  <h1 class="doxsection"><a class="anchor" id="autotoc_md43"></a>
 Testing</h1>

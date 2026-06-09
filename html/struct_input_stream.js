@@ -2,7 +2,7 @@ var struct_input_stream =
 [
     [ "InputStream", "struct_input_stream.html#a4986fc84da57bfef1710d312ee257710", null ],
     [ "_parse_float_token", "struct_input_stream.html#a51d5cd5c81f4334666f4177c8b1518c8", null ],
-    [ "_parse_keyword_or_identifier_token", "struct_input_stream.html#a570bac5dc65d6b5949eff1cce00c5df4", null ],
+    [ "_parse_keyword_or_identifier_token", "struct_input_stream.html#af17ef001d87a53b538f3ff671858a20e", null ],
     [ "_parse_string_token", "struct_input_stream.html#a8047d9da5de694abe020532a1b723d7f", null ],
     [ "_update_location", "struct_input_stream.html#a62af616bf48b24d634fff12c8a601136", null ],
     [ "read_char", "struct_input_stream.html#a2ccf15c4fd0df43ec95003db7730d031", null ],
