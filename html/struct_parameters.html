@@ -119,31 +119,47 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('struct_paramet
 </div><!--header-->
 <div class="contents">
 
-<p>Helper class to parse the <a class="el" href="struct_parameters.html" title="Helper class to parse the Parameters provided from CLI.">Parameters</a> provided from CLI.  
+<p>Parsed command-line parameters used to configure program execution.  
  <a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a292a9736164f948a1ba3f683e7cc0902" id="r_a292a9736164f948a1ba3f683e7cc0902"><td class="memItemLeft">std::expected&lt; void, std::string &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a292a9736164f948a1ba3f683e7cc0902">parse_command_line</a> (std::span&lt; char * &gt; args)</td></tr>
+<tr class="memdesc:a292a9736164f948a1ba3f683e7cc0902"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse command-line arguments and populate a <a class="el" href="struct_parameters.html" title="Parsed command-line parameters used to configure program execution.">Parameters</a> structure.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:acf51a3021f1aa0f5f7ed6ca63f729879" id="r_acf51a3021f1aa0f5f7ed6ca63f729879"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#acf51a3021f1aa0f5f7ed6ca63f729879">command</a> = &quot;&quot;</td></tr>
+<tr class="memdesc:acf51a3021f1aa0f5f7ed6ca63f729879"><td class="mdescLeft">&#160;</td><td class="mdescRight">Selected command/subprogram (e.g. "render", "pfm2png", "demo").  <br /></td></tr>
 <tr class="memitem:a987e3bd78e5c907ff081b7372d733ef9" id="r_a987e3bd78e5c907ff081b7372d733ef9"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#a987e3bd78e5c907ff081b7372d733ef9">input_pfm_file_name</a> = &quot;&quot;</td></tr>
+<tr class="memdesc:a987e3bd78e5c907ff081b7372d733ef9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Input PFM image file.  <br /></td></tr>
 <tr class="memitem:aa68e498421b0e782de17f44e5fc827fc" id="r_aa68e498421b0e782de17f44e5fc827fc"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#aa68e498421b0e782de17f44e5fc827fc">input_scene_file_name</a> = &quot;&quot;</td></tr>
+<tr class="memdesc:aa68e498421b0e782de17f44e5fc827fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Input scene description file.  <br /></td></tr>
 <tr class="memitem:a91b91258f03d69287748d11bda7c8d3b" id="r_a91b91258f03d69287748d11bda7c8d3b"><td class="memItemLeft">float&#160;</td><td class="memItemRight"><a class="el" href="#a91b91258f03d69287748d11bda7c8d3b">alpha</a> = 0.2f</td></tr>
+<tr class="memdesc:a91b91258f03d69287748d11bda7c8d3b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tone-mapping alpha parameter.  <br /></td></tr>
 <tr class="memitem:a1c670d4a1b7c1621bf98ad379a0578d8" id="r_a1c670d4a1b7c1621bf98ad379a0578d8"><td class="memItemLeft">float&#160;</td><td class="memItemRight"><a class="el" href="#a1c670d4a1b7c1621bf98ad379a0578d8">gamma</a> = 1.0f</td></tr>
+<tr class="memdesc:a1c670d4a1b7c1621bf98ad379a0578d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gamma-correction exponent.  <br /></td></tr>
 <tr class="memitem:aaee6ae0f9bfc4c0917d69aa649d272f7" id="r_aaee6ae0f9bfc4c0917d69aa649d272f7"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#aaee6ae0f9bfc4c0917d69aa649d272f7">algorithm</a> = &quot;flat&quot;</td></tr>
+<tr class="memdesc:aaee6ae0f9bfc4c0917d69aa649d272f7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rendering algorithm identifier.  <br /></td></tr>
 <tr class="memitem:a808a75564049da3abcdb7e4e273577d4" id="r_a808a75564049da3abcdb7e4e273577d4"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#a808a75564049da3abcdb7e4e273577d4">antialiasing</a> = &quot;no_antialiasing&quot;</td></tr>
+<tr class="memdesc:a808a75564049da3abcdb7e4e273577d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Anti-aliasing mode identifier.  <br /></td></tr>
 <tr class="memitem:a6d185d44363fc4b3c854bc6e441fc8c9" id="r_a6d185d44363fc4b3c854bc6e441fc8c9"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a6d185d44363fc4b3c854bc6e441fc8c9">antialiasing_level</a> = 0</td></tr>
+<tr class="memdesc:a6d185d44363fc4b3c854bc6e441fc8c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Anti-aliasing subdivision level.  <br /></td></tr>
 <tr class="memitem:ad2a4343c4b87e01fc7c0ce0b26543ffa" id="r_ad2a4343c4b87e01fc7c0ce0b26543ffa"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#ad2a4343c4b87e01fc7c0ce0b26543ffa">output_png_file_name</a> = &quot;&quot;</td></tr>
+<tr class="memdesc:ad2a4343c4b87e01fc7c0ce0b26543ffa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Output PNG image file.  <br /></td></tr>
 <tr class="memitem:ac49ff0cd376d169399694e8a4d6c2312" id="r_ac49ff0cd376d169399694e8a4d6c2312"><td class="memItemLeft">std::pair&lt; int, int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ac49ff0cd376d169399694e8a4d6c2312">image_dimension</a> {800, 800}</td></tr>
+<tr class="memdesc:ac49ff0cd376d169399694e8a4d6c2312"><td class="mdescLeft">&#160;</td><td class="mdescRight">Output image dimensions in pixels: {width, height}.  <br /></td></tr>
 <tr class="memitem:a93a3bf44bd4941dc5a67c861e8d416e3" id="r_a93a3bf44bd4941dc5a67c861e8d416e3"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a93a3bf44bd4941dc5a67c861e8d416e3">pathtracer_num_of_rays</a> = 4</td></tr>
+<tr class="memdesc:a93a3bf44bd4941dc5a67c861e8d416e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of rays generated per scattering event.  <br /></td></tr>
 <tr class="memitem:a7d0304e98f8452cb6bb12f7c40b490f0" id="r_a7d0304e98f8452cb6bb12f7c40b490f0"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a7d0304e98f8452cb6bb12f7c40b490f0">pathtracer_max_depth</a> = 4</td></tr>
+<tr class="memdesc:a7d0304e98f8452cb6bb12f7c40b490f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum recursion depth.  <br /></td></tr>
 <tr class="memitem:a0ff45a874a82e65ad418072596d1c323" id="r_a0ff45a874a82e65ad418072596d1c323"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a0ff45a874a82e65ad418072596d1c323">pathtracer_rr_depth</a> = 2</td></tr>
+<tr class="memdesc:a0ff45a874a82e65ad418072596d1c323"><td class="mdescLeft">&#160;</td><td class="mdescRight">Russian roulette activation depth.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Helper class to parse the <a class="el" href="struct_parameters.html" title="Helper class to parse the Parameters provided from CLI.">Parameters</a> provided from CLI. </p>
+<div class="textblock"><p>Parsed command-line parameters used to configure program execution. </p>
+<p>This structure stores all options extracted from the CLI, including input/output files, rendering settings, image dimensions, and path-tracing configuration parameters.</p>
+<p>Members are initialized with the same default values used when the corresponding command-line option is omitted. </p>
 </div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
 <a id="a292a9736164f948a1ba3f683e7cc0902" name="a292a9736164f948a1ba3f683e7cc0902"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a292a9736164f948a1ba3f683e7cc0902">&#9670;&#160;</a></span>parse_command_line()</h2>
@@ -168,6 +184,26 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Parse command-line arguments and populate a <a class="el" href="struct_parameters.html" title="Parsed command-line parameters used to configure program execution.">Parameters</a> structure. </p>
+<p>Supported commands:</p><ul>
+<li>pfm2png</li>
+<li>render</li>
+</ul>
+<p>Supported optional flags:</p><ul>
+<li>&ndash;output</li>
+<li>&ndash;algorithm</li>
+<li>&ndash;antialiasing</li>
+<li>&ndash;dimensions</li>
+<li>&ndash;pathtracer_params</li>
+</ul>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">args</td><td>Command-line arguments. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Parsed <a class="el" href="struct_parameters.html" title="Parsed command-line parameters used to configure program execution.">Parameters</a> object or an error description. </dd></dl>
+
 </div>
 </div>
 <a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
@@ -183,6 +219,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Rendering algorithm identifier. </p>
+
 </div>
 </div>
 <a id="a91b91258f03d69287748d11bda7c8d3b" name="a91b91258f03d69287748d11bda7c8d3b"></a>
@@ -196,6 +234,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Tone-mapping alpha parameter. </p>
 
 </div>
 </div>
@@ -211,6 +251,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Anti-aliasing mode identifier. </p>
+
 </div>
 </div>
 <a id="a6d185d44363fc4b3c854bc6e441fc8c9" name="a6d185d44363fc4b3c854bc6e441fc8c9"></a>
@@ -224,6 +266,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Anti-aliasing subdivision level. </p>
 
 </div>
 </div>
@@ -239,6 +283,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Selected command/subprogram (e.g. "render", "pfm2png", "demo"). </p>
+
 </div>
 </div>
 <a id="a1c670d4a1b7c1621bf98ad379a0578d8" name="a1c670d4a1b7c1621bf98ad379a0578d8"></a>
@@ -252,6 +298,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Gamma-correction exponent. </p>
 
 </div>
 </div>
@@ -267,6 +315,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Output image dimensions in pixels: {width, height}. </p>
+
 </div>
 </div>
 <a id="a987e3bd78e5c907ff081b7372d733ef9" name="a987e3bd78e5c907ff081b7372d733ef9"></a>
@@ -280,6 +330,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Input PFM image file. </p>
 
 </div>
 </div>
@@ -295,6 +347,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Input scene description file. </p>
+
 </div>
 </div>
 <a id="ad2a4343c4b87e01fc7c0ce0b26543ffa" name="ad2a4343c4b87e01fc7c0ce0b26543ffa"></a>
@@ -308,6 +362,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Output PNG image file. </p>
 
 </div>
 </div>
@@ -323,6 +379,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Maximum recursion depth. </p>
+
 </div>
 </div>
 <a id="a93a3bf44bd4941dc5a67c861e8d416e3" name="a93a3bf44bd4941dc5a67c861e8d416e3"></a>
@@ -337,6 +395,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Number of rays generated per scattering event. </p>
+
 </div>
 </div>
 <a id="a0ff45a874a82e65ad418072596d1c323" name="a0ff45a874a82e65ad418072596d1c323"></a>
@@ -350,6 +410,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Russian roulette activation depth. </p>
 
 </div>
 </div>
