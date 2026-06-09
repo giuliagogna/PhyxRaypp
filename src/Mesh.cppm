@@ -89,22 +89,28 @@ export struct BVHAABB {
     }
 };
 
-// A point in the mesh cloud, with respective normal
-export struct TrianglePoint {
-    Point point;
-    Normal normal;
+// Need to support sharp edges: this type has no more sense
+// // A point in the mesh cloud, with respective normal
+// export struct TrianglePoint {
+//     Point point;
+//     Normal normal;
+//     Vec2D texture;
+// 
+//     bool is_close(const TrianglePoint& other) {
+//         return (point.is_close(other.point) && normal.is_close(other.normal)) && texture.is_close(other.texture);
+//     }
+// };
 
-    bool is_close(const TrianglePoint& other) {
-        return (point.is_close(other.point) && normal.is_close(other.normal));
-    }
-};
-
-// Indexes to 3 points in the cloud to form a Triangle
+// Indexes to 3 points in the cloud to form a Triangle, with relative Normals and Vec2D UV texture coordinates
 export struct TriangleIndexes {
-    int i1, i2, i3;
+    int v1, v2, v3; // Point indexes
+    int vn1, vn2, vn3; // Normals indexes
+    int vt1, vt2, vt3; // Texture UV map indexes
 
     bool is_equal(const TriangleIndexes& other) {
-        return (i1 == other.i1 && i2 == other.i2 && i3 == other.i3);
+        return (v1 == other.v1 && v2 == other.v2 && v3 == other.v3 &&
+                vn1 == other.vn1 && vn2 == other.vn2 && vn3 == other.vn3 &&
+                vt1 == other.vt1 && vt2 == other.vt2 && vt3 == other.vt3);
     }
 };
 
@@ -118,7 +124,7 @@ inline float get_axis_value(const Point& p, int axis) {
     switch (axis) {
         case 0: return p.x;
         case 1: return p.y;
-        default: return p.z; // Assumiamo 2 o qualsiasi fallback su Z
+        default: return p.z;
     }
 }
 
@@ -132,25 +138,24 @@ export struct BVHNode { // RP: seems that alignas() is a secret weapon for perfo
     int minIndex = 0; // This is the first index of the triangle_point_indexes vector that belongs to this node
     int maxIndex = 0; // This is the last index of the triangle_point_indexes
 
-//    std::span<TriangleIndexes> triangle_point_indexes;
     bool is_leaf = false;
 
     // Pubblic wrapper to call the private method with the default axis value.
     // This is the only safe call so that the tree is correctly built with the best axis at each step.
     // Thus I put this pubblic to avoid calling the dangerous private method.
-    void Extend_tree_wrapper(std::vector<BVHNode>& current_nodes, const std::vector<TrianglePoint>& mesh_points, std::vector<TriangleIndexes>& triangle_point_indexes, const int n_bins, const int is_leaf_threshold = 1) {
+    void Extend_tree_wrapper(std::vector<BVHNode>& current_nodes, const std::vector<Point>& mesh_points, std::vector<TriangleIndexes>& triangle_point_indexes, const int n_bins, const int is_leaf_threshold = 1) {
     
         Extend_tree(current_nodes, current_nodes.size() - 1, mesh_points, triangle_point_indexes, n_bins, is_leaf_threshold);
     }
 private:
     // A B S O L U T E     C I N E M A:
-    // The this logic breaks since it's possible that the std::vector reallocates. No way.
+    // The "this->" logic breaks since it's possible that the std::vector reallocates. No way.
     // I just declare it static because I don't want any more problems with the std::vector reallocation.
-    // I just pass the current index to the recursive calls and I don't care about the actual position of the node in the std::vector.
+    // I just pass the current index to the recursive calls.
 
     // I want this private because it's good to call it with the default axis=3. Otherwise it's possible that it
     // does not explore all the casistics correctly (don't cut on the longest axis at each step) and thus it does not build a good tree.
-    static void Extend_tree(std::vector<BVHNode>& current_nodes, int node_index,const std::vector<TrianglePoint>& mesh_points, std::vector<TriangleIndexes>& triangle_point_indexes, const int n_bins, const int is_leaf_threshold = 1, int axis = 3) {
+    static void Extend_tree(std::vector<BVHNode>& current_nodes, int node_index,const std::vector<Point>& mesh_points, std::vector<TriangleIndexes>& triangle_point_indexes, const int n_bins, const int is_leaf_threshold = 1, int axis = 3) {
         current_nodes[node_index].node_index = node_index;
         int minIndex = current_nodes[node_index].minIndex;
         int maxIndex = current_nodes[node_index].maxIndex;
@@ -165,9 +170,9 @@ private:
         for (int i = minIndex; i < maxIndex; ++i) {
             const auto& tri = triangle_point_indexes[i];
 
-            Point centroid = (mesh_points[tri.i1].point +
-                              mesh_points[tri.i2].point.to_vec() +
-                              mesh_points[tri.i3].point.to_vec()) * (1.0f / 3.0f);
+            Point centroid = (mesh_points[tri.v1] +
+                              mesh_points[tri.v2].to_vec() +
+                              mesh_points[tri.v3].to_vec()) * (1.0f / 3.0f);
 
             centroid_bounds.grow(centroid);
         }
@@ -189,18 +194,18 @@ private:
 
         // Select each bin for each triangle based on its centroid
         for (int i = minIndex; i < maxIndex; ++i) {
-            Point centroid = (mesh_points[triangle_point_indexes[i].i1].point +
-                              mesh_points[triangle_point_indexes[i].i2].point.to_vec() +
-                              mesh_points[triangle_point_indexes[i].i3].point.to_vec()) * (1.0f / 3.0f);
+            Point centroid = (mesh_points[triangle_point_indexes[i].v1] +
+                              mesh_points[triangle_point_indexes[i].v2].to_vec() +
+                              mesh_points[triangle_point_indexes[i].v3].to_vec()) * (1.0f / 3.0f);
 
             // Find the bin index where the triangle belongs to
             int bin_index = std::max(0, std::min(n_bins - 1, static_cast<int>((get_axis_value(centroid, axis) - get_axis_value(centroid_bounds.minPoint, axis)) * scale)));
             bins[bin_index].trianglesCount++; // Update the population of the bin
             
             // Grow the AABB of the bin
-            bins[bin_index].bounds.grow(mesh_points[triangle_point_indexes[i].i1].point);
-            bins[bin_index].bounds.grow(mesh_points[triangle_point_indexes[i].i2].point);
-            bins[bin_index].bounds.grow(mesh_points[triangle_point_indexes[i].i3].point);
+            bins[bin_index].bounds.grow(mesh_points[triangle_point_indexes[i].v1]);
+            bins[bin_index].bounds.grow(mesh_points[triangle_point_indexes[i].v2]);
+            bins[bin_index].bounds.grow(mesh_points[triangle_point_indexes[i].v3]);
         }
 
         // SAH formula (to be minimized):
@@ -261,9 +266,9 @@ private:
             int j = maxIndex - 1;
 
             while (i <= j) {
-                Point centroid = (mesh_points[triangle_point_indexes[i].i1].point +
-                                  mesh_points[triangle_point_indexes[i].i2].point.to_vec() +
-                                  mesh_points[triangle_point_indexes[i].i3].point.to_vec()) * (1.0f / 3.0f);
+                Point centroid = (mesh_points[triangle_point_indexes[i].v1] +
+                                  mesh_points[triangle_point_indexes[i].v2].to_vec() +
+                                  mesh_points[triangle_point_indexes[i].v3].to_vec()) * (1.0f / 3.0f);
 
                 if (get_axis_value(centroid, axis) < split_value) {
                     i++;
@@ -303,15 +308,15 @@ private:
         // Update the AABB of the children
         current_nodes[current_nodes[node_index].left_child_index].bounds = BVHAABB();
         for (int i = current_nodes[current_nodes[node_index].left_child_index].minIndex; i < current_nodes[current_nodes[node_index].left_child_index].maxIndex; ++i) {
-            current_nodes[current_nodes[node_index].left_child_index].bounds.grow(mesh_points[triangle_point_indexes[i].i1].point);
-            current_nodes[current_nodes[node_index].left_child_index].bounds.grow(mesh_points[triangle_point_indexes[i].i2].point);
-            current_nodes[current_nodes[node_index].left_child_index].bounds.grow(mesh_points[triangle_point_indexes[i].i3].point);
+            current_nodes[current_nodes[node_index].left_child_index].bounds.grow(mesh_points[triangle_point_indexes[i].v1]);
+            current_nodes[current_nodes[node_index].left_child_index].bounds.grow(mesh_points[triangle_point_indexes[i].v2]);
+            current_nodes[current_nodes[node_index].left_child_index].bounds.grow(mesh_points[triangle_point_indexes[i].v3]);
         }
         current_nodes[current_nodes[node_index].right_child_index].bounds = BVHAABB();
         for (int i = current_nodes[current_nodes[node_index].right_child_index].minIndex; i < current_nodes[current_nodes[node_index].right_child_index].maxIndex; ++i) {
-            current_nodes[current_nodes[node_index].right_child_index].bounds.grow(mesh_points[triangle_point_indexes[i].i1].point);
-            current_nodes[current_nodes[node_index].right_child_index].bounds.grow(mesh_points[triangle_point_indexes[i].i2].point);
-            current_nodes[current_nodes[node_index].right_child_index].bounds.grow(mesh_points[triangle_point_indexes[i].i3].point);
+            current_nodes[current_nodes[node_index].right_child_index].bounds.grow(mesh_points[triangle_point_indexes[i].v1]);
+            current_nodes[current_nodes[node_index].right_child_index].bounds.grow(mesh_points[triangle_point_indexes[i].v2]);
+            current_nodes[current_nodes[node_index].right_child_index].bounds.grow(mesh_points[triangle_point_indexes[i].v3]);
         }
 
         // Call this method to generate the entire tree recursively
@@ -328,7 +333,9 @@ private:
 
 export struct Mesh : Shape {
 
-    std::vector<TrianglePoint> mesh_points;
+    std::vector<Point> mesh_points;
+    std::vector<Normal> mesh_normals;
+    std::vector<Vec2D> mesh_texture_uvs;
     std::vector<TriangleIndexes> triangle_points_indexes;
     std::vector<BVHNode> nodes;
 
@@ -340,16 +347,17 @@ export struct Mesh : Shape {
     Mesh(
         const Transformation& trans,
         std::shared_ptr<Material> material,
-        std::vector<TrianglePoint> points,
+        std::vector<Point> points,
+        std::vector<Normal> normals,
+        std::vector<Vec2D> texture_uvs,
         std::vector<TriangleIndexes> indexes,
         std::vector<BVHNode> bvh_nodes
     ) : Shape(trans, material), 
         mesh_points(std::move(points)),
+        mesh_normals(std::move(normals)),
+        mesh_texture_uvs(texture_uvs),
         triangle_points_indexes(std::move(indexes)),
-        nodes(std::move(bvh_nodes)) {
-
-    }
-    // Transformation not supported yet!!!
+        nodes(std::move(bvh_nodes)) {}
     Mesh(std::string obj_file, std::shared_ptr<Material> material = nullptr, Transformation trans = Transformation{}, int BVH_n_bins = 12, int BVH_is_leaf_threshold = 3) : Shape(trans, material) {
         // Call read_mesh_from_obj(obj_file)
         auto file_reading_result = read_mesh_from_obj(obj_file);
@@ -366,7 +374,7 @@ export struct Mesh : Shape {
         root.maxIndex = triangle_points_indexes.size();
         // Extend AABB of the root
         for (auto& mesh_point : mesh_points) {
-            root.bounds.grow(mesh_point.point);
+            root.bounds.grow(mesh_point);
         }
         nodes.push_back(root);
         // Call BVHNode::Extend_tree via wrapper
@@ -376,7 +384,7 @@ export struct Mesh : Shape {
     [[nodiscard]] std::optional<HitRecord> ray_intersection(const Ray& ray) const override {
         // Reference frame of the mesh
         Ray local_ray = ray.transform(trans.inverse());
-        auto hit_record = ray_intersection_unwrapped(local_ray);
+        auto hit_record = ray_intersection_unwrapped(local_ray); // Start recursion flow with transformed ray
         if (hit_record.has_value()) {
             hit_record->ray = ray;
             hit_record->hit_point = ray.at(hit_record->t);
@@ -386,24 +394,27 @@ export struct Mesh : Shape {
 
     }
 
+    // Meant to be recursive, accepts the transformated ray.
     [[nodiscard]] std::optional<HitRecord> ray_intersection_unwrapped(Ray& local_ray, int starting_index = 0, std::optional<HitRecord> closest_hit = std::nullopt) const {
         if (!nodes[starting_index].bounds.intersect(local_ray)) {
             return closest_hit; // No intersection with the bounding box, skip this node
         }
 
         if (nodes[starting_index].is_leaf) {
+            int minIndex = nodes[starting_index].minIndex;
+            int maxIndex = nodes[starting_index].maxIndex;
             // Check intersection with triangles in this leaf node
-            for (int i = nodes[starting_index].minIndex; i < nodes[starting_index].maxIndex; ++i) {
+            for (int i = minIndex; i < maxIndex; ++i) {
                 const auto& tri = triangle_points_indexes[i];
-                const auto& A = mesh_points[tri.i1];
-                const auto& B = mesh_points[tri.i2];
-                const auto& C = mesh_points[tri.i3];
+                const auto& A = mesh_points[tri.v1];
+                const auto& B = mesh_points[tri.v2];
+                const auto& C = mesh_points[tri.v3];
 
                 // Ray-triangle intersection test (Möller–Trumbore algorithm)
-                Vec E1 = B.point - A.point;
-                Vec E2 = C.point - A.point;
+                Vec E1 = B - A;
+                Vec E2 = C - A;
                 Vec P = local_ray.direction % E2;
-                Vec T = local_ray.origin - A.point;
+                Vec T = local_ray.origin - A;
                 Vec Q = T % E1;
                 float det = E1 * P;
                 // Early exit if ray is parallel or nearly parallel to the triangle plane
@@ -411,19 +422,27 @@ export struct Mesh : Shape {
                     continue; 
                 }
                 float inv_det = 1.0f / det;
-                float u = (T * P) * inv_det;
-                float v = (Q * local_ray.direction) * inv_det;
+                float beta = (T * P) * inv_det;
+                float gamma = (Q * local_ray.direction) * inv_det;
+                float alpha = 1.0f - beta - gamma;
                 float t = (Q * E2) * inv_det;
-                if (u >= 0 && v >= 0 && u + v <= 1 && t >= local_ray.tmin && t <= local_ray.tmax) {
+                if (beta >= 0.0f && gamma >= 0.0f && alpha > 0.0f && alpha <= 1.0f && t >= local_ray.tmin && t <= local_ray.tmax) {
                     // Some members of the HitRecord struct will be updated outside this method,
                     // since we are in the frame of reference of the Mesh.
+                    auto& nA = mesh_normals[tri.vn1];
+                    auto& nB = mesh_normals[tri.vn2];
+                    auto& nC = mesh_normals[tri.vn3];
+                    auto& tA = mesh_texture_uvs[tri.vt1];
+                    auto& tB = mesh_texture_uvs[tri.vt2];
+                    auto& tC = mesh_texture_uvs[tri.vt3];
                     HitRecord hit;
                     hit.t = t;
-                    Vec interpolated_normal = (A.normal * (1 - u - v) + B.normal * u + C.normal * v);
+                    Vec interpolated_normal = (nA * alpha + nB * beta + nC * gamma);
                     hit.hit_normal = (interpolated_normal * (-std::copysign(1.0f, interpolated_normal * local_ray.direction))).to_norm(); // Flip normal if it's facing the ray
-                    hit.surface_params = {u, v}; // Will be updated in the future with actual UV coordinates if available
+                    hit.surface_params = {alpha * tA.u + beta * tB.u + gamma * tC.u,
+                                          alpha * tA.v + beta * tB.v + gamma * tC.v};
                     hit.hitted_shape = this; // Point directly to this exact mesh in memory
-                    // Uodate local ray tmax
+                    // Update LOCAL ray tmax
                     local_ray.tmax = t; // Shrink the ray range to find closer intersections
                     closest_hit = hit; // Update the closest hit
                 }
@@ -432,7 +451,6 @@ export struct Mesh : Shape {
 
         } else {
             // Recursion on children
-            // 3. INTERNAL NODE: Recursive traversal
             if (auto left_hit = ray_intersection_unwrapped(local_ray, nodes[starting_index].left_child_index, closest_hit)) {
                 local_ray.tmax = left_hit->t; // Shrink the ray range to find closer intersections
                 closest_hit = left_hit;
@@ -455,12 +473,6 @@ export struct Mesh : Shape {
             if (!result.empty() && result.ends_with("\r")) {
                 result.pop_back();
             }
-
-            // if the line starts with # it is a comment and we skip it (flexibility)
-            if (result.empty() || result.starts_with("#") || result.starts_with("o")) {
-                continue;
-            }
-
             return result;
         }
 
@@ -468,26 +480,25 @@ export struct Mesh : Shape {
     }
 
     [[nodiscard]] std::expected<void, std::string> read_mesh_from_obj(std::istream& obj_stream) {
-        std::vector<Point> just_points;
-        std::vector<Normal> just_normals;
+        std::vector<Point> points;
+        std::vector<Normal> normals;
+        std::vector<Vec2D> uv_coordinates;
         std::vector<TriangleIndexes> indexes;
-        std::vector<TrianglePoint> points_and_normals;
         int n_points = 0;
-        bool has_entered_while_cycle = false;
 
         // Read a valid line from the stream
         auto line_expected = _read_line(obj_stream);
+        if (!line_expected.has_value()) {
+            return std::unexpected("Problems with the .obj file");
+        }
         while (line_expected.has_value()) {
-            has_entered_while_cycle = true;
-            // Clean from the / / / (if we are in the faces field of the file)
             std::string& line = line_expected.value();
-            std::replace(line.begin(), line.end(), '/', ' ');
             // Reput in a stream
             std::istringstream ss(line); // Using a string stream to parse things
             // Reading the line prefix
             // v: vertex point
             // vn: vertex normal
-            // vt: vertex texture coordinates (not supported yet)
+            // vt: vertex texture coordinates
             // f: triangular face points and normals indexes
             std::string prefix;
             ss >> prefix;
@@ -495,53 +506,87 @@ export struct Mesh : Shape {
             if (prefix == "v") { // Triangles verticies section
                 Point v;
                 ss >> v.x >> v.y >> v.z; 
-                just_points.push_back(v);
+                points.push_back(v);
             } 
             else if (prefix == "vn") { // Triangles normals section
                 Normal vn;
                 ss >> vn.x >> vn.y >> vn.z;
                 vn.normalize();
-                just_normals.push_back(vn);
-            } 
-            else if (prefix == "f") { // Triangles section
-                if (!n_points) {
-                    n_points = just_normals.size();
-                    if(n_points != just_points.size()) {
-                        return std::unexpected("Points and Normals std::vector are different in size, please check the .obj file");
-                    }                    
-                }
+                normals.push_back(vn);
+            }
+            else if (prefix == "vt") {
+                Vec2D UV;
+                ss >> UV.u >> UV.v;
+                UV.v = 1.0f - UV.v; // Adapt to the way the code orients images axis and UV
+                uv_coordinates.push_back(UV);
+            }
+            else if (prefix == "f") { // Supporting non-triangular mesh files, still storing as triangular mesh
+                struct ObjVertex { // Practical data structure for this scope
+                    int v = 0, vt = 0, vn = 0;
+                };
+                std::vector<ObjVertex> face_vertices;
+                std::string vertex_str;
+            
+                // Parsing all blocks
+                while (ss >> vertex_str) {
+                    ObjVertex vertex;
 
-                // Reading the indexes
-                int v1, vn1, v2, vn2, v3, vn3, junk;
-                ss >> v1 >> junk >> vn1
-                   >> v2 >> junk >> vn2
-                   >> v3 >> junk >> vn3;
-                v1--; vn1--; v2--; vn2--; v3--; vn3--; // .obj files indexing starts from 1 so they are readapted to start drom 0 to match this code
+                    // Replacing "/"" with " " for this chunk
+                    std::replace(vertex_str.begin(), vertex_str.end(), '/', ' ');
+                    // Put the chunk in a string stream
+                    std::istringstream vertex_ss(vertex_str);
+
+                    // Extract vertex v/vt/vn
+                    if (vertex_ss >> vertex.v >> vertex.vt >> vertex.vn) {
+                        face_vertices.push_back(vertex);
+                    }
+                }
+            
+                // Checking if it's at least a triangle
+                if (face_vertices.size() < 3) {
+                    return std::unexpected("Corrupted face format: less than 3 vertex for a face");
+                }
+            
+                // Index range check
+                for (auto& vertex : face_vertices) {
+                    // Controllo sui limiti usando le dimensioni attuali dei tuoi vettori di lettura temporanei
+                    if (vertex.v == 0 || vertex.v > points.size() ||
+                        vertex.vn == 0 || vertex.vn > normals.size() ||
+                        vertex.vt == 0 || vertex.vt > uv_coordinates.size()) {
+                        return std::unexpected("Problems with triangle indexing in .obj file: index out of range");
+                    }
                 
-                if (v1 != vn1 || v2 != vn2 || v3 != vn3) {
-                    return std::unexpected("Problems with triangle indexing in .obj file: for a single triangle Point and Normal should be under the same index");
+                    //Adapting indexing to start from 0
+                    vertex.v--; 
+                    vertex.vt--; 
+                    vertex.vn--;
                 }
-                if (v1 >= n_points || v2 >= n_points || v3 >= n_points) {
-                    return std::unexpected("Problems with triangle indexing in .obj file: index out of range");
+            
+                // Making triangles by taking diagonals from a single point (index 0 vertex)
+                for (int i = 1; i < face_vertices.size() - 1; ++i) {
+                    const auto& vA = face_vertices[0]; // Common vertex
+                    const auto& vB = face_vertices[i];
+                    const auto& vC = face_vertices[i + 1];
+                
+                    indexes.push_back(TriangleIndexes{
+                        vA.v, vB.v, vC.v,
+                        vA.vn, vB.vn, vC.vn,
+                        vA.vt, vB.vt, vC.vt
+                    });
                 }
-
-                indexes.push_back(TriangleIndexes{v1, v2, v3});
             }
 
-            // Avanziamo alla riga successiva prima di ricominciare il ciclo
             line_expected = _read_line(obj_stream);
         }
-        if (!has_entered_while_cycle) {
-            return std::unexpected("Problems with the .obj file");
-        }
-        triangle_points_indexes = indexes; // Update the object data member
+        // Update the data members of the Mesh
+        triangle_points_indexes = indexes; // Update the TriangleIndexes data member
+        mesh_points = points; // Update the Point data member (mesh points)
+        mesh_normals = normals; // Update the Normal data member (mesh points normals)
+        mesh_texture_uvs = uv_coordinates; // Update the Vec2D data member (mesh points UV map)
 
-        for (int i = 0; i < n_points; i++) {
-            points_and_normals.push_back({just_points[i], just_normals[i]});
-        }
-        mesh_points = points_and_normals;
         return {};       
     }
+
 
     // wrapper: you pass the file name string to call read_mesh_from_obj
     [[nodiscard]] std::expected<void, std::string> read_mesh_from_obj(std::string obj_file) {

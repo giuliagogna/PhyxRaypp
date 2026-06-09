@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- Full OBJ mesh files support: triangular and non-triangular meshes (stored as triangular), UV map textures
 - Add scene files .txt
 - Restructuring of main
 - Parser implementation

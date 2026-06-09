@@ -291,6 +291,9 @@ public:
                         parse_y.value() < 1 ? 1 : parse_y.value()
                     );
 
+                    // Increment i to skip the values that have just been processed
+                    i += 2;
+
                 } else if (std::string_view(args[i]) == "--pathtracer_params" && i + 3 < args.size()) {
                     // ---------------------------------------------------------
                     // FLAG: --pathtracer_params <rays> <max_depth> <rr_depth>
@@ -309,6 +312,9 @@ public:
                     auto parse_rr_depth = parse_float(args[i + 3]);
                     if(!parse_rr_depth) return std::unexpected(parse_rr_depth.error());
                     pathtracer_rr_depth = parse_rr_depth.value() < 1 ? 1 : parse_rr_depth.value();
+
+                    // Increment i to skip the values that have just been processed
+                    i += 3;
                 }
             }
 

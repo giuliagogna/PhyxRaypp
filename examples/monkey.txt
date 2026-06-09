@@ -1,0 +1,18 @@
+# A scene containing a monkey with its custom texture on
+
+# Pre-computed rotation variable
+float pi_over_2 = 1.5707963;
+
+# Background sky color
+background(<0.01, 0.01, 1.0>);
+
+camera(perspective, 1.0, 3.0, rot_z(1.0) * rot_y(0.5) * translation([-10.0, 0.0, 2.2]));
+
+# Textured material for the monkey
+material monkey_mat(diffuse(image("mesh/Monkey/monkey.pfm")));
+
+# The Monkey
+mesh("mesh/Monkey/14090_Hear_No_Evil_Monkey_v2_L1.obj", monkey_mat, scaling([0.1, 0.1, 0.1]));
+
+# Command to render:
+# xmake run PhyxRadpp render examples/monkey.txt 1.0 1.0 --algorithm flat

@@ -4,6 +4,7 @@ PhyxRadpp is a C++23 ray tracer and image processing utility built using `xmake`
 
 Scenes and rendering parameters are parsed dynamically at runtime using a custom LL(1) recursive descent parser, reading from text-based scene description files.
 
+
 ------------------------------------------------------------------------------------------------------------------------------------------------
 ## Features
 
@@ -12,7 +13,7 @@ Scenes and rendering parameters are parsed dynamically at runtime using a custom
   * `onoff`: Binary hit/miss visibility testing (generates a black-and-white silhouette).
   * `flat`: Flat shading that resolves surface coordinates to apply solid colors or UV-mapped HDR textures without calculating light bounces.
   * `pathtracing`: Physically based rendering using Monte Carlo integration and Russian Roulette depth control to calculate global illumination.
-* **OBJ meshes support:** it's possible to upload OBJ files and create meshes (still without texture). The ray intersection test is accelerated via BVH-SAH algorithm.
+* **OBJ file support:** Imports vertexes, normals and UV mapping textures from OBJ+PFM files to generate triangular meshes. The ray intersection method is optimized by a BVH binary tree SAH logic.
 * **Material System:** Supports uniform colors, procedural checkerboards, and HDR image texture mapping attached to diffusive or specular BRDFs.
 * **HDR Image Processing:** Converts `.pfm` files to standard `.png` files, applying normalization (alpha) and gamma correction.
 
@@ -113,7 +114,7 @@ xmake run PhyxRadpp render examples/cornell_box_spheres.txt 1.0 1.0 generated_im
 <img src="generated_images/cornell_box_spheres_a1_g1_pathtracing_800x800_AA10_r4_d4_rr3.png" alt="OnOff spheres result" width="50%">
 
 #### -- Example 2.4: Custom Output
-Render a scene and manually define the exact output path. 
+Render a scene and manually define the exact output path.
 This is the rendering of `examples/utah_teapot.txt`.
 
 ```bash
