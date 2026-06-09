@@ -9,6 +9,6 @@ var searchData=
   ['check_5fis_5fstring_6',['check_is_string',['../test___scene_files_8cpp.html#ab0d6d35b622c815ccd2737556fd585e7',1,'test_SceneFiles.cpp']]],
   ['check_5fis_5fsymbol_7',['check_is_symbol',['../test___scene_files_8cpp.html#aa477dcfa92d9132f526100439337cd4a',1,'test_SceneFiles.cpp']]],
   ['checkeredpigment_8',['CheckeredPigment',['../struct_checkered_pigment.html#a4a71d4b0b7adbb2bbdadc424f0de595c',1,'CheckeredPigment']]],
-  ['clamp_5fimage_9',['clamp_image',['../struct_h_d_r_image.html#ae33940e1bc2325a4bc3ac71ed6d9f729',1,'HDRImage']]],
+  ['clamp_5fimage_9',['clamp_image',['../struct_h_d_r_image.html#a88497332fe0cd5ac62cddb2d6af0faeb',1,'HDRImage']]],
   ['create_5fonb_5ffrom_5fz_10',['create_onb_from_z',['../_geometry_8cppm.html#ac3bf7e2822e7f2fc4be45b37f7fa80b2',1,'Geometry.cppm']]]
 ];

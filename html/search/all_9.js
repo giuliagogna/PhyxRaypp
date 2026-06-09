@@ -18,7 +18,7 @@ var searchData=
   ['check_5fis_5fsymbol_15',['check_is_symbol',['../test___scene_files_8cpp.html#aa477dcfa92d9132f526100439337cd4a',1,'test_SceneFiles.cpp']]],
   ['checkered_16',['CHECKERED',['../_scene_files_8cppm.html#a0a395672924ac94ef998770a52e49f42ab54cd96ca6d7e95bfb9e8c521fea8b4d',1,'SceneFiles.cppm']]],
   ['checkeredpigment_17',['CheckeredPigment',['../struct_checkered_pigment.html',1,'CheckeredPigment'],['../struct_checkered_pigment.html#a4a71d4b0b7adbb2bbdadc424f0de595c',1,'CheckeredPigment::CheckeredPigment()']]],
-  ['clamp_5fimage_18',['clamp_image',['../struct_h_d_r_image.html#ae33940e1bc2325a4bc3ac71ed6d9f729',1,'HDRImage']]],
+  ['clamp_5fimage_18',['clamp_image',['../struct_h_d_r_image.html#a88497332fe0cd5ac62cddb2d6af0faeb',1,'HDRImage']]],
   ['col_5fnum_19',['col_num',['../struct_source_location.html#a863acd0a98972a641cf33477931edce7',1,'SourceLocation']]],
   ['color_20',['Color',['../struct_color.html',1,'Color'],['../module___color.html',1,'Color module']]],
   ['color_21',['color',['../struct_uniform_pigment.html#a96d11b7b12b62d319ca0b16e3990369e',1,'UniformPigment']]],

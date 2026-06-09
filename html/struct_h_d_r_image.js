@@ -10,7 +10,7 @@ var struct_h_d_r_image =
     [ "apply_gamma_correction", "struct_h_d_r_image.html#aabe1497a8207e73211e6f5c445146992", null ],
     [ "apply_gamma_correction", "struct_h_d_r_image.html#af3c96b394219e920279cceae3912154e", null ],
     [ "average_luminosity", "struct_h_d_r_image.html#ad3eb129fc25f95922f2725c97b5c6033", null ],
-    [ "clamp_image", "struct_h_d_r_image.html#ae33940e1bc2325a4bc3ac71ed6d9f729", null ],
+    [ "clamp_image", "struct_h_d_r_image.html#a88497332fe0cd5ac62cddb2d6af0faeb", null ],
     [ "get_pixel", "struct_h_d_r_image.html#a5cd1b9f8eaafc4f72f9477d53c3d13d0", null ],
     [ "normalize_image", "struct_h_d_r_image.html#a5f0a3df25483b2af37a4296a6e1075a1", null ],
     [ "normalize_image", "struct_h_d_r_image.html#a6967d48560feb7cf01e0e4578bbbd7d1", null ],

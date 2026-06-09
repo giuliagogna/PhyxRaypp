@@ -644,33 +644,12 @@ TEST_CASE("Testing image clamping (clamp_image)") {
     img.set_pixel(0, 0, Color(1.0f, 3.0f, 7.0f));
     img.set_pixel(1, 0, Color(9.0f, 15.0f, 19.0f));
 
-    SUBCASE("Default clamping with factor 1.0") {
+    SUBCASE("Valid clamping") {
         auto result = img.clamp_image();
 
         REQUIRE(result.has_value());
         CHECK(img.get_pixel(0, 0).is_close(Color{0.5f, 0.75f, 0.875f}));
         CHECK(img.get_pixel(1, 0).is_close(Color{0.9f, 0.9375f, 0.95f}));
-    }
-
-    SUBCASE("Clamping with custom factor (0.5)") {
-        auto result = img.clamp_image(0.5f);
-
-        CHECK(result.has_value());
-
-        // R: 0.5 / 1.5, G: 1.5 / 2.5, B: 3.5 / 4.5
-        CHECK(img.get_pixel(0, 0).is_close(Color{0.5f/1.5f, 1.5f/2.5f, 3.5/4.5}));
-        // R: 4.5 / 5.5, G: 7.5 / 8.5, B: 9.5 / 10.5
-        CHECK(img.get_pixel(1, 0).is_close(Color{4.5f/5.5f, 7.5f/8.5f, 9.5f/10.5f}));
-    }
-
-    SUBCASE("Invalid factor (<= 0)") {
-        auto result0 = img.clamp_image(0.0f);
-        CHECK_FALSE(result0.has_value());
-        CHECK(result0.error().starts_with("Factor needs to be strictly positive. Received: "));
-
-        auto result1 = img.clamp_image(-1.0f);
-        CHECK_FALSE(result1.has_value());
-        CHECK(result0.error().starts_with("Factor needs to be strictly positive. Received: "));
     }
 
     SUBCASE("Negative pixel values") {
