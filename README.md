@@ -1,56 +1,63 @@
 # PhyxRadpp
 
-PhyxRadpp is a modern C++23 ray tracer and image processing utility. Built with performance and modern standards in mind, the project heavily utilizes C++23 modules and the `xmake` build system.
+PhyxRadpp is a C++23 ray tracer and image processing utility built using `xmake`. It supports processing HDR images and rendering 3D scenes using mathematical primitives (spheres, planes, cubes) and OBJ meshes.
 
-Currently, the engine is capable of processing High Dynamic Range (HDR) images and rendering 3D scenes featuring perspective cameras and mathematical shapes (such as spheres, planes and cubes), and physically based rendering (PBR) through path tracing.
+Scenes and rendering parameters are parsed dynamically at runtime using a custom LL(1) recursive descent parser, reading from text-based scene description files.
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 ## Features
 
-* **PFM to PNG Conversion:** Converts HDR `.pfm` image files into standard `.png` files. Includes customizable exposure scaling (alpha factor) and gamma correction.
-* **Modular Material System:** Features an extensible architecture for materials and BRDFs. Includes support for UniformPigment (solid colors), CheckeredPigment (procedural grids), and ImagePigment (HDR texture mapping).
-* **Multi-Algorithm Ray Tracing:** Renders 3D scenes using interchangeable algorithms. Currently supports:
-  - `onoff`: A fast silhouette map of ray-object intersections (default black and white image).
-  - `flat`: A flat-shading renderer that resolves surface parameters (UV coordinates) to apply colors and image textures.
-  - `pathtracing`: An advanced renderer that numerically solves the rendering equation using Monte Carlo integration and Russian Roulette depth control for photorealistic global illumination.
-* **Modern C++23 Architecture:** Fully modularized codebase (`.cppm` files), utilizing the newest features like `std::expected` for safe error handling.
+* **Scene Parsing:** Scenes are loaded at runtime from `.txt` files, supporting custom variables, material definitions, transformations, and camera positioning.
+* **Rendering Algorithms:**
+  * `onoff`: Binary hit/miss visibility testing (generates a black-and-white silhouette).
+  * `flat`: Flat shading that resolves surface coordinates to apply solid colors or UV-mapped HDR textures without calculating light bounces.
+  * `pathtracing`: Physically based rendering using Monte Carlo integration and Russian Roulette depth control to calculate global illumination.
+* **OBJ meshes support:** it's possible to upload OBJ files and create meshes (still without texture). The ray intersection test is accelerated via BVH-SAH algorithm.
+* **Material System:** Supports uniform colors, procedural checkerboards, and HDR image texture mapping attached to diffusive or specular BRDFs.
+* **HDR Image Processing:** Converts `.pfm` files to standard `.png` files, applying normalization (alpha) and gamma correction.
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
-## Quick Start (Building & Running)
+## Building the Project
 
-If your system is already set up with a modern C++ compiler, building the project is incredibly simple. Navigate to the folder containing `xmake.lua` and run:
+The project requires a C++23 compatible compiler. Dependencies (`doctest` and `stb`) are handled automatically by `xmake`.
+
+Navigate to the project root, where `xmake.lua` is located, and run:
 ```bash
 xmake
 ```
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 ## Usage
-The executable PhyxRadpp has two main commands: `pfm2png` and `demo`.
+The executable PhyxRadpp provides two main commands: `pfm2png` and `demo`.
 
 ### 1. PFM to PNG Converter
 Converts an HDR image into a standard PNG.
 
 ```bash
-xmake run PhyxRadpp pfm2png <INPUT_PFM> <ALPHA_FACTOR> <GAMMA> <OUTPUT_PNG>
+xmake run PhyxRadpp pfm2png <INPUT_PFM> <ALPHA_FACTOR> <GAMMA> [FLAGS]
 ```
+- Routing: The program automatically looks for the input file in pfm_files/` and saves the output to `png_converted/`.
 
 #### -- Example 1.1: Conversion from `.pfm` to `.png`
-Here is a command that converts `images/memorial.pfm` into `memorial_alpha0.2_gamma_1.png`
+Convert `pfm_files/memorial.pfm` using an `alpha=0.3` and a `gamma=1.0.
 
 ```bash
-xmake run PhyxRadpp pfm2png images/memorial.pfm 0.2 1.0 memorial
+xmake run PhyxRadpp pfm2png memorial.pfm 0.3 1.0
 ```
+*(Outputs: `png_converted/memorial_a0.3_g1.png`)*
 
-<img src="memorial_alpha0.2_gamma1.png" alt="Conversion result" width="40%">
+<img src="png_converted/memorial_a0.3_g1.png" alt="Conversion result" width="40%">
 
 
-### 2. Ray Tracing Demo
+### 2. Scene Rendering
 Renders a 3D scene. You can optionally specify the rendering algorithm, resolution, antialiasing, and path tracing parameters.
 
+**Command**
 ```bash
-xmake run PhyxRadpp demo <ALPHA_FACTOR> <GAMMA> <OUTPUT_PNG> [FLAGS]
+xmake run PhyxRadpp render <INPUT_SCENE_TXT> <ALPHA_FACTOR> <GAMMA> [FLAGS]
 ```
 **Optional Flags:**
+* `--output <filename>`: Bypasses the automated folder routing/naming and saves the file exactly as specified.
 * `--algorithm <type>` : Render engine (`onoff`, `flat`, or `pathtracing`). Default is `flat`.
 * `--antialiasing <N>` : Apply anti-aliasing with NxN samples per pixel.
 * `--dimensions <W> <H>` : Set output image resolution in pixels (Width Height).
@@ -59,47 +66,83 @@ xmake run PhyxRadpp demo <ALPHA_FACTOR> <GAMMA> <OUTPUT_PNG> [FLAGS]
   * `<max_depth>` : Maximum reflection depth/bounces.
   * `<rr_depth>` : Russian Roulette start depth.
 
-#### Changing the Active Scene & Creating Custom Scenes
-Because `PhyxRadpp`
-Because PhyxRadpp is designed to be highly modular, scenes are built using dedicated builder functions. To change the scene that gets rendered, open `src/main.cpp` and locate the `run_demo function.
+#### -- Example 2.1: Silhouette Mode (On/Off)**
+Render the quick black-and-white silhouette map of the geometry in `examples/sphere_silhouette.txt. This is highly useful for checking camera framing without waiting for complex light calculations.
+```bash
+xmake run PhyxRadpp render sphere_silhouette.txt 1.0 1.0 --algorithm onoff
+```
+<img src="generated_images/sphere_silhouette_a1_g1_flat_800x800.png" alt="OnOff spheres result" width="50%">
 
-You can easily build and render your own custom 3D environments without altering the core rendering logic by writing a new `build_my_custom_world()` function and calling it in the algorithm selection block.
+*(Outputs: `generated_images/sphere_silhouette_a1_g1_onoff_800x800.png`)*
 
-#### -- Example 2.1: Textured Scene (Flat Shading)
-Ensure `World world = build_plane_and_sphere_world();` is active in `main.cpp`.
+*Note: When using the `onoff` renderer, the values of alpha` and `gamma` do not affect the binary output, but must still be provided to satisfy the CLI parameters.*
+
+#### -- Example 2.2: Flat Shading (Textured Scene)
+Render `examples/sphere_and_plane.txt` with resolution 800x800 and 4x4 antialiasing.
+
 To render a scene with a textured sphere and a checkered plane using an `alpha=0.3` and `gamma=2.2`:
 
 ```bash
-xmake run PhyxRadpp demo 0.3 2.2 sphere_plane --algorithm flat
+xmake run PhyxRadpp render sphere_and_plane.txt 0.3 2.2 --algorithm flat --dimensions 800 800 --antialiasing 4
 ```
 
-<img src="sphere_plane_alpha0.3_gamma2.2.png" alt="Textured scene" width="50%">
+*(Outputs: `generated_images/sphere_and_plane_a0.3_g2.2_flat_800x800_AA4.png`)*
+
+<img src="generated_images/sphere_and_plane_a0.3_g2.2_flat_800x800_AA4.png" alt="Textured scene" width="50%">
 
 
-#### -- Example 2.2: Silhouette Mode (On/Off)
-Ensure `World world = build_10_white_spheres_world();` is active in `main.cpp`.
-To render a black-and-white silhouette of the geometry:
+#### -- Example 2.3: Path Tracing (Global Illumination)
+Render `examples/cornell_box_teapot.txt` with resolution 800x800, 10x10 antialiasing, using 4 rays per bounce, `max_depth=4`, and Russian Roulette at `depth=3`:
 
 ```bash
-xmake run PhyxRadpp demo 1 1 demo_silhouette --algorithm onoff
+xmake run PhyxRadpp render cornell_box_teapot.txt 1.0 1.0 --algorithm pathtracing --antialiasing 10 --dimensions 800 800 --pathtracer_params 4 4 3
 ```
 
-<img src="spheres_alpha1_gamma1.png" alt="OnOff spheres result" width="50%">
+<img src="generated_images/cornell_box_teapot_a1_g1_pathtracing_800x800_AA10_r4_d4_rr3.png" alt="OnOff spheres result" width="50%">
 
-*Note: if you use the default settings for OnOffRenderer the values of `alpha` and `gamma` are irrelevant. Be careful to set sensible values of `alpha` and `gamma` when you render different colors.*
+*(Outputs: `generated_images/cornell_box_teapot_a1_g1_pathtracing_800x800_AA10_r4_d4_rr3.png`)*
 
-#### -- Example 2.3: Global Illumination (Path Tracing)
-Ensure `World world = build_Cornell_box_world();` is active for the pathtracing algorithm block in `main.cpp`.
-
-To render a photorealistic Cornell Box containing diffusive and mirrored spheres, solving the rendering equation with a 400x400 resolution, 10x10 antialiasing (100 samples per pixel), 4 rays per bounce, a max depth of 4, and Russian Roulette starting at depth 3.
+Another example of this is the rendering of `examples/cornell_box_spheres.txt` with resolution 800x800, 10x10 antialiasing, using 4 rays per bounce, `max_depth=4`, and Russian Roulette at `depth=3`:
 
 ```bash
-xmake run PhyxRadpp demo 1 1 Cornell_Box_Sphere_400_400_anti10_path443 --algorithm pathtracing --dimensions 400 400 --antialiasing 10 --pathtracer_params 4 4 3
+xmake run PhyxRadpp render examples/cornell_box_spheres.txt 1.0 1.0 generated_images/cornell_box_spheres.png --algorithm pathtracing --antialiasing 10 --dimensions 800 800 --pathtracer_params 4 4 3
 ```
 
-<img src="Cornell_Box_Sphere_400_400_anti10_path443_alpha1_gamma1.png" alt="OnOff spheres result" width="50%">
+*(Outputs: `generated_images/cornell_box_spheres_a1_g1_pathtracing_800x800_AA10_r4_d4_rr3.png`)*
 
-*Note: The code will automatically append _alpha1_gamma1.png to your output filename.*
+<img src="generated_images/cornell_box_spheres_a1_g1_pathtracing_800x800_AA10_r4_d4_rr3.png" alt="OnOff spheres result" width="50%">
+
+#### -- Example 2.4: Custom Output
+Render a scene and manually define the exact output path. 
+This is the rendering of `examples/utah_teapot.txt`.
+
+```bash
+xmake run PhyxRadpp render utah_teapot.txt 1.0 1.0 --algorithm flat --output my_custom_output_path/custom_test_render.png
+```
+
+*(Outputs: `my_custom_output_path/custom_test_render.png`)*
+
+<img src="my_custom_output_path/custom_test_render.png" alt="OnOff spheres result" width="50%">
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+## Scene Description Language
+
+`PhyxRadpp` uses a custom, easily readable text format to define 3D environments at runtime. You can define variables, build complex BRDF materials, and chain matrix transformations.
+
+Here is a quick example of a scene file:
+```text
+# Define variables
+float pi = 3.14159;
+
+# Set environment and camera
+background(<0.5, 0.7, 1.0>);
+camera(perspective, 1.0, 3.0, translation([0.0, 0.0, 5.0]));
+
+# Build a material and apply it to a shape
+material red_plastic(diffuse(uniform(<0.8, 0.1, 0.1>)));
+sphere(translation([0.0, 1.0, 0.0]) * scaling([2.0, 2.0, 2.0]), red_plastic);
+```
+For a complete guide on all available shapes, materials, and syntax rules, please see the Scene Language Documentation in `docs/SCENE_LANGUAGE.md`.
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 ## Testing
@@ -108,11 +151,10 @@ To build and run the `doctest` unit test suite, simply use:
 ```bash
 xmake test -v
 ```
-Each `.cppm` file has its own tests: to build and run tests for a specific `.cppm` file run
+To run tests for a specific module (e.g., `HDRImage):
 ```bash
-xmake run test_<FILE_NAME>
+xmake run test_HDRImage
 ```
-(Example for `HDRImage`: `xmake run test_HDRImage`)
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 ## First Time Setup (Dependencies)
