@@ -362,7 +362,7 @@ TEST_CASE("Integration test: reading PFM images (read_pfm_file)") {
     SUBCASE("Invalid file: Non-existent file") {
         auto result = HDRImage::read_pfm_file("images/this_file_does_not_exist_123.pfm");
         REQUIRE(result.has_value() == false);
-        CHECK(result.error().message.starts_with("Error in opening input file '"));
+        CHECK(result.error().message.starts_with("Error in opening file '"));
     }
 }
 
