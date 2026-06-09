@@ -1,0 +1,49 @@
+\chapter{Changelog}
+\hypertarget{md_CHANGELOG}{}\label{md_CHANGELOG}\index{Changelog@{Changelog}}
+\label{md_CHANGELOG_autotoc_md0}%
+\Hypertarget{md_CHANGELOG_autotoc_md0}%
+
+
+All notable changes to this project will be documented in this file.\hypertarget{md_CHANGELOG_autotoc_md1}{}\doxysection{\texorpdfstring{\mbox{[}Unreleased\mbox{]}}{\mbox{[}Unreleased\mbox{]}}}\label{md_CHANGELOG_autotoc_md1}
+\hypertarget{md_CHANGELOG_autotoc_md2}{}\doxysubsection{\texorpdfstring{Added}{Added}}\label{md_CHANGELOG_autotoc_md2}
+
+\begin{DoxyItemize}
+\item Full OBJ mesh files support\+: triangular and non-\/triangular meshes (stored as triangular), UV map textures
+\item Add scene files .txt
+\item Restructuring of main
+\item Parser implementation
+\item Lexer implementation
+\item OBJ mesh files support for points and normals only (no texture)
+\item Mesh shape, optimized via BVH-\/\+SAH
+\end{DoxyItemize}
+
+\DoxyHorRuler{0}
+\hypertarget{md_CHANGELOG_autotoc_md4}{}\doxysection{\texorpdfstring{\mbox{[}0.\+3.\+0\mbox{]} -\/ 2026-\/05-\/20}{\mbox{[}0.\+3.\+0\mbox{]} -\/ 2026-\/05-\/20}}\label{md_CHANGELOG_autotoc_md4}
+\hypertarget{md_CHANGELOG_autotoc_md5}{}\doxysubsection{\texorpdfstring{Added}{Added}}\label{md_CHANGELOG_autotoc_md5}
+
+\begin{DoxyItemize}
+\item Rendering algorithm Pathtracer
+\item Antialiasing, added flag {\ttfamily -\/-\/antialiasing} to activate and choose the level
+\item Cube shape
+\item Specular\+BRDF, Diffusive\+BRDF
+\item Added flag {\ttfamily -\/-\/algorithm} to choose between On\+Off\+Renderer or Flat\+Renderer
+\item Renderer struct with On\+Off\+Renderer and Flat\+Renderer
+\item Material, BRDF, Pigments (Image, Checkered, Uniform) struct
+\item PCG random generator algorithm
+\item Refined main architecture
+\end{DoxyItemize}\hypertarget{md_CHANGELOG_autotoc_md6}{}\doxysection{\texorpdfstring{\mbox{[}0.\+2.\+0\mbox{]} -\/ 2026-\/05-\/06}{\mbox{[}0.\+2.\+0\mbox{]} -\/ 2026-\/05-\/06}}\label{md_CHANGELOG_autotoc_md6}
+\hypertarget{md_CHANGELOG_autotoc_md7}{}\doxysubsection{\texorpdfstring{Added}{Added}}\label{md_CHANGELOG_autotoc_md7}
+
+\begin{DoxyItemize}
+\item Command line interface with {\ttfamily pfm2png} and {\ttfamily demo} subcommands in main
+\item {\ttfamily Shape} (Sphere, Plane) and {\ttfamily World} structs for scene management
+\end{DoxyItemize}\hypertarget{md_CHANGELOG_autotoc_md8}{}\doxysubsection{\texorpdfstring{Fixed}{Fixed}}\label{md_CHANGELOG_autotoc_md8}
+
+\begin{DoxyItemize}
+\item Bug in {\ttfamily Image\+Tracer\+::fire\+\_\+ray} \mbox{[}\#5\mbox{]}
+\end{DoxyItemize}\hypertarget{md_CHANGELOG_autotoc_md9}{}\doxysection{\texorpdfstring{\mbox{[}0.\+1.\+0\mbox{]} -\/ 2026-\/04-\/01}{\mbox{[}0.\+1.\+0\mbox{]} -\/ 2026-\/04-\/01}}\label{md_CHANGELOG_autotoc_md9}
+\hypertarget{md_CHANGELOG_autotoc_md10}{}\doxysubsection{\texorpdfstring{Added}{Added}}\label{md_CHANGELOG_autotoc_md10}
+
+\begin{DoxyItemize}
+\item First release of the code 
+\end{DoxyItemize}

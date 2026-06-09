@@ -1,0 +1,29 @@
+# Pre-computed variables for rotations
+float pi_over_2 = 1.5707963;
+
+background(<0.5, 0.7, 1.0>);
+camera(perspective, 1.0, 3.0);
+
+# Material Definitions
+material floor_mat(diffuse(uniform(<0.8, 0.8, 0.8>)));
+material left_wall_mat(diffuse(uniform(<0.8, 0.01, 0.01>)));
+material right_wall_mat(diffuse(uniform(<0.01, 0.8, 0.01>)));
+material pink_mat(diffuse(uniform(<1.0, 0.03, 1.0>)));
+material mirror_mat(specular(uniform(<0.4, 0.4, 0.4>)));
+
+# The lamp uses the explicit emission parameter
+material lamp_mat(diffuse(uniform(<1.0, 1.0, 1.0>)), uniform(<1.0, 1.0, 1.0>));
+
+# The Box
+plane(translation([0.0, 0.0, -2.0]) * rot_z(pi_over_2), floor_mat);
+plane(translation([0.0, -2.0, 0.0]) * rot_x(pi_over_2), left_wall_mat);
+plane(translation([0.0, 2.0, 0.0]) * rot_x(pi_over_2), right_wall_mat);
+plane(translation([6.0, 0.0, 0.0]) * rot_y(pi_over_2), floor_mat);
+plane(translation([-4.0, 0.0, 0.0]) * rot_y(pi_over_2), floor_mat);
+plane(translation([0.0, 0.0, 2.0]), floor_mat);
+
+# The Objects
+sphere(translation([1.0, 0.0, 2.0]) * scaling([0.5, 0.5, 0.5]), lamp_mat);
+
+# The Dragon
+mesh("mesh/dragon/dragon.obj", pink_mat, translation([5.0, 0.0, 0.0]) * rot_x(pi_over_2) * scaling([3.5, 3.5, 3.5]));
