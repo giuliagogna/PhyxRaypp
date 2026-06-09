@@ -118,21 +118,34 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('struct_hit_rec
   <div class="headertitle"><div class="title">HitRecord Struct Reference<span class="mlabels"><span class="mlabel export">export</span></span><div class="ingroups">module <a class="el" href="module___shape.html">Shape</a></div></div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Information associated with a ray-shape intersection.  
+ <a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:aecb69ac0aac6c0cc691ada8e18f0e9a3" id="r_aecb69ac0aac6c0cc691ada8e18f0e9a3"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#aecb69ac0aac6c0cc691ada8e18f0e9a3">is_close</a> (const <a class="el" href="struct_hit_record.html">HitRecord</a> &amp;other, float epsilon=1e-5f) const</td></tr>
+<tr class="memdesc:aecb69ac0aac6c0cc691ada8e18f0e9a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if two <a class="el" href="struct_hit_record.html" title="Information associated with a ray-shape intersection.">HitRecord</a> objects are close within a custom epsilon (used for tests).  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a5fc92c8c0566e51c79d5bbf1fcfa7a93" id="r_a5fc92c8c0566e51c79d5bbf1fcfa7a93"><td class="memItemLeft"><a class="el" href="struct_ray.html">Ray</a>&#160;</td><td class="memItemRight"><a class="el" href="#a5fc92c8c0566e51c79d5bbf1fcfa7a93">ray</a></td></tr>
+<tr class="memdesc:a5fc92c8c0566e51c79d5bbf1fcfa7a93"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="struct_ray.html" title="Ray used for visibility and light transport queries.">Ray</a> that produced the intersection.  <br /></td></tr>
 <tr class="memitem:a71baab3efa8c7b7766086619084d6cc3" id="r_a71baab3efa8c7b7766086619084d6cc3"><td class="memItemLeft"><a class="el" href="struct_point.html">Point</a>&#160;</td><td class="memItemRight"><a class="el" href="#a71baab3efa8c7b7766086619084d6cc3">hit_point</a></td></tr>
+<tr class="memdesc:a71baab3efa8c7b7766086619084d6cc3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Intersection point in world space.  <br /></td></tr>
 <tr class="memitem:a7ab4e6bafa8dad015370bb5a1727e12a" id="r_a7ab4e6bafa8dad015370bb5a1727e12a"><td class="memItemLeft"><a class="el" href="struct_normal.html">Normal</a>&#160;</td><td class="memItemRight"><a class="el" href="#a7ab4e6bafa8dad015370bb5a1727e12a">hit_normal</a></td></tr>
+<tr class="memdesc:a7ab4e6bafa8dad015370bb5a1727e12a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Surface normal at the intersection point.  <br /></td></tr>
 <tr class="memitem:ab46e595693954446f0a7bc0a79a3db24" id="r_ab46e595693954446f0a7bc0a79a3db24"><td class="memItemLeft"><a class="el" href="struct_vec2_d.html">Vec2D</a>&#160;</td><td class="memItemRight"><a class="el" href="#ab46e595693954446f0a7bc0a79a3db24">surface_params</a></td></tr>
+<tr class="memdesc:ab46e595693954446f0a7bc0a79a3db24"><td class="mdescLeft">&#160;</td><td class="mdescRight">Surface parametric coordinates (u,v).  <br /></td></tr>
 <tr class="memitem:abaca114479bacf7c54167059def61d62" id="r_abaca114479bacf7c54167059def61d62"><td class="memItemLeft">float&#160;</td><td class="memItemRight"><a class="el" href="#abaca114479bacf7c54167059def61d62">t</a></td></tr>
+<tr class="memdesc:abaca114479bacf7c54167059def61d62"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="struct_ray.html" title="Ray used for visibility and light transport queries.">Ray</a> parameter corresponding to the intersection.  <br /></td></tr>
 <tr class="memitem:a536239f75be5d46f4b3fc0a92ed59f9f" id="r_a536239f75be5d46f4b3fc0a92ed59f9f"><td class="memItemLeft">const <a class="el" href="struct_shape.html">Shape</a> *&#160;</td><td class="memItemRight"><a class="el" href="#a536239f75be5d46f4b3fc0a92ed59f9f">hitted_shape</a> = nullptr</td></tr>
+<tr class="memdesc:a536239f75be5d46f4b3fc0a92ed59f9f"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="struct_shape.html" title="Base class for all geometric primitives.">Shape</a> that was intersected.  <br /></td></tr>
 </table>
-<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Information associated with a ray-shape intersection. </p>
+<p>A <a class="el" href="struct_hit_record.html" title="Information associated with a ray-shape intersection.">HitRecord</a> stores the geometric data required for shading and ray propagation after an intersection has been found. </p>
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
 <a id="aecb69ac0aac6c0cc691ada8e18f0e9a3" name="aecb69ac0aac6c0cc691ada8e18f0e9a3"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aecb69ac0aac6c0cc691ada8e18f0e9a3">&#9670;&#160;</a></span>is_close()</h2>
 
@@ -152,6 +165,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Checks if two <a class="el" href="struct_hit_record.html" title="Information associated with a ray-shape intersection.">HitRecord</a> objects are close within a custom epsilon (used for tests). </p>
+
 </div>
 </div>
 <a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
@@ -167,6 +182,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Surface normal at the intersection point. </p>
+
 </div>
 </div>
 <a id="a71baab3efa8c7b7766086619084d6cc3" name="a71baab3efa8c7b7766086619084d6cc3"></a>
@@ -180,6 +197,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Intersection point in world space. </p>
 
 </div>
 </div>
@@ -195,6 +214,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p><a class="el" href="struct_shape.html" title="Base class for all geometric primitives.">Shape</a> that was intersected. </p>
+
 </div>
 </div>
 <a id="a5fc92c8c0566e51c79d5bbf1fcfa7a93" name="a5fc92c8c0566e51c79d5bbf1fcfa7a93"></a>
@@ -208,6 +229,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p><a class="el" href="struct_ray.html" title="Ray used for visibility and light transport queries.">Ray</a> that produced the intersection. </p>
 
 </div>
 </div>
@@ -223,6 +246,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Surface parametric coordinates (u,v). </p>
+
 </div>
 </div>
 <a id="abaca114479bacf7c54167059def61d62" name="abaca114479bacf7c54167059def61d62"></a>
@@ -236,6 +261,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p><a class="el" href="struct_ray.html" title="Ray used for visibility and light transport queries.">Ray</a> parameter corresponding to the intersection. </p>
 
 </div>
 </div>

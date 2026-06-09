@@ -233,7 +233,7 @@ Functions</h2></td></tr>
 <tr class="memitem:aa772d56c92b7d423100443d51de1f697" id="r_aa772d56c92b7d423100443d51de1f697"><td class="memItemLeft"><a class="el" href="test___color_8cpp.html#a3b69631535313e83809cd7746027cc62">std::expected</a>&lt; std::unique_ptr&lt; <a class="el" href="struct_camera.html">Camera</a> &gt;, <a class="el" href="struct_grammar_error.html">GrammarError</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#aa772d56c92b7d423100443d51de1f697">parse_camera</a> (<a class="el" href="struct_input_stream.html">InputStream</a> &amp;input_file, <a class="el" href="struct_scene.html">Scene</a> &amp;scene)</td></tr>
 <tr class="memdesc:aa772d56c92b7d423100443d51de1f697"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a <a class="el" href="struct_camera.html" title="Base class for camera models.">Camera</a> declaration from the scene file.  <br /></td></tr>
 <tr class="memitem:a54a27b45b7d0718e8280322697e3fa14" id="r_a54a27b45b7d0718e8280322697e3fa14"><td class="memItemLeft"><a class="el" href="test___color_8cpp.html#a3b69631535313e83809cd7746027cc62">std::expected</a>&lt; <a class="el" href="struct_scene.html">Scene</a>, <a class="el" href="struct_grammar_error.html">GrammarError</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a54a27b45b7d0718e8280322697e3fa14">parse_scene</a> (<a class="el" href="struct_input_stream.html">InputStream</a> &amp;input_file, const std::unordered_map&lt; std::string, float &gt; &amp;overridden_variables={})</td></tr>
-<tr class="memdesc:a54a27b45b7d0718e8280322697e3fa14"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses an entire scene file from top to bottom, building the <a class="el" href="struct_world.html">World</a>, <a class="el" href="struct_camera.html" title="Base class for camera models.">Camera</a>, and Materials.  <br /></td></tr>
+<tr class="memdesc:a54a27b45b7d0718e8280322697e3fa14"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses an entire scene file from top to bottom, building the <a class="el" href="struct_world.html" title="Collection of shapes forming a scene.">World</a>, <a class="el" href="struct_camera.html" title="Base class for camera models.">Camera</a>, and Materials.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
@@ -725,7 +725,7 @@ Variables</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A unique pointer to the constructed <a class="el" href="struct_mesh.html">Mesh</a> safely upcast to <a class="el" href="struct_shape.html">Shape</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A unique pointer to the constructed <a class="el" href="struct_mesh.html">Mesh</a> safely upcast to <a class="el" href="struct_shape.html" title="Base class for all geometric primitives.">Shape</a>. </dd></dl>
 <dl class="section warning"><dt>Warning</dt><dd>Throws a <a class="el" href="struct_grammar_error.html" title="An error found by the lexer or parser while reading a scene file. Contains the location of the error ...">GrammarError</a> if the material is unknown or the file cannot be opened. </dd></dl>
 
 </div>
@@ -796,7 +796,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Parses an entire scene file from top to bottom, building the <a class="el" href="struct_world.html">World</a>, <a class="el" href="struct_camera.html" title="Base class for camera models.">Camera</a>, and Materials. </p>
+<p>Parses an entire scene file from top to bottom, building the <a class="el" href="struct_world.html" title="Collection of shapes forming a scene.">World</a>, <a class="el" href="struct_camera.html" title="Base class for camera models.">Camera</a>, and Materials. </p>
 <p>This function acts as the root of the recursive descent parser. It sequentially reads top-level tokens (Float variables, Materials, Cameras, and Shapes) and populates a <a class="el" href="struct_scene.html" title="Represents a fully parsed scene containing all objects needed for rendering.">Scene</a> object.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -842,7 +842,7 @@ template&lt;typename T&gt; </div>
 <p>Reads the transformation matrix and material identifier for a shape. Performs a dictionary lookup to bind the shape to an already-defined material in the scene.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">T</td><td>The specific <a class="el" href="struct_shape.html">Shape</a> class to instantiate (e.g., <a class="el" href="struct_sphere.html">Sphere</a>, <a class="el" href="struct_plane.html">Plane</a>, <a class="el" href="struct_cube.html">Cube</a>). </td></tr>
+    <tr><td class="paramname">T</td><td>The specific <a class="el" href="struct_shape.html" title="Base class for all geometric primitives.">Shape</a> class to instantiate (e.g., <a class="el" href="struct_sphere.html" title="Unit sphere centered at the local origin.">Sphere</a>, <a class="el" href="struct_plane.html" title="Infinite plane lying on the local z = 0 plane.">Plane</a>, <a class="el" href="struct_cube.html" title="Axis-aligned cube spanning [-1,1]^3 in local space.">Cube</a>). </td></tr>
   </table>
   </dd>
 </dl>
@@ -853,7 +853,7 @@ template&lt;typename T&gt; </div>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A unique pointer to the newly allocated <a class="el" href="struct_shape.html">Shape</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A unique pointer to the newly allocated <a class="el" href="struct_shape.html" title="Base class for all geometric primitives.">Shape</a>. </dd></dl>
 <dl class="section warning"><dt>Warning</dt><dd>Throws a <a class="el" href="struct_grammar_error.html" title="An error found by the lexer or parser while reading a scene file. Contains the location of the error ...">GrammarError</a> if the material name is not found in the scene's dictionary. <a class="el" href="struct_transformation.html" title="Affine transformation storing both a matrix and its inverse. It stores the direct matrix of the trans...">Transformation</a> is an optional argument </dd></dl>
 
 </div>

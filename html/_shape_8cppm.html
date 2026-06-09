@@ -118,14 +118,17 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('_shape_8cppm.h
   <div class="headertitle"><div class="title">Shape.cppm File Reference<div class="ingroups">module <a class="el" href="module___shape.html">Shape</a></div></div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Geometric primitives and ray-scene intersection routines.  
+<a href="#details">More...</a></p>
 <div class="textblock"><code>import <a class="el" href="_b_r_d_f_8cppm_source.html">BRDF</a>;</code><br />
-<code>import <a class="el" href="_material_8cppm_source.html">Material</a>;</code><br />
 <code>import <a class="el" href="_h_d_r_image_8cppm_source.html">HDRImage</a>;</code><br />
-<code>import <a class="el" href="_camera_8cppm_source.html">Camera</a>;</code><br />
-<code>import <a class="el" href="_color_8cppm_source.html">Color</a>;</code><br />
-<code>import <a class="el" href="_pigment_8cppm_source.html">Pigment</a>;</code><br />
-<code>import <a class="el" href="auxiliary__functions_8cppm_source.html">auxiliary_functions</a>;</code><br />
 <code>import <a class="el" href="_geometry_8cppm_source.html">Geometry</a>;</code><br />
+<code>import <a class="el" href="_camera_8cppm_source.html">Camera</a>;</code><br />
+<code>import <a class="el" href="_material_8cppm_source.html">Material</a>;</code><br />
+<code>import <a class="el" href="_color_8cppm_source.html">Color</a>;</code><br />
+<code>import <a class="el" href="auxiliary__functions_8cppm_source.html">auxiliary_functions</a>;</code><br />
+<code>import <a class="el" href="_pigment_8cppm_source.html">Pigment</a>;</code><br />
 <code>import std;</code><br />
 </div>
 <p><a href="_shape_8cppm_source.html">Go to the source code of this file.</a></p>
@@ -133,13 +136,22 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('_shape_8cppm.h
 <tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:HitRecord" id="r_HitRecord"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_hit_record.html">HitRecord</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Information associated with a ray-shape intersection.  <a href="struct_hit_record.html#details">More...</a><br /></td></tr>
 <tr class="memitem:Shape" id="r_Shape"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_shape.html">Shape</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base class for all geometric primitives.  <a href="struct_shape.html#details">More...</a><br /></td></tr>
 <tr class="memitem:Sphere" id="r_Sphere"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_sphere.html">Sphere</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unit sphere centered at the local origin.  <a href="struct_sphere.html#details">More...</a><br /></td></tr>
 <tr class="memitem:Plane" id="r_Plane"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_plane.html">Plane</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Infinite plane lying on the local z = 0 plane.  <a href="struct_plane.html#details">More...</a><br /></td></tr>
 <tr class="memitem:Cube" id="r_Cube"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_cube.html">Cube</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Axis-aligned cube spanning [-1,1]^3 in local space.  <a href="struct_cube.html#details">More...</a><br /></td></tr>
 <tr class="memitem:World" id="r_World"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_world.html">World</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Collection of shapes forming a scene.  <a href="struct_world.html#details">More...</a><br /></td></tr>
 </table>
-</div><!-- contents -->
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Geometric primitives and ray-scene intersection routines. </p>
+<p>This module defines the shapes that can be placed in a scene, the information returned by ray intersections, and the <a class="el" href="struct_world.html" title="Collection of shapes forming a scene.">World</a> container used to store scene geometry. </p>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <div id="page-nav" class="page-nav-panel">
 <div id="page-nav-resize-handle"></div>

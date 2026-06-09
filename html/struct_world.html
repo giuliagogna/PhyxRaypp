@@ -118,17 +118,26 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('struct_world.h
   <div class="headertitle"><div class="title">World Struct Reference<span class="mlabels"><span class="mlabel export">export</span></span><div class="ingroups">module <a class="el" href="module___shape.html">Shape</a></div></div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Collection of shapes forming a scene.  
+ <a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a30f0f89641d238945456192952e3cefd" id="r_a30f0f89641d238945456192952e3cefd"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a30f0f89641d238945456192952e3cefd">add</a> (std::unique_ptr&lt; <a class="el" href="struct_shape.html">Shape</a> &gt; shape)</td></tr>
+<tr class="memdesc:a30f0f89641d238945456192952e3cefd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a shape to the scene.  <br /></td></tr>
 <tr class="memitem:a68f09046b306d40f0847644c07d11154" id="r_a68f09046b306d40f0847644c07d11154"><td class="memItemLeft">std::optional&lt; <a class="el" href="struct_hit_record.html">HitRecord</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a68f09046b306d40f0847644c07d11154">ray_intersection</a> (<a class="el" href="struct_ray.html">Ray</a> ray) const</td></tr>
+<tr class="memdesc:a68f09046b306d40f0847644c07d11154"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find the closest intersection along a ray.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:ac3485c019e0662f9fb66dbb373103084" id="r_ac3485c019e0662f9fb66dbb373103084"><td class="memItemLeft">std::vector&lt; std::unique_ptr&lt; <a class="el" href="struct_shape.html">Shape</a> &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ac3485c019e0662f9fb66dbb373103084">shapes</a></td></tr>
+<tr class="memdesc:ac3485c019e0662f9fb66dbb373103084"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shapes contained in the scene.  <br /></td></tr>
 </table>
-<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Collection of shapes forming a scene. </p>
+<p>The <a class="el" href="struct_world.html" title="Collection of shapes forming a scene.">World</a> is responsible for finding the closest intersection between a ray and the scene geometry. </p>
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
 <a id="a30f0f89641d238945456192952e3cefd" name="a30f0f89641d238945456192952e3cefd"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a30f0f89641d238945456192952e3cefd">&#9670;&#160;</a></span>add()</h2>
 
@@ -151,6 +160,9 @@ Public Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Add a shape to the scene. </p>
+<p>Ownership is transferred to the <a class="el" href="struct_world.html" title="Collection of shapes forming a scene.">World</a>. </p>
 
 </div>
 </div>
@@ -177,6 +189,15 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Find the closest intersection along a ray. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ray</td><td><a class="el" href="struct_ray.html" title="Ray used for visibility and light transport queries.">Ray</a> to test. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Closest valid intersection, if any. </dd></dl>
+
 </div>
 </div>
 <a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
@@ -191,6 +212,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Shapes contained in the scene. </p>
 
 </div>
 </div>
