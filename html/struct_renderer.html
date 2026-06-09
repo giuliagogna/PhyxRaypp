@@ -118,30 +118,41 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('struct_rendere
   <div class="headertitle"><div class="title">Renderer Struct Reference<span class="mlabels"><span class="mlabel abstract">abstract</span><span class="mlabel export">export</span></span><div class="ingroups">module <a class="el" href="module___renderer.html">Renderer</a></div></div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Base class for rendering algorithms.  
+ <a href="#details">More...</a></p>
 <div class="dynheader">
 Inheritance diagram for Renderer:</div>
 <div class="dyncontent">
  <div class="center">
   <img src="struct_renderer.png" usemap="#Renderer_map" alt=""/>
   <map id="Renderer_map" name="Renderer_map">
-<area href="struct_flat_renderer.html" alt="FlatRenderer" shape="rect" coords="0,56,100,80"/>
-<area href="struct_on_off_renderer.html" alt="OnOffRenderer" shape="rect" coords="110,56,210,80"/>
-<area href="struct_path_tracer.html" alt="PathTracer" shape="rect" coords="220,56,320,80"/>
+<area href="struct_flat_renderer.html" title="Flat-shading renderer." alt="FlatRenderer" shape="rect" coords="0,56,100,80"/>
+<area href="struct_on_off_renderer.html" title="Visibility renderer." alt="OnOffRenderer" shape="rect" coords="110,56,210,80"/>
+<area href="struct_path_tracer.html" title="Monte Carlo path tracer." alt="PathTracer" shape="rect" coords="220,56,320,80"/>
   </map>
 </div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a9f576b7fe06c6ae2ee1236efc3ace8aa" id="r_a9f576b7fe06c6ae2ee1236efc3ace8aa"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a9f576b7fe06c6ae2ee1236efc3ace8aa">Renderer</a> (const <a class="el" href="struct_world.html">World</a> *world, <a class="el" href="struct_color.html">Color</a> bg_color=<a class="el" href="struct_color.html">Color</a>{0.0f, 0.0f, 0.0f})</td></tr>
+<tr class="memdesc:a9f576b7fe06c6ae2ee1236efc3ace8aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct a renderer.  <br /></td></tr>
 <tr class="memitem:add2012f269f157754034e7b5475a8927" id="r_add2012f269f157754034e7b5475a8927"><td class="memItemLeft">virtual&#160;</td><td class="memItemRight"><a class="el" href="#add2012f269f157754034e7b5475a8927">~Renderer</a> ()=default</td></tr>
+<tr class="memdesc:add2012f269f157754034e7b5475a8927"><td class="mdescLeft">&#160;</td><td class="mdescRight">Virtual destructor.  <br /></td></tr>
 <tr class="memitem:a95d4bc69dca50b8c940245d0b6a90b83" id="r_a95d4bc69dca50b8c940245d0b6a90b83"><td class="memItemLeft">virtual <a class="el" href="struct_color.html">Color</a>&#160;</td><td class="memItemRight"><a class="el" href="#a95d4bc69dca50b8c940245d0b6a90b83">operator()</a> (const <a class="el" href="struct_ray.html">Ray</a> &amp;ray) const =0</td></tr>
+<tr class="memdesc:a95d4bc69dca50b8c940245d0b6a90b83"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate the radiance carried by a ray.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a87c32d629c49b5ba7452f58673fcb700" id="r_a87c32d629c49b5ba7452f58673fcb700"><td class="memItemLeft">const <a class="el" href="struct_world.html">World</a> *&#160;</td><td class="memItemRight"><a class="el" href="#a87c32d629c49b5ba7452f58673fcb700">world</a></td></tr>
+<tr class="memdesc:a87c32d629c49b5ba7452f58673fcb700"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="struct_scene.html" title="Represents a fully parsed scene containing all objects needed for rendering.">Scene</a> to be rendered.  <br /></td></tr>
 <tr class="memitem:abb73049b7b6e2732f5f425e4af8fbe6a" id="r_abb73049b7b6e2732f5f425e4af8fbe6a"><td class="memItemLeft"><a class="el" href="struct_color.html">Color</a>&#160;</td><td class="memItemRight"><a class="el" href="#abb73049b7b6e2732f5f425e4af8fbe6a">background_color</a></td></tr>
+<tr class="memdesc:abb73049b7b6e2732f5f425e4af8fbe6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Radiance returned when a ray does not hit any object.  <br /></td></tr>
 </table>
-<a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Base class for rendering algorithms. </p>
+<p>A renderer evaluates a ray and returns the radiance associated with that ray. </p>
+</div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a9f576b7fe06c6ae2ee1236efc3ace8aa" name="a9f576b7fe06c6ae2ee1236efc3ace8aa"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9f576b7fe06c6ae2ee1236efc3ace8aa">&#9670;&#160;</a></span>Renderer()</h2>
 
@@ -169,6 +180,15 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Construct a renderer. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">world</td><td><a class="el" href="struct_scene.html" title="Represents a fully parsed scene containing all objects needed for rendering.">Scene</a> to render. </td></tr>
+    <tr><td class="paramname">bg_color</td><td>Environment radiance. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="add2012f269f157754034e7b5475a8927" name="add2012f269f157754034e7b5475a8927"></a>
@@ -193,6 +213,8 @@ Public Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Virtual destructor. </p>
 
 </div>
 </div>
@@ -220,6 +242,15 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Evaluate the radiance carried by a ray. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ray</td><td><a class="el" href="struct_ray.html" title="Ray used for visibility and light transport queries.">Ray</a> to evaluate. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Radiance associated with the ray. </dd></dl>
+
 <p>Implemented in <a class="el" href="struct_flat_renderer.html#a9a0162b6c78298dc073db1a9495d1663">FlatRenderer</a>, <a class="el" href="struct_on_off_renderer.html#aa50d28f238152c49e60f50d85e96d935">OnOffRenderer</a>, and <a class="el" href="struct_path_tracer.html#a998cbaa8a2a024b3e123f22daa268ef5">PathTracer</a>.</p>
 
 </div>
@@ -237,6 +268,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Radiance returned when a ray does not hit any object. </p>
+
 </div>
 </div>
 <a id="a87c32d629c49b5ba7452f58673fcb700" name="a87c32d629c49b5ba7452f58673fcb700"></a>
@@ -250,6 +283,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p><a class="el" href="struct_scene.html" title="Represents a fully parsed scene containing all objects needed for rendering.">Scene</a> to be rendered. </p>
 
 </div>
 </div>

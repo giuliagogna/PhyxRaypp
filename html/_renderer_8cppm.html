@@ -118,14 +118,17 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('_renderer_8cpp
   <div class="headertitle"><div class="title">Renderer.cppm File Reference<div class="ingroups">module <a class="el" href="module___renderer.html">Renderer</a></div></div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Rendering algorithms.  
+<a href="#details">More...</a></p>
 <div class="textblock"><code>import <a class="el" href="_p_c_g_8cppm_source.html">PCG</a>;</code><br />
-<code>import <a class="el" href="_geometry_8cppm_source.html">Geometry</a>;</code><br />
-<code>import <a class="el" href="_color_8cppm_source.html">Color</a>;</code><br />
-<code>import <a class="el" href="_h_d_r_image_8cppm_source.html">HDRImage</a>;</code><br />
-<code>import <a class="el" href="_material_8cppm_source.html">Material</a>;</code><br />
 <code>import <a class="el" href="_shape_8cppm_source.html">Shape</a>;</code><br />
-<code>import <a class="el" href="_pigment_8cppm_source.html">Pigment</a>;</code><br />
+<code>import <a class="el" href="_geometry_8cppm_source.html">Geometry</a>;</code><br />
 <code>import <a class="el" href="_camera_8cppm_source.html">Camera</a>;</code><br />
+<code>import <a class="el" href="_color_8cppm_source.html">Color</a>;</code><br />
+<code>import <a class="el" href="_material_8cppm_source.html">Material</a>;</code><br />
+<code>import <a class="el" href="_h_d_r_image_8cppm_source.html">HDRImage</a>;</code><br />
+<code>import <a class="el" href="_pigment_8cppm_source.html">Pigment</a>;</code><br />
 <code>import std;</code><br />
 </div>
 <p><a href="_renderer_8cppm_source.html">Go to the source code of this file.</a></p>
@@ -133,11 +136,18 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('_renderer_8cpp
 <tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:Renderer" id="r_Renderer"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_renderer.html">Renderer</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base class for rendering algorithms.  <a href="struct_renderer.html#details">More...</a><br /></td></tr>
 <tr class="memitem:OnOffRenderer" id="r_OnOffRenderer"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_on_off_renderer.html">OnOffRenderer</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Visibility renderer.  <a href="struct_on_off_renderer.html#details">More...</a><br /></td></tr>
 <tr class="memitem:FlatRenderer" id="r_FlatRenderer"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_flat_renderer.html">FlatRenderer</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flat-shading renderer.  <a href="struct_flat_renderer.html#details">More...</a><br /></td></tr>
 <tr class="memitem:PathTracer" id="r_PathTracer"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_path_tracer.html">PathTracer</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Monte Carlo path tracer.  <a href="struct_path_tracer.html#details">More...</a><br /></td></tr>
 </table>
-</div><!-- contents -->
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Rendering algorithms. </p>
+<p>This module defines the rendering strategies used to evaluate camera rays, ranging from simple visibility tests to recursive Monte Carlo path tracing. </p>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <div id="page-nav" class="page-nav-panel">
 <div id="page-nav-resize-handle"></div>

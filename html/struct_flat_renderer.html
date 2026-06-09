@@ -118,31 +118,43 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('struct_flat_re
   <div class="headertitle"><div class="title">FlatRenderer Struct Reference<span class="mlabels"><span class="mlabel export">export</span></span><div class="ingroups">module <a class="el" href="module___renderer.html">Renderer</a></div></div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Flat-shading renderer.  
+ <a href="#details">More...</a></p>
 <div class="dynheader">
 Inheritance diagram for FlatRenderer:</div>
 <div class="dyncontent">
  <div class="center">
   <img src="struct_flat_renderer.png" usemap="#FlatRenderer_map" alt=""/>
   <map id="FlatRenderer_map" name="FlatRenderer_map">
-<area href="struct_renderer.html" alt="Renderer" shape="rect" coords="0,0,86,24"/>
+<area href="struct_renderer.html" title="Base class for rendering algorithms." alt="Renderer" shape="rect" coords="0,0,86,24"/>
   </map>
 </div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a9a0162b6c78298dc073db1a9495d1663" id="r_a9a0162b6c78298dc073db1a9495d1663"><td class="memItemLeft"><a class="el" href="struct_color.html">Color</a>&#160;</td><td class="memItemRight"><a class="el" href="#a9a0162b6c78298dc073db1a9495d1663">operator()</a> (const <a class="el" href="struct_ray.html">Ray</a> &amp;ray) const override</td></tr>
+<tr class="memdesc:a9a0162b6c78298dc073db1a9495d1663"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate the radiance carried by a ray.  <br /></td></tr>
 <tr class="memitem:a9f576b7fe06c6ae2ee1236efc3ace8aa" id="r_a9f576b7fe06c6ae2ee1236efc3ace8aa"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a9f576b7fe06c6ae2ee1236efc3ace8aa">Renderer</a> (const <a class="el" href="struct_world.html">World</a> *world, <a class="el" href="struct_color.html">Color</a> bg_color=<a class="el" href="struct_color.html">Color</a>{0.0f, 0.0f, 0.0f})</td></tr>
+<tr class="memdesc:a9f576b7fe06c6ae2ee1236efc3ace8aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct a renderer.  <br /></td></tr>
 <tr class="inherit_header pub_methods_struct_renderer"><td colspan="2">Public Member Functions inherited from <a class="el" href="struct_renderer.html">Renderer</a></td></tr>
 <tr class="memitem:a9f576b7fe06c6ae2ee1236efc3ace8aa pub_methods_struct_renderer" id="r_a9f576b7fe06c6ae2ee1236efc3ace8aa"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="struct_renderer.html#a9f576b7fe06c6ae2ee1236efc3ace8aa">Renderer</a> (const <a class="el" href="struct_world.html">World</a> *world, <a class="el" href="struct_color.html">Color</a> bg_color=<a class="el" href="struct_color.html">Color</a>{0.0f, 0.0f, 0.0f})</td></tr>
+<tr class="memdesc:a9f576b7fe06c6ae2ee1236efc3ace8aa pub_methods_struct_renderer"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct a renderer.  <br /></td></tr>
 <tr class="memitem:add2012f269f157754034e7b5475a8927 pub_methods_struct_renderer" id="r_add2012f269f157754034e7b5475a8927"><td class="memItemLeft">virtual&#160;</td><td class="memItemRight"><a class="el" href="struct_renderer.html#add2012f269f157754034e7b5475a8927">~Renderer</a> ()=default</td></tr>
+<tr class="memdesc:add2012f269f157754034e7b5475a8927 pub_methods_struct_renderer"><td class="mdescLeft">&#160;</td><td class="mdescRight">Virtual destructor.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-inherited" class="groupheader"><a id="inherited" name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
 <tr class="inherit_header pub_attribs_struct_renderer"><td colspan="2">Public Attributes inherited from <a class="el" href="struct_renderer.html">Renderer</a></td></tr>
 <tr class="memitem:a87c32d629c49b5ba7452f58673fcb700 pub_attribs_struct_renderer" id="r_a87c32d629c49b5ba7452f58673fcb700"><td class="memItemLeft">const <a class="el" href="struct_world.html">World</a> *&#160;</td><td class="memItemRight"><a class="el" href="struct_renderer.html#a87c32d629c49b5ba7452f58673fcb700">world</a></td></tr>
+<tr class="memdesc:a87c32d629c49b5ba7452f58673fcb700 pub_attribs_struct_renderer"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="struct_scene.html" title="Represents a fully parsed scene containing all objects needed for rendering.">Scene</a> to be rendered.  <br /></td></tr>
 <tr class="memitem:abb73049b7b6e2732f5f425e4af8fbe6a pub_attribs_struct_renderer" id="r_abb73049b7b6e2732f5f425e4af8fbe6a"><td class="memItemLeft"><a class="el" href="struct_color.html">Color</a>&#160;</td><td class="memItemRight"><a class="el" href="struct_renderer.html#abb73049b7b6e2732f5f425e4af8fbe6a">background_color</a></td></tr>
+<tr class="memdesc:abb73049b7b6e2732f5f425e4af8fbe6a pub_attribs_struct_renderer"><td class="mdescLeft">&#160;</td><td class="mdescRight">Radiance returned when a ray does not hit any object.  <br /></td></tr>
 </table>
-<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Flat-shading renderer. </p>
+<p>Returns the pigment color associated with the intersected surface without performing any lighting computation. </p>
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
 <a id="a9a0162b6c78298dc073db1a9495d1663" name="a9a0162b6c78298dc073db1a9495d1663"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9a0162b6c78298dc073db1a9495d1663">&#9670;&#160;</a></span>operator()()</h2>
 
@@ -165,6 +177,15 @@ Additional Inherited Members</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Evaluate the radiance carried by a ray. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ray</td><td><a class="el" href="struct_ray.html" title="Ray used for visibility and light transport queries.">Ray</a> to evaluate. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Radiance associated with the ray. </dd></dl>
 
 <p>Implements <a class="el" href="struct_renderer.html#a95d4bc69dca50b8c940245d0b6a90b83">Renderer</a>.</p>
 
@@ -196,6 +217,15 @@ Additional Inherited Members</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Construct a renderer. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">world</td><td><a class="el" href="struct_scene.html" title="Represents a fully parsed scene containing all objects needed for rendering.">Scene</a> to render. </td></tr>
+    <tr><td class="paramname">bg_color</td><td>Environment radiance. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
