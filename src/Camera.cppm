@@ -53,11 +53,7 @@ export struct Ray {
 
     // RP: I don't feel it's spontaneous to have it here.
     // GG: You mean implementation? I put it here because it's just a return, but I can move it
-<<<<<<< HEAD
-    Ray transform(const Transformation& trans) const {
-=======
     inline Ray transform(const Transformation& trans) const {
->>>>>>> main
         return Ray{
             .origin = trans * origin,
             .direction = trans * direction,
@@ -99,11 +95,7 @@ export struct OrthogonalCamera : Camera {
         : Camera(aspect_ratio, trans) {}
     
     // Declared this way, u and v are always between 0 and 1
-<<<<<<< HEAD
-    [[nodiscard]] Ray fire_ray(float u, float v) const override {
-=======
     [[nodiscard]] inline Ray fire_ray(const float u, const float v) const override {
->>>>>>> main
         // Ray origin is on the image plane at distance d from the camera position
         const Point ray_origin{-1.0f, (1.0f - 2.0f * u) * aspect_ratio, 2.0f * v - 1.0f}; // Camera space origin
         constexpr Vec ray_direction{1.0f, 0.0f, 0.0f}; // Camera space direction (orthogonal to the image plane)
@@ -116,11 +108,7 @@ export struct PerspectiveCamera : Camera {
     PerspectiveCamera(float aspect_ratio=1.0f, float d=1.0f, const Transformation& trans=Transformation{})
         : Camera(aspect_ratio, trans), d(d) {}
     
-<<<<<<< HEAD
-    [[nodiscard]] Ray fire_ray(float u, float v) const override {
-=======
     [[nodiscard]] inline Ray fire_ray(const float u, const float v) const override {
->>>>>>> main
         // Ray origin is the camera position (0,0,0 in camera space)
         const Point ray_origin{-d, 0.0f, 0.0f}; // Camera space origin
         const Vec ray_direction{d, (1.0f - 2.0f * u) * aspect_ratio, 2.0f * v - 1.0f}; // Camera space direction (from the camera position to the pixel on the image plane)
