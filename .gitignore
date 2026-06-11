@@ -88,3 +88,8 @@ mesh/*/*.mtl
 # Images used as trials
 # ======================
 exclude/
+
+# ==============
+# HTML
+# ==============
+html*
