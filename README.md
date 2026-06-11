@@ -143,7 +143,7 @@ camera(perspective, 1.0, 3.0, translation([0.0, 0.0, 5.0]));
 material red_plastic(diffuse(uniform(<0.8, 0.1, 0.1>)));
 sphere(translation([0.0, 1.0, 0.0]) * scaling([2.0, 2.0, 2.0]), red_plastic);
 ```
-For a complete guide on all available shapes, materials, and syntax rules, please see the Scene Language Documentation in `docs/SCENE_LANGUAGE.md`.
+For a complete guide on all available shapes, materials, and syntax rules, please see the Scene Language Documentation in [`docs/SCENE_LANGUAGE.md`](docs/SCENE_LANGUAGE.md).
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 ## Testing
