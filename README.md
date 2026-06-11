@@ -158,6 +158,36 @@ xmake run test_HDRImage
 ```
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
+## Documentation
+
+`PhyxRadpp` includes source documentation in the repository:
+
+- API documentation embedded in the source code using Doxygen comments;
+- the Scene Description Language specification ([`docs/SCENE_LANGUAGE.md`](docs/SCENE_LANGUAGE.md)).
+
+The generated HTML documentation is not included in the repository and can be built locally using Doxygen.
+
+### Generate HTML Documentation
+
+Install Doxygen and run:
+
+```bash
+doxygen docs/Doxyfile
+```
+
+The generated documentation will be written to:
+
+```text
+docs/html/
+```
+
+Open the main page in your browser:
+
+```text
+docs/html/index.html
+```
+
+------------------------------------------------------------------------------------------------------------------------------------------------
 ## First Time Setup (Dependencies)
 If you are compiling this project on a fresh machine, you need a C++23 compatible compiler. `xmake` will automatically download `doctest` and `stb`, but you must provide the compiler.
 
