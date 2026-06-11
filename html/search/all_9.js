@@ -4,7 +4,7 @@ var searchData=
   ['c3_1',['c3',['../test___color_8cpp.html#af6c0c3e6944f1e84f426fe5e20fc6b92',1,'test_Color.cpp']]],
   ['c4_2',['c4',['../test___color_8cpp.html#a45620df22ee465daf4d1dc328ed60187',1,'test_Color.cpp']]],
   ['camera_3',['CAMERA',['../_scene_files_8cppm.html#a0a395672924ac94ef998770a52e49f42addf0d6b21537d984fea6544f58101fa8',1,'SceneFiles.cppm']]],
-  ['camera_4',['Camera',['../md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md15',1,'2. Environment and Camera'],['../struct_camera.html',1,'Camera'],['../module___camera.html',1,'Camera module'],['../struct_camera.html#a30b28e673f0e4acda69ac8cefcd49acd',1,'Camera::Camera()'],['../md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md17',1,'Camera']]],
+  ['camera_4',['Camera',['../md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md16',1,'2. Environment and Camera'],['../struct_camera.html',1,'Camera'],['../module___camera.html',1,'Camera module'],['../struct_camera.html#a30b28e673f0e4acda69ac8cefcd49acd',1,'Camera::Camera()'],['../md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md18',1,'Camera']]],
   ['camera_5',['camera',['../struct_image_tracer.html#a1cf1505362530cc319674fd198b2e755',1,'ImageTracer::camera'],['../struct_scene.html#a01a5fb63e810c9ccb301239c2aa0cfa6',1,'Scene::camera']]],
   ['camera_2ecppm_6',['Camera.cppm',['../_camera_8cppm.html',1,'']]],
   ['changelog_7',['Changelog',['../md__c_h_a_n_g_e_l_o_g.html',1,'']]],
@@ -26,10 +26,10 @@ var searchData=
   ['color1_23',['color1',['../struct_checkered_pigment.html#a4a025a35e136c3f09fa921c13bd59321',1,'CheckeredPigment']]],
   ['color2_24',['color2',['../struct_checkered_pigment.html#a260967c2e883f489b8dc08b8db13c77f',1,'CheckeredPigment']]],
   ['command_25',['command',['../struct_parameters.html#acf51a3021f1aa0f5f7ed6ca63f729879',1,'Parameters']]],
-  ['conversion_20from_20pfm_20to_20png_26',['&amp;ndash; Example 1.1: Conversion from &lt;span class=&quot;tt&quot;&gt;.pfm&lt;/span&gt; to &lt;span class=&quot;tt&quot;&gt;.png&lt;/span&gt;',['../md__r_e_a_d_m_e.html#autotoc_md34',1,'']]],
-  ['converter_27',['1. PFM to PNG Converter',['../md__r_e_a_d_m_e.html#autotoc_md33',1,'']]],
+  ['conversion_20from_20pfm_20to_20png_26',['&amp;ndash; Example 1.1: Conversion from &lt;span class=&quot;tt&quot;&gt;.pfm&lt;/span&gt; to &lt;span class=&quot;tt&quot;&gt;.png&lt;/span&gt;',['../md__r_e_a_d_m_e.html#autotoc_md35',1,'']]],
+  ['converter_27',['1. PFM to PNG Converter',['../md__r_e_a_d_m_e.html#autotoc_md34',1,'']]],
   ['create_5fonb_5ffrom_5fz_28',['create_onb_from_z',['../_geometry_8cppm.html#ac3bf7e2822e7f2fc4be45b37f7fa80b2',1,'Geometry.cppm']]],
   ['cube_29',['CUBE',['../_scene_files_8cppm.html#a0a395672924ac94ef998770a52e49f42afbfd6568f88d940b586c9ddf8f68236d',1,'SceneFiles.cppm']]],
   ['cube_30',['Cube',['../struct_cube.html',1,'']]],
-  ['custom_20output_31',['&amp;ndash; Example 2.4: Custom Output',['../md__r_e_a_d_m_e.html#autotoc_md39',1,'']]]
+  ['custom_20output_31',['&amp;ndash; Example 2.4: Custom Output',['../md__r_e_a_d_m_e.html#autotoc_md40',1,'']]]
 ];

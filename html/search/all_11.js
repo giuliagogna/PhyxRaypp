@@ -1,9 +1,9 @@
 var searchData=
 [
-  ['language_0',['Language',['../md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html',1,'PhyxRadpp Scene Description Language'],['../md__r_e_a_d_m_e.html#autotoc_md41',1,'Scene Description Language']]],
+  ['language_0',['Language',['../md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html',1,'PhyxRadpp Scene Description Language'],['../md__r_e_a_d_m_e.html#autotoc_md42',1,'Scene Description Language']]],
   ['left_5fchild_5findex_1',['left_child_index',['../struct_b_v_h_node.html#a4103ba5a4989ae9ef83099daf2c040a1',1,'BVHNode']]],
   ['line_5fnum_2',['line_num',['../struct_source_location.html#a766194e2284e00938ebfa0dce1992783',1,'SourceLocation']]],
-  ['linux_20ubuntu_3',['🐧 Linux (Ubuntu)',['../md__r_e_a_d_m_e.html#autotoc_md46',1,'']]],
+  ['linux_20ubuntu_3',['🐧 Linux (Ubuntu)',['../md__r_e_a_d_m_e.html#autotoc_md47',1,'']]],
   ['literalnumbertoken_4',['LiteralNumberToken',['../struct_literal_number_token.html',1,'LiteralNumberToken'],['../struct_literal_number_token.html#a5ca3ef64cc67f431c4283b26c0bf8378',1,'LiteralNumberToken::LiteralNumberToken()']]],
   ['literalstringtoken_5',['LiteralStringToken',['../struct_literal_string_token.html',1,'LiteralStringToken'],['../struct_literal_string_token.html#ac702e51a43482fff03832be715aa19a7',1,'LiteralStringToken::LiteralStringToken()']]],
   ['little_5fendian_6',['little_endian',['../struct_h_d_r_image.html#a044f086c2fcaa43ca80268e4d31a58b3a60ee1a7a6ea81cfd79115721fc09e1f0',1,'HDRImage']]],

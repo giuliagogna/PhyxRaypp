@@ -1,6 +1,6 @@
 var struct_b_v_h_node =
 [
-    [ "Extend_tree_wrapper", "struct_b_v_h_node.html#a1d45850ba98c33440b54610775de509e", null ],
+    [ "Extend_tree_wrapper", "struct_b_v_h_node.html#a277bfd23b55733742d1c3964eebcee61", null ],
     [ "bounds", "struct_b_v_h_node.html#a2ed1a6f8c3705edae9f111b1e0594c84", null ],
     [ "is_leaf", "struct_b_v_h_node.html#ae677046689a33100f71d86fd0d03569f", null ],
     [ "left_child_index", "struct_b_v_h_node.html#a4103ba5a4989ae9ef83099daf2c040a1", null ],

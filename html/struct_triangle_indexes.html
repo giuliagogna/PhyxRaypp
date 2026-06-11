@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.17.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>PhyxRadpp: TriangleIndexes Struct Reference</title>
+<title>PhyxRad++: TriangleIndexes Struct Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="codefolding.js"></script>
 <script type="text/javascript" src="clipboard.js"></script>
@@ -30,7 +30,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">PhyxRadpp
+   <div id="projectname">PhyxRad++
    </div>
   </td>
  </tr>
@@ -118,18 +118,41 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('struct_triangl
   <div class="headertitle"><div class="title">TriangleIndexes Struct Reference<span class="mlabels"><span class="mlabel export">export</span></span><div class="ingroups">module <a class="el" href="module___mesh.html">Mesh</a></div></div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Index triplet describing a triangular face in an indexed mesh.  
+ <a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:affb14f3af50ac04bd383f3fc313fd486" id="r_affb14f3af50ac04bd383f3fc313fd486"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#affb14f3af50ac04bd383f3fc313fd486">is_equal</a> (const <a class="el" href="struct_triangle_indexes.html">TriangleIndexes</a> &amp;other)</td></tr>
+<tr class="memdesc:affb14f3af50ac04bd383f3fc313fd486"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compares two triangle index sets for exact equality.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a660012bd146c5abb5c24e4b72290f14b" id="r_a660012bd146c5abb5c24e4b72290f14b"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a660012bd146c5abb5c24e4b72290f14b">i1</a></td></tr>
-<tr class="memitem:a1bbb0f4a938803ed2c915f22fd1b2104" id="r_a1bbb0f4a938803ed2c915f22fd1b2104"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a1bbb0f4a938803ed2c915f22fd1b2104">i2</a></td></tr>
-<tr class="memitem:a9b0495922ac0dedf8a39b51284a7fc2a" id="r_a9b0495922ac0dedf8a39b51284a7fc2a"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a9b0495922ac0dedf8a39b51284a7fc2a">i3</a></td></tr>
+<tr class="memitem:af61ba4683833232883979679b4f4f72a" id="r_af61ba4683833232883979679b4f4f72a"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#af61ba4683833232883979679b4f4f72a">v1</a></td></tr>
+<tr class="memdesc:af61ba4683833232883979679b4f4f72a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Index of the first vertex position.  <br /></td></tr>
+<tr class="memitem:aa22a20d9c355a519800d42640f66414b" id="r_aa22a20d9c355a519800d42640f66414b"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#aa22a20d9c355a519800d42640f66414b">v2</a></td></tr>
+<tr class="memdesc:aa22a20d9c355a519800d42640f66414b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Index of the second vertex position.  <br /></td></tr>
+<tr class="memitem:afbab32168f5fe07a3d3bea5ccd52c7b8" id="r_afbab32168f5fe07a3d3bea5ccd52c7b8"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#afbab32168f5fe07a3d3bea5ccd52c7b8">v3</a></td></tr>
+<tr class="memdesc:afbab32168f5fe07a3d3bea5ccd52c7b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Index of the third vertex position.  <br /></td></tr>
+<tr class="memitem:ab5e1a7c3fe41c12a98c3d074c6c946ba" id="r_ab5e1a7c3fe41c12a98c3d074c6c946ba"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ab5e1a7c3fe41c12a98c3d074c6c946ba">vn1</a></td></tr>
+<tr class="memdesc:ab5e1a7c3fe41c12a98c3d074c6c946ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Index of the normal associated with the first vertex.  <br /></td></tr>
+<tr class="memitem:ab142b608a3af1013c148447cccd5b67c" id="r_ab142b608a3af1013c148447cccd5b67c"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ab142b608a3af1013c148447cccd5b67c">vn2</a></td></tr>
+<tr class="memdesc:ab142b608a3af1013c148447cccd5b67c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Index of the normal associated with the second vertex.  <br /></td></tr>
+<tr class="memitem:ac909ff616c6280e3a603afa0b85170dc" id="r_ac909ff616c6280e3a603afa0b85170dc"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ac909ff616c6280e3a603afa0b85170dc">vn3</a></td></tr>
+<tr class="memdesc:ac909ff616c6280e3a603afa0b85170dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Index of the normal associated with the third vertex.  <br /></td></tr>
+<tr class="memitem:aecba1ab207cec47573acb0b3ecf3ff2c" id="r_aecba1ab207cec47573acb0b3ecf3ff2c"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#aecba1ab207cec47573acb0b3ecf3ff2c">vt1</a></td></tr>
+<tr class="memdesc:aecba1ab207cec47573acb0b3ecf3ff2c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Index of the texture coordinate associated with the first vertex.  <br /></td></tr>
+<tr class="memitem:aec22f7a66c98609ca7936e5058a88b63" id="r_aec22f7a66c98609ca7936e5058a88b63"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#aec22f7a66c98609ca7936e5058a88b63">vt2</a></td></tr>
+<tr class="memdesc:aec22f7a66c98609ca7936e5058a88b63"><td class="mdescLeft">&#160;</td><td class="mdescRight">Index of the texture coordinate associated with the second vertex.  <br /></td></tr>
+<tr class="memitem:a8c1ab014a2857ab6726ab1284591ceda" id="r_a8c1ab014a2857ab6726ab1284591ceda"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a8c1ab014a2857ab6726ab1284591ceda">vt3</a></td></tr>
+<tr class="memdesc:a8c1ab014a2857ab6726ab1284591ceda"><td class="mdescLeft">&#160;</td><td class="mdescRight">Index of the texture coordinate associated with the third vertex.  <br /></td></tr>
 </table>
-<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Index triplet describing a triangular face in an indexed mesh. </p>
+<p>Stores the indices of the three vertices composing a triangle, along with the corresponding normal and texture-coordinate indices as defined by the .obj format.</p>
+<p>All indices refer to elements stored in the <a class="el" href="struct_mesh.html" title="Polygonal mesh accelerated by a Bounding Volume Hierarchy (BVH).">Mesh</a> vertex, normal, and UV arrays. </p>
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
 <a id="affb14f3af50ac04bd383f3fc313fd486" name="affb14f3af50ac04bd383f3fc313fd486"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#affb14f3af50ac04bd383f3fc313fd486">&#9670;&#160;</a></span>is_equal()</h2>
 
@@ -153,48 +176,159 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Compares two triangle index sets for exact equality. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">other</td><td>Triangle index set to compare against. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if all vertex, normal, and texture-coordinate indices match. </dd></dl>
+
 </div>
 </div>
 <a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
-<a id="a660012bd146c5abb5c24e4b72290f14b" name="a660012bd146c5abb5c24e4b72290f14b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a660012bd146c5abb5c24e4b72290f14b">&#9670;&#160;</a></span>i1</h2>
+<a id="af61ba4683833232883979679b4f4f72a" name="af61ba4683833232883979679b4f4f72a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af61ba4683833232883979679b4f4f72a">&#9670;&#160;</a></span>v1</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int TriangleIndexes::i1</td>
+          <td class="memname">int TriangleIndexes::v1</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
+<p>Index of the first vertex position. </p>
+
 </div>
 </div>
-<a id="a1bbb0f4a938803ed2c915f22fd1b2104" name="a1bbb0f4a938803ed2c915f22fd1b2104"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1bbb0f4a938803ed2c915f22fd1b2104">&#9670;&#160;</a></span>i2</h2>
+<a id="aa22a20d9c355a519800d42640f66414b" name="aa22a20d9c355a519800d42640f66414b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa22a20d9c355a519800d42640f66414b">&#9670;&#160;</a></span>v2</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int TriangleIndexes::i2</td>
+          <td class="memname">int TriangleIndexes::v2</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
+<p>Index of the second vertex position. </p>
+
 </div>
 </div>
-<a id="a9b0495922ac0dedf8a39b51284a7fc2a" name="a9b0495922ac0dedf8a39b51284a7fc2a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9b0495922ac0dedf8a39b51284a7fc2a">&#9670;&#160;</a></span>i3</h2>
+<a id="afbab32168f5fe07a3d3bea5ccd52c7b8" name="afbab32168f5fe07a3d3bea5ccd52c7b8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afbab32168f5fe07a3d3bea5ccd52c7b8">&#9670;&#160;</a></span>v3</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int TriangleIndexes::i3</td>
+          <td class="memname">int TriangleIndexes::v3</td>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Index of the third vertex position. </p>
+
+</div>
+</div>
+<a id="ab5e1a7c3fe41c12a98c3d074c6c946ba" name="ab5e1a7c3fe41c12a98c3d074c6c946ba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab5e1a7c3fe41c12a98c3d074c6c946ba">&#9670;&#160;</a></span>vn1</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int TriangleIndexes::vn1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Index of the normal associated with the first vertex. </p>
+
+</div>
+</div>
+<a id="ab142b608a3af1013c148447cccd5b67c" name="ab142b608a3af1013c148447cccd5b67c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab142b608a3af1013c148447cccd5b67c">&#9670;&#160;</a></span>vn2</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int TriangleIndexes::vn2</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Index of the normal associated with the second vertex. </p>
+
+</div>
+</div>
+<a id="ac909ff616c6280e3a603afa0b85170dc" name="ac909ff616c6280e3a603afa0b85170dc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac909ff616c6280e3a603afa0b85170dc">&#9670;&#160;</a></span>vn3</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int TriangleIndexes::vn3</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Index of the normal associated with the third vertex. </p>
+
+</div>
+</div>
+<a id="aecba1ab207cec47573acb0b3ecf3ff2c" name="aecba1ab207cec47573acb0b3ecf3ff2c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aecba1ab207cec47573acb0b3ecf3ff2c">&#9670;&#160;</a></span>vt1</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int TriangleIndexes::vt1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Index of the texture coordinate associated with the first vertex. </p>
+
+</div>
+</div>
+<a id="aec22f7a66c98609ca7936e5058a88b63" name="aec22f7a66c98609ca7936e5058a88b63"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec22f7a66c98609ca7936e5058a88b63">&#9670;&#160;</a></span>vt2</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int TriangleIndexes::vt2</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Index of the texture coordinate associated with the second vertex. </p>
+
+</div>
+</div>
+<a id="a8c1ab014a2857ab6726ab1284591ceda" name="a8c1ab014a2857ab6726ab1284591ceda"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8c1ab014a2857ab6726ab1284591ceda">&#9670;&#160;</a></span>vt3</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int TriangleIndexes::vt3</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Index of the texture coordinate associated with the third vertex. </p>
 
 </div>
 </div>

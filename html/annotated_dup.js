@@ -55,7 +55,6 @@ var annotated_dup =
     [ "Token", "struct_token.html", "struct_token" ],
     [ "Transformation", "struct_transformation.html", "struct_transformation" ],
     [ "TriangleIndexes", "struct_triangle_indexes.html", "struct_triangle_indexes" ],
-    [ "TrianglePoint", "struct_triangle_point.html", "struct_triangle_point" ],
     [ "UniformPigment", "struct_uniform_pigment.html", "struct_uniform_pigment" ],
     [ "Vec", "struct_vec.html", "struct_vec" ],
     [ "Vec2D", "struct_vec2_d.html", "struct_vec2_d" ],

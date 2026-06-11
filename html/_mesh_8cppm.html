@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.17.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>PhyxRadpp: src/Mesh.cppm File Reference</title>
+<title>PhyxRad++: src/Mesh.cppm File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="codefolding.js"></script>
 <script type="text/javascript" src="clipboard.js"></script>
@@ -30,7 +30,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">PhyxRadpp
+   <div id="projectname">PhyxRad++
    </div>
   </td>
  </tr>
@@ -118,13 +118,16 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('_mesh_8cppm.ht
   <div class="headertitle"><div class="title">Mesh.cppm File Reference<div class="ingroups">module <a class="el" href="module___mesh.html">Mesh</a></div></div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>3D polygonal mesh representation and BVH acceleration.  
+<a href="#details">More...</a></p>
 <div class="textblock"><code>import <a class="el" href="_shape_8cppm_source.html">Shape</a>;</code><br />
 <code>import <a class="el" href="_pigment_8cppm_source.html">Pigment</a>;</code><br />
-<code>import <a class="el" href="_h_d_r_image_8cppm_source.html">HDRImage</a>;</code><br />
 <code>import <a class="el" href="_camera_8cppm_source.html">Camera</a>;</code><br />
-<code>import <a class="el" href="_b_r_d_f_8cppm_source.html">BRDF</a>;</code><br />
 <code>import <a class="el" href="_material_8cppm_source.html">Material</a>;</code><br />
 <code>import <a class="el" href="_color_8cppm_source.html">Color</a>;</code><br />
+<code>import <a class="el" href="_b_r_d_f_8cppm_source.html">BRDF</a>;</code><br />
+<code>import <a class="el" href="_h_d_r_image_8cppm_source.html">HDRImage</a>;</code><br />
 <code>import <a class="el" href="_geometry_8cppm_source.html">Geometry</a>;</code><br />
 <code>import <a class="el" href="auxiliary__functions_8cppm_source.html">auxiliary_functions</a>;</code><br />
 <code>import std;</code><br />
@@ -134,17 +137,25 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('_mesh_8cppm.ht
 <tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:BVHAABB" id="r_BVHAABB"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_b_v_h_a_a_b_b.html">BVHAABB</a></td></tr>
-<tr class="memitem:TrianglePoint" id="r_TrianglePoint"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_triangle_point.html">TrianglePoint</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Axis-Aligned Bounding Box for spatial partitioning.  <a href="struct_b_v_h_a_a_b_b.html#details">More...</a><br /></td></tr>
 <tr class="memitem:TriangleIndexes" id="r_TriangleIndexes"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_triangle_indexes.html">TriangleIndexes</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Index triplet describing a triangular face in an indexed mesh.  <a href="struct_triangle_indexes.html#details">More...</a><br /></td></tr>
 <tr class="memitem:BVHBin" id="r_BVHBin"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_b_v_h_bin.html">BVHBin</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Temporary bin used during BVH construction.  <a href="struct_b_v_h_bin.html#details">More...</a><br /></td></tr>
 <tr class="memitem:BVHNode" id="r_BVHNode"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_b_v_h_node.html">BVHNode</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Node of the Bounding Volume Hierarchy (BVH) Tree.  <a href="struct_b_v_h_node.html#details">More...</a><br /></td></tr>
 <tr class="memitem:Mesh" id="r_Mesh"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_mesh.html">Mesh</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Polygonal mesh accelerated by a Bounding Volume Hierarchy (BVH).  <a href="struct_mesh.html#details">More...</a><br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:a652a7027731b3723571cc5ee9020dbfe" id="r_a652a7027731b3723571cc5ee9020dbfe"><td class="memItemLeft">float&#160;</td><td class="memItemRight"><a class="el" href="#a652a7027731b3723571cc5ee9020dbfe">get_axis_value</a> (const <a class="el" href="struct_point.html">Point</a> &amp;p, int axis)</td></tr>
+<tr class="memdesc:a652a7027731b3723571cc5ee9020dbfe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a point coordinate along a selected axis.  <br /></td></tr>
 </table>
-<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>3D polygonal mesh representation and BVH acceleration. </p>
+<p>This module defines the <a class="el" href="struct_mesh.html" title="Polygonal mesh accelerated by a Bounding Volume Hierarchy (BVH).">Mesh</a> shape used to load and render complex 3D models. It handles parsing .obj files into an indexed face set architecture and constructs a Bounding Volume Hierarchy (BVH) using the Surface Area Heuristic (SAH) to highly accelerate ray-triangle intersection queries. </p>
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
 <a id="a652a7027731b3723571cc5ee9020dbfe" name="a652a7027731b3723571cc5ee9020dbfe"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a652a7027731b3723571cc5ee9020dbfe">&#9670;&#160;</a></span>get_axis_value()</h2>
 
@@ -171,6 +182,22 @@ Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Returns a point coordinate along a selected axis. </p>
+<p>Utility helper used by the BVH construction algorithm when sorting or binning primitives along a specific dimension.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">p</td><td>Input point. </td></tr>
+    <tr><td class="paramname">axis</td><td>Coordinate axis:<ul>
+<li>0 = X</li>
+<li>1 = Y</li>
+<li>2 = Z </li>
+</ul>
+</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The coordinate value corresponding to the selected axis. </dd></dl>
 
 </div>
 </div>

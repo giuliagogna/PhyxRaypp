@@ -17,7 +17,7 @@ var searchData=
   ['readme_2emd_14',['README.md',['../_r_e_a_d_m_e_8md.html',1,'']]],
   ['renderer_15',['Renderer',['../struct_renderer.html',1,'Renderer'],['../module___renderer.html',1,'Renderer module'],['../struct_renderer.html#a9f576b7fe06c6ae2ee1236efc3ace8aa',1,'Renderer::Renderer()'],['../struct_flat_renderer.html#a9f576b7fe06c6ae2ee1236efc3ace8aa',1,'FlatRenderer::Renderer()'],['../struct_path_tracer.html#a9f576b7fe06c6ae2ee1236efc3ace8aa',1,'PathTracer::Renderer()']]],
   ['renderer_2ecppm_16',['Renderer.cppm',['../_renderer_8cppm.html',1,'']]],
-  ['rendering_17',['2. Scene Rendering',['../md__r_e_a_d_m_e.html#autotoc_md35',1,'']]],
+  ['rendering_17',['2. Scene Rendering',['../md__r_e_a_d_m_e.html#autotoc_md36',1,'']]],
   ['result_18',['result',['../test___color_8cpp.html#a091e96177672531669b15d9b18121907',1,'test_Color.cpp']]],
   ['result_5fcomplex_19',['result_complex',['../test___color_8cpp.html#a8e840553da1e8bac390c4ae68dd5deca',1,'test_Color.cpp']]],
   ['right_5fchild_5findex_20',['right_child_index',['../struct_b_v_h_node.html#a599750e48790c93c76ceb829ab709355',1,'BVHNode']]],

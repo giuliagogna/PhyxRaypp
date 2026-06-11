@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.17.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>PhyxRadpp: Mesh Struct Reference</title>
+<title>PhyxRad++: Mesh Struct Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="codefolding.js"></script>
 <script type="text/javascript" src="clipboard.js"></script>
@@ -30,7 +30,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">PhyxRadpp
+   <div id="projectname">PhyxRad++
    </div>
   </td>
  </tr>
@@ -118,6 +118,9 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('struct_mesh.ht
   <div class="headertitle"><div class="title">Mesh Struct Reference<span class="mlabels"><span class="mlabel export">export</span></span><div class="ingroups">module <a class="el" href="module___mesh.html">Mesh</a></div></div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Polygonal mesh accelerated by a Bounding Volume Hierarchy (BVH).  
+ <a href="#details">More...</a></p>
 <div class="dynheader">
 Inheritance diagram for Mesh:</div>
 <div class="dyncontent">
@@ -131,14 +134,21 @@ Inheritance diagram for Mesh:</div>
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ae6b6c56f0ebfa2f6b2b10d25a835c865" id="r_ae6b6c56f0ebfa2f6b2b10d25a835c865"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#ae6b6c56f0ebfa2f6b2b10d25a835c865">Mesh</a> ()=default</td></tr>
-<tr class="memitem:ab3caceda4bc1626c7650f0124b657622" id="r_ab3caceda4bc1626c7650f0124b657622"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#ab3caceda4bc1626c7650f0124b657622">Mesh</a> (const <a class="el" href="struct_transformation.html">Transformation</a> &amp;trans, std::shared_ptr&lt; <a class="el" href="struct_material.html">Material</a> &gt; material, std::vector&lt; <a class="el" href="struct_triangle_point.html">TrianglePoint</a> &gt; points, std::vector&lt; <a class="el" href="struct_triangle_indexes.html">TriangleIndexes</a> &gt; indexes, std::vector&lt; <a class="el" href="struct_b_v_h_node.html">BVHNode</a> &gt; bvh_nodes)</td></tr>
+<tr class="memdesc:ae6b6c56f0ebfa2f6b2b10d25a835c865"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor added for compatibility with some compilers.  <br /></td></tr>
+<tr class="memitem:aec4fd899b02f452963d0f1aefdc7cce1" id="r_aec4fd899b02f452963d0f1aefdc7cce1"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#aec4fd899b02f452963d0f1aefdc7cce1">Mesh</a> (const <a class="el" href="struct_transformation.html">Transformation</a> &amp;trans, std::shared_ptr&lt; <a class="el" href="struct_material.html">Material</a> &gt; material, std::vector&lt; <a class="el" href="struct_point.html">Point</a> &gt; points, std::vector&lt; <a class="el" href="struct_normal.html">Normal</a> &gt; normals, std::vector&lt; <a class="el" href="struct_vec2_d.html">Vec2D</a> &gt; texture_uvs, std::vector&lt; <a class="el" href="struct_triangle_indexes.html">TriangleIndexes</a> &gt; indexes, std::vector&lt; <a class="el" href="struct_b_v_h_node.html">BVHNode</a> &gt; bvh_nodes)</td></tr>
+<tr class="memdesc:aec4fd899b02f452963d0f1aefdc7cce1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs a mesh from pre-built geometry and BVH data.  <br /></td></tr>
 <tr class="memitem:a0704bd1e7bcc75bebb880c8e0d7c3c09" id="r_a0704bd1e7bcc75bebb880c8e0d7c3c09"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a0704bd1e7bcc75bebb880c8e0d7c3c09">Mesh</a> (std::string obj_file, std::shared_ptr&lt; <a class="el" href="struct_material.html">Material</a> &gt; material=nullptr, <a class="el" href="struct_transformation.html">Transformation</a> trans=<a class="el" href="struct_transformation.html">Transformation</a>{}, int BVH_n_bins=12, int BVH_is_leaf_threshold=3)</td></tr>
+<tr class="memdesc:a0704bd1e7bcc75bebb880c8e0d7c3c09"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads a mesh from an .obj file and builds its BVH.  <br /></td></tr>
 <tr class="memitem:a62587c40347ce0d4549c7ef814afaf7a" id="r_a62587c40347ce0d4549c7ef814afaf7a"><td class="memItemLeft">std::optional&lt; <a class="el" href="struct_hit_record.html">HitRecord</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a62587c40347ce0d4549c7ef814afaf7a">ray_intersection</a> (const <a class="el" href="struct_ray.html">Ray</a> &amp;ray) const override</td></tr>
-<tr class="memdesc:a62587c40347ce0d4549c7ef814afaf7a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the intersection between a ray and the shape.  <br /></td></tr>
+<tr class="memdesc:a62587c40347ce0d4549c7ef814afaf7a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface entry point for ray-mesh intersection.  <br /></td></tr>
 <tr class="memitem:a04912cd581309e99cade1095b16eab52" id="r_a04912cd581309e99cade1095b16eab52"><td class="memItemLeft">std::optional&lt; <a class="el" href="struct_hit_record.html">HitRecord</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a04912cd581309e99cade1095b16eab52">ray_intersection_unwrapped</a> (<a class="el" href="struct_ray.html">Ray</a> &amp;local_ray, int starting_index=0, std::optional&lt; <a class="el" href="struct_hit_record.html">HitRecord</a> &gt; closest_hit=std::nullopt) const</td></tr>
+<tr class="memdesc:a04912cd581309e99cade1095b16eab52"><td class="mdescLeft">&#160;</td><td class="mdescRight">Recursively traverses the BVH to find the closest ray-triangle intersection.  <br /></td></tr>
 <tr class="memitem:a886026bc08145033ec7ac7aa801edc74" id="r_a886026bc08145033ec7ac7aa801edc74"><td class="memItemLeft">std::expected&lt; std::string, std::string &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a886026bc08145033ec7ac7aa801edc74">_read_line</a> (std::istream &amp;stream)</td></tr>
+<tr class="memdesc:a886026bc08145033ec7ac7aa801edc74"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads the next meaningful line from a text stream.  <br /></td></tr>
 <tr class="memitem:a080d5bc7d8f82ca4ba954f47dcfc776b" id="r_a080d5bc7d8f82ca4ba954f47dcfc776b"><td class="memItemLeft">std::expected&lt; void, std::string &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a080d5bc7d8f82ca4ba954f47dcfc776b">read_mesh_from_obj</a> (std::istream &amp;obj_stream)</td></tr>
+<tr class="memdesc:a080d5bc7d8f82ca4ba954f47dcfc776b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads mesh geometry from an obj stream.  <br /></td></tr>
 <tr class="memitem:a0fd0a2b6ef39d6e53c854be062b70b09" id="r_a0fd0a2b6ef39d6e53c854be062b70b09"><td class="memItemLeft">std::expected&lt; void, std::string &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a0fd0a2b6ef39d6e53c854be062b70b09">read_mesh_from_obj</a> (std::string obj_file)</td></tr>
+<tr class="memdesc:a0fd0a2b6ef39d6e53c854be062b70b09"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads a mesh from an OBJ file on disk.  <br /></td></tr>
 <tr class="memitem:a62a5023071475aaa672b77d8333732ee" id="r_a62a5023071475aaa672b77d8333732ee"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a62a5023071475aaa672b77d8333732ee">Shape</a> (const <a class="el" href="struct_transformation.html">Transformation</a> &amp;trans=<a class="el" href="struct_transformation.html">Transformation</a>{}, std::shared_ptr&lt; <a class="el" href="struct_material.html">Material</a> &gt; material=nullptr)</td></tr>
 <tr class="inherit_header pub_methods_struct_shape"><td colspan="2">Public Member Functions inherited from <a class="el" href="struct_shape.html">Shape</a></td></tr>
 <tr class="memitem:a62a5023071475aaa672b77d8333732ee pub_methods_struct_shape" id="r_a62a5023071475aaa672b77d8333732ee"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="struct_shape.html#a62a5023071475aaa672b77d8333732ee">Shape</a> (const <a class="el" href="struct_transformation.html">Transformation</a> &amp;trans=<a class="el" href="struct_transformation.html">Transformation</a>{}, std::shared_ptr&lt; <a class="el" href="struct_material.html">Material</a> &gt; material=nullptr)</td></tr>
@@ -147,16 +157,27 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:ae4b44bbce99d405e754f3366754d6ef5" id="r_ae4b44bbce99d405e754f3366754d6ef5"><td class="memItemLeft">std::vector&lt; <a class="el" href="struct_triangle_point.html">TrianglePoint</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ae4b44bbce99d405e754f3366754d6ef5">mesh_points</a></td></tr>
+<tr class="memitem:a45fae31e15f287d6cf6442e8f30a8731" id="r_a45fae31e15f287d6cf6442e8f30a8731"><td class="memItemLeft">std::vector&lt; <a class="el" href="struct_point.html">Point</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a45fae31e15f287d6cf6442e8f30a8731">mesh_points</a></td></tr>
+<tr class="memdesc:a45fae31e15f287d6cf6442e8f30a8731"><td class="mdescLeft">&#160;</td><td class="mdescRight">Vertex positions of the mesh. Corresponds to the 'v' records in the .obj file. <a class="el" href="struct_triangle_indexes.html#af61ba4683833232883979679b4f4f72a" title="Index of the first vertex position.">TriangleIndexes::v1</a>, v2 and v3 reference elements of this array.  <br /></td></tr>
+<tr class="memitem:ab7a5e6412f026c305dbec5e856bb861a" id="r_ab7a5e6412f026c305dbec5e856bb861a"><td class="memItemLeft">std::vector&lt; <a class="el" href="struct_normal.html">Normal</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ab7a5e6412f026c305dbec5e856bb861a">mesh_normals</a></td></tr>
+<tr class="memdesc:ab7a5e6412f026c305dbec5e856bb861a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-vertex normal vectors. Corresponds to the 'vn' records in the .obj file. <a class="el" href="struct_triangle_indexes.html#ab5e1a7c3fe41c12a98c3d074c6c946ba" title="Index of the normal associated with the first vertex.">TriangleIndexes::vn1</a>, vn2 and vn3 reference elements of this array.  <br /></td></tr>
+<tr class="memitem:a589530a76d7e997dc558f2a8473ba790" id="r_a589530a76d7e997dc558f2a8473ba790"><td class="memItemLeft">std::vector&lt; <a class="el" href="struct_vec2_d.html">Vec2D</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a589530a76d7e997dc558f2a8473ba790">mesh_texture_uvs</a></td></tr>
+<tr class="memdesc:a589530a76d7e997dc558f2a8473ba790"><td class="mdescLeft">&#160;</td><td class="mdescRight">Texture coordinates associated with mesh vertices. Corresponds to the 'vt' records in the .obj file. Used during texture lookup and UV interpolation.  <br /></td></tr>
 <tr class="memitem:a32a3f43a5bf6ae437d8f5b7b15b314cd" id="r_a32a3f43a5bf6ae437d8f5b7b15b314cd"><td class="memItemLeft">std::vector&lt; <a class="el" href="struct_triangle_indexes.html">TriangleIndexes</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a32a3f43a5bf6ae437d8f5b7b15b314cd">triangle_points_indexes</a></td></tr>
+<tr class="memdesc:a32a3f43a5bf6ae437d8f5b7b15b314cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indexed triangle list describing mesh connectivity. Each entry stores indices into the vertex, normal and UV arrays, defining one triangular face of the mesh.  <br /></td></tr>
 <tr class="memitem:aac5be40434e2fa93247b05e1dcf93e3c" id="r_aac5be40434e2fa93247b05e1dcf93e3c"><td class="memItemLeft">std::vector&lt; <a class="el" href="struct_b_v_h_node.html">BVHNode</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#aac5be40434e2fa93247b05e1dcf93e3c">nodes</a></td></tr>
+<tr class="memdesc:aac5be40434e2fa93247b05e1dcf93e3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flat storage of the Bounding Volume Hierarchy. The BVH is stored as a contiguous array of nodes rather than as a pointer-based tree. Child nodes are referenced through the indices stored in <a class="el" href="struct_b_v_h_node.html#a4103ba5a4989ae9ef83099daf2c040a1">BVHNode::left_child_index</a> and <a class="el" href="struct_b_v_h_node.html#a599750e48790c93c76ceb829ab709355">BVHNode::right_child_index</a>.  <br /></td></tr>
 <tr class="inherit_header pub_attribs_struct_shape"><td colspan="2">Public Attributes inherited from <a class="el" href="struct_shape.html">Shape</a></td></tr>
 <tr class="memitem:aa4d3059a8632d006c6ee7390b884935a pub_attribs_struct_shape" id="r_aa4d3059a8632d006c6ee7390b884935a"><td class="memItemLeft"><a class="el" href="struct_transformation.html">Transformation</a>&#160;</td><td class="memItemRight"><a class="el" href="struct_shape.html#aa4d3059a8632d006c6ee7390b884935a">trans</a></td></tr>
 <tr class="memdesc:aa4d3059a8632d006c6ee7390b884935a pub_attribs_struct_shape"><td class="mdescLeft">&#160;</td><td class="mdescRight">Local-to-world transformation.  <br /></td></tr>
 <tr class="memitem:a0ea3be350731f432f1248f19b8825789 pub_attribs_struct_shape" id="r_a0ea3be350731f432f1248f19b8825789"><td class="memItemLeft">std::shared_ptr&lt; <a class="el" href="struct_material.html">Material</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="struct_shape.html#a0ea3be350731f432f1248f19b8825789">material</a></td></tr>
 <tr class="memdesc:a0ea3be350731f432f1248f19b8825789 pub_attribs_struct_shape"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="struct_material.html" title="Surface material.">Material</a> assigned to the shape.  <br /></td></tr>
 </table>
-<a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Polygonal mesh accelerated by a Bounding Volume Hierarchy (BVH). </p>
+<p>A <a class="el" href="struct_mesh.html" title="Polygonal mesh accelerated by a Bounding Volume Hierarchy (BVH).">Mesh</a> stores geometry loaded from an indexed triangle representation (typically parsed from a .obj file). Triangle intersection queries are accelerated through a BVH tree built using the Surface Area Heuristic (SAH).</p>
+<p>The mesh inherits from <a class="el" href="struct_shape.html" title="Base class for all geometric primitives.">Shape</a>, allowing it to participate in the scene exactly like built-in primitives such as spheres, planes, and cubes. </p>
+</div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ae6b6c56f0ebfa2f6b2b10d25a835c865" name="ae6b6c56f0ebfa2f6b2b10d25a835c865"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae6b6c56f0ebfa2f6b2b10d25a835c865">&#9670;&#160;</a></span>Mesh() <span class="overload">[1/3]</span></h2>
 
@@ -180,10 +201,12 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Default constructor added for compatibility with some compilers. </p>
+
 </div>
 </div>
-<a id="ab3caceda4bc1626c7650f0124b657622" name="ab3caceda4bc1626c7650f0124b657622"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab3caceda4bc1626c7650f0124b657622">&#9670;&#160;</a></span>Mesh() <span class="overload">[2/3]</span></h2>
+<a id="aec4fd899b02f452963d0f1aefdc7cce1" name="aec4fd899b02f452963d0f1aefdc7cce1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec4fd899b02f452963d0f1aefdc7cce1">&#9670;&#160;</a></span>Mesh() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -204,7 +227,17 @@ Public Attributes</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">std::vector&lt; <a class="el" href="struct_triangle_point.html">TrianglePoint</a> &gt;</td>          <td class="paramname"><span class="paramname"><em>points</em></span>, </td>
+          <td class="paramtype">std::vector&lt; <a class="el" href="struct_point.html">Point</a> &gt;</td>          <td class="paramname"><span class="paramname"><em>points</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; <a class="el" href="struct_normal.html">Normal</a> &gt;</td>          <td class="paramname"><span class="paramname"><em>normals</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; <a class="el" href="struct_vec2_d.html">Vec2D</a> &gt;</td>          <td class="paramname"><span class="paramname"><em>texture_uvs</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -223,6 +256,21 @@ Public Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Constructs a mesh from pre-built geometry and BVH data. </p>
+<p>This constructor is mainly intended for internal use, testing, serialization, or procedural mesh generation where all geometry and acceleration structures are already available.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">trans</td><td>Object-to-world transformation. </td></tr>
+    <tr><td class="paramname">material</td><td><a class="el" href="struct_material.html" title="Surface material.">Material</a> applied to the mesh surface. </td></tr>
+    <tr><td class="paramname">points</td><td>Vertex positions. </td></tr>
+    <tr><td class="paramname">normals</td><td>Vertex normals. </td></tr>
+    <tr><td class="paramname">texture_uvs</td><td>Texture coordinates. </td></tr>
+    <tr><td class="paramname">indexes</td><td>Indexes Triangle mesh faces. </td></tr>
+    <tr><td class="paramname">bvh_nodes</td><td>Precomputed BVH nodes. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -268,6 +316,19 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Loads a mesh from an .obj file and builds its BVH. </p>
+<p>The constructor parses the geometry contained in the specified file, initializes the mesh data structures, creates the root bounding box, and recursively builds a Bounding Volume Hierarchy using the Surface Area Heuristic via <a class="el" href="struct_b_v_h_node.html#a277bfd23b55733742d1c3964eebcee61" title="Builds the BVH subtree rooted at this node.">BVHNode::Extend_tree_wrapper</a>.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">obj_file</td><td>Path to the .obj file. </td></tr>
+    <tr><td class="paramname">material</td><td><a class="el" href="struct_material.html" title="Surface material.">Material</a> assigned to the mesh. </td></tr>
+    <tr><td class="paramname">trans</td><td>Object-to-world transformation. </td></tr>
+    <tr><td class="paramname">BVH_n_bins</td><td>Number of bins used by the SAH binning algorithm. Higher values may improve BVH quality at the cost of longer construction times. </td></tr>
+    <tr><td class="paramname">BVH_is_leaf_threshold</td><td>Minimum number of triangles required before subdivision is attempted. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
@@ -294,6 +355,16 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Reads the next meaningful line from a text stream. </p>
+<p>Empty lines and comment lines beginning with '#' are skipped. Trailing carriage-return characters ('\r') are removed to support Windows-formatted text files.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stream</td><td>Input stream. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The next non-empty, non-comment line, or an error if no such line can be read. </dd></dl>
+
 </div>
 </div>
 <a id="a62587c40347ce0d4549c7ef814afaf7a" name="a62587c40347ce0d4549c7ef814afaf7a"></a>
@@ -319,14 +390,15 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Compute the intersection between a ray and the shape. </p>
+<p>Interface entry point for ray-mesh intersection. </p>
+<p>Transforms the incoming ray from world space into the mesh local reference frame, delegates the intersection search to ray_intersection_unwrapped(), and converts the resulting hit information back into world coordinates.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">ray</td><td><a class="el" href="struct_ray.html" title="Ray used for visibility and light transport queries.">Ray</a> to test. </td></tr>
+    <tr><td class="paramname">ray</td><td>Incoming world-space ray. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="struct_hit_record.html" title="Information associated with a ray-shape intersection.">HitRecord</a> object if a hit occurs, nullptr otherwise. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>The closest intersection with the mesh, or std::nullopt if the ray misses the mesh entirely. </dd></dl>
 
 <p>Implements <a class="el" href="struct_shape.html#adb039667ce09177e942917adde400388">Shape</a>.</p>
 
@@ -364,6 +436,32 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Recursively traverses the BVH to find the closest ray-triangle intersection. </p>
+<p>This method operates entirely in the mesh local coordinate system.</p>
+<p>Starting from the BVH node identified by starting_index:</p><ul>
+<li>the node AABB is tested against the ray;</li>
+<li>if the ray misses the box, the subtree is skipped;</li>
+<li>if the node is a leaf, every contained triangle is tested using the Möller–Trumbore ray-triangle intersection algorithm;</li>
+<li>if the node is an internal node, the method recursively visits both children.</li>
+</ul>
+<p>When a triangle intersection is found:</p><ul>
+<li>barycentric coordinates are computed;</li>
+<li>vertex normals are interpolated using those barycentric weights to obtain a smooth shading normal;</li>
+<li>texture coordinates are interpolated in the same way;</li>
+<li>a partial <a class="el" href="struct_hit_record.html" title="Information associated with a ray-shape intersection.">HitRecord</a> is generated.</li>
+</ul>
+<p>Whenever a closer intersection is found, local_ray.tmax is reduced to the hit distance, allowing subsequent tests to ignore farther geometry and improving traversal performance.</p>
+<p>The returned <a class="el" href="struct_hit_record.html" title="Information associated with a ray-shape intersection.">HitRecord</a> is expressed in the mesh local reference frame. World-space information such as the final hit point, transformed normal, and original ray are completed by ray_intersection().</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">local_ray</td><td><a class="el" href="struct_ray.html" title="Ray used for visibility and light transport queries.">Ray</a> expressed in mesh local coordinates. The ray is modified during traversal by shrinking its tmax value whenever a closer hit is found. </td></tr>
+    <tr><td class="paramname">starting_index</td><td>Index of the BVH node currently being explored. Defaults to the root node (0). </td></tr>
+    <tr><td class="paramname">closest_hit</td><td>Current closest intersection discovered so far.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The nearest <a class="el" href="struct_hit_record.html" title="Information associated with a ray-shape intersection.">HitRecord</a> found in the subtree rooted at starting_index, or std::nullopt if no intersection exists. </dd></dl>
+
 </div>
 </div>
 <a id="a080d5bc7d8f82ca4ba954f47dcfc776b" name="a080d5bc7d8f82ca4ba954f47dcfc776b"></a>
@@ -389,6 +487,23 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Loads mesh geometry from an obj stream. </p>
+<p>The parser supports:</p><ul>
+<li>vertex positions ("v")</li>
+<li>vertex normals ("vn")</li>
+<li>texture coordinates ("vt")</li>
+<li>polygonal faces ("f")</li>
+</ul>
+<p>Faces containing more than three vertices are automatically triangulated using a fan triangulation strategy.</p>
+<p>Parsed geometry is stored in the mesh vertex, normal, texture, and triangle index arrays.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">obj_stream</td><td>Stream containing OBJ file contents. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Success or an error message if the file format is invalid. </dd></dl>
+
 </div>
 </div>
 <a id="a0fd0a2b6ef39d6e53c854be062b70b09" name="a0fd0a2b6ef39d6e53c854be062b70b09"></a>
@@ -413,6 +528,16 @@ Public Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Loads a mesh from an OBJ file on disk. </p>
+<p>Opens the specified file and forwards the parsing work to the stream-based read_mesh_from_obj() overload.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">obj_file</td><td>Path to the OBJ file. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>An empty expected on success, or an error message if the file cannot be opened or parsing fails. </dd></dl>
 
 </div>
 </div>
@@ -446,17 +571,51 @@ Public Attributes</h2></td></tr>
 </div>
 </div>
 <a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
-<a id="ae4b44bbce99d405e754f3366754d6ef5" name="ae4b44bbce99d405e754f3366754d6ef5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae4b44bbce99d405e754f3366754d6ef5">&#9670;&#160;</a></span>mesh_points</h2>
+<a id="ab7a5e6412f026c305dbec5e856bb861a" name="ab7a5e6412f026c305dbec5e856bb861a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab7a5e6412f026c305dbec5e856bb861a">&#9670;&#160;</a></span>mesh_normals</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">std::vector&lt;<a class="el" href="struct_triangle_point.html">TrianglePoint</a>&gt; Mesh::mesh_points</td>
+          <td class="memname">std::vector&lt;<a class="el" href="struct_normal.html">Normal</a>&gt; Mesh::mesh_normals</td>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Per-vertex normal vectors. Corresponds to the 'vn' records in the .obj file. <a class="el" href="struct_triangle_indexes.html#ab5e1a7c3fe41c12a98c3d074c6c946ba" title="Index of the normal associated with the first vertex.">TriangleIndexes::vn1</a>, vn2 and vn3 reference elements of this array. </p>
+
+</div>
+</div>
+<a id="a45fae31e15f287d6cf6442e8f30a8731" name="a45fae31e15f287d6cf6442e8f30a8731"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a45fae31e15f287d6cf6442e8f30a8731">&#9670;&#160;</a></span>mesh_points</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;<a class="el" href="struct_point.html">Point</a>&gt; Mesh::mesh_points</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Vertex positions of the mesh. Corresponds to the 'v' records in the .obj file. <a class="el" href="struct_triangle_indexes.html#af61ba4683833232883979679b4f4f72a" title="Index of the first vertex position.">TriangleIndexes::v1</a>, v2 and v3 reference elements of this array. </p>
+
+</div>
+</div>
+<a id="a589530a76d7e997dc558f2a8473ba790" name="a589530a76d7e997dc558f2a8473ba790"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a589530a76d7e997dc558f2a8473ba790">&#9670;&#160;</a></span>mesh_texture_uvs</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;<a class="el" href="struct_vec2_d.html">Vec2D</a>&gt; Mesh::mesh_texture_uvs</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Texture coordinates associated with mesh vertices. Corresponds to the 'vt' records in the .obj file. Used during texture lookup and UV interpolation. </p>
 
 </div>
 </div>
@@ -472,6 +631,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Flat storage of the Bounding Volume Hierarchy. The BVH is stored as a contiguous array of nodes rather than as a pointer-based tree. Child nodes are referenced through the indices stored in <a class="el" href="struct_b_v_h_node.html#a4103ba5a4989ae9ef83099daf2c040a1">BVHNode::left_child_index</a> and <a class="el" href="struct_b_v_h_node.html#a599750e48790c93c76ceb829ab709355">BVHNode::right_child_index</a>. </p>
+
 </div>
 </div>
 <a id="a32a3f43a5bf6ae437d8f5b7b15b314cd" name="a32a3f43a5bf6ae437d8f5b7b15b314cd"></a>
@@ -485,6 +646,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Indexed triangle list describing mesh connectivity. Each entry stores indices into the vertex, normal and UV arrays, defining one triangular face of the mesh. </p>
 
 </div>
 </div>

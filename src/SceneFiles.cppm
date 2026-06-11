@@ -1528,7 +1528,7 @@ export {
 
         if (sym1 != nullptr && sym1->symbol == ')') {
             if (keyword == KeywordEnum::ORTHOGONAL) return std::make_unique<OrthogonalCamera>();
-            else if (keyword == KeywordEnum::PERSPECTIVE) return std::make_unique<PerspectiveCamera>();
+            else /*if (keyword == KeywordEnum::PERSPECTIVE)*/ return std::make_unique<PerspectiveCamera>();
         }
         if (sym1 == nullptr || sym1->symbol != ',') {
             return std::unexpected(GrammarError{tok1->location, "Expected ',' or ')' after camera type."});
@@ -1549,7 +1549,7 @@ export {
             if (!close_res.has_value()) return std::unexpected(close_res.error());
 
             if (keyword == KeywordEnum::ORTHOGONAL) return std::make_unique<OrthogonalCamera>(aspect_ratio, trans_res.value());
-            else if (keyword == KeywordEnum::PERSPECTIVE) return std::make_unique<PerspectiveCamera>(aspect_ratio, distance, trans_res.value());
+            else /*if (keyword == KeywordEnum::PERSPECTIVE)*/ return std::make_unique<PerspectiveCamera>(aspect_ratio, distance, trans_res.value());
         }
 
         // It wasn't a transformation, so it must be the aspect ratio
@@ -1566,7 +1566,7 @@ export {
 
         if (sym2 != nullptr && sym2->symbol == ')') {
             if (keyword == KeywordEnum::ORTHOGONAL) return std::make_unique<OrthogonalCamera>(aspect_ratio);
-            else if (keyword == KeywordEnum::PERSPECTIVE) return std::make_unique<PerspectiveCamera>(aspect_ratio);
+            else /*if (keyword == KeywordEnum::PERSPECTIVE)*/ return std::make_unique<PerspectiveCamera>(aspect_ratio);
         }
         if (sym2 == nullptr || sym2->symbol != ',') {
             return std::unexpected(GrammarError{tok2->location, "Expected ',' or ')' after aspect ratio."});
@@ -1582,7 +1582,7 @@ export {
 
             return std::make_unique<OrthogonalCamera>(aspect_ratio, trans_res.value());
         }
-        else if (keyword == KeywordEnum::PERSPECTIVE) {
+        else /*if (keyword == KeywordEnum::PERSPECTIVE)*/ {
             // Perspective: is it distance or transformation?
             auto peek3_res = input_file.read_token();
             if (!peek3_res.has_value()) { return std::unexpected(peek3_res.error()); }

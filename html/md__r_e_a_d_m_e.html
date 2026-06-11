@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.17.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>PhyxRadpp: PhyxRadpp</title>
+<title>PhyxRad++: PhyxRadpp</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="codefolding.js"></script>
 <script type="text/javascript" src="clipboard.js"></script>
@@ -30,7 +30,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">PhyxRadpp
+   <div id="projectname">PhyxRad++
    </div>
   </td>
  </tr>
@@ -118,11 +118,11 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('md__r_e_a_d_m_
   <div class="headertitle"><div class="title">PhyxRadpp </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md26"></a></p>
+<div class="textblock"><p><a class="anchor" id="autotoc_md27"></a></p>
 <p>PhyxRadpp is a C++23 ray tracer and image processing utility built using <span class="tt">xmake</span>. It supports processing HDR images and rendering 3D scenes using mathematical primitives (spheres, planes, cubes) and OBJ meshes.</p>
 <p>Scenes and rendering parameters are parsed dynamically at runtime using a custom LL(1) recursive descent parser, reading from text-based scene description files.</p>
 <hr  />
- <h1 class="doxsection"><a class="anchor" id="autotoc_md28"></a>
+ <h1 class="doxsection"><a class="anchor" id="autotoc_md29"></a>
 Features</h1>
 <ul>
 <li><b><a class="el" href="struct_scene.html" title="Represents a fully parsed scene ready for rendering.">Scene</a> Parsing:</b> Scenes are loaded at runtime from <span class="tt">.txt</span> files, supporting custom variables, material definitions, transformations, and camera positioning.</li>
@@ -132,33 +132,33 @@ Features</h1>
 <li><span class="tt">pathtracing</span>: Physically based rendering using Monte Carlo integration and Russian Roulette depth control to calculate global illumination.</li>
 </ul>
 </li>
-<li><b>OBJ meshes support:</b> it's possible to upload OBJ files and create meshes (still without texture). The ray intersection test is accelerated via BVH-SAH algorithm.</li>
+<li><b>OBJ file support:</b> Imports vertexes, normals and UV mapping textures from OBJ+PFM files to generate triangular meshes. The ray intersection method is optimized by a BVH binary tree SAH logic.</li>
 <li><b><a class="el" href="struct_material.html" title="Surface material.">Material</a> System:</b> Supports uniform colors, procedural checkerboards, and HDR image texture mapping attached to diffusive or specular BRDFs.</li>
 <li><b>HDR Image Processing:</b> Converts <span class="tt">.pfm</span> files to standard <span class="tt">.png</span> files, applying normalization (alpha) and gamma correction.</li>
 </ul>
 <hr  />
- <h1 class="doxsection"><a class="anchor" id="autotoc_md30"></a>
+ <h1 class="doxsection"><a class="anchor" id="autotoc_md31"></a>
 Building the Project</h1>
 <p>The project requires a C++23 compatible compiler. Dependencies (<span class="tt">doctest</span> and <span class="tt">stb</span>) are handled automatically by <span class="tt">xmake</span>.</p>
 <p>Navigate to the project root, where <span class="tt">xmake.lua</span> is located, and run: </p><div class="fragment"><div class="line">xmake</div>
 </div><!-- fragment --><hr  />
- <h1 class="doxsection"><a class="anchor" id="autotoc_md32"></a>
+ <h1 class="doxsection"><a class="anchor" id="autotoc_md33"></a>
 Usage</h1>
 <p>The executable PhyxRadpp provides two main commands: <span class="tt">pfm2png</span> and <span class="tt">demo</span>.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md33"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md34"></a>
 1. PFM to PNG Converter</h2>
 <p>Converts an HDR image into a standard PNG.</p>
 <div class="fragment"><div class="line">xmake run PhyxRadpp pfm2png &lt;INPUT_PFM&gt; &lt;ALPHA_FACTOR&gt; &lt;GAMMA&gt; [FLAGS]</div>
 </div><!-- fragment --><ul>
 <li>Routing: The program automatically looks for the input file in pfm_files/<span class="tt"> and saves the output to </span>png_converted/`.</li>
 </ul>
-<h3 class="doxsection"><a class="anchor" id="autotoc_md34"></a>
+<h3 class="doxsection"><a class="anchor" id="autotoc_md35"></a>
 &ndash; Example 1.1: Conversion from <span class="tt">.pfm</span> to <span class="tt">.png</span></h3>
 <p>Convert <span class="tt">pfm_files/memorial.pfm</span> using an <span class="tt">alpha=0.3</span> and a `gamma=1.0.</p>
 <div class="fragment"><div class="line">xmake run PhyxRadpp pfm2png memorial.pfm 0.3 1.0</div>
 </div><!-- fragment --><p> <em>(Outputs: <span class="tt">png_converted/memorial_a0.3_g1.png</span>)</em></p>
 <p><img src="png_converted/memorial_a0.3_g1.png" alt="Conversion result" width="40%" class="inline"/></p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md35"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md36"></a>
 2. Scene Rendering</h2>
 <p>Renders a 3D scene. You can optionally specify the rendering algorithm, resolution, antialiasing, and path tracing parameters.</p>
 <p><b>Command</b> </p><div class="fragment"><div class="line">xmake run PhyxRadpp render &lt;INPUT_SCENE_TXT&gt; &lt;ALPHA_FACTOR&gt; &lt;GAMMA&gt; [FLAGS]</div>
@@ -174,20 +174,20 @@ Usage</h1>
 </ul>
 </li>
 </ul>
-<h3 class="doxsection"><a class="anchor" id="autotoc_md36"></a>
+<h3 class="doxsection"><a class="anchor" id="autotoc_md37"></a>
 &ndash; Example 2.1: Silhouette Mode (On/Off)**</h3>
 <p>Render the quick black-and-white silhouette map of the geometry in `examples/sphere_silhouette.txt. This is highly useful for checking camera framing without waiting for complex light calculations. </p><div class="fragment"><div class="line">xmake run PhyxRadpp render sphere_silhouette.txt 1.0 1.0 --algorithm onoff</div>
 </div><!-- fragment --><p> <img src="generated_images/sphere_silhouette_a1_g1_flat_800x800.png" alt="OnOff spheres result" width="50%" class="inline"/></p>
 <p><em>(Outputs: <span class="tt">generated_images/sphere_silhouette_a1_g1_onoff_800x800.png</span>)</em></p>
 <p><em>Note: When using the <span class="tt">onoff</span> renderer, the values of alpha<span class="tt"> and </span>gamma` do not affect the binary output, but must still be provided to satisfy the CLI parameters.</em></p>
-<h3 class="doxsection"><a class="anchor" id="autotoc_md37"></a>
+<h3 class="doxsection"><a class="anchor" id="autotoc_md38"></a>
 &ndash; Example 2.2: Flat Shading (Textured Scene)</h3>
 <p>Render <span class="tt">examples/sphere_and_plane.txt</span> with resolution 800x800 and 4x4 antialiasing.</p>
 <p>To render a scene with a textured sphere and a checkered plane using an <span class="tt">alpha=0.3</span> and <span class="tt">gamma=2.2</span>:</p>
 <div class="fragment"><div class="line">xmake run PhyxRadpp render sphere_and_plane.txt 0.3 2.2 --algorithm flat --dimensions 800 800 --antialiasing 4</div>
 </div><!-- fragment --><p><em>(Outputs: <span class="tt">generated_images/sphere_and_plane_a0.3_g2.2_flat_800x800_AA4.png</span>)</em></p>
 <p><img src="generated_images/sphere_and_plane_a0.3_g2.2_flat_800x800_AA4.png" alt="Textured scene" width="50%" class="inline"/></p>
-<h3 class="doxsection"><a class="anchor" id="autotoc_md38"></a>
+<h3 class="doxsection"><a class="anchor" id="autotoc_md39"></a>
 &ndash; Example 2.3: Path Tracing (Global Illumination)</h3>
 <p>Render <span class="tt">examples/cornell_box_teapot.txt</span> with resolution 800x800, 10x10 antialiasing, using 4 rays per bounce, <span class="tt">max_depth=4</span>, and Russian Roulette at <span class="tt">depth=3</span>:</p>
 <div class="fragment"><div class="line">xmake run PhyxRadpp render cornell_box_teapot.txt 1.0 1.0 --algorithm pathtracing --antialiasing 10 --dimensions 800 800 --pathtracer_params 4 4 3</div>
@@ -197,14 +197,14 @@ Usage</h1>
 <div class="fragment"><div class="line">xmake run PhyxRadpp render examples/cornell_box_spheres.txt 1.0 1.0 generated_images/cornell_box_spheres.png --algorithm pathtracing --antialiasing 10 --dimensions 800 800 --pathtracer_params 4 4 3</div>
 </div><!-- fragment --><p><em>(Outputs: <span class="tt">generated_images/cornell_box_spheres_a1_g1_pathtracing_800x800_AA10_r4_d4_rr3.png</span>)</em></p>
 <p><img src="generated_images/cornell_box_spheres_a1_g1_pathtracing_800x800_AA10_r4_d4_rr3.png" alt="OnOff spheres result" width="50%" class="inline"/></p>
-<h3 class="doxsection"><a class="anchor" id="autotoc_md39"></a>
+<h3 class="doxsection"><a class="anchor" id="autotoc_md40"></a>
 &ndash; Example 2.4: Custom Output</h3>
 <p>Render a scene and manually define the exact output path. This is the rendering of <span class="tt">examples/utah_teapot.txt</span>.</p>
 <div class="fragment"><div class="line">xmake run PhyxRadpp render utah_teapot.txt 1.0 1.0 --algorithm flat --output my_custom_output_path/custom_test_render.png</div>
 </div><!-- fragment --><p><em>(Outputs: <span class="tt">my_custom_output_path/custom_test_render.png</span>)</em></p>
 <p><img src="my_custom_output_path/custom_test_render.png" alt="OnOff spheres result" width="50%" class="inline"/></p>
 <hr  />
- <h1 class="doxsection"><a class="anchor" id="autotoc_md41"></a>
+ <h1 class="doxsection"><a class="anchor" id="autotoc_md42"></a>
 Scene Description Language</h1>
 <p><span class="tt">PhyxRadpp</span> uses a custom, easily readable text format to define 3D environments at runtime. You can define variables, build complex <a class="el" href="struct_b_r_d_f.html" title="Base class for surface scattering models.">BRDF</a> materials, and chain matrix transformations.</p>
 <p>Here is a quick example of a scene file: </p><div class="fragment"><div class="line"># Define variables</div>
@@ -219,28 +219,28 @@ Scene Description Language</h1>
 <div class="line">sphere(translation([0.0, 1.0, 0.0]) * scaling([2.0, 2.0, 2.0]), red_plastic);</div>
 </div><!-- fragment --><p> For a complete guide on all available shapes, materials, and syntax rules, please see the <a class="el" href="struct_scene.html" title="Represents a fully parsed scene ready for rendering.">Scene</a> Language Documentation in <span class="tt"><a class="el" href="_s_c_e_n_e___l_a_n_g_u_a_g_e_8md.html">docs/SCENE_LANGUAGE.md</a></span>.</p>
 <hr  />
- <h1 class="doxsection"><a class="anchor" id="autotoc_md43"></a>
+ <h1 class="doxsection"><a class="anchor" id="autotoc_md44"></a>
 Testing</h1>
 <p>To build and run the <span class="tt">doctest</span> unit test suite, simply use:</p>
 <div class="fragment"><div class="line">xmake test -v</div>
 </div><!-- fragment --><p> To run tests for a specific module (e.g., `HDRImage): </p><div class="fragment"><div class="line">xmake run test_HDRImage</div>
 </div><!-- fragment --><hr  />
- <h1 class="doxsection"><a class="anchor" id="autotoc_md45"></a>
+ <h1 class="doxsection"><a class="anchor" id="autotoc_md46"></a>
 First Time Setup (Dependencies)</h1>
 <p>If you are compiling this project on a fresh machine, you need a C++23 compatible compiler. <span class="tt">xmake</span> will automatically download <span class="tt">doctest</span> and <span class="tt">stb</span>, but you must provide the compiler.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md46"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md47"></a>
 🐧 Linux (Ubuntu)</h2>
 <p>You need Clang 18 and libc++ for C++23 modules support. Run these commands once:</p>
 <div class="fragment"><div class="line">sudo apt-get update</div>
 <div class="line">sudo apt-get install -y clang-18 libc++-18-dev libc++abi-18-dev clang-tools-18</div>
 <div class="line">xmake config --yes --toolchain=clang</div>
-</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md47"></a>
+</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md48"></a>
 🍎 macOS</h2>
 <p>Install the official LLVM via Homebrew (Apple Clang lacks full module support):</p>
 <div class="fragment"><div class="line">brew update</div>
 <div class="line">brew install llvm</div>
 <div class="line">xmake config --yes</div>
-</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md48"></a>
+</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md49"></a>
 🪟 Windows</h2>
 <p>Visual Studio 2022 (MSVC) is fully supported and detected automatically. Just run xmake. </p>
 </div></div><!-- contents -->

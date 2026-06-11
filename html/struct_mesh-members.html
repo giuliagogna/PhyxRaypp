@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.17.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>PhyxRadpp: Member List</title>
+<title>PhyxRad++: Member List</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="codefolding.js"></script>
 <script type="text/javascript" src="clipboard.js"></script>
@@ -30,7 +30,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">PhyxRadpp
+   <div id="projectname">PhyxRad++
    </div>
   </td>
  </tr>
@@ -124,9 +124,11 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('struct_mesh.ht
   <tr class="even"><td class="entry"><a class="el" href="struct_mesh.html#a886026bc08145033ec7ac7aa801edc74">_read_line</a>(std::istream &amp;stream)</td><td class="entry"><a class="el" href="struct_mesh.html">Mesh</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
   <tr class="odd"><td class="entry"><a class="el" href="struct_shape.html#a0ea3be350731f432f1248f19b8825789">material</a></td><td class="entry"><a class="el" href="struct_shape.html">Shape</a></td><td class="entry"></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="struct_mesh.html#ae6b6c56f0ebfa2f6b2b10d25a835c865">Mesh</a>()=default</td><td class="entry"><a class="el" href="struct_mesh.html">Mesh</a></td><td class="entry"></td></tr>
-  <tr class="odd"><td class="entry"><a class="el" href="struct_mesh.html#ab3caceda4bc1626c7650f0124b657622">Mesh</a>(const Transformation &amp;trans, std::shared_ptr&lt; Material &gt; material, std::vector&lt; TrianglePoint &gt; points, std::vector&lt; TriangleIndexes &gt; indexes, std::vector&lt; BVHNode &gt; bvh_nodes)</td><td class="entry"><a class="el" href="struct_mesh.html">Mesh</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr class="odd"><td class="entry"><a class="el" href="struct_mesh.html#aec4fd899b02f452963d0f1aefdc7cce1">Mesh</a>(const Transformation &amp;trans, std::shared_ptr&lt; Material &gt; material, std::vector&lt; Point &gt; points, std::vector&lt; Normal &gt; normals, std::vector&lt; Vec2D &gt; texture_uvs, std::vector&lt; TriangleIndexes &gt; indexes, std::vector&lt; BVHNode &gt; bvh_nodes)</td><td class="entry"><a class="el" href="struct_mesh.html">Mesh</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="struct_mesh.html#a0704bd1e7bcc75bebb880c8e0d7c3c09">Mesh</a>(std::string obj_file, std::shared_ptr&lt; Material &gt; material=nullptr, Transformation trans=Transformation{}, int BVH_n_bins=12, int BVH_is_leaf_threshold=3)</td><td class="entry"><a class="el" href="struct_mesh.html">Mesh</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
-  <tr class="odd"><td class="entry"><a class="el" href="struct_mesh.html#ae4b44bbce99d405e754f3366754d6ef5">mesh_points</a></td><td class="entry"><a class="el" href="struct_mesh.html">Mesh</a></td><td class="entry"></td></tr>
+  <tr class="odd"><td class="entry"><a class="el" href="struct_mesh.html#ab7a5e6412f026c305dbec5e856bb861a">mesh_normals</a></td><td class="entry"><a class="el" href="struct_mesh.html">Mesh</a></td><td class="entry"></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="struct_mesh.html#a45fae31e15f287d6cf6442e8f30a8731">mesh_points</a></td><td class="entry"><a class="el" href="struct_mesh.html">Mesh</a></td><td class="entry"></td></tr>
+  <tr class="odd"><td class="entry"><a class="el" href="struct_mesh.html#a589530a76d7e997dc558f2a8473ba790">mesh_texture_uvs</a></td><td class="entry"><a class="el" href="struct_mesh.html">Mesh</a></td><td class="entry"></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="struct_mesh.html#aac5be40434e2fa93247b05e1dcf93e3c">nodes</a></td><td class="entry"><a class="el" href="struct_mesh.html">Mesh</a></td><td class="entry"></td></tr>
   <tr class="odd"><td class="entry"><a class="el" href="struct_mesh.html#a62587c40347ce0d4549c7ef814afaf7a">ray_intersection</a>(const Ray &amp;ray) const override</td><td class="entry"><a class="el" href="struct_mesh.html">Mesh</a></td><td class="entry"><span class="mlabel">inline</span><span class="mlabel">virtual</span></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="struct_mesh.html#a04912cd581309e99cade1095b16eab52">ray_intersection_unwrapped</a>(Ray &amp;local_ray, int starting_index=0, std::optional&lt; HitRecord &gt; closest_hit=std::nullopt) const</td><td class="entry"><a class="el" href="struct_mesh.html">Mesh</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>

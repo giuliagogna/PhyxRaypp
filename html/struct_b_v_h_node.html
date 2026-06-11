@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.17.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>PhyxRadpp: BVHNode Struct Reference</title>
+<title>PhyxRad++: BVHNode Struct Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="codefolding.js"></script>
 <script type="text/javascript" src="clipboard.js"></script>
@@ -30,7 +30,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">PhyxRadpp
+   <div id="projectname">PhyxRad++
    </div>
   </td>
  </tr>
@@ -118,24 +118,37 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('struct_b_v_h_n
   <div class="headertitle"><div class="title">BVHNode Struct Reference<span class="mlabels"><span class="mlabel export">export</span></span><div class="ingroups">module <a class="el" href="module___mesh.html">Mesh</a></div></div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Node of the Bounding Volume Hierarchy (BVH) Tree.  
+ <a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a1d45850ba98c33440b54610775de509e" id="r_a1d45850ba98c33440b54610775de509e"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a1d45850ba98c33440b54610775de509e">Extend_tree_wrapper</a> (std::vector&lt; <a class="el" href="struct_b_v_h_node.html">BVHNode</a> &gt; &amp;current_nodes, const std::vector&lt; <a class="el" href="struct_triangle_point.html">TrianglePoint</a> &gt; &amp;mesh_points, std::vector&lt; <a class="el" href="struct_triangle_indexes.html">TriangleIndexes</a> &gt; &amp;triangle_point_indexes, const int n_bins, const int is_leaf_threshold=1)</td></tr>
+<tr class="memitem:a277bfd23b55733742d1c3964eebcee61" id="r_a277bfd23b55733742d1c3964eebcee61"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a277bfd23b55733742d1c3964eebcee61">Extend_tree_wrapper</a> (std::vector&lt; <a class="el" href="struct_b_v_h_node.html">BVHNode</a> &gt; &amp;current_nodes, const std::vector&lt; <a class="el" href="struct_point.html">Point</a> &gt; &amp;mesh_points, std::vector&lt; <a class="el" href="struct_triangle_indexes.html">TriangleIndexes</a> &gt; &amp;triangle_point_indexes, const int n_bins, const int is_leaf_threshold=1)</td></tr>
+<tr class="memdesc:a277bfd23b55733742d1c3964eebcee61"><td class="mdescLeft">&#160;</td><td class="mdescRight">Builds the BVH subtree rooted at this node.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a2ed1a6f8c3705edae9f111b1e0594c84" id="r_a2ed1a6f8c3705edae9f111b1e0594c84"><td class="memItemLeft"><a class="el" href="struct_b_v_h_a_a_b_b.html">BVHAABB</a>&#160;</td><td class="memItemRight"><a class="el" href="#a2ed1a6f8c3705edae9f111b1e0594c84">bounds</a></td></tr>
+<tr class="memdesc:a2ed1a6f8c3705edae9f111b1e0594c84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bounding box enclosing all triangles assigned to this node.  <br /></td></tr>
 <tr class="memitem:a4103ba5a4989ae9ef83099daf2c040a1" id="r_a4103ba5a4989ae9ef83099daf2c040a1"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a4103ba5a4989ae9ef83099daf2c040a1">left_child_index</a> = -1</td></tr>
 <tr class="memitem:a599750e48790c93c76ceb829ab709355" id="r_a599750e48790c93c76ceb829ab709355"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a599750e48790c93c76ceb829ab709355">right_child_index</a> = -1</td></tr>
 <tr class="memitem:a706412ec33fc9eb3cf95c085fb8d9dcf" id="r_a706412ec33fc9eb3cf95c085fb8d9dcf"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a706412ec33fc9eb3cf95c085fb8d9dcf">node_index</a> = -1</td></tr>
+<tr class="memdesc:a706412ec33fc9eb3cf95c085fb8d9dcf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Position of this node inside the BVH node vector.  <br /></td></tr>
 <tr class="memitem:adc0dcb962750c3be72976d2b5b06336b" id="r_adc0dcb962750c3be72976d2b5b06336b"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#adc0dcb962750c3be72976d2b5b06336b">minIndex</a> = 0</td></tr>
+<tr class="memdesc:adc0dcb962750c3be72976d2b5b06336b"><td class="mdescLeft">&#160;</td><td class="mdescRight">First triangle index belonging to this node.  <br /></td></tr>
 <tr class="memitem:a8c8dcdd6fad0edd6306a51af24792898" id="r_a8c8dcdd6fad0edd6306a51af24792898"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a8c8dcdd6fad0edd6306a51af24792898">maxIndex</a> = 0</td></tr>
+<tr class="memdesc:a8c8dcdd6fad0edd6306a51af24792898"><td class="mdescLeft">&#160;</td><td class="mdescRight">One-past-the-end triangle index belonging to this node.  <br /></td></tr>
 <tr class="memitem:ae677046689a33100f71d86fd0d03569f" id="r_ae677046689a33100f71d86fd0d03569f"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#ae677046689a33100f71d86fd0d03569f">is_leaf</a> = false</td></tr>
+<tr class="memdesc:ae677046689a33100f71d86fd0d03569f"><td class="mdescLeft">&#160;</td><td class="mdescRight">True if this node is a leaf and contains no child nodes.  <br /></td></tr>
 </table>
-<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
-<a id="a1d45850ba98c33440b54610775de509e" name="a1d45850ba98c33440b54610775de509e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1d45850ba98c33440b54610775de509e">&#9670;&#160;</a></span>Extend_tree_wrapper()</h2>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Node of the Bounding Volume Hierarchy (BVH) Tree. </p>
+<p>Each node stores an axis-aligned bounding box enclosing a contiguous range of triangles from the mesh. Internal nodes contain references to two child nodes, while leaf nodes directly represent a small subset of triangles.</p>
+<p>The BVH is stored as a flat std::vector&lt;BVHNode&gt;, therefore child references are represented by integer indices rather than pointers. </p>
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
+<a id="a277bfd23b55733742d1c3964eebcee61" name="a277bfd23b55733742d1c3964eebcee61"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a277bfd23b55733742d1c3964eebcee61">&#9670;&#160;</a></span>Extend_tree_wrapper()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -151,7 +164,7 @@ Public Attributes</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::vector&lt; <a class="el" href="struct_triangle_point.html">TrianglePoint</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>mesh_points</em></span>, </td>
+          <td class="paramtype">const std::vector&lt; <a class="el" href="struct_point.html">Point</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>mesh_points</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -176,6 +189,20 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Builds the BVH subtree rooted at this node. </p>
+<p>Public entry point used to recursively construct the BVH. This wrapper automatically selects the optimal initial splitting axis and forwards the work to the internal recursive builder.</p>
+<p>The resulting hierarchy is generated using a Surface Area Heuristic (SAH) binning strategy.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">current_nodes</td><td>Flat vector containing all BVH nodes. </td></tr>
+    <tr><td class="paramname">mesh_points</td><td>Vertex positions of the mesh. </td></tr>
+    <tr><td class="paramname">triangle_point_indexes</td><td>Triangle index buffer to partition. </td></tr>
+    <tr><td class="paramname">n_bins</td><td>Number of bins used by the SAH splitting algorithm. </td></tr>
+    <tr><td class="paramname">is_leaf_threshold</td><td>Maximum number of triangles allowed in a leaf node. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
@@ -191,6 +218,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Bounding box enclosing all triangles assigned to this node. </p>
+
 </div>
 </div>
 <a id="ae677046689a33100f71d86fd0d03569f" name="ae677046689a33100f71d86fd0d03569f"></a>
@@ -205,6 +234,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>True if this node is a leaf and contains no child nodes. </p>
+
 </div>
 </div>
 <a id="a4103ba5a4989ae9ef83099daf2c040a1" name="a4103ba5a4989ae9ef83099daf2c040a1"></a>
@@ -218,6 +249,7 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Index of the left child node in the BVH node vector. Equal to -1 if this node is a leaf. </p>
 
 </div>
 </div>
@@ -233,6 +265,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>One-past-the-end triangle index belonging to this node. </p>
+<p>Together with minIndex defines the half-open range [minIndex, maxIndex). </p>
+
 </div>
 </div>
 <a id="adc0dcb962750c3be72976d2b5b06336b" name="adc0dcb962750c3be72976d2b5b06336b"></a>
@@ -246,6 +281,9 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>First triangle index belonging to this node. </p>
+<p>Refers to the triangle_point_indexes array. The node owns triangles in the half-open range [minIndex, maxIndex). </p>
 
 </div>
 </div>
@@ -261,6 +299,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Position of this node inside the BVH node vector. </p>
+
 </div>
 </div>
 <a id="a599750e48790c93c76ceb829ab709355" name="a599750e48790c93c76ceb829ab709355"></a>
@@ -274,6 +314,7 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Index of the right child node in the BVH node vector. Equal to -1 if this node is a leaf. </p>
 
 </div>
 </div>

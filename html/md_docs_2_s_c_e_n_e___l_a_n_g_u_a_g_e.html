@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.17.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>PhyxRadpp: PhyxRadpp Scene Description Language</title>
+<title>PhyxRad++: PhyxRadpp Scene Description Language</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="codefolding.js"></script>
 <script type="text/javascript" src="clipboard.js"></script>
@@ -30,7 +30,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">PhyxRadpp
+   <div id="projectname">PhyxRad++
    </div>
   </td>
  </tr>
@@ -118,35 +118,35 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('md_docs_2_s_c_
   <div class="headertitle"><div class="title">PhyxRadpp Scene Description Language </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md10"></a></p>
+<div class="textblock"><p><a class="anchor" id="autotoc_md11"></a></p>
 <p><span class="tt">PhyxRadpp</span> uses a custom text-based scene description language. The language is parsed at runtime, allowing you to build and modify 3D environments without needing to recompile the C++ engine.</p>
 <hr  />
-<h1 class="doxsection"><a class="anchor" id="autotoc_md12"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md13"></a>
 1. Basics &amp; Syntax</h1>
 <ul>
 <li><b>Comments:</b> Any line starting with <span class="tt">#</span> is a comment and will be ignored by the parser.</li>
 <li><b>Semicolons:</b> Top-level declarations (variables, materials, cameras, shapes) must end with a semicolon <span class="tt">;</span>.</li>
 <li><b>Whitespace:</b> Spaces, tabs, and newlines are ignored.</li>
 </ul>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md13"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md14"></a>
 Data Types</h2>
 <ul>
 <li><b>Floats:</b> Standard floating-point numbers (e.g., <span class="tt">1.0</span>, <span class="tt">-0.5</span>, <span class="tt">3.14</span>).</li>
 <li><b>Vectors:</b> 3D coordinates enclosed in square brackets: <span class="tt">[x, y, z]</span>.</li>
 <li><b>Colors:</b> RGB values enclosed in angle brackets: <span class="tt">&lt;r, g, b&gt;</span>. <a class="el" href="struct_color.html" title="RGB color.">Color</a> components are normalized between <span class="tt">0.0</span> and <span class="tt">1.0</span>.</li>
 </ul>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md14"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md15"></a>
 Variables</h2>
 <p>You can define floating-point variables to reuse values throughout your scene:</p>
 <div class="fragment"><div class="line">float pi_over_2 = 1.5707963;</div>
 <div class="line">float my_scale = 2.5;</div>
-</div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md15"></a>
+</div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md16"></a>
 2. Environment and Camera</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md16"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md17"></a>
 Background</h2>
 <p>Defines the global sky color of the scene.</p>
 <div class="fragment"><div class="line">background(&lt;r, g, b&gt;);</div>
-</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md17"></a>
+</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md18"></a>
 Camera</h2>
 <p>You can define exactly one camera per scene. The camera can be perspective or orthogonal.</p>
 <ul>
@@ -156,10 +156,10 @@ Camera</h2>
 <p><em>Note: aspect ratio, distance, and transformations are optional and will fall back to engine defaults if omitted.</em></p>
 <div class="fragment"><div class="line"># Example: Perspective camera moved back 10 units and up 2 units</div>
 <div class="line">camera(perspective, 1.0, 3.0, translation([-10.0, 0.0, 2.0]));</div>
-</div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md18"></a>
+</div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md19"></a>
 3. Materials and Pigments</h1>
 <p>A material dictates how light interacts with a surface. It is composed of a <a class="el" href="struct_b_r_d_f.html" title="Base class for surface scattering models.">BRDF</a> (Bidirectional Reflectance Distribution Function) and an optional Emitted Radiance (for glowing objects like lamps).</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md19"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md20"></a>
 Pigments</h2>
 <p>Pigments define the visual pattern of a surface.</p>
 <ul>
@@ -167,13 +167,13 @@ Pigments</h2>
 <li><span class="tt">checkered(&lt;r1, g1, b1&gt;, &lt;r2, g2, b2&gt;, steps)</span> : A 3D checkerboard pattern.</li>
 <li><span class="tt">image("path/to/image.pfm")</span> : A high-dynamic-range image texture mapping.</li>
 </ul>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md20"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md21"></a>
 BRDFs</h2>
 <ul>
 <li><span class="tt">diffuse(pigment)</span> : A rough, matte surface that scatters light in all directions.</li>
 <li><span class="tt">specular(pigment)</span> : A smooth, mirror-like surface that reflects light perfectly.</li>
 </ul>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md21"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md22"></a>
 Defining Materials</h2>
 <p>Materials must be named so they can be attached to shapes later.</p>
 <div class="fragment"><div class="line"># Syntax: material name(brdf, [emitted_radiance]);</div>
@@ -186,7 +186,7 @@ Defining Materials</h2>
 <div class="line"> </div>
 <div class="line"># A glowing white lamp (uses the optional second pigment parameter)</div>
 <div class="line">material light_bulb(diffuse(uniform(&lt;1.0, 1.0, 1.0&gt;)), uniform(&lt;10.0, 10.0, 10.0&gt;));</div>
-</div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md22"></a>
+</div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md23"></a>
 4. Transformations</h1>
 <p>Transformations allow you to move, rotate, and scale objects and cameras in 3D space. They are chained together using the * operator.</p>
 <ul>
@@ -198,11 +198,11 @@ Defining Materials</h2>
 <li><span class="tt">rot\_z(angle)</span> : Rotates around the Z-axis (in radians).</li>
 </ul>
 <p><em>Important: Transformations are applied right-to-left. translation(...) * scaling(...) will scale the object first, then move it.</em></p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md23"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md24"></a>
 5. Shapes and Geometry</h1>
 <p>Once a material is defined, you can apply it to geometric primitives. The transformation matrix is optional.</p>
 <p><b>Syntax:</b> <span class="tt">shape_type(transformation, material_name);</span> or `shape_type(material_name);</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md24"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md25"></a>
 Built-in primitives</h2>
 <div class="fragment"><div class="line"># A default sphere at the origin (0,0,0)</div>
 <div class="line">sphere(matte_blue);</div>
@@ -212,7 +212,7 @@ Built-in primitives</h2>
 <div class="line"> </div>
 <div class="line"># A rotated cube</div>
 <div class="line">cube(rot_y(1.57), matte_blue);</div>
-</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md25"></a>
+</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md26"></a>
 3D Meshes (.obj)</h2>
 <p>You can load complex 3D geometry from <span class="tt">.obj</span> files. The mesh automatically builds a Bounding Volume Hierarchy (BVH) to optimize rendering speed.</p>
 <p><b>Syntax</b>: <span class="tt">mesh("filepath", material_name, transformation);</span></p>

@@ -62,7 +62,6 @@ var hierarchy =
     ] ],
     [ "Transformation", "struct_transformation.html", null ],
     [ "TriangleIndexes", "struct_triangle_indexes.html", null ],
-    [ "TrianglePoint", "struct_triangle_point.html", null ],
     [ "Vec", "struct_vec.html", null ],
     [ "Vec2D", "struct_vec2_d.html", null ],
     [ "World", "struct_world.html", null ]

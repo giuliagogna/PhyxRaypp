@@ -24,60 +24,62 @@
 */
 var NAVTREE =
 [
-  [ "PhyxRadpp", "index.html", [
+  [ "PhyxRad++", "index.html", [
     [ "Changelog", "md__c_h_a_n_g_e_l_o_g.html", [
-      [ "[Unreleased]", "md__c_h_a_n_g_e_l_o_g.html#autotoc_md1", null ],
-      [ "[0.3.0] - 2026-05-20", "md__c_h_a_n_g_e_l_o_g.html#autotoc_md3", [
-        [ "Added", "md__c_h_a_n_g_e_l_o_g.html#autotoc_md4", null ]
+      [ "[Unreleased]", "md__c_h_a_n_g_e_l_o_g.html#autotoc_md1", [
+        [ "Added", "md__c_h_a_n_g_e_l_o_g.html#autotoc_md2", null ]
       ] ],
-      [ "[0.2.0] - 2026-05-06", "md__c_h_a_n_g_e_l_o_g.html#autotoc_md5", [
-        [ "Added", "md__c_h_a_n_g_e_l_o_g.html#autotoc_md6", null ],
-        [ "Fixed", "md__c_h_a_n_g_e_l_o_g.html#autotoc_md7", null ]
+      [ "[0.3.0] - 2026-05-20", "md__c_h_a_n_g_e_l_o_g.html#autotoc_md4", [
+        [ "Added", "md__c_h_a_n_g_e_l_o_g.html#autotoc_md5", null ]
       ] ],
-      [ "[0.1.0] - 2026-04-01", "md__c_h_a_n_g_e_l_o_g.html#autotoc_md8", [
-        [ "Added", "md__c_h_a_n_g_e_l_o_g.html#autotoc_md9", null ]
+      [ "[0.2.0] - 2026-05-06", "md__c_h_a_n_g_e_l_o_g.html#autotoc_md6", [
+        [ "Added", "md__c_h_a_n_g_e_l_o_g.html#autotoc_md7", null ],
+        [ "Fixed", "md__c_h_a_n_g_e_l_o_g.html#autotoc_md8", null ]
+      ] ],
+      [ "[0.1.0] - 2026-04-01", "md__c_h_a_n_g_e_l_o_g.html#autotoc_md9", [
+        [ "Added", "md__c_h_a_n_g_e_l_o_g.html#autotoc_md10", null ]
       ] ]
     ] ],
     [ "PhyxRadpp Scene Description Language", "md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html", [
-      [ "1. Basics &amp; Syntax", "md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md12", [
-        [ "Data Types", "md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md13", null ],
-        [ "Variables", "md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md14", null ]
+      [ "1. Basics &amp; Syntax", "md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md13", [
+        [ "Data Types", "md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md14", null ],
+        [ "Variables", "md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md15", null ]
       ] ],
-      [ "2. Environment and Camera", "md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md15", [
-        [ "Background", "md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md16", null ],
-        [ "Camera", "md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md17", null ]
+      [ "2. Environment and Camera", "md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md16", [
+        [ "Background", "md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md17", null ],
+        [ "Camera", "md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md18", null ]
       ] ],
-      [ "3. Materials and Pigments", "md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md18", [
-        [ "Pigments", "md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md19", null ],
-        [ "BRDFs", "md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md20", null ],
-        [ "Defining Materials", "md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md21", null ]
+      [ "3. Materials and Pigments", "md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md19", [
+        [ "Pigments", "md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md20", null ],
+        [ "BRDFs", "md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md21", null ],
+        [ "Defining Materials", "md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md22", null ]
       ] ],
-      [ "4. Transformations", "md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md22", null ],
-      [ "5. Shapes and Geometry", "md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md23", [
-        [ "Built-in primitives", "md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md24", null ],
-        [ "3D Meshes (.obj)", "md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md25", null ]
+      [ "4. Transformations", "md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md23", null ],
+      [ "5. Shapes and Geometry", "md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md24", [
+        [ "Built-in primitives", "md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md25", null ],
+        [ "3D Meshes (.obj)", "md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md26", null ]
       ] ]
     ] ],
     [ "PhyxRadpp", "md__r_e_a_d_m_e.html", [
-      [ "Features", "md__r_e_a_d_m_e.html#autotoc_md28", null ],
-      [ "Building the Project", "md__r_e_a_d_m_e.html#autotoc_md30", null ],
-      [ "Usage", "md__r_e_a_d_m_e.html#autotoc_md32", [
-        [ "1. PFM to PNG Converter", "md__r_e_a_d_m_e.html#autotoc_md33", [
-          [ "&ndash; Example 1.1: Conversion from <span class=\"tt\">.pfm</span> to <span class=\"tt\">.png</span>", "md__r_e_a_d_m_e.html#autotoc_md34", null ]
+      [ "Features", "md__r_e_a_d_m_e.html#autotoc_md29", null ],
+      [ "Building the Project", "md__r_e_a_d_m_e.html#autotoc_md31", null ],
+      [ "Usage", "md__r_e_a_d_m_e.html#autotoc_md33", [
+        [ "1. PFM to PNG Converter", "md__r_e_a_d_m_e.html#autotoc_md34", [
+          [ "&ndash; Example 1.1: Conversion from <span class=\"tt\">.pfm</span> to <span class=\"tt\">.png</span>", "md__r_e_a_d_m_e.html#autotoc_md35", null ]
         ] ],
-        [ "2. Scene Rendering", "md__r_e_a_d_m_e.html#autotoc_md35", [
-          [ "&ndash; Example 2.1: Silhouette Mode (On/Off)**", "md__r_e_a_d_m_e.html#autotoc_md36", null ],
-          [ "&ndash; Example 2.2: Flat Shading (Textured Scene)", "md__r_e_a_d_m_e.html#autotoc_md37", null ],
-          [ "&ndash; Example 2.3: Path Tracing (Global Illumination)", "md__r_e_a_d_m_e.html#autotoc_md38", null ],
-          [ "&ndash; Example 2.4: Custom Output", "md__r_e_a_d_m_e.html#autotoc_md39", null ]
+        [ "2. Scene Rendering", "md__r_e_a_d_m_e.html#autotoc_md36", [
+          [ "&ndash; Example 2.1: Silhouette Mode (On/Off)**", "md__r_e_a_d_m_e.html#autotoc_md37", null ],
+          [ "&ndash; Example 2.2: Flat Shading (Textured Scene)", "md__r_e_a_d_m_e.html#autotoc_md38", null ],
+          [ "&ndash; Example 2.3: Path Tracing (Global Illumination)", "md__r_e_a_d_m_e.html#autotoc_md39", null ],
+          [ "&ndash; Example 2.4: Custom Output", "md__r_e_a_d_m_e.html#autotoc_md40", null ]
         ] ]
       ] ],
-      [ "Scene Description Language", "md__r_e_a_d_m_e.html#autotoc_md41", null ],
-      [ "Testing", "md__r_e_a_d_m_e.html#autotoc_md43", null ],
-      [ "First Time Setup (Dependencies)", "md__r_e_a_d_m_e.html#autotoc_md45", [
-        [ "🐧 Linux (Ubuntu)", "md__r_e_a_d_m_e.html#autotoc_md46", null ],
-        [ "🍎 macOS", "md__r_e_a_d_m_e.html#autotoc_md47", null ],
-        [ "🪟 Windows", "md__r_e_a_d_m_e.html#autotoc_md48", null ]
+      [ "Scene Description Language", "md__r_e_a_d_m_e.html#autotoc_md42", null ],
+      [ "Testing", "md__r_e_a_d_m_e.html#autotoc_md44", null ],
+      [ "First Time Setup (Dependencies)", "md__r_e_a_d_m_e.html#autotoc_md46", [
+        [ "🐧 Linux (Ubuntu)", "md__r_e_a_d_m_e.html#autotoc_md47", null ],
+        [ "🍎 macOS", "md__r_e_a_d_m_e.html#autotoc_md48", null ],
+        [ "🪟 Windows", "md__r_e_a_d_m_e.html#autotoc_md49", null ]
       ] ]
     ] ],
     [ "Modules", "modules.html", [
@@ -127,9 +129,9 @@ var NAVTREEINDEX =
 [
 "_b_r_d_f_8cppm.html",
 "functions_r.html",
-"struct_h_d_r_image.html#a044f086c2fcaa43ca80268e4d31a58b3a999a58c75466038ed7fbeaf3bd45e6e9",
-"struct_path_tracer.html#aaefed6b7b2623f08a75489ed941c79d2",
-"test___camera_8cpp.html#a34b072c0ecdc1820b4e66842c53f34bf"
+"struct_h_d_r_image.html#a044f086c2fcaa43ca80268e4d31a58b3a60ee1a7a6ea81cfd79115721fc09e1f0",
+"struct_path_tracer.html#a998cbaa8a2a024b3e123f22daa268ef5",
+"structstd_1_1formatter_3_01_vec_01_4.html#a8e019e851d667a7be67189ebf9daa85e"
 ];
 
 const SYNCONMSG = 'click to disable panel synchronization';

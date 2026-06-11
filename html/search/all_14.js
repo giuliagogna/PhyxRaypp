@@ -1,8 +1,8 @@
 var searchData=
 [
-  ['obj_0',['3D Meshes (.obj)',['../md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md25',1,'']]],
-  ['off_1',['&amp;ndash; Example 2.1: Silhouette Mode (On/Off)**',['../md__r_e_a_d_m_e.html#autotoc_md36',1,'']]],
-  ['on_20off_2',['&amp;ndash; Example 2.1: Silhouette Mode (On/Off)**',['../md__r_e_a_d_m_e.html#autotoc_md36',1,'']]],
+  ['obj_0',['3D Meshes (.obj)',['../md_docs_2_s_c_e_n_e___l_a_n_g_u_a_g_e.html#autotoc_md26',1,'']]],
+  ['off_1',['&amp;ndash; Example 2.1: Silhouette Mode (On/Off)**',['../md__r_e_a_d_m_e.html#autotoc_md37',1,'']]],
+  ['on_20off_2',['&amp;ndash; Example 2.1: Silhouette Mode (On/Off)**',['../md__r_e_a_d_m_e.html#autotoc_md37',1,'']]],
   ['onoffrenderer_3',['OnOffRenderer',['../struct_on_off_renderer.html',1,'OnOffRenderer'],['../struct_on_off_renderer.html#a4b1fe2ef38d97c53f9aaf4316a6029ae',1,'OnOffRenderer::OnOffRenderer()']]],
   ['open_5finput_5ffile_4',['open_input_file',['../namespaceaux.html#a4ec0cac7679a71244ca6fe61e59e1b8c',1,'aux']]],
   ['open_5foutput_5ffile_5',['open_output_file',['../namespaceaux.html#a79e8d4f94dcd15eeafd334a06415e13e',1,'aux']]],
@@ -19,7 +19,7 @@ var searchData=
   ['origin_16',['origin',['../struct_ray.html#a57c8d5214c2cf378dea72f07c0c54c35',1,'Ray']]],
   ['orthogonal_17',['ORTHOGONAL',['../_scene_files_8cppm.html#a0a395672924ac94ef998770a52e49f42ac9643b6ef9ceab12abacac795c0543ec',1,'SceneFiles.cppm']]],
   ['orthogonalcamera_18',['OrthogonalCamera',['../struct_orthogonal_camera.html',1,'OrthogonalCamera'],['../struct_orthogonal_camera.html#ada7b6045ef5b38d8cb7841ffbfdacf73',1,'OrthogonalCamera::OrthogonalCamera()']]],
-  ['output_19',['&amp;ndash; Example 2.4: Custom Output',['../md__r_e_a_d_m_e.html#autotoc_md39',1,'']]],
+  ['output_19',['&amp;ndash; Example 2.4: Custom Output',['../md__r_e_a_d_m_e.html#autotoc_md40',1,'']]],
   ['output_5fpng_5ffile_5fname_20',['output_png_file_name',['../struct_parameters.html#ad2a4343c4b87e01fc7c0ce0b26543ffa',1,'Parameters']]],
   ['overflow_21',['overflow',['../class_failing_stream_buf.html#a179044a96885f47c78ea9b782e461e39',1,'FailingStreamBuf']]],
   ['overridden_5fvariables_22',['overridden_variables',['../struct_scene.html#a6847d93b7a891ace20a71ee8de551299',1,'Scene']]]

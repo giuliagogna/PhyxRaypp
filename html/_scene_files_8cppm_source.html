@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.17.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>PhyxRadpp: src/SceneFiles.cppm Source File</title>
+<title>PhyxRad++: src/SceneFiles.cppm Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="codefolding.js"></script>
 <script type="text/javascript" src="clipboard.js"></script>
@@ -30,7 +30,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">PhyxRadpp
+   <div id="projectname">PhyxRad++
    </div>
   </td>
  </tr>
@@ -1228,7 +1228,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('_scene_files_8
 <div class="line"><a id="l01528" name="l01528"></a><span class="lineno"> 1528</span> </div>
 <div class="line"><a id="l01529" name="l01529"></a><span class="lineno"> 1529</span>        <span class="keywordflow">if</span> (sym1 != <span class="keyword">nullptr</span> &amp;&amp; sym1-&gt;symbol == <span class="charliteral">&#39;)&#39;</span>) {</div>
 <div class="line"><a id="l01530" name="l01530"></a><span class="lineno"> 1530</span>            <span class="keywordflow">if</span> (keyword == <a class="code hl_enumvalue" href="_scene_files_8cppm.html#a0a395672924ac94ef998770a52e49f42ac9643b6ef9ceab12abacac795c0543ec">KeywordEnum::ORTHOGONAL</a>) <span class="keywordflow">return</span> std::make_unique&lt;OrthogonalCamera&gt;();</div>
-<div class="line"><a id="l01531" name="l01531"></a><span class="lineno"> 1531</span>            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (keyword == <a class="code hl_enumvalue" href="_scene_files_8cppm.html#a0a395672924ac94ef998770a52e49f42ad46c97be63d6c4cb887419a4a3df5347">KeywordEnum::PERSPECTIVE</a>) <span class="keywordflow">return</span> std::make_unique&lt;PerspectiveCamera&gt;();</div>
+<div class="line"><a id="l01531" name="l01531"></a><span class="lineno"> 1531</span>            <span class="keywordflow">else</span> <span class="comment">/*if (keyword == KeywordEnum::PERSPECTIVE)*/</span> <span class="keywordflow">return</span> std::make_unique&lt;PerspectiveCamera&gt;();</div>
 <div class="line"><a id="l01532" name="l01532"></a><span class="lineno"> 1532</span>        }</div>
 <div class="line"><a id="l01533" name="l01533"></a><span class="lineno"> 1533</span>        <span class="keywordflow">if</span> (sym1 == <span class="keyword">nullptr</span> || sym1-&gt;symbol != <span class="charliteral">&#39;,&#39;</span>) {</div>
 <div class="line"><a id="l01534" name="l01534"></a><span class="lineno"> 1534</span>            <span class="keywordflow">return</span> std::unexpected(<a class="code hl_struct" href="struct_grammar_error.html">GrammarError</a>{tok1-&gt;location, <span class="stringliteral">&quot;Expected &#39;,&#39; or &#39;)&#39; after camera type.&quot;</span>});</div>
@@ -1249,7 +1249,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('_scene_files_8
 <div class="line"><a id="l01549" name="l01549"></a><span class="lineno"> 1549</span>            <span class="keywordflow">if</span> (!close_res.has_value()) <span class="keywordflow">return</span> std::unexpected(close_res.error());</div>
 <div class="line"><a id="l01550" name="l01550"></a><span class="lineno"> 1550</span> </div>
 <div class="line"><a id="l01551" name="l01551"></a><span class="lineno"> 1551</span>            <span class="keywordflow">if</span> (keyword == <a class="code hl_enumvalue" href="_scene_files_8cppm.html#a0a395672924ac94ef998770a52e49f42ac9643b6ef9ceab12abacac795c0543ec">KeywordEnum::ORTHOGONAL</a>) <span class="keywordflow">return</span> std::make_unique&lt;OrthogonalCamera&gt;(aspect_ratio, trans_res.value());</div>
-<div class="line"><a id="l01552" name="l01552"></a><span class="lineno"> 1552</span>            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (keyword == <a class="code hl_enumvalue" href="_scene_files_8cppm.html#a0a395672924ac94ef998770a52e49f42ad46c97be63d6c4cb887419a4a3df5347">KeywordEnum::PERSPECTIVE</a>) <span class="keywordflow">return</span> std::make_unique&lt;PerspectiveCamera&gt;(aspect_ratio, distance, trans_res.value());</div>
+<div class="line"><a id="l01552" name="l01552"></a><span class="lineno"> 1552</span>            <span class="keywordflow">else</span> <span class="comment">/*if (keyword == KeywordEnum::PERSPECTIVE)*/</span> <span class="keywordflow">return</span> std::make_unique&lt;PerspectiveCamera&gt;(aspect_ratio, distance, trans_res.value());</div>
 <div class="line"><a id="l01553" name="l01553"></a><span class="lineno"> 1553</span>        }</div>
 <div class="line"><a id="l01554" name="l01554"></a><span class="lineno"> 1554</span> </div>
 <div class="line"><a id="l01555" name="l01555"></a><span class="lineno"> 1555</span>        <span class="comment">// It wasn&#39;t a transformation, so it must be the aspect ratio</span></div>
@@ -1266,7 +1266,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('_scene_files_8
 <div class="line"><a id="l01566" name="l01566"></a><span class="lineno"> 1566</span> </div>
 <div class="line"><a id="l01567" name="l01567"></a><span class="lineno"> 1567</span>        <span class="keywordflow">if</span> (sym2 != <span class="keyword">nullptr</span> &amp;&amp; sym2-&gt;symbol == <span class="charliteral">&#39;)&#39;</span>) {</div>
 <div class="line"><a id="l01568" name="l01568"></a><span class="lineno"> 1568</span>            <span class="keywordflow">if</span> (keyword == <a class="code hl_enumvalue" href="_scene_files_8cppm.html#a0a395672924ac94ef998770a52e49f42ac9643b6ef9ceab12abacac795c0543ec">KeywordEnum::ORTHOGONAL</a>) <span class="keywordflow">return</span> std::make_unique&lt;OrthogonalCamera&gt;(aspect_ratio);</div>
-<div class="line"><a id="l01569" name="l01569"></a><span class="lineno"> 1569</span>            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (keyword == <a class="code hl_enumvalue" href="_scene_files_8cppm.html#a0a395672924ac94ef998770a52e49f42ad46c97be63d6c4cb887419a4a3df5347">KeywordEnum::PERSPECTIVE</a>) <span class="keywordflow">return</span> std::make_unique&lt;PerspectiveCamera&gt;(aspect_ratio);</div>
+<div class="line"><a id="l01569" name="l01569"></a><span class="lineno"> 1569</span>            <span class="keywordflow">else</span> <span class="comment">/*if (keyword == KeywordEnum::PERSPECTIVE)*/</span> <span class="keywordflow">return</span> std::make_unique&lt;PerspectiveCamera&gt;(aspect_ratio);</div>
 <div class="line"><a id="l01570" name="l01570"></a><span class="lineno"> 1570</span>        }</div>
 <div class="line"><a id="l01571" name="l01571"></a><span class="lineno"> 1571</span>        <span class="keywordflow">if</span> (sym2 == <span class="keyword">nullptr</span> || sym2-&gt;symbol != <span class="charliteral">&#39;,&#39;</span>) {</div>
 <div class="line"><a id="l01572" name="l01572"></a><span class="lineno"> 1572</span>            <span class="keywordflow">return</span> std::unexpected(<a class="code hl_struct" href="struct_grammar_error.html">GrammarError</a>{tok2-&gt;location, <span class="stringliteral">&quot;Expected &#39;,&#39; or &#39;)&#39; after aspect ratio.&quot;</span>});</div>
@@ -1282,7 +1282,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('_scene_files_8
 <div class="line"><a id="l01582" name="l01582"></a><span class="lineno"> 1582</span> </div>
 <div class="line"><a id="l01583" name="l01583"></a><span class="lineno"> 1583</span>            <span class="keywordflow">return</span> std::make_unique&lt;OrthogonalCamera&gt;(aspect_ratio, trans_res.value());</div>
 <div class="line"><a id="l01584" name="l01584"></a><span class="lineno"> 1584</span>        }</div>
-<div class="line"><a id="l01585" name="l01585"></a><span class="lineno"> 1585</span>        <span class="keywordflow">else</span> <span class="keywordflow">if</span> (keyword == <a class="code hl_enumvalue" href="_scene_files_8cppm.html#a0a395672924ac94ef998770a52e49f42ad46c97be63d6c4cb887419a4a3df5347">KeywordEnum::PERSPECTIVE</a>) {</div>
+<div class="line"><a id="l01585" name="l01585"></a><span class="lineno"> 1585</span>        <span class="keywordflow">else</span> <span class="comment">/*if (keyword == KeywordEnum::PERSPECTIVE)*/</span> {</div>
 <div class="line"><a id="l01586" name="l01586"></a><span class="lineno"> 1586</span>            <span class="comment">// Perspective: is it distance or transformation?</span></div>
 <div class="line"><a id="l01587" name="l01587"></a><span class="lineno"> 1587</span>            <span class="keyword">auto</span> peek3_res = input_file.<a class="code hl_function" href="struct_input_stream.html#a89e527c1bc3b977566dde983d6aa47a3">read_token</a>();</div>
 <div class="line"><a id="l01588" name="l01588"></a><span class="lineno"> 1588</span>            <span class="keywordflow">if</span> (!peek3_res.has_value()) { <span class="keywordflow">return</span> std::unexpected(peek3_res.error()); }</div>
