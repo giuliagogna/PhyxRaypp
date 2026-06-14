@@ -106,8 +106,11 @@ public:
 
     /// Anti-aliasing mode identifier.
     std::string antialiasing = "no_antialiasing";
-    std::string parallel = "no_parallel";
     int antialiasing_level = 0;
+
+    /// Parallelization identifier
+    std::string parallel = "no_parallel";
+    int number_of_threads = 0;
 
     /// Output PNG image file.
     std::string output_png_file_name = "";
@@ -161,7 +164,7 @@ public:
 
                 "Optional Flags:\n"
                 "  --output <filename>             Override automatic naming and specify exact output path\n"
-                "  --parallel                      Use TBB parallelization to render the image\n"
+                "  --parallel <N>                  Use TBB parallelization on N threads to render the image\n"
                 "  --algorithm <type>              Render engine: 'flat' or 'pathtracing' (default: 'flat')\n"
                 "  --antialiasing <N>              Apply anti-aliasing with NxN samples per pixel\n"
                 "  --dimensions <width> <height>   Set output image resolution in pixels\n"
@@ -280,11 +283,14 @@ public:
                     // Clamp the value: AA level cannot be less than 1
                     antialiasing_level = parse_antialiasing_level.value() < 1 ? 1 : parse_antialiasing_level.value();
 
-                } else if (std::string_view(args[i]) == "--parallel") {
+                } else if (std::string_view(args[i]) == "--parallel" && i + 1 < args.size()) {
                     // ---------------------------------------------------------
-                    // FLAG: --parallel
+                    // FLAG: --parallel <N>
                     // ---------------------------------------------------------
                     parallel = "parallel";
+                    auto parse_number_of_threads = parse_float(args[i + 1]);
+                    if(!parse_number_of_threads) return std::unexpected(parse_number_of_threads.error());
+                    number_of_threads = parse_number_of_threads.value() < 1 ? 1 : parse_number_of_threads.value();
 
                 } else if (std::string_view(args[i]) == "--dimensions" && i + 2 < args.size()) {
                     // ---------------------------------------------------------
@@ -558,17 +564,7 @@ void run_render(const Parameters& params) {
  */
 int main(int argc, char* argv[]) {
 
-    unsigned int total_threads = std::thread::hardware_concurrency();
-    
-    // Leave 2 cores free
-    int safe_threads = std::max(1u, total_threads > 4 ? total_threads - 2 : total_threads);
-
-    tbb::global_control thread_limit(
-        tbb::global_control::max_allowed_parallelism, 
-        safe_threads
-    );
-
-    Parameters parameters;
+    Parameters parameters;   
 
     std::span<char*> args(argv, argc);
 
@@ -577,6 +573,15 @@ int main(int argc, char* argv[]) {
         std::println("{}", parse_res.error());
         return 1;
     }
+
+    // TBB parallelization: asking a safe number of threads to the machine to claim during the job.
+    unsigned int max_threads = std::thread::hardware_concurrency(); // Verify the number of concurrent threads supported by the hardware
+    unsigned int safe_threads = std::max(1u, parameters.number_of_threads > max_threads ? max_threads : parameters.number_of_threads);
+    std::println("Using {} threads for parallelization.", safe_threads);
+    tbb::global_control thread_limit( // claims the specified number of threads for the parallel regions in the program, preventing oversubscription and ensuring efficient resource utilization
+        tbb::global_control::max_allowed_parallelism, 
+        safe_threads
+    );
 
     if (parameters.command == "pfm2png") {
         run_pfm2png(parameters);

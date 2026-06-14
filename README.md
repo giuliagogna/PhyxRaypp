@@ -14,6 +14,7 @@ Scenes and rendering parameters are parsed dynamically at runtime using a custom
   * `flat`: Flat shading that resolves surface coordinates to apply solid colors or UV-mapped HDR textures without calculating light bounces.
   * `pathtracing`: Physically based rendering using Monte Carlo integration and Russian Roulette depth control to calculate global illumination.
 * **OBJ file support:** Imports vertexes, normals and UV mapping textures from OBJ+PFM files to generate triangular meshes. The ray intersection method is optimized by a BVH binary tree SAH logic.
+* **TBB parallelism:** thanks to Intel TBB library, it's possible to reduce rendering time by dividing the job on more threads.
 * **Material System:** Supports uniform colors, procedural checkerboards, and HDR image texture mapping attached to diffusive or specular BRDFs.
 * **HDR Image Processing:** Converts `.pfm` files to standard `.png` files, applying normalization (alpha) and gamma correction.
 
@@ -59,6 +60,7 @@ xmake run PhyxRadpp render <INPUT_SCENE_TXT> <ALPHA_FACTOR> <GAMMA> [FLAGS]
 ```
 **Optional Flags:**
 * `--output <filename>`: Bypasses the automated folder routing/naming and saves the file exactly as specified.
+* `--parallel <N>`: Perform a parallel run of the rendering on N threads using Intel TBB  
 * `--algorithm <type>` : Render engine (`onoff`, `flat`, or `pathtracing`). Default is `flat`.
 * `--antialiasing <N>` : Apply anti-aliasing with NxN samples per pixel.
 * `--dimensions <W> <H>` : Set output image resolution in pixels (Width Height).
