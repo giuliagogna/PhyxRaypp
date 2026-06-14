@@ -13,8 +13,8 @@ Scenes and rendering parameters are parsed dynamically at runtime using a custom
   * `onoff`: Binary hit/miss visibility testing (generates a black-and-white silhouette).
   * `flat`: Flat shading that resolves surface coordinates to apply solid colors or UV-mapped HDR textures without calculating light bounces.
   * `pathtracing`: Physically based rendering using Monte Carlo integration and Russian Roulette depth control to calculate global illumination.
-* **OBJ file support:** Imports vertexes, normals and UV mapping textures from OBJ+PFM files to generate triangular meshes. The ray intersection method is optimized by a BVH binary tree SAH logic.
 * **TBB parallelism:** thanks to Intel TBB library, it's possible to reduce rendering time by dividing the job on more threads.
+* **Mesh and OBJ file support:** Imports vertexes, normals and UV mapping textures from OBJ+PFM files to generate triangular meshes. The ray intersection method is optimized by a BVH binary tree SAH logic.
 * **Material System:** Supports uniform colors, procedural checkerboards, and HDR image texture mapping attached to diffusive or specular BRDFs.
 * **HDR Image Processing:** Converts `.pfm` files to standard `.png` files, applying normalization (alpha) and gamma correction.
 
@@ -146,6 +146,15 @@ material red_plastic(diffuse(uniform(<0.8, 0.1, 0.1>)));
 sphere(translation([0.0, 1.0, 0.0]) * scaling([2.0, 2.0, 2.0]), red_plastic);
 ```
 For a complete guide on all available shapes, materials, and syntax rules, please see the Scene Language Documentation in [`docs/SCENE_LANGUAGE.md`](docs/SCENE_LANGUAGE.md).
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+## Mesh Loading and BVH Acceleration
+
+`PhyxRadpp` supports loading complex 3D geometry directly from standard `.obj` files. To ensure fast and efficient ray intersection during rendering, these meshes can be accelerated using a Bounding Volume Hierarchy (BVH) built with the Surface Area Heuristic (SAH).
+
+* **BVH:** a Bounding Volume Hierarchy organizes the complex mesh into a tree structure of progressively smaller 3D boxes. Instead of testing a light ray against millions of individual triangles, the renderer tests the ray against these large boxes first. If a ray misses a box, the engine can safely ignore everything inside it, drastically speeding up render times.
+* **SAH:** The Surface Area Heuristic is a cost model used to build a highly optimized BVH. Rather than splitting the mesh randomly or blindly down the middle, the SAH calculates the best places to divide the geometry based on the surface area of the bounding boxes. It estimates the mathematical probability of a ray hitting different parts of the mesh, creating a tree structure that actively minimizes unnecessary intersection tests.
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 ## Testing
