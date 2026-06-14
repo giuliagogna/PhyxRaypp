@@ -1,4 +1,4 @@
-# PhyxRadpp Scene Description Language
+# PhyxRadpp Scene Description Language {#SCENE_LANGUAGE}
 
 `PhyxRadpp` uses a custom text-based scene description language. The language is parsed at runtime, allowing you to build and modify 3D environments without needing to recompile the C++ engine.
 

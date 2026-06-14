@@ -143,7 +143,7 @@ camera(perspective, 1.0, 3.0, translation([0.0, 0.0, 5.0]));
 material red_plastic(diffuse(uniform(<0.8, 0.1, 0.1>)));
 sphere(translation([0.0, 1.0, 0.0]) * scaling([2.0, 2.0, 2.0]), red_plastic);
 ```
-For a complete guide on all available shapes, materials, and syntax rules, please see the Scene Language Documentation in `docs/SCENE_LANGUAGE.md`.
+For a complete guide on all available shapes, materials, and syntax rules, please see the Scene Language Documentation in [`docs/SCENE_LANGUAGE.md`](docs/SCENE_LANGUAGE.md).
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 ## Testing
@@ -155,6 +155,36 @@ xmake test -v
 To run tests for a specific module (e.g., `HDRImage):
 ```bash
 xmake run test_HDRImage
+```
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+## Documentation
+
+`PhyxRadpp` includes source documentation in the repository:
+
+- API documentation embedded in the source code using Doxygen comments;
+- the Scene Description Language specification ([`docs/SCENE_LANGUAGE.md`](docs/SCENE_LANGUAGE.md)).
+
+The generated HTML documentation is not included in the repository and can be built locally using Doxygen.
+
+### Generate HTML Documentation
+
+Install Doxygen and run:
+
+```bash
+doxygen docs/Doxyfile
+```
+
+The generated documentation will be written to:
+
+```text
+docs/html/
+```
+
+Open the main page in your browser:
+
+```text
+docs/html/index.html
 ```
 
 ------------------------------------------------------------------------------------------------------------------------------------------------

@@ -15,6 +15,14 @@
  * limitations under the Licence.
  */
 
+/**
+ * @file Material.cppm
+ * @brief Material definition used by the renderer.
+ *
+ * A material describes how a surface interacts with light through
+ * a BRDF and an optional emitted radiance term.
+ */
+
 module;
 export module Material;
 
@@ -24,18 +32,38 @@ import Geometry;
 import Pigment;
 import BRDF;
 
-// Struct conttaining the BRDF and emitted radiance
+/**
+ * @brief Surface material.
+ *
+ * A material combines:
+ *
+ * - a BRDF, describing how incoming light is scattered
+ * - an emitted radiance term, describing light emitted by the surface
+ *
+ * Emissive materials can therefore act as light sources.
+ */
 export struct Material {
+
+    /// Surface scattering model.
     std::shared_ptr<BRDF> brdf;
+
+    /// Radiance emitted by the surface.
     std::shared_ptr<Pigment> emitted_radiance;
 
-    // Constructor with default arguments
+    /**
+     * @brief Construct a material from a BRDF and an emission term.
+     *
+     * By default, creates a white diffuse material with no emission.
+     *
+     * @param brdf: Surface scattering model.
+     * @param emitted_radiance: Emitted radiance pigment.
+     */
     Material(
         std::shared_ptr<BRDF> brdf = std::make_shared<DiffusiveBRDF>(
             std::make_shared<UniformPigment>(Color{1.0f, 1.0f, 1.0f})
         ),
 
-        std::shared_ptr<Pigment> emitted_radiance = std::make_shared<UniformPigment>(Color{0.0f, 0.0f, 0.0f}) // Default black emission
+        std::shared_ptr<Pigment> emitted_radiance = std::make_shared<UniformPigment>(Color{0.0f, 0.0f, 0.0f})
 
     ) : brdf(std::move(brdf)), emitted_radiance(std::move(emitted_radiance)) {}
 

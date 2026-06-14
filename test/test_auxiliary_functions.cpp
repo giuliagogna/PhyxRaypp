@@ -85,7 +85,7 @@ TEST_CASE("Opening files securely (open_input_file)") {
         REQUIRE(result.has_value() == false);
 
         // Verify that the error message perfectly matches the expected format
-        CHECK(result.error() == std::format("Error in opening input file '{}'", fake_filename));
+        CHECK(result.error() == std::format("Error in opening file '{}'", fake_filename));
     }
 }
 

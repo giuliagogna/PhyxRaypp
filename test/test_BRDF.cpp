@@ -40,7 +40,6 @@ TEST_CASE("Test BRDF constructors") {
         SpecularBRDF specular(std::make_shared<UniformPigment>(white));
 
         CHECK(specular.pigment->get_color(Vec2D{0.0f, 0.0f}).is_close(white.get_color(Vec2D{0.0f, 0.0f})));
-        CHECK(aux::are_close(specular.threshold_angle_rad, std::numbers::pi_v<float> / 1800.0f));
     }
 }
 

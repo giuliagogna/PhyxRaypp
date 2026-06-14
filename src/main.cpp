@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2026 Giulia Gogna, Riccardo Piazza.
+ * Copyright (c) 2026 Giulia Gogna, Riccardo Piazza.
  *
  * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
  * the European Commission - subsequent versions of the EUPL (the "Licence");
@@ -34,7 +34,18 @@ import SceneFiles;
 
 using namespace std;
 
-/// @brief Helper function to parse floats
+/**
+ * @brief Converts a string into a floating-point value.
+ *
+ * Leading and trailing whitespace are ignored. Decimal commas are automatically converted
+ * to decimal points before parsing, allowing inputs such as `"3,14"` as well as `"3.14"`.
+ *
+ * Parsing is performed using the classic C locale to ensure locale-independent behavior.
+ *
+ * @param str String representation of the floating-point value.
+ * @return The parsed float on success, or an error message if the
+ *         string does not represent a valid floating-point number.
+ */
 [[nodiscard]] std::expected<float, std::string> parse_float(std::string_view str) {
     std::string safe_str(str);
 
@@ -58,30 +69,83 @@ using namespace std;
     return value;
 }
 
-/// @brief Helper class to parse the Parameters provided from CLI
+/**
+ * @brief Parsed command-line parameters used to configure program execution.
+ *
+ * This structure stores all options extracted from the CLI, including
+ * input/output files, rendering settings, image dimensions, and
+ * path-tracing configuration parameters.
+ *
+ * Members are initialized with the same default values used when the
+ * corresponding command-line option is omitted.
+ */
 struct Parameters {
 
 public:
-    std::string command = ""; // "pfm2png", "demo"
+    /// Selected command/subprogram (e.g. "render", "pfm2png", "demo").
+    std::string command = "";
 
+    // -----------------------------------------------------------------
     // Shared parameters
+    // -----------------------------------------------------------------
+
+    /// Input PFM image file.
     std::string input_pfm_file_name = "";
+
+    /// Input scene description file.
     std::string input_scene_file_name = "";
+
+    /// Tone-mapping alpha parameter.
     float alpha = 0.2f;
+
+    /// Gamma-correction exponent.
     float gamma = 1.0f;
+
+    /// Rendering algorithm identifier.
     std::string algorithm = "flat";
+
+    /// Anti-aliasing mode identifier.
     std::string antialiasing = "no_antialiasing";
     std::string parallel = "no_parallel";
     int antialiasing_level = 0;
+
+    /// Output PNG image file.
     std::string output_png_file_name = "";
+
+    /// Output image dimensions in pixels: {width, height}.
     std::pair<int, int> image_dimension{800, 800};
 
-    // See PathTracer struct for more details
+    // -----------------------------------------------------------------
+    // Path tracer parameters
+    // -----------------------------------------------------------------
+
+    /// Number of rays generated per scattering event.
     int pathtracer_num_of_rays = 4;
+
+    /// Maximum recursion depth.
     int pathtracer_max_depth = 4;
+
+    /// Russian roulette activation depth.
     int pathtracer_rr_depth = 2;
 
 
+    /**
+     * @brief Parse command-line arguments and populate a Parameters structure.
+     *
+     * Supported commands:
+     * - pfm2png
+     * - render
+     *
+     * Supported optional flags:
+     * - --output
+     * - --algorithm
+     * - --antialiasing
+     * - --dimensions
+     * - --pathtracer_params
+     *
+     * @param args Command-line arguments.
+     * @return Parsed Parameters object or an error description.
+     */
     [[nodiscard]] std::expected<void, std::string> parse_command_line(std::span<char*> args) {
         std::string program_name = std::filesystem::path(args[0]).filename().string();
 
@@ -276,7 +340,28 @@ public:
     }
 
 private:
-    /// @brief Helper function to format output file name
+    /**
+     * @brief Generate the output image filename from the current render settings.
+     *
+     * The generated name preserves the directory of @p base_path and encodes relevant rendering
+     * parameters into the filename. Depending on the active command and rendering algorithm,
+     * information such as alpha, gamma, image dimensions, anti-aliasing settings, and path-tracer parameters
+     * may be appended.
+     *
+     * If @p base_path does not contain an extension, ".png" is automatically added.
+     *
+     * Example:
+     * @code
+     * output.png
+     *   -> output_a0.2_g1.0_flat_800x800.png
+     *
+     * render.png
+     *   -> render_a0.2_g1.0_pathtracing_800x800_AA4_r4_d4_rr3.png
+     * @endcode
+     *
+     * @param base_path User-provided output path.
+     * @return Fully qualified output filename with embedded render settings.
+     */
     std::string process_output_filename(std::string_view base_path) {
         std::filesystem::path path(base_path);
 
@@ -317,7 +402,17 @@ private:
 // EXECUTION FUNCTIONS (SUBCOMMANDS)
 // ====================================
 
-/// @brief Function to run pfm2png
+/**
+ * @brief Execute the pfm2png subcommand.
+ *
+ * Loads an HDR image from a PFM file, applies the standard post-processing pipeline
+ * (normalization, clamping, and gamma correction), and writes the result as a low-dynamic-range PNG image.
+ *
+ * Any processing error is reported to the console and terminates the
+ * operation early.
+ *
+ * @param params Parsed command-line parameters.
+ */
 void run_pfm2png(const Parameters& params) {
     auto img_res = HDRImage::read_pfm_file(params.input_pfm_file_name);
     if (!img_res.has_value()) {
@@ -342,7 +437,20 @@ void run_pfm2png(const Parameters& params) {
     std::println("File \"{}\" correctly written on disk.", params.output_png_file_name);
 }
 
-/// @brief Function to run demo
+/**
+ * @brief Execute the render subcommand.
+ *
+ * Loads and parses a scene description file, constructs the selected renderer,
+ * generates the image, applies the standard post-processing pipeline, and writes the final PNG image to disk.
+ *
+ * The rendering algorithm, anti-aliasing settings, image dimensions, and path-tracing parameters
+ * are taken from @p params.
+ *
+ * Scene parsing errors, rendering failures, and image-processing errors
+ * are reported to the console and terminate the operation early.
+ *
+ * @param params Parsed command-line parameters.
+ */
 void run_render(const Parameters& params) {
 
     // ======================================
@@ -434,6 +542,20 @@ void run_render(const Parameters& params) {
 // MAIN FUNCTION
 // ====================================
 
+/**
+ * @brief Program entry point.
+ *
+ * Parses command-line arguments and dispatches execution to one of the
+ * supported subcommands:
+ *
+ *   - pfm2png : converts HDR PFM images to LDR PNG images
+ *   - render  : parses a scene file and renders an image
+ *
+ * @param argc Number of command-line arguments.
+ * @param argv Command-line argument array.
+ *
+ * @return EXIT_SUCCESS on success, non-zero on error.
+ */
 int main(int argc, char* argv[]) {
 
     unsigned int total_threads = std::thread::hardware_concurrency();

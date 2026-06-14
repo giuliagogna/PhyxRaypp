@@ -944,7 +944,7 @@ TEST_CASE("Test Parser: Parse functions") {
 
             auto res = parse_mesh(stream, scene);
             REQUIRE_FALSE(res.has_value());
-            CHECK(res.error().message.find("Cannot open mesh file") != std::string::npos);
+            CHECK(res.error().message.find("Error in opening") != std::string::npos);
         }
 
         SUBCASE("Negative: Bad Optional Syntax") {

@@ -84,6 +84,11 @@ mesh/*/*.mtl
 # This ignores PNGs only at the root of the project
 /*.png
 
+# ======================
+# Images used as trials
+# ======================
+exclude/
+
 # ==============
 # HTML
 # ==============
