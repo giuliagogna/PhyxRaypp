@@ -22,7 +22,7 @@ plane(translation([-4.0, 0.0, 0.0]) * rot_y(pi_over_2), floor_mat);
 plane(translation([0.0, 0.0, 2.0]), floor_mat);
 
 # The Objects
-sphere(translation([2.0, 0.0, 2.0]) * scaling([0.5, 0.5, 0.5]), lamp_mat);
+sphere(translation([1.0, 0.0, 2.0]) * scaling([0.5, 0.5, 0.5]), lamp_mat);
 
 # The Teapot
-mesh("mesh/dragon/dragon.obj", pink_mat, translation([6.0, 0.0, 0.0]) * rot_z(pi_over_2) * scaling([3.4, 3.4, 3.4]));
+mesh("mesh/dragon/dragon.obj", pink_mat, translation([4.0, 0.0, 0.0]) * rot_x(pi_over_2) * scaling([3.4, 3.4, 3.4]));

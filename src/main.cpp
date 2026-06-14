@@ -15,6 +15,8 @@
  * limitations under the Licence.
  */
 
+#include <tbb/global_control.h>
+
 import std;
 import HDRImage;
 import Geometry;
@@ -433,6 +435,17 @@ void run_render(const Parameters& params) {
 // ====================================
 
 int main(int argc, char* argv[]) {
+
+    unsigned int total_threads = std::thread::hardware_concurrency();
+    
+    // Leave 2 cores free
+    int safe_threads = std::max(1u, total_threads > 4 ? total_threads - 2 : total_threads);
+
+    tbb::global_control thread_limit(
+        tbb::global_control::max_allowed_parallelism, 
+        safe_threads
+    );
+
     Parameters parameters;
 
     std::span<char*> args(argv, argc);
