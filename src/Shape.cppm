@@ -314,7 +314,7 @@ export struct Cube : Shape {
         }
 
         // Flip the normal for rays originating inside the cube.
-        if (local_point.to_vec() * local_ray.direction > 0.0f) {
+        if (local_normal * local_ray.direction > 0.0f) {
             local_normal = -local_normal;
         }
 
