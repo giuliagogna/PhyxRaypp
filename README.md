@@ -69,7 +69,7 @@ xmake run PhyxRadpp render <INPUT_SCENE_TXT> <ALPHA_FACTOR> <GAMMA> [FLAGS]
   * `<max_depth>` : Maximum reflection depth/bounces.
   * `<rr_depth>` : Russian Roulette start depth.
 
-#### -- Example 2.1: Silhouette Mode (On/Off)**
+#### -- Example 2.1: Silhouette Mode (On/Off)
 Render the quick black-and-white silhouette map of the geometry in `examples/sphere_silhouette.txt. This is highly useful for checking camera framing without waiting for complex light calculations.
 ```bash
 xmake run PhyxRadpp render sphere_silhouette.txt 1.0 1.0 --algorithm onoff
