@@ -108,8 +108,11 @@ public:
     std::string antialiasing = "no_antialiasing";
     int antialiasing_level = 0;
 
-    /// Parallelization identifier
+    /// Parallelization activation flag (e.g., "parallel" or "no_parallel").
     std::string parallel = "no_parallel";
+
+    /// Number of threads requested for parallel rendering.
+    /// If set to 0 or left uninitialized, the program defaults to hardware capabilities or single-threaded mode.
     int number_of_threads = 0;
 
     /// Output PNG image file.
@@ -141,6 +144,7 @@ public:
      *
      * Supported optional flags:
      * - --output
+     * - --parallel
      * - --algorithm
      * - --antialiasing
      * - --dimensions
@@ -556,6 +560,10 @@ void run_render(const Parameters& params) {
  *
  *   - pfm2png : converts HDR PFM images to LDR PNG images
  *   - render  : parses a scene file and renders an image
+ *
+ * This function also initializes Intel TBB's global control to safely restrict
+ * the maximum number of concurrent threads based on hardware capabilities and
+ * user configuration before passing execution to the renderer.
  *
  * @param argc Number of command-line arguments.
  * @param argv Command-line argument array.
