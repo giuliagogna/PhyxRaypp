@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+------
+
+## [1.0.0] - 2026-07-06
+
+### Fixed
+- Bug in `Cube` [#26]
+
 ### Added
 - Parallelization
 - Full OBJ mesh files support: triangular and non-triangular meshes (stored as triangular), UV map textures
@@ -13,8 +20,6 @@ All notable changes to this project will be documented in this file.
 - Lexer implementation
 - OBJ mesh files support for points and normals only (no texture)
 - Mesh shape, optimized via BVH-SAH
-
---------
 
 ## [0.3.0] - 2026-05-20
 
