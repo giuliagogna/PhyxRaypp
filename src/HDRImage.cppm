@@ -20,7 +20,7 @@
  * @brief High Dynamic Range image representation and file I/O.
  *
  * This module provides:
- * - Storage for HDR images as floating-point RGB pixels.
+ * - Storage for HDR test_images as floating-point RGB pixels.
  * - Reading and writing of Portable Float Map (PFM) files.
  * - Tone-mapping utilities such as normalization, clamping, and gamma correction.
  */

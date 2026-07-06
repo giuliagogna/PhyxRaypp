@@ -338,7 +338,7 @@ public:
 
             // Only generate the automatic name if the user didn't specify the --output flag
             if (!custom_output) {
-                // Generated images with any rendering algorithm get saved in generated_images/
+                // Generated test_images with any rendering algorithm get saved in generated_images/
                 std::filesystem::create_directories("generated_images");
                 output_png_file_name = process_output_filename("generated_images/" + stem);
             }
@@ -558,7 +558,7 @@ void run_render(const Parameters& params) {
  * Parses command-line arguments and dispatches execution to one of the
  * supported subcommands:
  *
- *   - pfm2png : converts HDR PFM images to LDR PNG images
+ *   - pfm2png : converts HDR PFM test_images to LDR PNG test_images
  *   - render  : parses a scene file and renders an image
  *
  * This function also initializes Intel TBB's global control to safely restrict

@@ -942,7 +942,7 @@ export struct Mesh : Shape {
             else if (prefix == "vt") {
                 Vec2D UV;
                 ss >> UV.u >> UV.v;
-                UV.v = 1.0f - UV.v; // Adapt to the way the code orients images axis and UV
+                UV.v = 1.0f - UV.v; // Adapt to the way the code orients test_images axis and UV
                 uv_coordinates.push_back(UV);
             }
             else if (prefix == "f") { // Supporting non-triangular mesh files, still storing as triangular mesh
