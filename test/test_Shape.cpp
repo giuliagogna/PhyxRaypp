@@ -435,6 +435,34 @@ TEST_CASE("TEST 4: CUBE - Comprehensive Test Suite") {
         CHECK(aux::are_close(record->t, 1.0f));
     }
 
+    SUBCASE("Ray from inside failing to flip normal") {
+        // Ray originates inside, near the corner (0.9, 0.9, 0).
+        // It points down and slightly right, hitting the +X face at (1.0, 0.5, 0).
+        // Under the old bug, P_hit * D = (1.0)(0.1) + (0.5)(-0.4) = -0.1 < 0.
+        // It would incorrectly keep the normal as (1, 0, 0) instead of flipping it.
+        Ray ray{Point{0.9f, 0.9f, 0.0f}, Vec{0.1f, -0.4f, 0.0f}};
+
+        auto record = cube.ray_intersection(ray);
+
+        REQUIRE(record.has_value());
+        CHECK(record->hit_normal.is_close(Normal{-1.0f, 0.0f, 0.0f}));
+        CHECK(record->hit_point.is_close(Point{1.0f, 0.5f, 0.0f}));
+    }
+
+    SUBCASE("Ray from outside incorrectly flipping normal") {
+        // Ray originates outside, below the cube at (2.0, -1.0, 0).
+        // It points steeply up and left, hitting the +X face at (1.0, 0.9, 0).
+        // Under the old bug, P_hit * D = (1.0)(-1.0) + (0.9)(1.9) = 0.71 > 0.
+        // It would incorrectly flip the normal to (-1, 0, 0).
+        Ray ray{Point{2.0f, -1.0f, 0.0f}, Vec{-1.0f, 1.9f, 0.0f}};
+
+        auto record = cube.ray_intersection(ray);
+
+        REQUIRE(record.has_value());
+        CHECK(record->hit_normal.is_close(Normal{1.0f, 0.0f, 0.0f}));
+        CHECK(record->hit_point.is_close(Point{1.0f, 0.9f, 0.0f}));
+    }
+
     SUBCASE("UV parametrization - X face") {
         Ray ray{Point{3.0f, 0.5f, -0.5f}, Vec{-1.0f, 0.0f, 0.0f}};
         auto record = cube.ray_intersection(ray);
