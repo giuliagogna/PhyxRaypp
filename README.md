@@ -211,6 +211,13 @@ docs/html/index.html
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 ## First Time Setup (Dependencies)
+
+### Prerequisite: xmake
+This project uses `xmake` as its build system. You must install it before compiling the project.
+* **Installation Guide:** [xmake.io/getting_started](https://xmake.io/#/getting_started)
+
+Once `xmake` is installed, follow the instructions for your specific operating system to ensure your C++23 compiler is properly configured.
+
 If you are compiling this project on a fresh machine, you need a C++23 compatible compiler. `xmake` will automatically download `doctest` and `stb`, but you must provide the compiler.
 
 ### 🐧 Linux (Ubuntu)
