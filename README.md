@@ -101,7 +101,7 @@ Render `examples/cornell_box_teapot.txt` with resolution 800x800, 10x10 antialia
 xmake run PhyxRadpp render cornell_box_teapot.txt 1.0 1.0 --algorithm pathtracing --antialiasing 10 --dimensions 800 800 --pathtracer_params 4 4 3
 ```
 
-<img src="generated_images/cornell_box_teapot_a1_g1_pathtracing_800x800_AA10_r4_d4_rr3.png" alt="OnOff spheres result" width="50%">
+<img src="generated_images/cornell_box_teapot_a1_g1_pathtracing_800x800_AA10_r4_d4_rr3.png" alt="Cornell Box Teapot" width="50%">
 
 *(Outputs: `generated_images/cornell_box_teapot_a1_g1_pathtracing_800x800_AA10_r4_d4_rr3.png`)*
 
@@ -113,7 +113,7 @@ xmake run PhyxRadpp render examples/cornell_box_spheres.txt 1.0 1.0 generated_im
 
 *(Outputs: `generated_images/cornell_box_spheres_a1_g1_pathtracing_800x800_AA10_r4_d4_rr3.png`)*
 
-<img src="generated_images/cornell_box_spheres_a1_g1_pathtracing_800x800_AA10_r4_d4_rr3.png" alt="OnOff spheres result" width="50%">
+<img src="generated_images/cornell_box_spheres_a1_g1_pathtracing_800x800_AA10_r4_d4_rr3.png" alt="Cornell Box Spheres" width="50%">
 
 #### -- Example 2.4: Custom Output
 Render a scene and manually define the exact output path.
@@ -125,7 +125,18 @@ xmake run PhyxRadpp render utah_teapot.txt 1.0 1.0 --algorithm flat --output my_
 
 *(Outputs: `my_custom_output_path/custom_test_render.png`)*
 
-<img src="my_custom_output_path/custom_test_render.png" alt="OnOff spheres result" width="50%">
+<img src="my_custom_output_path/custom_test_render.png" alt="Teapot" width="50%">
+
+#### -- Example 2.5: Classic Cornell Box
+Render `examples/cornell_box_classic.txt` with resolution 800x800, 10x10 antialiasing, using 4 rays per bounce, `max_depth=4`, and Russian Roulette at `depth=3`:
+
+```bash
+xmake run PhyxRadpp render examples/cornell_box_classic.txt 1.0 1.0 --algorithm pathtracing --antialiasing 10 --dimensions 800 800 --pathtracer_params 4 4 3
+```
+
+<img src="generated_images/cornell_box_classic_a1_g1_pathtracing_800x800_AA10_r4_d4_rr3.png" alt="Classic Cornell Box" width="50%">
+
+*(Outputs: `generated_images/cornell_box_classic_a1_g1_pathtracing_800x800_AA10_r4_d4_rr3.png`)*
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 ## Scene Description Language
