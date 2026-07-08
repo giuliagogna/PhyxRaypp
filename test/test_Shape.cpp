@@ -611,3 +611,168 @@ TEST_CASE("TEST 6: Shape's material assignment and memory storage") {
     Color expected_brdf_color{0.0f, 0.0f, 1.0f};
     CHECK(sphere.material->brdf->pigment->get_color(dummy_uv).is_close(expected_brdf_color));
 }
+
+// =========================================================================
+// TEST 7: DIRECTIONALHITRECORD STRUCT TESTS
+// =========================================================================
+TEST_CASE("TEST 7: directionalHitRecord basic properties and consistency") {
+    Ray ray{Point{0.0f, 0.0f, 0.0f}, Vec{0.0f, 0.0f, 1.0f}};
+    Normal normal{0.0f, 0.0f, 1.0f};
+    Vec2D uv{0.5f, 0.5f};
+    Sphere dummy_shape;
+
+    directionalHitRecord record1;
+    record1.ray = ray;
+    record1.t = 2.0f;
+    record1.hit_point = Point{0.0f, 0.0f, 2.0f};
+    record1.hit_normal = normal;
+    record1.surface_params = uv;
+    record1.hitted_shape = &dummy_shape;
+    record1.is_entering = true;
+
+    SUBCASE("Field verification") {
+        CHECK(record1.ray.is_close(ray));
+        CHECK(aux::are_close(record1.t, 2.0f));
+        CHECK(record1.hit_point.is_close(Point{0.0f, 0.0f, 2.0f}));
+        CHECK(record1.hit_normal.is_close(normal));
+        CHECK(record1.surface_params.is_close(uv));
+        CHECK(record1.hitted_shape == &dummy_shape);
+        CHECK(record1.is_entering == true);
+    }
+}
+
+// =========================================================================
+// TEST 8: SPHERE - RAY_ALL_INTERSECTIONS TESTS
+// =========================================================================
+TEST_CASE("TEST 8: Sphere - ray_all_intersections Test Suite") {
+    Sphere sphere;
+
+    SUBCASE("Ray from outside passing through the center") {
+        // Ray starts at z=3, points down towards the sphere at the origin
+        Ray ray(Point{0.0f, 0.0f, 3.0f}, Vec{0.0f, 0.0f, -1.0f});
+        auto hits = sphere.ray_all_intersections(ray);
+
+        // Must find exactly 2 intersections (entry and exit)
+        REQUIRE(hits.size() == 2);
+
+        // Entry Hit (t = 2.0)
+        CHECK(aux::are_close(hits[0].t, 2.0f));
+        CHECK(hits[0].hit_point.is_close(Point{0.0f, 0.0f, 1.0f}));
+        CHECK(hits[0].hit_normal.is_close(Normal{0.0f, 0.0f, 1.0f})); // Points outward (towards the ray)
+        CHECK(hits[0].is_entering == true);
+
+        // Exit Hit (t = 4.0)
+        CHECK(aux::are_close(hits[1].t, 4.0f));
+        CHECK(hits[1].hit_point.is_close(Point{0.0f, 0.0f, -1.0f}));
+        CHECK(hits[1].hit_normal.is_close(Normal{0.0f, 0.0f, 1.0f})); // Flipped! Points inward (towards the ray)
+        CHECK(hits[1].is_entering == false);
+    }
+
+    SUBCASE("Ray from inside the sphere") {
+        // Ray starts at the center, points towards +Z
+        Ray ray(Point{0.0f, 0.0f, 0.0f}, Vec{0.0f, 0.0f, 1.0f});
+        auto hits = sphere.ray_all_intersections(ray);
+
+        // Only 1 intersection within valid t bounds (the exit point)
+        REQUIRE(hits.size() == 1);
+
+        CHECK(aux::are_close(hits[0].t, 1.0f));
+        CHECK(hits[0].hit_point.is_close(Point{0.0f, 0.0f, 1.0f}));
+        CHECK(hits[0].hit_normal.is_close(Normal{0.0f, 0.0f, -1.0f})); // Flipped! Points inward
+        CHECK(hits[0].is_entering == false);
+    }
+
+    SUBCASE("Ray missing the sphere entirely") {
+        Ray ray(Point{5.0f, 0.0f, 0.0f}, Vec{0.0f, 0.0f, -1.0f});
+        auto hits = sphere.ray_all_intersections(ray);
+
+        CHECK(hits.empty());
+    }
+}
+
+// =========================================================================
+// TEST 9: PLANE - RAY_ALL_INTERSECTIONS TESTS
+// =========================================================================
+TEST_CASE("TEST 9: Plane - ray_all_intersections Test Suite") {
+    Plane plane;
+
+    SUBCASE("Ray from above hitting the plane") {
+        Ray ray{Point{0.0f, 0.0f, 1.0f}, Vec{0.0f, 0.0f, -1.0f}};
+        auto hits = plane.ray_all_intersections(ray);
+
+        // Infinite plane only has 1 surface intersection
+        REQUIRE(hits.size() == 1);
+
+        CHECK(aux::are_close(hits[0].t, 1.0f));
+        CHECK(hits[0].hit_point.is_close(Point{0.0f, 0.0f, 0.0f}));
+        CHECK(hits[0].hit_normal.is_close(Normal{0.0f, 0.0f, 1.0f}));
+        CHECK(hits[0].is_entering == true);
+    }
+
+    SUBCASE("Ray from below hitting the plane") {
+        Ray ray{Point{0.0f, 0.0f, -1.0f}, Vec{0.0f, 0.0f, 1.0f}};
+        auto hits = plane.ray_all_intersections(ray);
+
+        REQUIRE(hits.size() == 1);
+
+        CHECK(aux::are_close(hits[0].t, 1.0f));
+        CHECK(hits[0].hit_point.is_close(Point{0.0f, 0.0f, 0.0f}));
+        CHECK(hits[0].hit_normal.is_close(Normal{0.0f, 0.0f, -1.0f})); // Flipped!
+        CHECK(hits[0].is_entering == false);
+    }
+
+    SUBCASE("Ray parallel to the plane") {
+        Ray ray{Point{0.0f, 0.0f, 1.0f}, Vec{1.0f, 0.0f, 0.0f}};
+        auto hits = plane.ray_all_intersections(ray);
+
+        CHECK(hits.empty());
+    }
+}
+
+// =========================================================================
+// TEST 10: CUBE - RAY_ALL_INTERSECTIONS TESTS
+// =========================================================================
+TEST_CASE("TEST 10: Cube - ray_all_intersections Test Suite") {
+    Cube cube;
+
+    SUBCASE("Ray piercing the cube from side to side") {
+        // Starts outside at X=2, shoots straight along -X axis
+        Ray ray{Point{2.0f, 0.0f, 0.0f}, Vec{-1.0f, 0.0f, 0.0f}};
+        auto hits = cube.ray_all_intersections(ray);
+
+        REQUIRE(hits.size() == 2);
+
+        // Entry Hit on +X Face (t = 1.0)
+        CHECK(aux::are_close(hits[0].t, 1.0f));
+        CHECK(hits[0].hit_point.is_close(Point{1.0f, 0.0f, 0.0f}));
+        CHECK(hits[0].hit_normal.is_close(Normal{1.0f, 0.0f, 0.0f})); // Points outward
+        CHECK(hits[0].is_entering == true);
+
+        // Exit Hit on -X Face (t = 3.0)
+        CHECK(aux::are_close(hits[1].t, 3.0f));
+        CHECK(hits[1].hit_point.is_close(Point{-1.0f, 0.0f, 0.0f}));
+        CHECK(hits[1].hit_normal.is_close(Normal{1.0f, 0.0f, 0.0f})); // Flipped! Points back inside the cube
+        CHECK(hits[1].is_entering == false);
+    }
+
+    SUBCASE("Ray originating from inside the cube") {
+        // Starts at origin, shoots straight along +X axis
+        Ray ray{Point{0.0f, 0.0f, 0.0f}, Vec{1.0f, 0.0f, 0.0f}};
+        auto hits = cube.ray_all_intersections(ray);
+
+        // Only the exit hit is inside valid positive t limits
+        REQUIRE(hits.size() == 1);
+
+        CHECK(aux::are_close(hits[0].t, 1.0f));
+        CHECK(hits[0].hit_point.is_close(Point{1.0f, 0.0f, 0.0f}));
+        CHECK(hits[0].hit_normal.is_close(Normal{-1.0f, 0.0f, 0.0f})); // Flipped! Points back inside
+        CHECK(hits[0].is_entering == false);
+    }
+
+    SUBCASE("Ray missing the cube entirely") {
+        Ray ray{Point{2.0f, 5.0f, 3.0f}, Vec{-1.0f, 0.0f, 0.0f}};
+        auto hits = cube.ray_all_intersections(ray);
+
+        CHECK(hits.empty());
+    }
+}

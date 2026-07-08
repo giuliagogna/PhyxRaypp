@@ -247,6 +247,69 @@ TEST_CASE("TEST 3: Mesh test suite") {
         CHECK(hit_record.surface_params.is_close(Vec2D{0.0f, 1.0f}, 1e-2f));
     }
 
+    SUBCASE("Test Mesh::ray_all_intersections (Deferred Sorting)") {
+        Mesh mesh {
+            Transformation{}, 
+            std::make_shared<Material>(),
+            triangle_points,
+            triangle_normals,
+            texture_uv,
+            triangle_point_indexes,
+            all_nodes
+        };
+        Ray test_ray{Point{1.0001f, 1.0001f, 2.0f}, Vec{0.0f, 0.0f, -1.0f}};
+        auto hits = mesh.ray_all_intersections(test_ray);
+        
+        // The ray pierces the mesh completely, intersecting 2 triangles
+        REQUIRE(hits.size() == 2);
+
+        // Sort locally with respect to t within the test to verify records beside the BVH path
+        std::sort(hits.begin(), hits.end(), [](const directionalHitRecord& a, const directionalHitRecord& b) {
+            return a.t < b.t;
+        });
+
+        // First hit: Identical to ray_intersection
+        CHECK(aux::are_close(hits[0].t, 0.9f, 1e-3f));
+        CHECK(hits[0].hit_point.is_close(Point{1.0001f, 1.0001f, 1.1f}, 1e-3f));
+        CHECK(hits[0].hitted_shape == &mesh);
+
+        // Second hit: The mirrored triangle on the bottom face of the "cube"
+        CHECK(aux::are_close(hits[1].t, 2.9f, 1e-3f));
+        CHECK(hits[1].hit_point.is_close(Point{1.0001f, 1.0001f, -0.9f}, 1e-3f));
+        CHECK(hits[1].hitted_shape == &mesh);
+    }
+
+    SUBCASE("Test Mesh::ray_all_intersections with a Transformation") {
+        Mesh mesh {
+            Scale(Vec{1.0f, 1.0f, 2.0f}), 
+            std::make_shared<Material>(),
+            triangle_points,
+            triangle_normals,
+            texture_uv,
+            triangle_point_indexes,
+            all_nodes
+        };
+        Ray test_ray{Point{1.0001f, 1.0001f, -3.0f}, Vec{0.0f, 0.0f, 1.0f}};
+        auto hits = mesh.ray_all_intersections(test_ray);
+        
+        REQUIRE(hits.size() == 2);
+
+        // Sort locally before running assertions
+        std::sort(hits.begin(), hits.end(), [](const directionalHitRecord& a, const directionalHitRecord& b) {
+            return a.t < b.t;
+        });
+
+        // First hit (Local space inversion: enters from the bottom due to scaling)
+        CHECK(aux::are_close(hits[0].t, 1.2f, 1e-3f));
+        CHECK(hits[0].hit_point.is_close(Point{1.0001f, 1.0001f, -1.8f}, 1e-3f));
+        CHECK(hits[0].hitted_shape == &mesh);
+
+        // Second hit (Exits from the top face of the scaled mesh)
+        CHECK(aux::are_close(hits[1].t, 5.2f, 1e-3f));
+        CHECK(hits[1].hit_point.is_close(Point{1.0001f, 1.0001f, 2.2f}, 1e-3f));
+        CHECK(hits[1].hitted_shape == &mesh);
+    }
+
     SUBCASE("Test Mesh::read_mesh_from_obj(std::istream)") {
         Mesh mesh;
 
