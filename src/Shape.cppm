@@ -81,6 +81,14 @@ bool HitRecord::is_close(const HitRecord& other, float epsilon) const {
            hitted_shape == other.hitted_shape;
 }
 
+/**
+ * @brief It adds to HitRecord the information about the direction of the ray, telling if it's entering or exiting the shape.
+ */
+export struct directionalHitRecord : HitRecord {
+    /// Hit information indicating if the ray is entering the surface of hitted_shape.
+    bool is_entering;
+};
+
 // ======================================================
 // SHAPE STRUCTURE (virtual base class for all shapes)
 // ======================================================
@@ -103,15 +111,21 @@ export struct Shape {
     virtual ~Shape() = default;
 
     /**
-     * @brief Compute the intersection between a ray and the shape.
+     * @brief Compute the closest intersection between a ray and the shape.
      *
      * @param ray Ray to test.
      * @return HitRecord object if a hit occurs, nullptr otherwise.
      */
     virtual std::optional<HitRecord> ray_intersection(const Ray& ray) const = 0; // Pure virtual method to compute ray-shape intersection
-    
-};
 
+    /**
+     * @brief Compute all the valid intersections between a ray and the shape and store in a vector. Ideal to perform CSG.
+     *
+     * @param ray Ray to test.
+     * @return A vector of directionalHitRecord objects 
+     */
+    virtual std::vector<directionalHitRecord> ray_all_intersections(const Ray& ray) const = 0; // Pure virtual method to compute ray-shape intersections    
+};
 
 // ======================================================
 // SPHERE
@@ -125,12 +139,8 @@ export struct Shape {
 export struct Sphere : Shape {
     using Shape::Shape; // Constructor takes in the Shape transformation
 
-    /// Returns a HitRecord in the axis origin frame if the ray intersects the sphere, std::nullopt otherwise
-    std::optional<HitRecord> ray_intersection(const Ray& ray) const { // Override method to compute ray-sphere intersection
-
-        // Transform the ray to the sphere reference frame (where the sphere is a unit sphere centered at the origin)
-        Ray local_ray = ray.transform(trans.inverse());
-
+    /// Supports both ray_intersection and ray_all_intersections in finding t1 and t2 equation roots.
+    std::array<float, 2> _compute_t1_t2(const Ray& local_ray) const {
         Vec O = local_ray.origin.to_vec(); // ray origin is stored as a Vec, so it can be normalized
                                            // (under the carpet the calculation is Point ray_origin - Point axes_origin = Vec ray_origin)
         Vec D = local_ray.direction;
@@ -141,20 +151,30 @@ export struct Sphere : Shape {
         float discriminant = (b_half * b_half) - dir2 * (O.norm2() - 1.0f);
 
         if (discriminant < 0.0f) {
-            return std::nullopt;
+            return std::array<float, 2>{-1.0f, -1.0f}; // Defaulting to negative, meaningless, values
         }
 
         float sqrt_disc = std::sqrt(discriminant);
         float t1 = (-b_half - sqrt_disc) / dir2;
         float t2 = (-b_half + sqrt_disc) / dir2;
+        return std::array<float, 2>{t1, t2};
+    }
+
+    /// Returns a HitRecord in the axis origin frame if the ray intersects the sphere, std::nullopt otherwise
+    [[nodiscard]] std::optional<HitRecord> ray_intersection(const Ray& ray) const { // Override method to compute ray-sphere intersection
+
+        // Transform the ray to the sphere reference frame (where the sphere is a unit sphere centered at the origin)
+        Ray local_ray = ray.transform(trans.inverse());
 
         // Find the closest valid t
         float first_hit_t;
+        std::array<float, 2> t = _compute_t1_t2(local_ray); // Computes equation roots
 
-        if (t1 > local_ray.tmin && t1 < local_ray.tmax) {
-            first_hit_t = t1;
-        } else if (t2 > local_ray.tmin && t2 < local_ray.tmax) {
-            first_hit_t = t2;
+        // First check the t[0] since it's always the lower
+        if (t[0] > local_ray.tmin && t[0] < local_ray.tmax) {
+            first_hit_t = t[0];
+        } else if (t[1] > local_ray.tmin && t[1] < local_ray.tmax) {
+            first_hit_t = t[1];
         } else {
             return std::nullopt; // Both t1 and t2 are out of bounds
         }
@@ -165,7 +185,7 @@ export struct Sphere : Shape {
         // Since the calculations assume to have a unit sphere centered at the origin the coordinates of the point of
         // intersection are exactly the components of the normal to the sphere in that point
         Normal local_normal{local_point.x, local_point.y, local_point.z};
-        if (local_point.to_vec() * D > 0.0f) {
+        if (local_point.to_vec() * local_ray.direction > 0.0f) {
             local_normal = -local_normal;
         }
 
@@ -189,6 +209,56 @@ export struct Sphere : Shape {
         return record;
     }
 
+    /// Returns a vector of directionalHitRecord in the axis origin frame if the ray intersects the sphere, a empty vector otherwise.
+    [[nodiscard]] std::vector<directionalHitRecord> ray_all_intersections(const Ray& ray) const {
+        // Transform the ray to the sphere reference frame (where the sphere is a unit sphere centered at the origin)
+        Ray local_ray = ray.transform(trans.inverse());
+        // vector to be filled of intersections
+        std::vector<directionalHitRecord> intersections;
+
+        // Find valid t values
+        std::array<float, 2> computed_t1_t2 = _compute_t1_t2(local_ray); // Computes equation roots
+
+        // Check if those are suitable
+        for (float t : computed_t1_t2) {
+            if (t > local_ray.tmin && t < local_ray.tmax) {
+                // Local Space Geometry
+                Point local_point = local_ray.at(t);
+
+                // Since the calculations assume to have a unit sphere centered at the origin the coordinates of the point of
+                // intersection are exactly the components of the normal to the sphere in that point
+                Normal local_normal{local_point.x, local_point.y, local_point.z};
+                bool is_entering = true;
+                if (local_point.to_vec() * local_ray.direction > 0.0f) {
+                    local_normal = -local_normal;
+                    is_entering = false;
+                }
+
+                // Compute texture coordinates in local space so that textures follow object transformations.
+                float u = std::atan2(local_point.y, local_point.x) / (2.0f * std::numbers::pi_v<float>);
+                u = (u >= 0.0f) ? u : (u + 1.0f);
+                float v = std::acos(local_point.z) / std::numbers::pi_v<float>;
+
+                // Local Space -> World Space: report the HitRecord in the global space
+                directionalHitRecord record;
+                record.ray = ray;
+                record.t = t;
+                record.hit_point = trans * local_point;
+
+                // Normals are transformed using the inverse transpose transformation.
+                // Renormalize after transformation to account for scaling.
+                record.hit_normal = (trans * local_normal).normalize();
+                record.surface_params = {u, v};
+                record.hitted_shape = this;
+                record.is_entering = is_entering;
+
+                // Update the vector
+                intersections.push_back(record);
+            }
+        }
+        return intersections;
+    }
+
 };
 
 // ==================================
@@ -202,6 +272,7 @@ export struct Plane : Shape {
 
     using Shape::Shape; // Inherits constructors from Shape (allows passing Transformation)
 
+    /// Returns a HitRecord in the axis origin frame if the ray intersects the plane, std::nullopt otherwise
     [[nodiscard]] std::optional<HitRecord> ray_intersection(const Ray& ray) const override {
 
         // Reference frame change: form World to local Shape frame
@@ -222,7 +293,7 @@ export struct Plane : Shape {
 
         // Return geometric information for intersection in global space
         Point local_point = local_ray.at(first_hit_t);
-        HitRecord record;
+        directionalHitRecord record;
         record.ray = ray;
         record.t = first_hit_t;
         record.hit_point = trans * local_point;
@@ -235,6 +306,48 @@ export struct Plane : Shape {
         record.hitted_shape = this;
 
         return record;
+    }
+
+    /// Returns a vector of directionalHitRecord in the axis origin frame if the ray intersects the plane, a empty vector otherwise. Internal part for this shape is choosen to be z<0 in the plane reference frame.
+    [[nodiscard]] std::vector<directionalHitRecord> ray_all_intersections(const Ray& ray) const override {
+
+        // Reference frame change: form World to local Shape frame
+        Ray local_ray = ray.transform(trans.inverse());
+
+        // vector to be returned
+        std::vector<directionalHitRecord> intersection;
+
+        // Control parallelism: if z-component of ray direction is close to zero there is no intersection
+        if (std::abs(local_ray.direction.z) < 1e-5f) {
+            return intersection;
+        }
+
+        // Intersection: O_z + t * d_z = 0  =>  t = -O_z / d_z
+        float t = -local_ray.origin.z / local_ray.direction.z;
+
+        // t limits control
+        if (t < local_ray.tmin || t > local_ray.tmax) {
+            return intersection;
+        }
+
+        // Return geometric information for intersection in global space
+        Point local_point = local_ray.at(t);
+        directionalHitRecord record;
+        record.ray = ray;
+        record.t = t;
+        record.hit_point = trans * local_point;
+        Normal local_normal = (local_ray.direction.z < 0) ? Normal{0.0f, 0.0f, 1.0f} : Normal{0.0f, 0.0f, -1.0f};
+        record.hit_normal = trans * local_normal;
+
+        // Generate repeating texture coordinates from local position
+        record.surface_params.u = local_point.x - std::floor(local_point.x);
+        record.surface_params.v = local_point.y - std::floor(local_point.y);
+        record.hitted_shape = this;
+        record.is_entering = (local_normal.z > 0.0f); // If the ray comes from above the plane, then it's entering
+        
+        intersection.push_back(record);
+
+        return intersection;
     }
 };
 
@@ -250,44 +363,40 @@ export struct Plane : Shape {
 */
 export struct Cube : Shape {
     using Shape::Shape;
+
     [[nodiscard]] std::optional<HitRecord> ray_intersection(const Ray& ray) const override {
 
-        // Transform the ray into the cube's local reference frame.
+        // Transform the ray into the cube's local reference frame
         Ray local_ray = ray.transform(trans.inverse());
 
-        // Ray-box intersection using the slab method.
-        Vec inv_direction = Vec{
-                                1.0f/local_ray.direction.x,
-                                1.0f/local_ray.direction.y,
-                                1.0f/local_ray.direction.z
-                                };
+        // Ray-box intersection using the slab method
+        Vec inv_dir = Vec{
+            1.0f / local_ray.direction.x,
+            1.0f / local_ray.direction.y,
+            1.0f / local_ray.direction.z
+        };
 
-        // left-bottom-behind corner and right-upper-front corner of the canonical cube
-        Vec bounds[2] = {Vec{-1.0f, -1.0f, -1.0f}, Vec{1.0f, 1.0f, 1.0f}};
+        // ---------------------------------------------------------
+        // Slab Method (Branchless)
+        // ---------------------------------------------------------
+        float tx1 = (-1.0f - local_ray.origin.x) * inv_dir.x;
+        float tx2 = ( 1.0f - local_ray.origin.x) * inv_dir.x;
+        float tmin = std::min(tx1, tx2);
+        float tmax = std::max(tx1, tx2);
 
-        // Determine which side of each slab is encountered first.
-        int sign[3];
-        sign[0] = (local_ray.direction.x < 0) ? 1 : 0;
-        sign[1] = (local_ray.direction.y < 0) ? 1 : 0;
-        sign[2] = (local_ray.direction.z < 0) ? 1 : 0;
+        float ty1 = (-1.0f - local_ray.origin.y) * inv_dir.y;
+        float ty2 = ( 1.0f - local_ray.origin.y) * inv_dir.y;
+        tmin = std::max(tmin, std::min(ty1, ty2));
+        tmax = std::min(tmax, std::max(ty1, ty2));
 
-        float tmin = (bounds[sign[0]].x - local_ray.origin.x) * inv_direction.x;
-        float tmax = (bounds[1-sign[0]].x - local_ray.origin.x) * inv_direction.x;
-        float tymin = (bounds[sign[1]].y - local_ray.origin.y) * inv_direction.y;
-        float tymax = (bounds[1-sign[1]].y - local_ray.origin.y) * inv_direction.y;
+        float tz1 = (-1.0f - local_ray.origin.z) * inv_dir.z;
+        float tz2 = ( 1.0f - local_ray.origin.z) * inv_dir.z;
+        tmin = std::max(tmin, std::min(tz1, tz2));
+        tmax = std::min(tmax, std::max(tz1, tz2));
 
-        if (tmin > tymax || tymin > tmax) return std::nullopt;
-        if (tymin > tmin) tmin = tymin;
-        if (tymax < tmax) tmax = tymax;
+        if (tmin > tmax) return std::nullopt;
 
-        float tzmin = (bounds[sign[2]].z - local_ray.origin.z) * inv_direction.z;
-        float tzmax = (bounds[1-sign[2]].z - local_ray.origin.z) * inv_direction.z;
-
-        if (tmin > tzmax || tzmin > tmax) return std::nullopt;
-        if (tzmin > tmin) tmin = tzmin;
-        if (tzmax < tmax) tmax = tzmax;
-
-        // Choose the first valid intersection along the ray.
+        // Choose the first valid intersection along the ray
         float first_hit_t{0.0f};
         if (tmin > local_ray.tmin && tmin < local_ray.tmax) {
             first_hit_t = tmin;
@@ -300,23 +409,10 @@ export struct Cube : Shape {
         Point local_point = local_ray.at(first_hit_t);
         Normal local_normal{0.0f, 0.0f, 0.0f};
 
-        // The dominant coordinate identifies the intersected face.
+        // The dominant coordinate identifies the intersected face
         float abs_x = std::abs(local_point.x);
         float abs_y = std::abs(local_point.y);
         float abs_z = std::abs(local_point.z);
-
-        if (abs_x >= abs_y && abs_x >= abs_z) {
-            local_normal = Normal{(local_point.x > 0.0f) ? 1.0f : -1.0f, 0.0f, 0.0f};
-        } else if (abs_y >= abs_x && abs_y >= abs_z) {
-            local_normal = Normal{0.0f, (local_point.y > 0.0f) ? 1.0f : -1.0f, 0.0f};
-        } else {
-            local_normal = Normal{0.0f, 0.0f, (local_point.z > 0.0f) ? 1.0f : -1.0f};
-        }
-
-        // Flip the normal for rays originating inside the cube.
-        if (local_normal * local_ray.direction > 0.0f) {
-            local_normal = -local_normal;
-        }
 
         /* ---------------------------------------------------------
          * Cube atlas UV mapping
@@ -333,47 +429,57 @@ export struct Cube : Shape {
         // Variables used to position the face in the atlas cross
         float col{0.0f}, row{0.0f};
 
-
         // YZ face (+X or -X)
-        if (std::abs(local_normal.x) > 0.5f) {
-            // Compute local face coordinates with a consistent orientation.
-            raw_u = (local_point.x > 0.0f) ? local_point.y : -local_point.y;
+        if (abs_x >= abs_y && abs_x >= abs_z) {
+            float s = std::copysign(1.0f, local_point.x);
+            local_normal = Normal{s, 0.0f, 0.0f};
+
+            raw_u = local_point.y * s;
             raw_v = local_point.z;
 
-            // Set the position in the cross
             col = 1.0f;
-            row = (local_point.x > 0.0f) ? 0.0f : 2.0f;
+            row = 1.0f - s; // s=1 -> 0.0, s=-1 -> 2.0
         }
         // XZ face (+Y or -Y)
-        else if (std::abs(local_normal.y) > 0.5f) {
-            raw_u = (local_point.y > 0.0f) ? -local_point.x : local_point.x;
+        else if (abs_y >= abs_x && abs_y >= abs_z) {
+            float s = std::copysign(1.0f, local_point.y);
+            local_normal = Normal{0.0f, s, 0.0f};
+
+            raw_u = -local_point.x * s;
             raw_v = local_point.z;
 
-            // Set the position in the cross
-            col = (local_point.y > 0.0f) ? 0.0f : 2.0f;
+            col = 1.0f - s; // s=1 -> 0.0, s=-1 -> 2.0
             row = 2.0f;
         }
         // XY face (+Z or -Z)
-        else if (std::abs(local_normal.z) > 0.5f) {
-            // Top (+Z) and bottom (-Z) faces.
-            //
-            // UV coordinates are chosen so that neighbouring faces share a consistent orientation when
-            // unfolded into the cube-map cross atlas.
-            raw_u = -local_point.y;
-            raw_v = (local_point.z > 0.0f) ? local_point.x : -local_point.x;
+        else {
+            float s = std::copysign(1.0f, local_point.z);
+            local_normal = Normal{0.0f, 0.0f, s};
 
-            // Set the position in the cross
+            raw_u = -local_point.y;
+            raw_v = local_point.x * s;
+
             col = 1.0f;
-            row = (local_point.z > 0.0f) ? 3.0f : 1.0f;
+            row = 2.0f + s; // s=1 -> 3.0, s=-1 -> 1.0
         }
+
+        // Branchless normal flip based on ray direction
+        float dot = local_normal * local_ray.direction;
+        float flip = -std::copysign(1.0f, dot);
+
+        local_normal = Normal{
+            local_normal.x * flip, 
+            local_normal.y * flip, 
+            local_normal.z * flip
+        };
 
         // Convert the local coordinates from [-1, 1] range to standard UV [0, 1] range
         u_local = (raw_u + 1.0f) * 0.5f;
         v_local = (raw_v + 1.0f) * 0.5f;
 
-        u = (col + u_local)/3.0f;
-        v = (row + v_local)/4.0f;
-
+        // Multiply by reciprocal instead of dividing (faster)
+        u = (col + u_local) * 0.3333333f; 
+        v = (row + v_local) * 0.25f;      
 
         // Geometric information on the intersection point in global space
         HitRecord record;
@@ -386,6 +492,141 @@ export struct Cube : Shape {
         record.hitted_shape = this;
 
         return record;
+    }
+
+    [[nodiscard]] std::vector<directionalHitRecord> ray_all_intersections(const Ray& ray) const override {
+        std::vector<directionalHitRecord> intersections;
+
+        // Transform the ray into the cube's local reference frame
+        Ray local_ray = ray.transform(trans.inverse());
+
+        // Ray-box intersection using the slab method
+        Vec inv_dir = Vec{
+            1.0f / local_ray.direction.x,
+            1.0f / local_ray.direction.y,
+            1.0f / local_ray.direction.z
+        };
+
+        // ---------------------------------------------------------
+        // Slab Method (Branchless)
+        // ---------------------------------------------------------
+        float tx1 = (-1.0f - local_ray.origin.x) * inv_dir.x;
+        float tx2 = ( 1.0f - local_ray.origin.x) * inv_dir.x;
+        float tmin = std::min(tx1, tx2);
+        float tmax = std::max(tx1, tx2);
+
+        float ty1 = (-1.0f - local_ray.origin.y) * inv_dir.y;
+        float ty2 = ( 1.0f - local_ray.origin.y) * inv_dir.y;
+        tmin = std::max(tmin, std::min(ty1, ty2));
+        tmax = std::min(tmax, std::max(ty1, ty2));
+
+        float tz1 = (-1.0f - local_ray.origin.z) * inv_dir.z;
+        float tz2 = ( 1.0f - local_ray.origin.z) * inv_dir.z;
+        tmin = std::max(tmin, std::min(tz1, tz2));
+        tmax = std::min(tmax, std::max(tz1, tz2));
+
+        if (tmin > tmax) return intersections;
+
+        // Evaluate both potential hits (entry and exit)
+        std::array<float, 2> candidates = {tmin, tmax};
+
+        // Iteration on potential hits
+        for (float t_curr : candidates) {
+            // Check if the current t is within the valid bounds of the ray
+            if (t_curr > local_ray.tmin && t_curr < local_ray.tmax) {
+                
+                Point local_point = local_ray.at(t_curr);
+                Normal local_normal{0.0f, 0.0f, 0.0f};
+
+                // The dominant coordinate identifies the intersected face
+                float abs_x = std::abs(local_point.x);
+                float abs_y = std::abs(local_point.y);
+                float abs_z = std::abs(local_point.z);
+
+                /* ---------------------------------------------------------
+                 * Cube atlas UV mapping
+                 * The hit point is first converted into local coordinates
+                 * on the intersected face. The six faces are then arranged
+                 * into a cross-shaped texture atlas.
+                 ---------------------------------------------------------- */
+                // Coordinates on the single face of the cube
+                float u_local{0.0f}, v_local{0.0f};
+                // Coordinates in the Atlas representation
+                float u{0.0f}, v{0.0f};
+                // Auxiliary variables for the raw coordinates
+                float raw_u{0.0f}, raw_v{0.0f};
+                // Variables used to position the face in the atlas cross
+                float col{0.0f}, row{0.0f};
+
+                // YZ face (+X or -X)
+                if (abs_x >= abs_y && abs_x >= abs_z) {
+                    float s = std::copysign(1.0f, local_point.x);
+                    local_normal = Normal{s, 0.0f, 0.0f};
+
+                    raw_u = local_point.y * s;
+                    raw_v = local_point.z;
+
+                    col = 1.0f;
+                    row = 1.0f - s;
+                }
+                // XZ face (+Y or -Y)
+                else if (abs_y >= abs_x && abs_y >= abs_z) {
+                    float s = std::copysign(1.0f, local_point.y);
+                    local_normal = Normal{0.0f, s, 0.0f};
+
+                    raw_u = -local_point.x * s;
+                    raw_v = local_point.z;
+
+                    col = 1.0f - s;
+                    row = 2.0f;
+                }
+                // XY face (+Z or -Z)
+                else {
+                    float s = std::copysign(1.0f, local_point.z);
+                    local_normal = Normal{0.0f, 0.0f, s};
+
+                    raw_u = -local_point.y;
+                    raw_v = local_point.x * s;
+
+                    col = 1.0f;
+                    row = 2.0f + s;
+                }
+
+                // Determine entry/exit state based on the initial geometric dot product
+                float dot = local_normal * local_ray.direction;
+                bool is_entering = (dot < 0.0f);
+
+                // Branchless normal flip based on ray direction
+                float flip = -std::copysign(1.0f, dot);
+                local_normal = Normal{
+                    local_normal.x * flip, 
+                    local_normal.y * flip, 
+                    local_normal.z * flip
+                };
+
+                // Convert the local coordinates from [-1, 1] range to standard UV [0, 1] range
+                u_local = (raw_u + 1.0f) * 0.5f;
+                v_local = (raw_v + 1.0f) * 0.5f;
+
+                // Multiply by reciprocal instead of dividing (faster)
+                u = (col + u_local) * 0.3333333f; 
+                v = (row + v_local) * 0.25f;      
+
+                // Geometric information on the intersection point in global space
+                directionalHitRecord record;
+                record.ray = ray;
+                record.t = t_curr;
+                record.hit_point = trans * local_point;
+                record.hit_normal = (trans * local_normal).normalize();
+                record.surface_params.u = u;
+                record.surface_params.v = v;
+                record.hitted_shape = this;
+                record.is_entering = is_entering;
+
+                intersections.push_back(record);
+            }
+        }
+        return intersections;
     }
 };
 

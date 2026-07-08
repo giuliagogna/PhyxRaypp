@@ -844,6 +844,129 @@ export struct Mesh : Shape {
         }
     }
 
+    /**
+     * @brief Recursively traverses the BVH to find ALL ray-triangle intersections.
+     *
+     * Unlike the standard intersection method, this traversal does NOT shrink 
+     * local_ray.tmax. It must explore every node intersected by the ray.
+     */
+    void ray_all_intersections_unwrapped(
+        const Ray& local_ray, // Passed as const! We do NOT shrink tmax here.
+        int starting_index,
+        std::vector<directionalHitRecord>& hits_collection) const {
+
+        // If the ray misses this box, skip it
+        if (!nodes[starting_index].bounds.intersect(local_ray)) {
+            return; 
+        }
+
+        // If the node is a leaf check the intersection of the ray with the triangles in the node
+        if (nodes[starting_index].is_leaf) {
+            int minIndex = nodes[starting_index].minIndex;
+            int maxIndex = nodes[starting_index].maxIndex;
+
+            // Loop on the triangles
+            for (int i = minIndex; i < maxIndex; ++i) {
+
+                const auto& tri = triangle_points_indexes[i];
+
+                const auto& A = mesh_points[tri.v1];
+                const auto& B = mesh_points[tri.v2];
+                const auto& C = mesh_points[tri.v3];
+
+                // Ray-triangle intersection test (Möller–Trumbore algorithm)
+                Vec E1 = B - A;
+                Vec E2 = C - A;
+
+                Vec P = local_ray.direction % E2;
+                Vec T = local_ray.origin - A;
+                Vec Q = T % E1;
+
+                float det = E1 * P;
+                if (std::abs(det) < 1e-6f) {
+                    continue;
+                }
+
+                float inv_det = 1.0f / det;
+
+                // Calculate the barycentric coordinates alpha, beta, gamma
+                float beta = (T * P) * inv_det;
+                float gamma = (Q * local_ray.direction) * inv_det;
+                float alpha = 1.0f - beta - gamma;
+
+                float t = (Q * E2) * inv_det;
+
+                // Notice we still check against local_ray.tmin and local_ray.tmax, 
+                // but those bounds remain constant throughout the traversal.
+                if (beta >= 0.0f && gamma >= 0.0f && alpha > 0.0f && alpha <= 1.0f && t >= local_ray.tmin && t <= local_ray.tmax) {
+
+                    auto& nA = mesh_normals[tri.vn1];
+                    auto& nB = mesh_normals[tri.vn2];
+                    auto& nC = mesh_normals[tri.vn3];
+                    auto& tA = mesh_texture_uvs[tri.vt1];
+                    auto& tB = mesh_texture_uvs[tri.vt2];
+                    auto& tC = mesh_texture_uvs[tri.vt3];
+
+                    Vec interpolated_normal = (nA * alpha + nB * beta + nC * gamma);
+
+                    // Entry/Exit evaluation based on the true geometric normal
+                    float dot = interpolated_normal * local_ray.direction;
+                    bool is_entering = (dot < 0.0f);
+
+                    // Branchless normal flip
+                    float flip = -std::copysign(1.0f, dot);
+
+                    directionalHitRecord hit;
+                    hit.t = t;
+                    hit.hit_normal = (interpolated_normal * flip).to_norm();
+                    hit.surface_params = {
+                        alpha * tA.u + beta * tB.u + gamma * tC.u,
+                        alpha * tA.v + beta * tB.v + gamma * tC.v
+                    };
+                    hit.hitted_shape = this;
+                    hit.is_entering = is_entering;
+
+                    // Accumulate the intersection without shrinking the ray
+                    hits_collection.push_back(hit);
+                }
+            }
+        } else { 
+            // If the current node is not a leaf, call the method recursively on the children
+            // We must visit BOTH children if their AABB was hit (checked at the start of the call)
+            ray_all_intersections_unwrapped(local_ray, nodes[starting_index].left_child_index, hits_collection);
+            ray_all_intersections_unwrapped(local_ray, nodes[starting_index].right_child_index, hits_collection);
+        }
+    }
+
+    /**
+     * @brief Interface entry point for finding all ray-mesh intersections.
+     *
+     * Similar to ray_intersection, but collects every valid intersection along the ray
+     * without shrinking the ray's tmax. The final hits are transformed back to world
+     * space.
+     */
+    [[nodiscard]] std::vector<directionalHitRecord> ray_all_intersections(const Ray& ray) const override {
+        // vector to be filled of intersections
+        std::vector<directionalHitRecord> intersections;
+
+        // Transform the ray in the reference frame of the mesh
+        Ray local_ray = ray.transform(trans.inverse());
+
+        // Start recursion flow with transformed ray. 
+        // Pass the vector by reference to collect all hits.
+        ray_all_intersections_unwrapped(local_ray, 0, intersections);
+
+        // Transform everything back to world coordinates
+        for (auto& record : intersections) {
+            record.ray = ray;
+            record.hit_point = ray.at(record.t); 
+            record.hit_normal = (trans * record.hit_normal).normalize();
+        }
+
+        return intersections;
+    }
+
+
 
     // -------------------------------------------------------
     // READING UTILITIES
