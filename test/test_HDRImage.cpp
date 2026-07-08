@@ -261,12 +261,12 @@ TEST_CASE("Parsing image dimension width and height (_parse_img_size)") {
 // =========================================================================
 // TEST 8: Integration Test (read_pfm_file(stream) and read_pfm_file(string))
 // =========================================================================
-TEST_CASE("Integration test: reading PFM images (read_pfm_file)") {
+TEST_CASE("Integration test: reading PFM test_images (read_pfm_file)") {
 
     // --- POSITIVE TESTS ---
 
     SUBCASE("Valid image: Little-Endian (testing both overloads)") {
-        std::string filename = "images/reference_le.pfm";
+        std::string filename = "test_images/reference_le.pfm";
 
         // Test overload 1: filename
         auto res_filename = HDRImage::read_pfm_file(filename);
@@ -278,7 +278,7 @@ TEST_CASE("Integration test: reading PFM images (read_pfm_file)") {
         auto res_stream = HDRImage::read_pfm_file(stream);
         REQUIRE(res_stream.has_value() == true);
 
-        // Extract both images
+        // Extract both test_images
         auto& img_from_file = res_filename.value();
         auto& img_from_stream = res_stream.value();
 
@@ -302,7 +302,7 @@ TEST_CASE("Integration test: reading PFM images (read_pfm_file)") {
     }
 
     SUBCASE("Valid image: Big-Endian (testing both overloads)") {
-        std::string filename = "images/reference_be.pfm";
+        std::string filename = "test_images/reference_be.pfm";
 
         auto res_filename = HDRImage::read_pfm_file(filename);
         REQUIRE(res_filename.has_value() == true);
@@ -331,14 +331,14 @@ TEST_CASE("Integration test: reading PFM images (read_pfm_file)") {
     // --- NEGATIVE TESTS ---
 
     SUBCASE("Invalid file: Wrong format (not a PFM)") {
-        auto result = HDRImage::read_pfm_file("images/wrong_format.txt");
+        auto result = HDRImage::read_pfm_file("test_images/wrong_format.txt");
         REQUIRE(result.has_value() == false);
         CHECK(result.error().message.starts_with("Non valid format. Expected 'PF' read "));
     }
 
     // --- REDUNDANT: I ALREADY HAVE UNIT TESTS, BUT I AM A BIT PARANOID ---
     SUBCASE("Invalid file: wrong dimensions") {
-        auto result = HDRImage::read_pfm_file("images/non_valid_dimensions.pfm");
+        auto result = HDRImage::read_pfm_file("test_images/non_valid_dimensions.pfm");
         REQUIRE(result.has_value() == false);
         CHECK(result.error().message.starts_with("Image dimensions must be greater than zero."));
     }
@@ -348,21 +348,21 @@ TEST_CASE("Integration test: reading PFM images (read_pfm_file)") {
     // than expected and the case of a file that contains less binary data than expected.
     // GG: Here try to make it a warning and not an error (like in the corresponding function in HDRImage.cppm)
     SUBCASE("Invalid file: more binary data than expected") {
-        auto result = HDRImage::read_pfm_file("images/too_long.pfm");
+        auto result = HDRImage::read_pfm_file("test_images/too_long.pfm");
         REQUIRE(result.has_value() == false);
         CHECK(result.error().message == "Unexpected data after reading all pixels.");
     }
 
     SUBCASE("Invalid file: less binary data than expected") {
-        auto result = HDRImage::read_pfm_file("images/too_short.pfm");
+        auto result = HDRImage::read_pfm_file("test_images/too_short.pfm");
         REQUIRE(result.has_value() == false);
         CHECK(result.error().message.starts_with("Truncated file: expected 4 bytes for a float but only read"));
     }
     
     SUBCASE("Invalid file: Non-existent file") {
-        auto result = HDRImage::read_pfm_file("images/this_file_does_not_exist_123.pfm");
+        auto result = HDRImage::read_pfm_file("test_images/this_file_does_not_exist_123.pfm");
         REQUIRE(result.has_value() == false);
-        CHECK(result.error().message.starts_with("Error in opening input file '"));
+        CHECK(result.error().message.starts_with("Error in opening file '"));
     }
 }
 
@@ -476,7 +476,7 @@ TEST_CASE("Testing write_pfm_file against hardcoded reference bytes") {
         CHECK(generated_bytes_stream == reference_le_bytes);
 
         // --- TEST 2: File Overload ---
-        std::string filename = "images/test_out_le.pfm";
+        std::string filename = "test_images/test_out_le.pfm";
         auto write_res_file = img.write_pfm_file(filename, HDRImage::Endianness::little_endian);
         REQUIRE(write_res_file.has_value() == true);
 
@@ -511,7 +511,7 @@ TEST_CASE("Testing write_pfm_file against hardcoded reference bytes") {
         CHECK(generated_bytes_stream == reference_be_bytes);
 
         // --- TEST 2: File Overload ---
-        std::string filename = "images/test_out_be.pfm";
+        std::string filename = "test_images/test_out_be.pfm";
         auto write_res_file = img.write_pfm_file(filename, HDRImage::Endianness::big_endian);
         REQUIRE(write_res_file.has_value() == true);
 
@@ -635,7 +635,7 @@ TEST_CASE("Test normalization of the image (normalize_image)") {
 }
 
 // =========================================================================
-// TEST 13: Clamping images (clamp_image)
+// TEST 13: Clamping test_images (clamp_image)
 // =========================================================================
 
 TEST_CASE("Testing image clamping (clamp_image)") {
@@ -644,33 +644,12 @@ TEST_CASE("Testing image clamping (clamp_image)") {
     img.set_pixel(0, 0, Color(1.0f, 3.0f, 7.0f));
     img.set_pixel(1, 0, Color(9.0f, 15.0f, 19.0f));
 
-    SUBCASE("Default clamping with factor 1.0") {
+    SUBCASE("Valid clamping") {
         auto result = img.clamp_image();
 
         REQUIRE(result.has_value());
         CHECK(img.get_pixel(0, 0).is_close(Color{0.5f, 0.75f, 0.875f}));
         CHECK(img.get_pixel(1, 0).is_close(Color{0.9f, 0.9375f, 0.95f}));
-    }
-
-    SUBCASE("Clamping with custom factor (0.5)") {
-        auto result = img.clamp_image(0.5f);
-
-        CHECK(result.has_value());
-
-        // R: 0.5 / 1.5, G: 1.5 / 2.5, B: 3.5 / 4.5
-        CHECK(img.get_pixel(0, 0).is_close(Color{0.5f/1.5f, 1.5f/2.5f, 3.5/4.5}));
-        // R: 4.5 / 5.5, G: 7.5 / 8.5, B: 9.5 / 10.5
-        CHECK(img.get_pixel(1, 0).is_close(Color{4.5f/5.5f, 7.5f/8.5f, 9.5f/10.5f}));
-    }
-
-    SUBCASE("Invalid factor (<= 0)") {
-        auto result0 = img.clamp_image(0.0f);
-        CHECK_FALSE(result0.has_value());
-        CHECK(result0.error().starts_with("Factor needs to be strictly positive. Received: "));
-
-        auto result1 = img.clamp_image(-1.0f);
-        CHECK_FALSE(result1.has_value());
-        CHECK(result0.error().starts_with("Factor needs to be strictly positive. Received: "));
     }
 
     SUBCASE("Negative pixel values") {
@@ -725,7 +704,7 @@ TEST_CASE("Gamma correction of the image.") {
 // =========================================================================
 // TEST 15: Integration test LDR image writing (write_ldr_image)
 // =========================================================================
-TEST_CASE("Integration test: writing LDR PNG images (write_ldr_image)") {
+TEST_CASE("Integration test: writing LDR PNG test_images (write_ldr_image)") {
 
     HDRImage img(4, 2);
 

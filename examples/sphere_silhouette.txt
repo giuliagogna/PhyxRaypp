@@ -1,0 +1,20 @@
+# A silhouette of 10 spheres seen in perspective
+
+# Material with diffusive brdf and uniform pigment white, with emitted radiance default to black
+material solid_material(diffuse(uniform(<1.0, 1.0, 1.0>)));
+
+# 8 Spheres on the vertices of a cube, each with a different color
+sphere(translation([0.5, 0.5, 0.5]) * scaling([0.1, 0.1, 0.1]), solid_material);
+sphere(translation([0.5, 0.5, -0.5]) * scaling([0.1, 0.1, 0.1]), solid_material);
+sphere(translation([0.5, -0.5, 0.5]) * scaling([0.1, 0.1, 0.1]), solid_material);
+sphere(translation([0.5, -0.5, -0.5]) * scaling([0.1, 0.1, 0.1]), solid_material);
+sphere(translation([-0.5, 0.5, 0.5]) * scaling([0.1, 0.1, 0.1]), solid_material);
+sphere(translation([-0.5, 0.5, -0.5]) * scaling([0.1, 0.1, 0.1]), solid_material);
+sphere(translation([-0.5, -0.5, 0.5]) * scaling([0.1, 0.1, 0.1]), solid_material);
+sphere(translation([-0.5, -0.5, -0.5]) * scaling([0.1, 0.1, 0.1]), solid_material);
+
+# 2 Spheres on the left and bottom faces
+sphere(translation([0.0, 0.5, 0.0]) * scaling([0.1, 0.1, 0.1]), solid_material);
+sphere(translation([0.0, 0.0, -0.5]) * scaling([0.1, 0.1, 0.1]), solid_material);
+
+camera(perspective, 1.0, 3.0);

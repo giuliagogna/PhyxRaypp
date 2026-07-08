@@ -1,0 +1,18 @@
+# An image of a teapot from mesh
+
+# Pre-computed rotation variable
+float pi_over_2 = 1.5707963;
+
+# Background sky color
+background(<0.01, 0.01, 1.0>);
+
+camera(perspective, 1.0, 3.0, rot_z(1.0) * rot_y(0.5) * translation([-10.0, 0.0, 2.0]));
+
+# Checkered material for the pot
+material teapot_mat(diffuse(checkered(<1.0, 1.0, 1.0>, <0.0, 0.0, 0.0>, 3)));
+
+# The Teapot
+mesh("mesh/utah_teapot.obj", teapot_mat, identity);
+
+# Execution command (to put in README)
+# xmake run PhyxRadpp render examples/utah_teapot.txt 1.0 1.0 generated_images/utah_teapot.png --algorithm flat

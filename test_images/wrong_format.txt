@@ -1,0 +1,4 @@
+HELLO KITTY
+10 45
+1
+<binary data>

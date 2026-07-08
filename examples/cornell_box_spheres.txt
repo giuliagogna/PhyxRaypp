@@ -1,0 +1,33 @@
+# Pre-computed variables for rotations
+float pi_over_2 = 1.5707963;
+
+background(<0.5, 0.7, 1.0>);
+camera(perspective, 1.0, 3.0);
+
+# Material Definitions
+material floor_mat(diffuse(uniform(<0.8, 0.8, 0.8>)));
+material left_wall_mat(diffuse(uniform(<0.8, 0.0, 0.0>)));
+material right_wall_mat(diffuse(uniform(<0.0, 0.8, 0.0>)));
+material blue_mat(diffuse(uniform(<0.0, 0.0, 1.0>)));
+material pink_mat(diffuse(uniform(<1.0, 0.0, 1.0>)));
+material mirror_mat(specular(uniform(<0.6, 0.6, 0.6>)));
+
+# The lamp uses the explicit emission parameter
+material lamp_mat(diffuse(uniform(<1.0, 1.0, 1.0>)), uniform(<1.0, 1.0, 1.0>));
+
+# The Box
+plane(translation([0.0, 0.0, -2.0]) * rot_z(pi_over_2), floor_mat);
+plane(translation([0.0, -2.0, 0.0]) * rot_x(pi_over_2), left_wall_mat);
+plane(translation([0.0, 2.0, 0.0]) * rot_x(pi_over_2), right_wall_mat);
+plane(translation([6.0, 0.0, 0.0]) * rot_y(pi_over_2), floor_mat);
+plane(translation([-4.0, 0.0, 0.0]) * rot_y(pi_over_2), floor_mat);
+plane(translation([0.0, 0.0, 2.0]), floor_mat);
+
+# The Objects
+sphere(translation([2.0, 0.0, 2.0]) * scaling([0.5, 0.5, 0.5]), lamp_mat);
+sphere(translation([4.0, -1.0, -1.6]) * scaling([0.4, 0.4, 0.4]), blue_mat);
+sphere(translation([4.0, 1.0, -1.6]) * scaling([0.4, 0.4, 0.4]), pink_mat);
+sphere(translation([6.0, 0.0, 0.0]) * scaling([0.8, 0.8, 0.8]), mirror_mat);
+
+# Command to render
+# xmake run PhyxRadpp render examples/cornell_box_spheres.txt 1.0 1.0 generated_images/cornell_box_spheres.png --algorithm pathtracing --antialiasing 10 --dimensions 800 800 --pathtracer_params 4 4 3

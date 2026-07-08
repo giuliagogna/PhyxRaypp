@@ -7,6 +7,7 @@ set_policy("build.c++.modules", true)
 -- Ask xmake to automatically download doctest and stb if they are not already present
 add_requires("doctest")
 add_requires("stb")
+add_requires("tbb")
 
 -- Variable to hold the found path so we only search ONCE
 local linux_std_path = nil
@@ -82,6 +83,7 @@ target("PhyxRadpp")
 
     -- FIX 1: The main target needs the stb package to link properly
     add_packages("stb")
+    add_packages("tbb")
 
     if is_plat("linux") then
         add_linux_std_module()
@@ -104,10 +106,10 @@ for _, file in ipairs(os.files("test/test_*.cpp")) do
     target(name)
         set_kind("binary")
         set_default(false)
-        set_rundir("$(projectdir)") 
+        set_rundir("$(projectdir)")
 
         -- Ensure the target uses the doctest and stb packages
-        add_packages("doctest", "stb")
+        add_packages("doctest", "stb", "tbb")
 
         if is_plat("linux") then
             add_linux_std_module()
