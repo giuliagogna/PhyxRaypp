@@ -28,6 +28,7 @@ import Shape;
 import Material;
 import Camera;
 import Mesh;
+import CSG;
 import auxiliary_functions;
 
 TEST_CASE("Test InputStream") {
@@ -895,7 +896,7 @@ TEST_CASE("Test Parser: Parse functions") {
         auto dummy_brdf = std::make_shared<DiffusiveBRDF>(std::make_shared<UniformPigment>(Color{1.0f,1.0f,1.0f}));
         scene.materials["mesh_mat"] = std::make_shared<Material>(dummy_brdf);
 
-        std::string test_obj = "dummy_test_mesh.obj";
+        std::string test_obj = "./mesh/dummy_test_mesh.obj";
         {
             std::ofstream out(test_obj);
             out << "v 0 0 0\nv 1 0 0\nv 0 1 0\n";
@@ -933,32 +934,120 @@ TEST_CASE("Test Parser: Parse functions") {
             REQUIRE(res.has_value());
             REQUIRE(dynamic_cast<Mesh*>(res.value().get()) != nullptr);
         }
+    }
 
-        // ==========================================
-        // Negative Tests
-        // ==========================================
+    // =======================================================================
+    // CSG PARSING TESTS
+    // =======================================================================
+    SUBCASE("parse_csg_*()") {
+        auto dummy_brdf = std::make_shared<DiffusiveBRDF>(std::make_shared<UniformPigment>(Color{1.0f, 1.0f, 1.0f}));
+        scene.materials["csg_mat"] = std::make_shared<Material>(dummy_brdf);
 
-        SUBCASE("Negative: Missing File") {
-            std::istringstream string_stream("(\"this_file_does_not_exist.obj\", mesh_mat, identity)");
+        SUBCASE("CSG Union - Valid primitive shapes") {
+            // Inizia con '(' perché 'csg_union' è già stato consumato prima di chiamare parse_csg_union
+            std::istringstream string_stream("(sphere(identity, csg_mat), cube(identity, csg_mat))");
             InputStream stream(string_stream);
 
-            auto res = parse_mesh(stream, scene);
-            REQUIRE_FALSE(res.has_value());
-            CHECK(res.error().message.find("Error in opening") != std::string::npos);
+            auto res = parse_csg_union(stream, scene);
+            REQUIRE(res.has_value());
+
+            auto* csg_node = dynamic_cast<CSG*>(res.value().get());
+            REQUIRE(csg_node != nullptr);
+
+            CHECK(csg_node->operation == CSGOperations::Union);
+            REQUIRE(csg_node->left != nullptr);
+            REQUIRE(csg_node->right != nullptr);
+            CHECK(dynamic_cast<Sphere*>(csg_node->left.get()) != nullptr);
+            CHECK(dynamic_cast<Cube*>(csg_node->right.get()) != nullptr);
         }
 
-        SUBCASE("Negative: Bad Optional Syntax") {
-            // User typed a comma but forgot the number
-            std::istringstream string_stream(std::format("(\"{}\", mesh_mat, identity, )", test_obj));
+        SUBCASE("CSG Intersection - Valid primitive shapes") {
+            std::istringstream string_stream("(sphere(identity, csg_mat), plane(identity, csg_mat))");
             InputStream stream(string_stream);
 
-            auto res = parse_mesh(stream, scene);
-            REQUIRE_FALSE(res.has_value());
-            // Since there is no number, expect_number will throw its standard error
-            CHECK(res.error().message.find("Expected a literal number") != std::string::npos);
+            auto res = parse_csg_intersection(stream, scene);
+            REQUIRE(res.has_value());
+
+            auto* csg_node = dynamic_cast<CSG*>(res.value().get());
+            REQUIRE(csg_node != nullptr);
+
+            CHECK(csg_node->operation == CSGOperations::Intersection);
+            REQUIRE(csg_node->left != nullptr);
+            REQUIRE(csg_node->right != nullptr);
+            CHECK(dynamic_cast<Sphere*>(csg_node->left.get()) != nullptr);
+            CHECK(dynamic_cast<Plane*>(csg_node->right.get()) != nullptr);
         }
 
-        std::filesystem::remove("dummy_test_mesh.obj");
+        SUBCASE("CSG Difference - Valid primitive shapes") {
+            std::istringstream string_stream("(cube(identity, csg_mat), sphere(identity, csg_mat))");
+            InputStream stream(string_stream);
+
+            auto res = parse_csg_difference(stream, scene);
+            REQUIRE(res.has_value());
+
+            auto* csg_node = dynamic_cast<CSG*>(res.value().get());
+            REQUIRE(csg_node != nullptr);
+
+            CHECK(csg_node->operation == CSGOperations::Difference);
+            REQUIRE(csg_node->left != nullptr);
+            REQUIRE(csg_node->right != nullptr);
+            CHECK(dynamic_cast<Cube*>(csg_node->left.get()) != nullptr);
+            CHECK(dynamic_cast<Sphere*>(csg_node->right.get()) != nullptr);
+        }
+
+        SUBCASE("Nested CSG shapes (CSG Union inside CSG Difference)") {
+            // L'operazione esterna csg_difference è omessa (inizia con '('), 
+            // ma la CSG interna 'csg_union' va specificata perché è un figlio
+            std::istringstream string_stream(R"(
+                (
+                    csg_union(
+                        sphere(identity, csg_mat),
+                        cube(identity, csg_mat)
+                    ),
+                    sphere(translation([0.5, 0.0, 0.0]), csg_mat)
+                )
+            )");
+            InputStream stream(string_stream);
+
+            auto res = parse_csg_difference(stream, scene);
+            REQUIRE(res.has_value());
+
+            auto* outer_diff = dynamic_cast<CSG*>(res.value().get());
+            REQUIRE(outer_diff != nullptr);
+            CHECK(outer_diff->operation == CSGOperations::Difference);
+
+            auto* inner_union = dynamic_cast<CSG*>(outer_diff->left.get());
+            REQUIRE(inner_union != nullptr);
+            CHECK(inner_union->operation == CSGOperations::Union);
+            CHECK(dynamic_cast<Sphere*>(inner_union->left.get()) != nullptr);
+            CHECK(dynamic_cast<Cube*>(inner_union->right.get()) != nullptr);
+
+            CHECK(dynamic_cast<Sphere*>(outer_diff->right.get()) != nullptr);
+        }
+
+        // ==========================================
+        // Negative Tests for CSG
+        // ==========================================
+
+        SUBCASE("Negative: Missing comma between children") {
+            std::istringstream string_stream("(sphere(identity, csg_mat) cube(identity, csg_mat))");
+            InputStream stream(string_stream);
+
+            auto res = parse_csg_union(stream, scene);
+            REQUIRE_FALSE(res.has_value());
+            CHECK(res.error().message.find("Expected symbol ','") != std::string::npos);
+        }
+
+        SUBCASE("Negative: Missing closing bracket") {
+            std::istringstream string_stream("(sphere(identity, csg_mat), cube(identity, csg_mat)");
+            InputStream stream(string_stream);
+
+            auto res = parse_csg_union(stream, scene);
+            REQUIRE_FALSE(res.has_value());
+
+            // ✅ Cerca la stringa esatta restituita dal tuo ramo else in parse_csg_operation:
+            CHECK(res.error().message.find("Expected ',' or ')'") != std::string::npos);
+        }
     }
 }
 
@@ -1052,6 +1141,36 @@ TEST_CASE("Integration: parse_scene() from external files") {
         auto* persp_cam = dynamic_cast<PerspectiveCamera*>(scene.camera.get());
         REQUIRE(persp_cam != nullptr);
 
+    }
+
+    SUBCASE("Valid scene: CSG shapes and Cube") {
+        std::istringstream stream(R"(
+            material red_mat(
+                diffuse(uniform(<1.0, 0.0, 0.0>)),
+                uniform(<0.0, 0.0, 0.0>)
+            );
+
+            material blue_mat(
+                diffuse(uniform(<0.0, 0.0, 1.0>)),
+                uniform(<0.0, 0.0, 0.0>)
+            );
+
+            csg_difference(
+                sphere(translation([0.0, 0.0, 0.0]), red_mat),
+                cube(scaling([0.8, 0.8, 0.8]), blue_mat),
+                identity
+            );
+        )");
+        InputStream input_stream(stream);
+
+        auto scene_res = parse_scene(input_stream);
+        REQUIRE(scene_res.has_value());
+        Scene scene = std::move(scene_res.value());
+
+        REQUIRE(scene.world.shapes.size() == 1);
+        auto* csg_shape = dynamic_cast<CSG*>(scene.world.shapes[0].get());
+        REQUIRE(csg_shape != nullptr);
+        CHECK(csg_shape->operation == CSGOperations::Difference);
     }
 
     SUBCASE("Valid scene: Command-line variable overrides") {

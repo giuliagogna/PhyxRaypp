@@ -38,6 +38,7 @@ import Camera;
 import Geometry;
 import HDRImage;
 import Mesh;
+import CSG;
 import auxiliary_functions;
 
 /// A string view containing all single-character symbols recognized by the language lexer.
@@ -61,12 +62,17 @@ export struct SourceLocation {
 /// Enumeration of all reserved keywords in the scene language.
 export enum class KeywordEnum {
     NEW,
-    // Shapes
     MATERIAL,
+
+    // Shapes
     PLANE,
     SPHERE,
     CUBE,
     MESH,
+    // CSG Shapes
+    CSG_UNION,
+    CSG_INTERSECTION,
+    CSG_DIFFERENCE,
 
     // BRDFs
     DIFFUSE,
@@ -98,11 +104,14 @@ export enum class KeywordEnum {
 /// Maps textual keywords appearing in a scene file to their corresponding KeywordEnum values.
 export const std::unordered_map<std::string, KeywordEnum> KEYWORDS{
     {"new", KeywordEnum::NEW},
-    {"material", KeywordEnum:: MATERIAL},
-    {"plane", KeywordEnum:: PLANE},
+    {"material", KeywordEnum::MATERIAL},
+    {"plane", KeywordEnum::PLANE},
     {"sphere", KeywordEnum::SPHERE},
     {"cube", KeywordEnum::CUBE},
     {"mesh", KeywordEnum::MESH},
+    {"csg_union", KeywordEnum::CSG_UNION},
+    {"csg_intersection", KeywordEnum::CSG_INTERSECTION},
+    {"csg_difference", KeywordEnum::CSG_DIFFERENCE},
     {"diffuse", KeywordEnum::DIFFUSE},
     {"specular", KeywordEnum::SPECULAR},
     {"uniform", KeywordEnum::UNIFORM},
@@ -1633,21 +1642,119 @@ export {
     }
 
 
+    // =========================================================================
+    // CSG PARSING FUNCTIONS
+    // =========================================================================
+
+    // Forward declaration to allow recursive parsing of nested CSG nodes
+    std::expected<std::unique_ptr<Shape>, GrammarError> parse_any_shape(InputStream& input_file, Scene& scene);
+
+    /**
+     * @brief Parses a Constructive Solid Geometry (CSG) operation node.
+     *
+     * Supported syntax:
+     * csg_op(left_shape, right_shape)
+     * csg_op(left_shape, right_shape, transformation)
+     *
+     * @param input_file Input stream containing scene definitions.
+     * @param scene Current scene object being populated.
+     * @param op CSG operation type (Union, Intersection, Difference).
+     * @return std::unique_ptr<Shape> containing the constructed CSG node.
+     */
+    std::expected<std::unique_ptr<Shape>, GrammarError> parse_csg_operation(
+        InputStream& input_file, Scene& scene, CSGOperations op) 
+    {
+        auto open_brk_res = expect_symbol(input_file, '(');
+        if (!open_brk_res.has_value()) { return std::unexpected(open_brk_res.error()); }
+
+        // Parse left child shape
+        auto left_res = parse_any_shape(input_file, scene);
+        if (!left_res.has_value()) { return std::unexpected(left_res.error()); }
+
+        auto comma1_res = expect_symbol(input_file, ',');
+        if (!comma1_res.has_value()) { return std::unexpected(comma1_res.error()); }
+
+        // Parse right child shape
+        auto right_res = parse_any_shape(input_file, scene);
+        if (!right_res.has_value()) { return std::unexpected(right_res.error()); }
+
+        // Parse optional transformation or closing parenthesis
+        Transformation transformation{}; // Default identity
+
+        auto next_tok_res = input_file.read_token();
+        if (!next_tok_res.has_value()) { return std::unexpected(next_tok_res.error()); }
+        std::unique_ptr<Token> tok = std::move(next_tok_res.value());
+
+        if (auto* sym_tok = dynamic_cast<SymbolToken*>(tok.get()); sym_tok && sym_tok->symbol == ',') {
+            auto trans_res = parse_transformation(input_file, scene);
+            if (!trans_res.has_value()) { return std::unexpected(trans_res.error()); }
+            transformation = trans_res.value();
+
+            auto close_brk_res = expect_symbol(input_file, ')');
+            if (!close_brk_res.has_value()) { return std::unexpected(close_brk_res.error()); }
+
+        } else if (auto* sym_tok = dynamic_cast<SymbolToken*>(tok.get()); sym_tok && sym_tok->symbol == ')') {
+            // No transformation provided, regular closing
+        } else {
+            return std::unexpected(GrammarError{
+                tok->location,
+                "Expected ',' or ')' in CSG operation definition."
+            });
+        }
+
+        auto csg_shape = std::make_unique<CSG>(std::move(left_res.value()), std::move(right_res.value()), op);
+        csg_shape->trans = transformation;
+        return csg_shape;
+    }
+
+    /// Helper parser functions for specific CSG operations.
+    inline std::expected<std::unique_ptr<Shape>, GrammarError> parse_csg_union(InputStream& input_file, Scene& scene) {
+        return parse_csg_operation(input_file, scene, CSGOperations::Union);
+    }
+
+    inline std::expected<std::unique_ptr<Shape>, GrammarError> parse_csg_intersection(InputStream& input_file, Scene& scene) {
+        return parse_csg_operation(input_file, scene, CSGOperations::Intersection);
+    }
+
+    inline std::expected<std::unique_ptr<Shape>, GrammarError> parse_csg_difference(InputStream& input_file, Scene& scene) {
+        return parse_csg_operation(input_file, scene, CSGOperations::Difference);
+    }
+
     /// Type alias for a function pointer to a template instantiation of parse_shape<T>.
     using ShapeParserFunc = std::expected<std::unique_ptr<Shape>, GrammarError>(*)(InputStream&, Scene&);
 
     /// Maps shape-related keywords to the parser responsible for constructing the corresponding Shape instance.
-    ///
-    /// This table centralizes top-level shape dispatch and avoids long chains of if/else
-    /// statements when new shape types are added.
     inline const std::unordered_map<KeywordEnum, ShapeParserFunc> SHAPE_PARSERS = {
-        {KeywordEnum::SPHERE, &parse_shape<Sphere>},
-        {KeywordEnum::PLANE,  &parse_shape<Plane>},
-        {KeywordEnum::CUBE,   &parse_shape<Cube>},
-        {KeywordEnum::MESH, &parse_mesh}
-        // To add a cylinder later, just add one line here:
-        // {KeywordEnum::CYLINDER, &parse_shape<Cylinder>}
+        {KeywordEnum::SPHERE,           &parse_shape<Sphere>},
+        {KeywordEnum::PLANE,            &parse_shape<Plane>},
+        {KeywordEnum::CUBE,             &parse_shape<Cube>},
+        {KeywordEnum::MESH,             &parse_mesh},
+        {KeywordEnum::CSG_UNION,        &parse_csg_union},
+        {KeywordEnum::CSG_INTERSECTION, &parse_csg_intersection},
+        {KeywordEnum::CSG_DIFFERENCE,   &parse_csg_difference}
     };
+
+    /**
+     * @brief Parses any valid shape keyword (primitives or CSG nodes), allowing for parsing the entire shape hierarchy.
+     * 
+     * @param input_file Input stream containing shape definition.
+     * @param scene Current scene object being populated.
+     * @return std::unique_ptr<Shape> containing the parsed shape object.
+     */
+    std::expected<std::unique_ptr<Shape>, GrammarError> parse_any_shape(InputStream& input_file, Scene& scene) {
+        auto kw_res = expect_keywords(input_file, {
+            KeywordEnum::SPHERE, 
+            KeywordEnum::PLANE, 
+            KeywordEnum::CUBE, 
+            KeywordEnum::MESH,
+            KeywordEnum::CSG_UNION, 
+            KeywordEnum::CSG_INTERSECTION, 
+            KeywordEnum::CSG_DIFFERENCE
+        });
+        if (!kw_res.has_value()) { return std::unexpected(kw_res.error()); }
+
+        return SHAPE_PARSERS.at(kw_res.value())(input_file, scene);
+    }
 
     /**
      * @brief Parses a complete scene description file.
@@ -1666,6 +1773,9 @@ export {
      *   plane
      *   cube
      *   mesh
+     *   csg_union
+     *   csg_intersection
+     *   csg_difference
      *
      * Declarations may appear in any order, subject to the following
      * constraints:
@@ -1764,7 +1874,7 @@ export {
             } else if (kw == KeywordEnum::CAMERA) {
 
                 if (scene.camera) {
-                    return std::unexpected(GrammarError{token->location, "You cannot define more than one Camera", });
+                    return std::unexpected(GrammarError{token->location, "You cannot define more than one Camera"});
                 }
                 auto camera_res = parse_camera(input_file, scene);
                 if (!camera_res.has_value()) { return std::unexpected(camera_res.error()); }
@@ -1793,7 +1903,7 @@ export {
 
             } else if (SHAPE_PARSERS.contains(kw)) {
 
-                // SHAPE_PARSER.at(kw) is just the template instantiation parse_shape function with the shape indicated by the shape keyword
+                // Each shape has its dedicated parser function, which is responsible for parsing the shape's parameters and returning a Shape instance.
                 auto shape_res = SHAPE_PARSERS.at(kw)(input_file, scene);
                 if (!shape_res.has_value()) { return std::unexpected(shape_res.error()); }
 
