@@ -630,6 +630,164 @@ export struct Cube : Shape {
     }
 };
 
+// ============================================================================
+// CYLINDER
+// ============================================================================
+
+/**
+ * @brief Infinite unit cylinder centered at the local origin along the z-axis.
+ * 
+ * The cylinder has a radius \f$r = 1.0\f$ and extends infinitely along the 
+ * z-axis (\f$z \in (-\infty, +\infty)\f$). It does not have top or bottom caps.
+ */
+export struct Cylinder : Shape {
+    using Shape::Shape;
+
+private:
+    /**
+     * @brief Helper function to solve the quadratic equation for the infinite cylinder.
+     * 
+     * Computes the intersection parameters \f$t\f$ by solving the equation 
+     * \f$x^2 + y^2 = 1\f$ in the local space of the cylinder.
+     * 
+     * @param local_ray The ray transformed into the cylinder's local coordinate space.
+     * @return std::optional<std::pair<float, float>> A pair containing the two roots 
+     *         {t1, t2} (where t1 <= t2) if an intersection occurs, otherwise std::nullopt.
+     */
+    [[nodiscard]] std::optional<std::array<float, 2>> _get_t_intersections(const Ray& local_ray) const {
+        Vec O = local_ray.origin.to_vec();
+        Vec D = local_ray.direction;
+
+        // Coefficients for the cylinder equation: x^2 + y^2 = 1
+        float a = D.x * D.x + D.y * D.y;
+        
+        // If the ray is strictly parallel to the Z-axis (a ~ 0), 
+        // it will never intersect the cylinder walls.
+        if (a < 1e-7f) {
+            return std::nullopt;
+        }
+
+        float b_half = O.x * D.x + O.y * D.y;
+        float c = O.x * O.x + O.y * O.y - 1.0f;
+        float disc = b_half * b_half - a * c;
+
+        // No real roots means the ray misses the cylinder completely
+        if (disc < 0.0f) {
+            return std::nullopt;
+        }
+
+        float sqrt_disc = std::sqrt(disc);
+        float inv_a = 1.0f / a;
+        
+        // Return the roots: t1 (closest) and t2 (farthest)
+        return std::array<float, 2>{
+            (-b_half - sqrt_disc) * inv_a, 
+            (-b_half + sqrt_disc) * inv_a
+        };
+    }
+
+public:
+    /**
+     * @brief Computes the closest valid intersection between the ray and the cylinder.
+     * 
+     * @param ray The incident ray in world space.
+     * @return std::optional<HitRecord> The hit record if an intersection occurs, otherwise std::nullopt.
+     */
+    [[nodiscard]] std::optional<HitRecord> ray_intersection(const Ray& ray) const override {
+        Ray local_ray = ray.transform(trans.inverse());
+
+        auto roots_optional = _get_t_intersections(local_ray);
+        if (!roots_optional) return std::nullopt;
+        auto roots = roots_optional.value();
+
+        float t1 = roots[0];
+        float t2 = roots[1];
+
+        // Branchless validation of the t parameters within the ray's valid range
+        bool valid1 = (t1 > local_ray.tmin && t1 < local_ray.tmax);
+        bool valid2 = (t2 > local_ray.tmin && t2 < local_ray.tmax);
+
+        if (!valid1 && !valid2) {
+            return std::nullopt;
+        }
+
+        // If t1 is valid, pick it (since t1 <= t2, it is the closest), otherwise fallback to t2
+        float first_hit_t = valid1 ? t1 : t2;
+
+        Point local_point = local_ray.at(first_hit_t);
+        Normal local_normal{local_point.x, local_point.y, 0.0f};
+
+        // Branchless normal flipping to ensure it always faces against the incident ray
+        float dot = local_normal * local_ray.direction;
+        float flip = -std::copysign(1.0f, dot);
+        local_normal = Normal{local_normal.x * flip, local_normal.y * flip, 0.0f};
+
+        // UV mapping
+        // u is mapped azimuthally [0, 1] around the z-axis
+        // v is periodically tiled every 1 unit along the z-axis to support the infinite length
+        float u = std::atan2(local_point.y, local_point.x) / (2.0f * std::numbers::pi_v<float>);
+        u = (u >= 0.0f) ? u : (u + 1.0f);
+        float v = local_point.z - std::floor(local_point.z);
+
+        HitRecord record;
+        record.ray = ray;
+        record.t = first_hit_t;
+        record.hit_point = trans * local_point;
+        record.hit_normal = (trans * local_normal).normalize();
+        record.surface_params = {u, v};
+        record.hitted_shape = this;
+
+        return record;
+    }
+
+    /**
+     * @brief Computes all valid intersections between the ray and the cylinder (useful for CSG).
+     * 
+     * @param ray The incident ray in world space.
+     * @return std::vector<directionalHitRecord> A collection of all intersections along the ray path.
+     */
+    [[nodiscard]] std::vector<directionalHitRecord> ray_all_intersections(const Ray& ray) const override {
+        Ray local_ray = ray.transform(trans.inverse());
+        std::vector<directionalHitRecord> intersections;
+
+        auto roots_optional = _get_t_intersections(local_ray);
+        if (!roots_optional) return intersections;
+        auto roots = roots_optional.value();
+
+        // Cleanly iterate over both potential roots
+        for (float t : roots) {
+            if (t > local_ray.tmin && t < local_ray.tmax) {
+                Point local_point = local_ray.at(t);
+                Normal local_normal{local_point.x, local_point.y, 0.0f};
+
+                float dot = local_normal * local_ray.direction;
+                bool is_entering = (dot < 0.0f);
+
+                // Branchless normal flipping
+                float flip = -std::copysign(1.0f, dot);
+                local_normal = Normal{local_normal.x * flip, local_normal.y * flip, 0.0f};
+
+                float u = std::atan2(local_point.y, local_point.x) / (2.0f * std::numbers::pi_v<float>);
+                u = (u >= 0.0f) ? u : (u + 1.0f);
+                float v = local_point.z - std::floor(local_point.z);
+
+                directionalHitRecord record;
+                record.ray = ray;
+                record.t = t;
+                record.hit_point = trans * local_point;
+                record.hit_normal = (trans * local_normal).normalize();
+                record.surface_params = {u, v};
+                record.hitted_shape = this;
+                record.is_entering = is_entering;
+
+                intersections.push_back(record);
+            }
+        }
+
+        return intersections;
+    }
+};
+
 
 // ===================================================================================
 // WORLD STRUCT
