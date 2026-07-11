@@ -868,6 +868,24 @@ TEST_CASE("Test Parser: Parse functions") {
             CHECK(res.value()->trans.m.is_close(expected_trans.m));
         }
 
+        SUBCASE("Valid Cylinder - All arguments") {
+            scene.materials["blue_mat"] = std::make_shared<Material>(dummy_brdf, dummy_emitted);
+
+            std::istringstream string_stream("(translation([0.0, 2.0, 0.0]), blue_mat)");
+            InputStream stream(string_stream);
+
+            // Test Cylinder building
+            auto res = parse_shape<Cylinder>(stream, scene);
+            REQUIRE(res.has_value());
+
+            // Confirm the material pointer was linked to the scene dictionary
+            CHECK(res.value()->material == scene.materials["blue_mat"]);
+
+            // Confirm the transformation is correct
+            Transformation expected_trans = Trans(Vec{0.0f, 2.0f, 0.0f});
+            CHECK(res.value()->trans.m.is_close(expected_trans.m));
+        }
+
         SUBCASE("Unknown Material applied (Negative)") {
             // Because this is a fresh subcase, scene.materials is already empty here!
             std::istringstream string_stream("(identity, invisible_material)");

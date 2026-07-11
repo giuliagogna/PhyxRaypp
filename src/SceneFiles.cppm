@@ -68,6 +68,7 @@ export enum class KeywordEnum {
     PLANE,
     SPHERE,
     CUBE,
+    CYLINDER,
     MESH,
     // CSG Shapes
     CSG_UNION,
@@ -108,6 +109,7 @@ export const std::unordered_map<std::string, KeywordEnum> KEYWORDS{
     {"plane", KeywordEnum::PLANE},
     {"sphere", KeywordEnum::SPHERE},
     {"cube", KeywordEnum::CUBE},
+    {"cylinder", KeywordEnum::CYLINDER},
     {"mesh", KeywordEnum::MESH},
     {"csg_union", KeywordEnum::CSG_UNION},
     {"csg_intersection", KeywordEnum::CSG_INTERSECTION},
@@ -1728,6 +1730,7 @@ export {
         {KeywordEnum::SPHERE,           &parse_shape<Sphere>},
         {KeywordEnum::PLANE,            &parse_shape<Plane>},
         {KeywordEnum::CUBE,             &parse_shape<Cube>},
+        {KeywordEnum::CYLINDER,         &parse_shape<Cylinder>},
         {KeywordEnum::MESH,             &parse_mesh},
         {KeywordEnum::CSG_UNION,        &parse_csg_union},
         {KeywordEnum::CSG_INTERSECTION, &parse_csg_intersection},
@@ -1745,7 +1748,8 @@ export {
         auto kw_res = expect_keywords(input_file, {
             KeywordEnum::SPHERE, 
             KeywordEnum::PLANE, 
-            KeywordEnum::CUBE, 
+            KeywordEnum::CUBE,
+            KeywordEnum::CYLINDER, 
             KeywordEnum::MESH,
             KeywordEnum::CSG_UNION, 
             KeywordEnum::CSG_INTERSECTION, 
@@ -1772,6 +1776,7 @@ export {
      *   sphere
      *   plane
      *   cube
+     *   cylinder
      *   mesh
      *   csg_union
      *   csg_intersection
