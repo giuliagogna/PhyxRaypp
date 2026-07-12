@@ -707,7 +707,8 @@ export struct Mesh : Shape {
         // Transform the ray in the reference frame of the mesh
         Ray local_ray = ray.transform(trans.inverse());
 
-        auto hit_record = ray_intersection_unwrapped(local_ray); // Start recursion flow with transformed ray
+        std::optional<HitRecord> closest_hit = std::nullopt;
+        auto hit_record = ray_intersection_unwrapped(local_ray, closest_hit);
         if (hit_record.has_value()) {
             hit_record->ray = ray;
             hit_record->hit_point = ray.at(hit_record->t);
@@ -746,15 +747,15 @@ export struct Mesh : Shape {
      *                  its tmax value whenever a closer hit is found.
      * @param starting_index Index of the BVH node currently being explored.
      *                       Defaults to the root node (0).
-     * @param closest_hit Current closest intersection discovered so far.
+     * @param closest_hit Current closest intersection discovered so far. It's passed by reference to avoid unnecessary copies.
      *
      * @return The nearest HitRecord found in the subtree rooted at
      *         starting_index, or std::nullopt if no intersection exists.
      */
     [[nodiscard]] std::optional<HitRecord> ray_intersection_unwrapped(
         Ray& local_ray,
-        int starting_index = 0,
-        std::optional<HitRecord> closest_hit = std::nullopt) const {
+        std::optional<HitRecord>& closest_hit,
+        int starting_index = 0) const {
 
         // If the ray misses this box, skip it
         if (!nodes[starting_index].bounds.intersect(local_ray)) {
@@ -829,12 +830,12 @@ export struct Mesh : Shape {
 
         } else { // If the current node is not a leaf, call the method recursively on the children
 
-            if (auto left_hit = ray_intersection_unwrapped(local_ray, nodes[starting_index].left_child_index, closest_hit)) {
+            if (auto left_hit = ray_intersection_unwrapped(local_ray, closest_hit, nodes[starting_index].left_child_index)) {
                 local_ray.tmax = left_hit->t; // Shrink the ray range to find closer intersections
                 closest_hit = left_hit;
             }
 
-            if (auto right_hit = ray_intersection_unwrapped(local_ray, nodes[starting_index].right_child_index, closest_hit)) {
+            if (auto right_hit = ray_intersection_unwrapped(local_ray, closest_hit, nodes[starting_index].right_child_index)) {
                 local_ray.tmax = right_hit->t; // Shrink the ray range to find closer intersections
                 closest_hit = right_hit; // Guaranteed to be closer if found because local_ray.tmax was shrunk
             }
