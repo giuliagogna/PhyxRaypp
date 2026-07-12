@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2026 Giulia Gogna, Riccardo Piazza.
+ * Copyright (c) 2026 Giulia Gogna, Riccardo Piazza.
  *
  * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
  * the European Commission - subsequent versions of the EUPL (the "Licence");
@@ -17,95 +17,104 @@
 
 /**
  * @file Geometry.cppm
- * @brief Core geometric primitives, vector algebra, and spatial transformations.
+ * @brief Core geometric primitives, vector algebra, and spatial transformations.[cite: 1]
  *
  * This module defines points, vectors, normals, homogeneous matrices,
- * and affine transformations used throughout the renderer.
+ * and affine transformations used throughout the renderer.[cite: 1]
  *
  * The distinction between Point, Vec, and Normal is intentional and helps
- * prevent invalid geometric operations at compile time.
+ * prevent invalid geometric operations at compile time.[cite: 1]
  */
 
 module;
+
+//#include <format>
 
 export module Geometry;
 
 import auxiliary_functions;
 import std;
 
-/// @brief 2D coordinates used for parametric surface and texture coordinates.
+/// @brief 2D coordinates used for parametric surface and texture coordinates.[cite: 1]
 export struct Vec2D {
     float u{0.0f}, v{0.0f};
-    /// @brief Check if two 2D vectors are close enough within an epsilon
-    bool is_close(const Vec2D& other, float epsilon = 1e-5f) const;
+    /// @brief Check if two 2D vectors are close enough within an epsilon[cite: 1]
+    bool is_close(const Vec2D other, float epsilon = 1e-5f) const;
 };
 
-/// @brief Unit-length direction vector used for orientations and shading.
+/// @brief Unit-length direction vector used for orientations and shading.[cite: 1]
 export struct Normal {
     float x{0.0f}, y{0.0f}, z{0.0f};
 
-    /// @brief Compute length of Normal object
-    float norm() const;
-    /// @brief Compute length square of Normal object
-    float norm2() const;
+    /// @brief Compute length of Normal object[cite: 1]
+    float norm() const;  
+    /// @brief Compute length square of Normal object[cite: 1]
+    float norm2() const; 
 
-    /// @brief Normalizes the Normal object (non-const)
-    Normal normalize();
+    /// @brief Normalizes the Normal object (non-const)[cite: 1]
+    Normal normalize(); 
 
-    /// @brief Check if two Normals are close enough within an epsilon
-    bool is_close(const Normal& other, float epsilon = 1e-5f) const;
+    /// @brief Check if two Normals are close enough within an epsilon[cite: 1]
+    bool is_close(const Normal other, float epsilon = 1e-5f) const; 
 };
 
-/// @brief 3D displacement or direction vector.
+/// @brief 3D displacement or direction vector.[cite: 1]
 export struct Vec {
     float x{0.0f}, y{0.0f}, z{0.0f};
 
-    /// @brief Normalizes a Vec and returns a Normal object
-    Normal to_norm() const;
-    /// @brief Normalizes and returns a Vec
-    Vec normalize() const;
+    /// @brief Pure conversion without implicit and expensive hidden normalization. 
+    /// It has to be performed before.
+    Normal to_norm() const; 
+    
+    /// @brief Normalizes and returns a Vec[cite: 1]
+    Vec normalize() const; 
 
-    /// @brief Compute length of Vec
+    /// @brief Compute length of Vec[cite: 1]
     float norm() const;
-    /// @brief Compute length square of Vec
+    /// @brief Compute length square of Vec[cite: 1]
     float norm2() const;
 
-    /// @brief Check if two Vec are close enough within an epsilon
-    bool is_close(const Vec& other, float epsilon = 1e-5f) const;
+    /// @brief Check if two Vec are close enough within an epsilon[cite: 1]
+    bool is_close(const Vec other, float epsilon = 1e-5f) const;
 };
 
-/// @brief 3D position in space.
+/// @brief 3D position in space.[cite: 1]
 export struct Point {
     float x{0.0}, y{0.0}, z{0.0};
-    /// @brief Converts a Point to a Vec
+    
+    /// @brief Converts a Point to a Vec[cite: 1]
     Vec to_vec() const;
-    /// @brief Check if two Points are close enough within an epsilon
-    bool is_close(const Point& other, float epsilon = 1e-5f) const;
+    
+    /// @brief Check if two Points are close enough within an epsilon[cite: 1]
+    bool is_close(const Point other, float epsilon = 1e-5f) const;
 };
 
-/// @brief 4x4 homogeneous transformation matrix.
+/// @brief 4x4 homogeneous transformation matrix.[cite: 1]
 /// This is only the basic object that stores a 4x4 Homogeneous Matrix (inverse matrix
-/// and consistency checks are implemented inside Transformation struct)
+/// and consistency checks are implemented inside Transformation struct)[cite: 1]
 export struct HomMatrix {
     std::array<float, 16> mat = {1.0f, 0.0f, 0.0f, 0.0f,
                                  0.0f, 1.0f, 0.0f, 0.0f,
                                  0.0f, 0.0f, 1.0f, 0.0f,
                                  0.0f, 0.0f, 0.0f, 1.0f};
 
+    /// @brief Checks if two matrixes are close enough within an epsilon
     bool is_close(const HomMatrix& other, float epsilon = 1e-5f) const;
 };
 
-/// @brief Affine transformation storing both a matrix and its inverse.
+/// @brief Affine transformation storing both a matrix and its inverse.[cite: 1]
 /// It stores the direct matrix of the transformation and its inverse: when applying transformation to a
-/// Point or Vec one should use the direct matrix.
-/// One often wants to apply the inverse transformation: to do so  we implement a method
-/// `inverse()` that simply  switches the two matrixes, so that now the inverse is the direct and vice-versa.
+/// Point or Vec one should use the direct matrix.[cite: 1]
+/// One often wants to apply the inverse transformation: to do so we implement a method
+/// `inverse()` that simply switches the two matrixes, so that now the inverse is the direct and vice-versa.[cite: 1]
 export struct Transformation {
     HomMatrix m;
     HomMatrix invm;
 
     bool is_consistent() const;
 
+    /// @brief Transformation inversion:
+    /// Creates a new transformation exchanging the matrix and the inverse[cite: 1]
     Transformation inverse() const;
 };
 
@@ -189,197 +198,226 @@ export {
     // ================================================
 
     // Sums
-    /// Point += Vec -> Point
-    Point& operator+= (Point& p, const Vec& v) {
-        p = _sum<Point, Vec, Point>(p, v);
+    /// @brief Point += Vec -> Point[cite: 1]
+    [[gnu::always_inline]] inline Point& operator+= (Point& p, Vec v) {
+        p.x += v.x; p.y += v.y; p.z += v.z;
         return p;
     }
-    /// Point + Vec -> Point
-    Point operator+ (const Point& p, const Vec& v) {
-        return _sum<Point, Vec, Point>(p, v);
-    }
-    /// Vec += Vec -> Vec
-    Vec& operator+= (Vec& v, const Vec& other) {
-        v = _sum<Vec, Vec, Vec>(v, other);
-        return v;
-    }
-    /// Vec + Vec -> Vec
-    Vec operator+ (const Vec& v, const Vec& other) {
-        return _sum<Vec, Vec, Vec>(v, other);
+
+    /// @brief Point + Vec -> Point[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline Point operator+ (Point p, Vec v) {
+        return Point{ p.x + v.x, p.y + v.y, p.z + v.z };
     }
 
+    /// @brief Vec += Vec -> Vec[cite: 1]
+    [[gnu::always_inline]] inline Vec& operator+= (Vec& v, Vec other) {
+        v.x += other.x; v.y += other.y; v.z += other.z;
+        return v;
+    }
+
+    /// @brief Vec + Vec -> Vec[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline Vec operator+ (Vec v, Vec other) {
+        return Vec{ v.x + other.x, v.y + other.y, v.z + other.z };
+    }
 
     // Differences
-    /// Point-=Vec -> Point
-    Point& operator-= (Point& p, const Vec& v) {
-        p = _difference<Point, Vec, Point>(p, v);
+    /// @brief Point -= Vec -> Point[cite: 1]
+    [[gnu::always_inline]] inline Point& operator-= (Point& p, Vec v) {
+        p.x -= v.x; p.y -= v.y; p.z -= v.z;
         return p;
     }
-    /// Point - Vec -> Point
-    Point operator- (const Point& p, const Vec& v) {
-        return _difference<Point, Vec, Point>(p, v);
-    }
-    /// Vec -= Vec -> Vec
-    Vec& operator-= (Vec& v, const Vec& other) {
-        v = _difference<Vec, Vec, Vec>(v, other);
-        return v;
-    }
-    /// Vec - Vec -> Vec
-    Vec operator- (const Vec& v, const Vec& other) {
-        return _difference<Vec, Vec, Vec>(v, other);
-    }
-    /// Point - Point -> Vec
-    Vec operator- (const Point& p, const Point& other) {
-        return _difference<Point, Point, Vec>(p, other);
+
+    /// @brief Point - Vec -> Point[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline Point operator- (Point p, Vec v) {
+        return Point{ p.x - v.x, p.y - v.y, p.z - v.z };
     }
 
+    /// @brief Vec -= Vec -> Vec[cite: 1]
+    [[gnu::always_inline]] inline Vec& operator-= (Vec& v, Vec other) {
+        v.x -= other.x; v.y -= other.y; v.z -= other.z;
+        return v;
+    }
+
+    /// @brief Vec - Vec -> Vec[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline Vec operator- (Vec v, Vec other) {
+        return Vec{ v.x - other.x, v.y - other.y, v.z - other.z };
+    }
+
+    /// @brief Point - Point -> Vec[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline Vec operator- (Point p, Point other) {
+        return Vec{ p.x - other.x, p.y - other.y, p.z - other.z };
+    }
 
     // Negations
-    /// -Vec -> Vec
-    Vec operator- (const Vec& v) {
-        return _negate<Vec, void, Vec>(v);
-    }
-    /// -Point -> Point
-    Point operator- (const Point& p) {
-        return _negate<Point, void, Point>(p);
-    }
-    /// -Normal -> Normal
-    Normal operator- (const Normal& n) {
-        return _negate<Normal, void, Normal>(n);
+    /// @brief -Vec -> Vec[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline Vec operator- (Vec v) {
+        return Vec{ -v.x, -v.y, -v.z };
     }
 
+    /// @brief -Point -> Point[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline Point operator- (Point p) {
+        return Point{ -p.x, -p.y, -p.z };
+    }
 
+    /// @brief -Normal -> Normal[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline Normal operator- (Normal n) {
+        return Normal{ -n.x, -n.y, -n.z };
+    }
+    
     // Scalar products
-    /// Point *= scalar -> Point
-    Point operator*= (Point& p, float scalar) {
-        // GG: Need to assign the result to the calling object
-        p = _scalar_multiply<Point, float, Point>(p, scalar);
+    /// @brief Point *= scalar -> Point[cite: 1]
+    [[gnu::always_inline]] inline Point& operator*= (Point& p, float scalar) {
+        p.x *= scalar; p.y *= scalar; p.z *= scalar;
         return p;
     }
-    /// Point * scalar -> Point
-    Point operator* (const Point& p, float scalar) {
-        return _scalar_multiply<Point, float, Point>(p, scalar);
-    }
-    /// Scalar * Point -> Point
-    Point operator* (float scalar, const Point& p) {
-        return _scalar_multiply<Point, float, Point>(p, scalar);
-    }
-    /// Vec *= scalar -> Vec
-    Vec& operator*= (Vec& v, float scalar) {
-        v = _scalar_multiply<Vec, float, Vec>(v, scalar);
-        return v;
-    }
-    /// Vec * scalar -> Vec
-    Vec operator* (const Vec& v, float scalar) {
-        return _scalar_multiply<Vec, float, Vec>(v, scalar);
-    }
-    /// Scalar * Vec -> Vec
-    Vec operator* (float scalar, const Vec& v) {
-        return _scalar_multiply<Vec, float, Vec>(v, scalar);
-    }
-    ///Normal * scalar -> Vec
-    Vec operator* (const Normal& n, float scalar) {
-        return _scalar_multiply<Normal, float, Vec>(n, scalar);
-    }
-    /// Scalar * Normal -> Vec
-    Vec operator* (float scalar, const Normal& n) {
-        return _scalar_multiply<Normal, float, Vec>(n, scalar);
+
+    /// @brief Point * scalar -> Point[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline Point operator* (Point p, float scalar) {
+        return Point{ p.x * scalar, p.y * scalar, p.z * scalar };
     }
 
+    /// @brief Scalar * Point -> Point[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline Point operator* (float scalar, Point p) {
+        return Point{ p.x * scalar, p.y * scalar, p.z * scalar };
+    }
+
+    /// @brief Vec *= scalar -> Vec[cite: 1]
+    [[gnu::always_inline]] inline Vec& operator*= (Vec& v, float scalar) {
+        v.x *= scalar; v.y *= scalar; v.z *= scalar;
+        return v;
+    }
+
+    /// @brief Vec * scalar -> Vec[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline Vec operator* (Vec v, float scalar) {
+        return Vec{ v.x * scalar, v.y * scalar, v.z * scalar };
+    }
+
+    /// @brief Scalar * Vec -> Vec[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline Vec operator* (float scalar, Vec v) {
+        return Vec{ v.x * scalar, v.y * scalar, v.z * scalar };
+    }
+
+    /// @brief Normal * scalar -> Vec[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline Vec operator* (Normal n, float scalar) {
+        return Vec{ n.x * scalar, n.y * scalar, n.z * scalar };
+    }
+
+    /// @brief Scalar * Normal -> Vec[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline Vec operator* (float scalar, Normal n) {
+        return Vec{ n.x * scalar, n.y * scalar, n.z * scalar };
+    }
 
     // Scalar division
-    /// Vec /= scalar -> Vec
-    Vec& operator/= (Vec& v, float scalar) {
-        v = _scalar_divide<Vec, float, Vec>(v, scalar);
+    /// @brief Vec /= scalar -> Vec[cite: 1]
+    [[gnu::always_inline]] inline Vec& operator/= (Vec& v, float scalar) {
+        float inv = 1.0f / scalar;
+        v.x *= inv; v.y *= inv; v.z *= inv;
         return v;
     }
-    /// Vec / scalar -> Vec
-    Vec operator/ (const Vec& v, float scalar) {
-        return _scalar_divide<Vec, float, Vec>(v, scalar);
-    }
-    /// Normal / scalar -> Vec
-    Vec operator/ (const Normal& n, float scalar) {
-        return _scalar_divide<Normal, float, Vec>(n, scalar);
-    }
-    /// Point / scalar -> Point
-    Point operator/ (const Point& p, float scalar) {
-        return _scalar_divide<Point, float, Point>(p, scalar);
+
+    /// @brief Vec / scalar -> Vec[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline Vec operator/ (Vec v, float scalar) {
+        float inv = 1.0f / scalar;
+        return Vec{ v.x * inv, v.y * inv, v.z * inv };
     }
 
+    /// @brief Normal / scalar -> Vec[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline Vec operator/ (Normal n, float scalar) {
+        float inv = 1.0f / scalar;
+        return Vec{ n.x * inv, n.y * inv, n.z * inv };
+    }
+
+    /// @brief Point / scalar -> Point[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline Point operator/ (Point p, float scalar) {
+        float inv = 1.0f / scalar;
+        return Point{ p.x * inv, p.y * inv, p.z * inv };
+    }
 
     // Dot products
-    /// Dot product between two Vec
-    float operator* (const Vec& v, const Vec& other) {
-        auto res = _elementwise_product<Vec, Vec, Vec>(v, other);
-        return res.x + res.y + res.z;
-    }
-    /// Dot products between a Vec and a Normal
-    float operator* (const Vec& v, const Normal& n) {
-        auto res = _elementwise_product<Vec, Normal, Vec>(v, n);
-        return res.x + res.y + res.z;
-    }
-    ///Dot products between a Normal and a Vec
-    float operator* (const Normal& n, const Vec& v) {
-        auto res = _elementwise_product<Normal, Vec, Vec>(n, v);
-        return res.x + res.y + res.z;
-    }
-    /// Dot product between two Normal
-    float operator* (const Normal& v, const Normal& n) {
-        auto res = _elementwise_product<Normal, Normal, Vec>(v, n);
-        return res.x + res.y + res.z;
+    /// @brief Dot product between two Vec[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline float operator* (Vec v, Vec other) {
+        return v.x * other.x + v.y * other.y + v.z * other.z;
     }
 
+    /// @brief Dot products between a Vec and a Normal[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline float operator* (Vec v, Normal n) {
+        return v.x * n.x + v.y * n.y + v.z * n.z;
+    }
+
+    /// @brief Dot products between a Normal and a Vec[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline float operator* (Normal n, Vec v) {
+        return n.x * v.x + n.y * v.y + n.z * v.z;
+    }
+
+    /// @brief Dot product between two Normal[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline float operator* (Normal v, Normal n) {
+        return v.x * n.x + v.y * n.y + v.z * n.z;
+    }
 
     // Cross products
-    /// Cross product between two Vec
-    Vec operator% (const Vec& v, const Vec& other) {
-        return _cross_product<Vec, Vec, Vec>(v, other);
-    }
-    /// Cross product between a Vec and a Normal
-    Vec operator% (const Vec& v, const Normal& n) {
-        return _cross_product<Vec, Normal, Vec>(v, n);
-    }
-    /// Cross product between a Normal and a Vec
-    Vec operator% (const Normal& n, const Vec& v) {
-        return _cross_product<Normal, Vec, Vec>(n, v);
-    }
-    /// Cross product between two Normal
-    Vec operator% (const Normal& n, const Normal& other) {
-        return _cross_product<Normal, Normal, Vec>(n, other);
+    /// @brief Cross product between two Vec[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline Vec operator% (Vec v, Vec other) {
+        return Vec{
+            v.y * other.z - v.z * other.y,
+            v.z * other.x - v.x * other.z,
+            v.x * other.y - v.y * other.x
+        };
     }
 
+    /// @brief Cross product between a Vec and a Normal[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline Vec operator% (Vec v, Normal n) {
+        return Vec{
+            v.y * n.z - v.z * n.y,
+            v.z * n.x - v.x * n.z,
+            v.x * n.y - v.y * n.x
+        };
+    }
+
+    /// @brief Cross product between a Normal and a Vec[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline Vec operator% (Normal n, Vec v) {
+        return Vec{
+            n.y * v.z - n.z * v.y,
+            n.z * v.x - n.x * v.z,
+            n.x * v.y - n.y * v.x
+        };
+    }
+
+    /// @brief Cross product between two Normal[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline Vec operator% (Normal n, Normal other) {
+        return Vec{
+            n.y * other.z - n.z * other.y,
+            n.z * other.x - n.x * other.z,
+            n.x * other.y - n.y * other.x
+        };
+    }
 
     // Matrix multiplication
-    /// Matrix * Point -> Point
-    Point operator* (const HomMatrix& M, const Point& p) {
-
-        float px = p.x; float py = p.y; float pz = p.z; // This should be optimized by the compiler to avoid overhead of multiple accesses to p.x, p.y and p.z
-
-        Point res{
-            M.mat[0] * px + M.mat[1] * py + M.mat[2] * pz + M.mat[3],
-            M.mat[4] * px + M.mat[5] * py + M.mat[6] * pz + M.mat[7],
-            M.mat[8] * px + M.mat[9] * py + M.mat[10] * pz + M.mat[11]
+    /// @brief Matrix * Point -> Point[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline Point operator* (const HomMatrix& M, Point p) {
+        return Point{
+            M.mat[0] * p.x + M.mat[1] * p.y + M.mat[2] * p.z + M.mat[3],
+            M.mat[4] * p.x + M.mat[5] * p.y + M.mat[6] * p.z + M.mat[7],
+            M.mat[8] * p.x + M.mat[9] * p.y + M.mat[10] * p.z + M.mat[11]
         };
-
-        float w = M.mat[12] * px + M.mat[13] * py + M.mat[14] * pz + M.mat[15];
-
-        if (w==1.f) {
-            return res;
-        }
-
-        return res / w; // homogeneous division
     }
-    /// Matrix * Vec -> Vec
-    Vec operator* (const HomMatrix& M, const Vec& v) {
+
+    /// @brief Matrix * Vec -> Vec[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline Vec operator* (const HomMatrix& M, Vec v) {
         return Vec{
             M.mat[0] * v.x + M.mat[1] * v.y + M.mat[2] * v.z,
             M.mat[4] * v.x + M.mat[5] * v.y + M.mat[6] * v.z,
             M.mat[8] * v.x + M.mat[9] * v.y + M.mat[10] * v.z
         };
     }
-    /// Matrix * Matrix -> Matrix
-    HomMatrix operator* (const HomMatrix& M1, const HomMatrix& M2) {
 
+    // ================================================
+    // MATRIX OPERATIONS
+    // ================================================
+
+    /// @brief Matrix * Matrix -> Matrix[cite: 1]
+    // Not forcing inlining since this operator is usually called
+    // creating transformations to pass to constructors
+    [[nodiscard]] inline HomMatrix operator* (const HomMatrix& M1, const HomMatrix& M2) {
         return HomMatrix{
             M1.mat[0] * M2.mat[0] + M1.mat[1] * M2.mat[4] + M1.mat[2] * M2.mat[8] + M1.mat[3] * M2.mat[12],
             M1.mat[0] * M2.mat[1] + M1.mat[1] * M2.mat[5] + M1.mat[2] * M2.mat[9] + M1.mat[3] * M2.mat[13],
@@ -396,52 +434,65 @@ export {
             M1.mat[8] * M2.mat[2] + M1.mat[9] * M2.mat[6] + M1.mat[10] * M2.mat[10] + M1.mat[11] * M2.mat[14],
             M1.mat[8] * M2.mat[3] + M1.mat[9] * M2.mat[7] + M1.mat[10] * M2.mat[11] + M1.mat[11] * M2.mat[15],
 
-            M1.mat[12] * M2.mat[0] + M1.mat[13] * M2.mat[4] + M1.mat[14] * M2.mat[8] + M1.mat[15] * M2.mat[12],
-            M1.mat[12] * M2.mat[1] + M1.mat[13] * M2.mat[5] + M1.mat[14] * M2.mat[9] + M1.mat[15] * M2.mat[13],
-            M1.mat[12] * M2.mat[2] + M1.mat[13] * M2.mat[6] + M1.mat[14] * M2.mat[10] + M1.mat[15] * M2.mat[14],
-            M1.mat[12] * M2.mat[3] + M1.mat[13] * M2.mat[7] + M1.mat[14] * M2.mat[11] + M1.mat[15] * M2.mat[15]
+            0.0f, 0.0f, 0.0f, 1.0f // last row of a hom. matrix optimized for affine transforms
         };
     }
-
 
     // ================================================
     // OPERATIONS ON TRANSFORMATIONS
     // ================================================
 
-    /// Transformation composition
-    Transformation operator*(const Transformation& T1, const Transformation& T2) {
+    /// @brief Transformation composition[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline Transformation operator*(const Transformation& T1, const Transformation& T2) {
         return Transformation{
-            T1.m * T2.m,            // Direct transformation multiplies in order
-            T2.invm * T1.invm   // Inverse transformation multiplies switched
+            T1.m * T2.m,
+            T2.invm * T1.invm
         };
     }
-    /// Transformation of a Point
-    Point operator*(const Transformation& T, const Point& p) {
+
+    /// @brief Transformation of a Point (By value)[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline Point operator*(const Transformation& T, Point p) {
         return T.m * p;
     }
-    /// Transformation of a Vec
-    Vec operator*(const Transformation& T, const Vec& v) {
+
+    /// @brief Transformation of a Vec (By value)[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline Vec operator*(const Transformation& T, Vec v) {
         return T.m * v;
     }
-    /// Transformation of a Normal
-    Normal operator* (const Transformation& T, const Normal& n) {
+
+    /// @brief Transformation of a Normal (By value)[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline Normal operator* (const Transformation& T, Normal n) {
         return Normal{
             T.invm.mat[0] * n.x + T.invm.mat[4] * n.y + T.invm.mat[8] * n.z,
             T.invm.mat[1] * n.x + T.invm.mat[5] * n.y + T.invm.mat[9] * n.z,
             T.invm.mat[2] * n.x + T.invm.mat[6] * n.y + T.invm.mat[10] * n.z
         };
     }
+    
+    // =============================================================
+    // Component-wise min/max utilities used for AABB construction[cite: 1]
+    // =============================================================
 
+    /// @brief Compute the Point with coordinates the minimum among the coordinates of the two input points[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline Point min (Point left, Point right) {
+        return Point{ std::min(left.x, right.x), std::min(left.y, right.y), std::min(left.z, right.z) };
+    }
 
+    /// @brief Compute the Point with coordinates the maximum among the coordinates of the two input points[cite: 1]
+    [[nodiscard]] [[gnu::always_inline]] inline Point max (Point left, Point right) {
+        return Point{ std::max(left.x, right.x), std::max(left.y, right.y), std::max(left.z, right.z) };
+    }
 
     // ================================================
     // TRANSFORMATION GENERATORS
     // ================================================
 
-    /** @brief Create a translation transformation. */
-    Transformation Trans(const Vec& v) {
+    /** @brief Create a translation transformation.[cite: 1] */
+    /// (Optimized by value)
+    inline Transformation Trans(Vec v) {
         Transformation t; // Starts as Identity
-        // Set the last column to the components of the vector
+        // M
+        // Sets the last column to the components of the vector
         t.m.mat[3] = v.x;
         t.m.mat[7] = v.y;
         t.m.mat[11] = v.z;
@@ -452,10 +503,12 @@ export {
         return t;
     }
 
-    /** @brief Create a non-uniform scaling transformation. */
-    Transformation Scale(const Vec& v) {
+    /** @brief Create a non-uniform scaling transformation.[cite: 1] */
+    /// (Optimized by value)
+    inline Transformation Scale(Vec v) {
         Transformation t; // Starts as Identity
-        // Set diagonal elements to components of the scaling vector
+        // M
+        // Sets diagonal elements to components of the scaling vector
         t.m.mat[0] = v.x;
         t.m.mat[5] = v.y;
         t.m.mat[10] = v.z;
@@ -466,13 +519,13 @@ export {
         return t;
     }
 
-
     // Euler angles rotations (intrinsic rotations around the axes of the reference system, applied in order Z, Y, X)
-    /** @brief Create a rotation around the X axis (radians). */
-    Transformation R_x(float angle_rad) {
+    /** @brief Create a rotation around the X axis (radians).[cite: 1] */
+    inline Transformation R_x(float angle_rad) {
         Transformation t;
         float c = std::cos(angle_rad);
         float s = std::sin(angle_rad);
+        // M
         // Already has 1 as mat[0]
         t.m.mat[5] = c;  t.m.mat[6] = -s;
         t.m.mat[9] = s;  t.m.mat[10] = c;
@@ -482,12 +535,13 @@ export {
         return t;
     }
 
-    /** @brief Create a rotation around the Y axis (radians). */
-    Transformation R_y(float angle_rad) {
+    /** @brief Create a rotation around the Y axis (radians).[cite: 1] */
+    inline Transformation R_y(float angle_rad) {
         Transformation t;
         float c = std::cos(angle_rad);
         float s = std::sin(angle_rad);
-        // Already has 1 in mat[5]
+        // M
+        // already has 1 in mat[5]
         t.m.mat[0] = c;  t.m.mat[2] = s;
         t.m.mat[8] = -s; t.m.mat[10] = c;
         // Inverse
@@ -496,54 +550,19 @@ export {
         return t;
     }
 
-    /** @brief Create a rotation around the Z axis (radians). */
-    Transformation R_z(float angle_rad) {
+    /** @brief Create a rotation around the Z axis (radians).[cite: 1] */
+    inline Transformation R_z(float angle_rad) {
         Transformation t;
         float c = std::cos(angle_rad);
         float s = std::sin(angle_rad);
-        // Already has 1 in mat[10]
+        // M
+        // already has 1 in mat[10]
         t.m.mat[0] = c;  t.m.mat[1] = -s;
         t.m.mat[4] = s;  t.m.mat[5] = c;
         // Inverse
         t.invm.mat[0] = c;  t.invm.mat[1] = s;
         t.invm.mat[4] = -s; t.invm.mat[5] = c;
         return t;
-    }
-
-    // =============================================================
-    // Component-wise min/max utilities used for AABB construction
-    // =============================================================
-
-    /// Return the component-wise minimum of two 3D objects.
-    template<typename Curr, typename Res>
-    Res min_v(const Curr& left, const Curr& right) {
-        return Res{
-            std::min(left.x, right.x),
-            std::min(left.y, right.y),
-            std::min(left.z, right.z)
-        };
-    }
-
-    /// Return the component-wise maximum of two 3D objects.
-    template<typename Curr, typename Res>
-    Res max_v(const Curr& left, const Curr& right) {
-        return Res{
-            std::max(left.x, right.x),
-            std::max(left.y, right.y),
-            std::max(left.z, right.z)
-        };
-    }
-
-    /// @brief Compute the Point with coordinates the minimum among the coordinates of
-    /// the two input points
-    Point min(const Point& left, const Point& right) {
-        return min_v<Point, Point>(left, right);
-    }
-
-    /// @brief Compute the Point with coordinates the maximum among the coordinates of
-    /// the two input points
-    Point max(const Point& left, const Point& right) {
-        return max_v<Point, Point>(left, right);
     }
 };
 
@@ -553,60 +572,69 @@ export {
 // ===================================================================================
 // ===================================================================================
 
-// ================================================
-// Methods to compute length in Vec and Normal
-// ================================================
-
-template<typename Curr> float norm2 (const Curr& left) {
-    return left.x * left.x + left.y * left.y + left.z * left.z;
-}
-
-template<typename Curr> float norm (const Curr& left) {
-    return std::sqrt(left.x * left.x + left.y * left.y + left.z * left.z);
-}
-
 // ======================================================
 // Methods to compute and access length in Vec and Normal
 // ======================================================
 
-float Vec::norm() const { return ::norm<Vec>(*this); }
-float Vec::norm2() const { return ::norm2<Vec>(*this); }
-
-float Normal::norm() const { return ::norm<Normal>(*this); }
-float Normal::norm2() const { return ::norm2<Normal>(*this); }
-
-/// Return a normalized Vec (a Vec with the same direction but length 1)
-Vec Vec::normalize() const {
-    return _scalar_divide<Vec, float, Vec>(*this, this->norm());
+[[nodiscard]] [[gnu::always_inline]] inline float Vec::norm2() const { 
+    return x * x + y * y + z * z; 
 }
 
-/// Renormalize a Normal which is not guaranteed to be of length 1 (rounding, ecc.)
-Normal Normal::normalize() {
-    return _scalar_divide<Normal, float, Normal>(*this, this->norm());
+[[nodiscard]] [[gnu::always_inline]] inline float Vec::norm() const { 
+    return std::sqrt(x * x + y * y + z * z); 
+}
+
+[[nodiscard]] [[gnu::always_inline]] inline float Normal::norm2() const { 
+    return x * x + y * y + z * z; 
+}
+
+[[nodiscard]] [[gnu::always_inline]] inline float Normal::norm() const { 
+    return std::sqrt(x * x + y * y + z * z); 
+}
+
+/// @brief Return a normalized Vec (Fast inverse square root or standard division)[cite: 1]
+[[nodiscard]] [[gnu::always_inline]] inline Vec Vec::normalize() const {
+    float n = std::sqrt(x * x + y * y + z * z);
+    float inv = 1.0f / n;
+    return Vec{ x * inv, y * inv, z * inv };
+}
+
+/// @brief Renormalize a Normal[cite: 1]
+[[gnu::always_inline]] inline Normal Normal::normalize() {
+    float n = std::sqrt(x * x + y * y + z * z);
+    float inv = 1.0f / n;
+    x *= inv; y *= inv; z *= inv;
+    return *this;
 }
 
 // ======================================================
 // is_close methods
 // ======================================================
 
-bool Vec2D::is_close(const Vec2D& other, float epsilon) const {
+[[nodiscard]] [[gnu::always_inline]] inline bool Vec2D::is_close(Vec2D other, float epsilon) const {
     return aux::are_close(u, other.u, epsilon) &&
            aux::are_close(v, other.v, epsilon);
 }
 
-bool Point::is_close(const Point& other, float epsilon) const {
-    return aux::are_xyz_close(*this, other, epsilon);
+[[nodiscard]] [[gnu::always_inline]] inline bool Point::is_close(Point other, float epsilon) const {
+    return aux::are_close(x, other.x, epsilon) &&
+           aux::are_close(y, other.y, epsilon) &&
+           aux::are_close(z, other.z, epsilon);
 }
 
-bool Vec::is_close(const Vec& other, float epsilon) const {
-    return aux::are_xyz_close(*this, other, epsilon);
+[[nodiscard]] [[gnu::always_inline]] inline bool Vec::is_close(Vec other, float epsilon) const {
+    return aux::are_close(x, other.x, epsilon) &&
+           aux::are_close(y, other.y, epsilon) &&
+           aux::are_close(z, other.z, epsilon);
 }
 
-bool Normal::is_close(const Normal& other, float epsilon) const {
-    return aux::are_xyz_close(*this, other, epsilon);
+[[nodiscard]] [[gnu::always_inline]] inline bool Normal::is_close(Normal other, float epsilon) const {
+    return aux::are_close(x, other.x, epsilon) &&
+           aux::are_close(y, other.y, epsilon) &&
+           aux::are_close(z, other.z, epsilon);
 }
 
-bool HomMatrix::is_close(const HomMatrix& other, float epsilon) const {
+[[nodiscard]] inline bool HomMatrix::is_close(const HomMatrix& other, float epsilon) const {
     for (int i = 0; i < 16; ++i) {
         if (!aux::are_close(mat[i], other.mat[i], epsilon)) return false;
     }
@@ -617,50 +645,53 @@ bool HomMatrix::is_close(const HomMatrix& other, float epsilon) const {
 // Point to vec , Vec to Normal
 // ================================================
 
-/// Returns a Vec with the same components as the Point (but different type)
-Vec Point::to_vec() const {
-    return _same<Point, Vec>(*this);
+/// @brief Returns a Vec with the same components as the Point (but different type)[cite: 1]
+[[nodiscard]] [[gnu::always_inline]] inline Vec Point::to_vec() const {
+    return Vec{ x, y, z };
 }
 
-/// Returns a Normal with the same direction as the Vec
-Normal Vec::to_norm() const {
-    return _scalar_divide<Vec, float, Normal>(*this, this->norm());
+/// @brief Pure conversion without implicit and expensive hidden normalization.
+/// It has to be performed before.
+[[nodiscard]] [[gnu::always_inline]] inline Normal Vec::to_norm() const {
+    return Normal{ x, y, z };
 }
 
-/// Transformation consistency
-bool Transformation::is_consistent() const {
-    // Exploit M*M multiplication
+// ================================================
+// Transformation utils
+// ================================================
+
+/// @brief Transformation consistency[cite: 1]
+[[nodiscard]] inline bool Transformation::is_consistent() const {
     HomMatrix result = m * invm;
-    HomMatrix identity; // Default is identity
-
+    HomMatrix identity; // Default constructor sets identity
     return result.is_close(identity);
 }
 
 /// @brief Trasformation inversion:
-/// Creates a new transformation exchanging the matrix and the inverse
-Transformation Transformation::inverse() const {
-    return Transformation{invm, m};
+/// Creates a new transformation exchanging the matrix and the inverse[cite: 1]
+[[nodiscard]] [[gnu::always_inline]] inline Transformation Transformation::inverse() const {
+    return Transformation{ invm, m };
 }
 
 // ============================================================
-// std::format support
+// std::formatter struct for Point, Vec, Normal and HomMatrix
 // ============================================================
 
 /**
- * Custom formatter specializations enabling std::format() support
- * for the geometry types defined in this module.
+ * @brief Custom formatter specializations enabling std::format() support
+ * for the geometry types defined in this module.[cite: 1]
  *
  * The formatting specification used for float values is propagated
- * to all components. For example:
+ * to all components. For example:[cite: 1]
  *
- * std::format("{:.2f}", Point{1.f, 2.f, 3.f})
+ * std::format("{:.2f}", Point{1.f, 2.f, 3.f})[cite: 1]
  *
- * produces:
+ * produces:[cite: 1]
  *
- * 1.00 2.00 3.00
+ * 1.00 2.00 3.00[cite: 1]
  */
 
-/// Enable std::format() support for Point.
+/// @brief Enable std::format() support for Point.[cite: 1]
 export template <>
 struct std::formatter<Point> {
     std::formatter<float> float_fmt;
@@ -681,7 +712,7 @@ struct std::formatter<Point> {
     }
 };
 
-/// Enable std::format() support for Vec.
+/// @brief Enable std::format() support for Vec.[cite: 1]
 export template <>
 struct std::formatter<Vec> {
     std::formatter<float> float_fmt;
@@ -702,7 +733,7 @@ struct std::formatter<Vec> {
     }
 };
 
-/// Enable std::format() support for Normal.
+/// @brief Enable std::format() support for Normal.[cite: 1]
 export template <>
 struct std::formatter<Normal> {
     std::formatter<float> float_fmt;
@@ -723,7 +754,7 @@ struct std::formatter<Normal> {
     }
 };
 
-/// Enable std::format() support for HomMatrix.
+/// @brief Enable std::format() support for HomMatrix.[cite: 1]
 export template <>
 struct std::formatter<HomMatrix> {
     std::formatter<float> float_fmt;
@@ -747,30 +778,26 @@ struct std::formatter<HomMatrix> {
     }
 };
 
+
 // ================================================
-// TEMPLATE ORTHONORMAL BASIS GENERATOR
+// ORTHONORMAL BASIS GENERATOR (Zero Overhead)
 // ================================================
 
 /**
- * @brief Build an orthonormal basis from a normalized direction.
+ * @brief Build an orthonormal basis from a normalized direction.[cite: 1]
  *
- * The input vector becomes the local z-axis of the generated basis.
+ * The input vector becomes the local z-axis of the generated basis.[cite: 1]
  *
- * @tparam VectorType Vec or Normal.
- * @param normal Normalized direction.
- * @return Array containing {e1, e2, e3}.
+ * @tparam VectorType Vec or Normal.[cite: 1]
+ * @param normal Normalized direction.[cite: 1]
+ * @return std::tuple containing {e1, e2, e3}.[cite: 1]
  */
-/// Create a orthonormal basis (ONB) from a vector representing the z axis (normalized)
-/// Return a tuple containing the three vectors (e1, e2, e3) of the basis. The result is such
-/// that e3 = normal.
-/// The `normal` vector must be *normalized*, otherwise this method won't work.
+/// Returns a std::tuple to allow the compiler to use CPU registers directly instead of stack memory.
+/// To unpack use: auto [e1, e2, e3] = create_onb_from_z(normal);
 export template <typename VectorType>
-std::array<Vec, 3> create_onb_from_z(const VectorType& normal) {
-
-    // std::copysign(1.0f, normal.z) copies the sign bit of normal.z onto 1.0f.
-    // It returns exactly 1.0f if positive/zero, and -1.0f if negative.
+[[nodiscard]] [[gnu::always_inline]] inline std::tuple<Vec, Vec, Vec> create_onb_from_z(VectorType normal) {
+    
     float sign = std::copysign(1.0f, normal.z);
-
     float a = -1.0f / (sign + normal.z);
     float b = normal.x * normal.y * a;
 
@@ -792,7 +819,5 @@ std::array<Vec, 3> create_onb_from_z(const VectorType& normal) {
         normal.z
     };
 
-    // Returns an array containing the [e1, e2, e3] basis vectors
-    // To unpack use auto [e1, e2, e3] = create_onb_from_z()
-    return std::array<Vec, 3>{e1, e2, e3};
-}
+    return std::make_tuple(e1, e2, e3);
+};

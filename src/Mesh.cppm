@@ -816,7 +816,7 @@ export struct Mesh : Shape {
                     hit.t = t;
                     Vec interpolated_normal = (nA * alpha + nB * beta + nC * gamma);
                     // Use std::copysign to flip normal if the ray comes from inside
-                    hit.hit_normal = (interpolated_normal * (-std::copysign(1.0f, interpolated_normal * local_ray.direction))).to_norm();
+                    hit.hit_normal = (interpolated_normal * (-std::copysign(1.0f, interpolated_normal * local_ray.direction))).to_norm().normalize(); // Raw conversion to_norm() needs to be normalized to ensure unit length
                     hit.surface_params = {alpha * tA.u + beta * tB.u + gamma * tC.u,
                                              alpha * tA.v + beta * tB.v + gamma * tC.v};
                     hit.hitted_shape = this; // Point directly to this exact mesh in memory

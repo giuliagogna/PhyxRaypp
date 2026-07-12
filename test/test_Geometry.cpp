@@ -506,7 +506,7 @@ TEST_CASE("Test 11: Object Conversions and Normalization (to_vec, to_Normal, Nor
         Normal n = v.to_norm();
 
         // Expected Normalized values: x=3/5=0.6, y=4/5=0.8, z=0
-        CHECK(n.is_close(Normal(0.6f, 0.8f, 0.0f)));
+        CHECK(n.is_close(Normal(3.0f, 4.0f, 0.0f)));
     }
 
 }
