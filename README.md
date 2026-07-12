@@ -15,6 +15,7 @@ Scenes and rendering parameters are parsed dynamically at runtime using a custom
   * `pathtracing`: Physically based rendering using Monte Carlo integration and Russian Roulette depth control to calculate global illumination.
 * **TBB parallelism:** thanks to Intel TBB library, it's possible to reduce rendering time by dividing the job on more threads.
 * **Mesh and OBJ file support:** Imports vertexes, normals and UV mapping textures from OBJ+PFM files to generate triangular meshes. The ray intersection method is optimized by a BVH binary tree SAH logic.
+* **CSG support:** Supports the Constructive Solid Geometry operation on all shapes. The structure is a binary operational tree where each node can perform union, intersection and difference evaluating and operating on the set of ray intercepted points.
 * **Material System:** Supports uniform colors, procedural checkerboards, and HDR image texture mapping attached to diffusive or specular BRDFs.
 * **HDR Image Processing:** Converts `.pfm` files to standard `.png` files, applying normalization (alpha) and gamma correction.
 
@@ -29,8 +30,8 @@ xmake
 ```
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
-## Usage
-The executable PhyxRadpp provides two main commands: `pfm2png` and `demo`.
+## Usage: quick introduction
+The executable PhyxRadpp provides two main commands: `pfm2png` and `render`.
 
 ### 1. PFM to PNG Converter
 Converts an HDR image into a standard PNG.
@@ -38,7 +39,7 @@ Converts an HDR image into a standard PNG.
 ```bash
 xmake run PhyxRadpp pfm2png <INPUT_PFM> <ALPHA_FACTOR> <GAMMA> [FLAGS]
 ```
-- Routing: The program automatically looks for the input file in pfm_files/` and saves the output to `png_converted/`.
+- Routing: The program automatically looks for the input file in `pfm_files` and saves the output to `png_converted`.
 
 #### -- Example 1.1: Conversion from `.pfm` to `.png`
 Convert `pfm_files/memorial.pfm` using an `alpha=0.3` and a `gamma=1.0.
@@ -46,13 +47,15 @@ Convert `pfm_files/memorial.pfm` using an `alpha=0.3` and a `gamma=1.0.
 ```bash
 xmake run PhyxRadpp pfm2png memorial.pfm 0.3 1.0
 ```
-*(Outputs: `png_converted/memorial_a0.3_g1.png`)*
 
+<div align="center">
 <img src="png_converted/memorial_a0.3_g1.png" alt="Conversion result" width="40%">
 
+(Outputs: `png_converted/memorial_a0.3_g1.png`)
+</div>
 
 ### 2. Scene Rendering
-Renders a 3D scene. You can optionally specify the rendering algorithm, resolution, antialiasing, and path tracing parameters.
+Renders a 3D scene. You can optionally specify the rendering algorithm, resolution, antialiasing, and more parameters.
 
 **Command**
 ```bash
@@ -60,7 +63,7 @@ xmake run PhyxRadpp render <INPUT_SCENE_TXT> <ALPHA_FACTOR> <GAMMA> [FLAGS]
 ```
 **Optional Flags:**
 * `--output <filename>`: Bypasses the automated folder routing/naming and saves the file exactly as specified.
-* `--parallel <N>`: Perform a parallel run of the rendering on N threads using Intel TBB  
+* `--parallel <N>`: Perform a parallel run of the rendering on N threads using Intel TBB.
 * `--algorithm <type>` : Render engine (`onoff`, `flat`, or `pathtracing`). Default is `flat`.
 * `--antialiasing <N>` : Apply anti-aliasing with NxN samples per pixel.
 * `--dimensions <W> <H>` : Set output image resolution in pixels (Width Height).
@@ -74,25 +77,28 @@ Render the quick black-and-white silhouette map of the geometry in `examples/sph
 ```bash
 xmake run PhyxRadpp render sphere_silhouette.txt 1.0 1.0 --algorithm onoff
 ```
+<div align="center">
 <img src="generated_images/sphere_silhouette_a1_g1_flat_800x800.png" alt="OnOff spheres result" width="50%">
 
-*(Outputs: `generated_images/sphere_silhouette_a1_g1_onoff_800x800.png`)*
+(Outputs: `generated_images/sphere_silhouette_a1_g1_onoff_800x800.png`)
+</div>
 
-*Note: When using the `onoff` renderer, the values of alpha` and `gamma` do not affect the binary output, but must still be provided to satisfy the CLI parameters.*
+*Note: When using the `onoff` renderer, the values of `alpha` and `gamma` do not affect the binary output, but **must** still be provided to satisfy the CLI parameters.*
 
 #### -- Example 2.2: Flat Shading (Textured Scene)
 Render `examples/sphere_and_plane.txt` with resolution 800x800 and 4x4 antialiasing.
 
-To render a scene with a textured sphere and a checkered plane using an `alpha=0.3` and `gamma=2.2`:
+To render the scene with a textured sphere and a checkered plane using an `alpha=0.3` and `gamma=2.2`:
 
 ```bash
 xmake run PhyxRadpp render sphere_and_plane.txt 0.3 2.2 --algorithm flat --dimensions 800 800 --antialiasing 4
 ```
 
-*(Outputs: `generated_images/sphere_and_plane_a0.3_g2.2_flat_800x800_AA4.png`)*
-
+<div align="center">
 <img src="generated_images/sphere_and_plane_a0.3_g2.2_flat_800x800_AA4.png" alt="Textured scene" width="50%">
 
+(Outputs: `generated_images/sphere_and_plane_a0.3_g2.2_flat_800x800_AA4.png`)
+</div>
 
 #### -- Example 2.3: Path Tracing (Global Illumination)
 Render `examples/cornell_box_teapot.txt` with resolution 800x800, 10x10 antialiasing, using 4 rays per bounce, `max_depth=4`, and Russian Roulette at `depth=3`:
@@ -100,10 +106,11 @@ Render `examples/cornell_box_teapot.txt` with resolution 800x800, 10x10 antialia
 ```bash
 xmake run PhyxRadpp render cornell_box_teapot.txt 1.0 1.0 --algorithm pathtracing --antialiasing 10 --dimensions 800 800 --pathtracer_params 4 4 3
 ```
-
+<div align="center">
 <img src="generated_images/cornell_box_teapot_a1_g1_pathtracing_800x800_AA10_r4_d4_rr3.png" alt="Cornell Box Teapot" width="50%">
 
-*(Outputs: `generated_images/cornell_box_teapot_a1_g1_pathtracing_800x800_AA10_r4_d4_rr3.png`)*
+(Outputs: `generated_images/cornell_box_teapot_a1_g1_pathtracing_800x800_AA10_r4_d4_rr3.png`)
+</div>
 
 Another example of this is the rendering of `examples/cornell_box_spheres.txt` with resolution 800x800, 10x10 antialiasing, using 4 rays per bounce, `max_depth=4`, and Russian Roulette at `depth=3`:
 
@@ -111,9 +118,11 @@ Another example of this is the rendering of `examples/cornell_box_spheres.txt` w
 xmake run PhyxRadpp render examples/cornell_box_spheres.txt 1.0 1.0 generated_images/cornell_box_spheres.png --algorithm pathtracing --antialiasing 10 --dimensions 800 800 --pathtracer_params 4 4 3
 ```
 
-*(Outputs: `generated_images/cornell_box_spheres_a1_g1_pathtracing_800x800_AA10_r4_d4_rr3.png`)*
-
+<div align="center">
 <img src="generated_images/cornell_box_spheres_a1_g1_pathtracing_800x800_AA10_r4_d4_rr3.png" alt="Cornell Box Spheres" width="50%">
+
+(Outputs: `generated_images/cornell_box_spheres_a1_g1_pathtracing_800x800_AA10_r4_d4_rr3.png`)
+</div>
 
 #### -- Example 2.4: Custom Output
 Render a scene and manually define the exact output path.
@@ -123,9 +132,11 @@ This is the rendering of `examples/utah_teapot.txt`.
 xmake run PhyxRadpp render utah_teapot.txt 1.0 1.0 --algorithm flat --output my_custom_output_path/custom_test_render.png
 ```
 
-*(Outputs: `my_custom_output_path/custom_test_render.png`)*
-
+<div align="center">
 <img src="my_custom_output_path/custom_test_render.png" alt="Teapot" width="50%">
+
+(Outputs: `my_custom_output_path/custom_test_render.png`)
+</div>
 
 #### -- Example 2.5: Classic Cornell Box
 Render `examples/cornell_box_classic.txt` with resolution 800x800, 10x10 antialiasing, using 4 rays per bounce, `max_depth=4`, and Russian Roulette at `depth=3`:
@@ -133,10 +144,11 @@ Render `examples/cornell_box_classic.txt` with resolution 800x800, 10x10 antiali
 ```bash
 xmake run PhyxRadpp render examples/cornell_box_classic.txt 1.0 1.0 --algorithm pathtracing --antialiasing 10 --dimensions 800 800 --pathtracer_params 4 4 3
 ```
-
+<div align="center">
 <img src="generated_images/cornell_box_classic_a1_g1_pathtracing_800x800_AA10_r4_d4_rr3.png" alt="Classic Cornell Box" width="50%">
 
-*(Outputs: `generated_images/cornell_box_classic_a1_g1_pathtracing_800x800_AA10_r4_d4_rr3.png`)*
+(Outputs: `generated_images/cornell_box_classic_a1_g1_pathtracing_800x800_AA10_r4_d4_rr3.png`)
+</div>
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 ## Scene Description Language
@@ -161,11 +173,34 @@ For a complete guide on all available shapes, materials, and syntax rules, pleas
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
 ## Mesh Loading and BVH Acceleration
+<div align="center">
+<img src="generated_images/monkey_a1_g1_flat_800x800.png" alt="Classic Cornell Box" width="50%">
+
+(A primate covering his hears because of the computer fans noise)
+</div>
+
 
 `PhyxRadpp` supports loading complex 3D geometry directly from standard `.obj` files. To ensure fast and efficient ray intersection during rendering, these meshes can be accelerated using a Bounding Volume Hierarchy (BVH) built with the Surface Area Heuristic (SAH).
 
 * **BVH:** a Bounding Volume Hierarchy organizes the complex mesh into a tree structure of progressively smaller 3D boxes. Instead of testing a light ray against millions of individual triangles, the renderer tests the ray against these large boxes first. If a ray misses a box, the engine can safely ignore everything inside it, drastically speeding up render times.
 * **SAH:** The Surface Area Heuristic is a cost model used to build a highly optimized BVH. Rather than splitting the mesh randomly or blindly down the middle, the SAH calculates the best places to divide the geometry based on the surface area of the bounding boxes. It estimates the mathematical probability of a ray hitting different parts of the mesh, creating a tree structure that actively minimizes unnecessary intersection tests.
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+## Constructive Solid Geometry
+<div align="center">
+<img src="other_images/csg-tree.png" alt="Classic Cornell Box" width="50%">
+</div>
+
+In order to avoid the preparation and usage of meshes, complex shapes can be obtained by binary operations (**union**, **intersection** and **difference**) between shapes. The shapes are prepared as a operational binary tree that operates on each node on the whole set of intersection with the incident ray (not just the first hit) on the two child shapes. Thus, a child can also be a CSG node itself, which is common practice as illustrated in the picture above.
+
+The architecture of the tree is implemented by the user with the Scene Description Language which allows nesting declarations of CSG shapes.
+
+<div align="center">
+<img src="generated_images/cornell_box_dice_pathtracing.png" alt="Classic Cornell Box" width="50%">
+
+(Dice generated by CSG operations on a cube: cilinders intersections to shape the edges and spheres differences to scoop the dots)
+</div>
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 ## Testing
@@ -184,7 +219,7 @@ xmake run test_HDRImage
 
 `PhyxRadpp` includes source documentation in the repository:
 
-- API documentation embedded in the source code using Doxygen comments;
+- Methods and struct documentation embedded in the source code using special comments;
 - the Scene Description Language specification ([`docs/SCENE_LANGUAGE.md`](docs/SCENE_LANGUAGE.md)).
 
 The generated HTML documentation is not included in the repository and can be built locally using Doxygen.

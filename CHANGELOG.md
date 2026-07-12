@@ -4,7 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-------
+### Added
+- Add BSG support to the Scene Description Language
+- Add `BSG` shape supporting union, intersection and difference operations
+- Add `Cylinder` shape
 
 ## [1.0.0] - 2026-07-06
 

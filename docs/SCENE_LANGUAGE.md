@@ -98,7 +98,7 @@ Transformations allow you to move, rotate, and scale objects and cameras in 3D s
 
 Once a material is defined, you can apply it to geometric primitives. The transformation matrix is optional.
 
-**Syntax:** `shape_type(transformation, material_name);` or `shape_type(material_name);
+**Syntax:** `shape_type(transformation, material_name);` or `shape_type(material_name);`
 
 ### Built-in primitives
 
@@ -123,4 +123,42 @@ The mesh automatically builds a Bounding Volume Hierarchy (BVH) to optimize rend
 ```text
 # Load the Utah Teapot
 mesh("mesh/utah_teapot.obj", red_mirror, scaling([0.4, 0.4, 0.4]));
+```
+
+### CSG structures
+
+It's possible to build a tree of successive BGS operation to build more complicated objects. The sintax allows nested operations. The sintax is different than the one from other shapes: there's no texture attribute since it derives from primitive shapes at the tree leafs, and the tranformations are put on the back (default is identity): `csg_operation(left_hand_shape(...), right_hand_shape(...), transformation)`
+
+Here a snippet of nested CSG operation in order to build a 6 face dice from cubes, cylinders and spheres: 
+```csg_difference(
+    csg_intersection(
+        csg_intersection(
+            cube(identity, dice_mat),
+            cylinder(scaling([1.3, 1.3, 1.3]), dice_mat)
+        ),
+        csg_intersection(
+            cylinder(rot_y(pi_over_2) * scaling([1.3, 1.3, 1.3]), dice_mat),
+            cylinder(rot_x(pi_over_2) * scaling([1.3, 1.3, 1.3]), dice_mat)
+        )        
+    ),
+    # Dice dots, well allocated tree
+    csg_union(
+        csg_union(
+            csg_union(
+                csg_union(
+                    csg_union(
+                        sphere(translation([-1.03,  0.5,  0.6]) * scaling([0.2, 0.2, 0.2]), dice_dots_mat),
+                        sphere(translation([-1.03,  0.5,  0.0]) * scaling([0.2, 0.2, 0.2]), dice_dots_mat)
+                    
+...
+
+                csg_union(
+                    sphere(translation([-0.6, -0.6, 1.03]) * scaling([0.2, 0.2, 0.2]), dice_dots_mat),
+                    sphere(translation([ 0.6, -0.6, 1.03]) * scaling([0.2, 0.2, 0.2]), dice_dots_mat)
+                )
+            )
+        )
+    ),
+    translation([4.0, 0.0, 0.0]) * scaling([0.5, 0.5, 0.5]) * ...
+);
 ```
