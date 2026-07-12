@@ -782,7 +782,7 @@ TEST_CASE("TEST 10: Cube - ray_all_intersections Test Suite") {
 // TEST 11: Cylinder - ray_intersection Test Suite
 // =========================================================================
 TEST_CASE("TEST 11: Cylinder - Comprehensive Test Suite (ray_intersection)") {
-    // Default cylinder: centered at origin, radius 1, infinite along Z-axis
+    // Default cylinder: centered at origin, radius 1, finite along Z-axis [-1.0, 1.0] with caps
     Cylinder cylinder;
 
     SUBCASE("Outside intersection perpendicular to Z-axis") {
@@ -803,11 +803,10 @@ TEST_CASE("TEST 11: Cylinder - Comprehensive Test Suite (ray_intersection)") {
         REQUIRE(hit.has_value());
         CHECK(aux::are_close(hit->t, 1.0f));
         CHECK(hit->hit_point.is_close(Point{1.0f, 0.0f, -1.0f}));
-        // Normal ignores Z component on an infinite cylinder body
         CHECK(hit->hit_normal.is_close(Normal{1.0f, 0.0f, 0.0f})); 
     }
 
-    SUBCASE("Intersection from inside the cylinder") {
+    SUBCASE("Intersection from inside the cylinder hitting the wall") {
         Ray ray{Point{0.0f, 0.0f, 0.0f}, Vec{0.0f, 1.0f, 0.0f}};
         auto hit = cylinder.ray_intersection(ray);
 
@@ -822,34 +821,47 @@ TEST_CASE("TEST 11: Cylinder - Comprehensive Test Suite (ray_intersection)") {
         Ray ray{Point{2.0f, 0.0f, 0.0f}, Vec{0.0f, 0.0f, 1.0f}};
         auto hit = cylinder.ray_intersection(ray);
 
-        // Tests degenerate case (a < 1e-7f)
         CHECK_FALSE(hit.has_value());
     }
 
-    SUBCASE("No intersection - Ray parallel to Z-axis inside cylinder") {
+    SUBCASE("Intersection with top cap - Ray parallel to Z-axis inside cylinder") {
+        // NOW VALID: Starting inside at origin and going up hits the top cap at z = 1.0
         Ray ray{Point{0.0f, 0.0f, 0.0f}, Vec{0.0f, 0.0f, 1.0f}};
         auto hit = cylinder.ray_intersection(ray);
 
-        CHECK_FALSE(hit.has_value());
+        REQUIRE(hit.has_value());
+        CHECK(aux::are_close(hit->t, 1.0f));
+        CHECK(hit->hit_point.is_close(Point{0.0f, 0.0f, 1.0f}));
+        // Flipped normal faces down against the ray direction
+        CHECK(hit->hit_normal.is_close(Normal{0.0f, 0.0f, -1.0f}));
+    }
+
+    SUBCASE("Intersection with top cap from outside") {
+        // Ray pointing straight down at the top cap from above
+        Ray ray{Point{0.0f, 0.0f, 3.0f}, Vec{0.0f, 0.0f, -1.0f}};
+        auto hit = cylinder.ray_intersection(ray);
+
+        REQUIRE(hit.has_value());
+        CHECK(aux::are_close(hit->t, 2.0f));
+        CHECK(hit->hit_point.is_close(Point{0.0f, 0.0f, 1.0f}));
+        // Normal faces up against the ray
+        CHECK(hit->hit_normal.is_close(Normal{0.0f, 0.0f, 1.0f}));
     }
 
     SUBCASE("No intersection - Ray misses cylinder") {
         Ray ray{Point{2.0f, 2.0f, 0.0f}, Vec{0.0f, 1.0f, 0.0f}};
         auto hit = cylinder.ray_intersection(ray);
 
-        // Discriminant < 0
         CHECK_FALSE(hit.has_value());
     }
 
     SUBCASE("Transformed cylinder (Scaling + Translation)") {
-        // Scaled by 2, translated x+5
         Cylinder cylinder_transformed{Trans(Vec{5.0f, 0.0f, 0.0f}) * Scale(Vec{2.0f, 2.0f, 1.0f})};
         
         Ray ray{Point{0.0f, 0.0f, 0.0f}, Vec{1.0f, 0.0f, 0.0f}};
         auto hit = cylinder_transformed.ray_intersection(ray);
 
         REQUIRE(hit.has_value());
-        // Cylinder origin at x=5, radius 2 => boundaries at x=3 and x=7
         CHECK(aux::are_close(hit->t, 3.0f));
         CHECK(hit->hit_point.is_close(Point{3.0f, 0.0f, 0.0f}));
         CHECK(hit->hit_normal.is_close(Normal{-1.0f, 0.0f, 0.0f}));
@@ -862,22 +874,22 @@ TEST_CASE("TEST 11: Cylinder - Comprehensive Test Suite (ray_intersection)") {
 TEST_CASE("TEST 12: Cylinder - ray_all_intersections Test Suite") {
     Cylinder cylinder;
 
-    SUBCASE("Ray passing completely through cylinder") {
-        Ray ray{Point{3.0f, 0.0f, 5.0f}, Vec{-1.0f, 0.0f, 0.0f}};
+    SUBCASE("Ray passing completely through cylinder side wall") {
+        // FIXED: Moved z from 5.0f to 0.0f so it actually hits the finite cylinder body
+        Ray ray{Point{3.0f, 0.0f, 0.0f}, Vec{-1.0f, 0.0f, 0.0f}};
         auto hits = cylinder.ray_all_intersections(ray);
 
         REQUIRE(hits.size() == 2);
 
         // Entry Hit (t = 2.0)
         CHECK(aux::are_close(hits[0].t, 2.0f));
-        CHECK(hits[0].hit_point.is_close(Point{1.0f, 0.0f, 5.0f}));
+        CHECK(hits[0].hit_point.is_close(Point{1.0f, 0.0f, 0.0f}));
         CHECK(hits[0].hit_normal.is_close(Normal{1.0f, 0.0f, 0.0f})); 
         CHECK(hits[0].is_entering == true);
 
         // Exit Hit (t = 4.0)
         CHECK(aux::are_close(hits[1].t, 4.0f));
-        CHECK(hits[1].hit_point.is_close(Point{-1.0f, 0.0f, 5.0f}));
-        // Normal flipped for exit hit
+        CHECK(hits[1].hit_point.is_close(Point{-1.0f, 0.0f, 0.0f}));
         CHECK(hits[1].hit_normal.is_close(Normal{1.0f, 0.0f, 0.0f})); 
         CHECK(hits[1].is_entering == false);
     }
@@ -896,7 +908,6 @@ TEST_CASE("TEST 12: Cylinder - ray_all_intersections Test Suite") {
     }
 
     SUBCASE("Secant ray (off-center intersection)") {
-        // Chord at y = 0.5
         Ray ray{Point{2.0f, 0.5f, 0.0f}, Vec{-1.0f, 0.0f, 0.0f}};
         auto hits = cylinder.ray_all_intersections(ray);
 
@@ -912,6 +923,26 @@ TEST_CASE("TEST 12: Cylinder - ray_all_intersections Test Suite") {
         // Exit Hit
         CHECK(aux::are_close(hits[1].t, 2.0f + expected_x));
         CHECK(hits[1].hit_point.is_close(Point{-expected_x, 0.5f, 0.0f}));
+        CHECK(hits[1].is_entering == false);
+    }
+
+    SUBCASE("Ray passing completely through from top cap to bottom cap") {
+        // NEW TEST: Verifies CSG behavior through the caps
+        Ray ray{Point{0.0f, 0.0f, 3.0f}, Vec{0.0f, 0.0f, -1.0f}};
+        auto hits = cylinder.ray_all_intersections(ray);
+
+        REQUIRE(hits.size() == 2);
+
+        // Top cap entry (t = 2.0)
+        CHECK(aux::are_close(hits[0].t, 2.0f));
+        CHECK(hits[0].hit_point.is_close(Point{0.0f, 0.0f, 1.0f}));
+        CHECK(hits[0].hit_normal.is_close(Normal{0.0f, 0.0f, 1.0f}));
+        CHECK(hits[0].is_entering == true);
+
+        // Bottom cap exit (t = 4.0)
+        CHECK(aux::are_close(hits[1].t, 4.0f));
+        CHECK(hits[1].hit_point.is_close(Point{0.0f, 0.0f, -1.0f}));
+        CHECK(hits[1].hit_normal.is_close(Normal{0.0f, 0.0f, 1.0f})); // Flipped to face against ray
         CHECK(hits[1].is_entering == false);
     }
 }

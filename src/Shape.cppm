@@ -631,156 +631,242 @@ export struct Cube : Shape {
 };
 
 // ============================================================================
-// CYLINDER
+// CYLINDER (FINITE WITH CAPS)
 // ============================================================================
 
 /**
- * @brief Infinite unit cylinder centered at the local origin along the z-axis.
- * 
- * The cylinder has a radius \f$r = 1.0\f$ and extends infinitely along the 
- * z-axis (\f$z \in (-\infty, +\infty)\f$). It does not have top or bottom caps.
+ * @brief Finite unit cylinder centered at the local origin along the z-axis.
+ * * Radius \f$r = 1.0\f$, bounded along the z-axis in \f$z \in [-1.0, 1.0]\f$.
+ * * Includes flat top and bottom caps to form a closed, solid convex shape.
  */
 export struct Cylinder : Shape {
     using Shape::Shape;
 
-private:
     /**
-     * @brief Helper function to solve the quadratic equation for the infinite cylinder.
-     * 
-     * Computes the intersection parameters \f$t\f$ by solving the equation 
-     * \f$x^2 + y^2 = 1\f$ in the local space of the cylinder.
-     * 
-     * @param local_ray The ray transformed into the cylinder's local coordinate space.
-     * @return std::optional<std::pair<float, float>> A pair containing the two roots 
-     *         {t1, t2} (where t1 <= t2) if an intersection occurs, otherwise std::nullopt.
-     */
-    [[nodiscard]] std::optional<std::array<float, 2>> _get_t_intersections(const Ray& local_ray) const {
-        Vec O = local_ray.origin.to_vec();
-        Vec D = local_ray.direction;
-
-        // Coefficients for the cylinder equation: x^2 + y^2 = 1
-        float a = D.x * D.x + D.y * D.y;
-        
-        // If the ray is strictly parallel to the Z-axis (a ~ 0), 
-        // it will never intersect the cylinder walls.
-        if (a < 1e-7f) {
-            return std::nullopt;
-        }
-
-        float b_half = O.x * D.x + O.y * D.y;
-        float c = O.x * O.x + O.y * O.y - 1.0f;
-        float disc = b_half * b_half - a * c;
-
-        // No real roots means the ray misses the cylinder completely
-        if (disc < 0.0f) {
-            return std::nullopt;
-        }
-
-        float sqrt_disc = std::sqrt(disc);
-        float inv_a = 1.0f / a;
-        
-        // Return the roots: t1 (closest) and t2 (farthest)
-        return std::array<float, 2>{
-            (-b_half - sqrt_disc) * inv_a, 
-            (-b_half + sqrt_disc) * inv_a
-        };
-    }
-
-public:
-    /**
-     * @brief Computes the closest valid intersection between the ray and the cylinder.
-     * 
+     * @brief Computes the closest valid intersection between the ray and the finite cylinder.
      * @param ray The incident ray in world space.
      * @return std::optional<HitRecord> The hit record if an intersection occurs, otherwise std::nullopt.
      */
     [[nodiscard]] std::optional<HitRecord> ray_intersection(const Ray& ray) const override {
-        Ray local_ray = ray.transform(trans.inverse());
+        const Ray local_ray = ray.transform(trans.inverse());
+        const Vec O = local_ray.origin.to_vec();
+        const Vec D = local_ray.direction;
 
-        auto roots_optional = _get_t_intersections(local_ray);
-        if (!roots_optional) return std::nullopt;
-        auto roots = roots_optional.value();
+        float best_t = local_ray.tmax;
+        Normal best_local_normal{0.0f, 0.0f, 0.0f};
+        float best_u = 0.0f, best_v = 0.0f;
 
-        float t1 = roots[0];
-        float t2 = roots[1];
+        // Intersect with the side wall: x^2 + y^2 = 1
+        const float a = D.x * D.x + D.y * D.y;
+        if (a > 1e-7f) {
+            const float c = O.x * O.x + O.y * O.y - 1.0f;
+            const float b_half = O.x * D.x + O.y * D.y;
+            const float disc = b_half * b_half - a * c;
 
-        // Branchless validation of the t parameters within the ray's valid range
-        bool valid1 = (t1 > local_ray.tmin && t1 < local_ray.tmax);
-        bool valid2 = (t2 > local_ray.tmin && t2 < local_ray.tmax);
+            if (disc >= 0.0f) {
+                const float sqrt_disc = std::sqrt(disc);
+                const float inv_a = 1.0f / a;
+                const float t1 = (-b_half - sqrt_disc) * inv_a;
+                const float t2 = (-b_half + sqrt_disc) * inv_a;
 
-        if (!valid1 && !valid2) {
+                for (const float t : {t1, t2}) {
+                    if (t > local_ray.tmin && t < best_t) {
+                        const float z = O.z + t * D.z;
+                        if (z >= -1.0f && z <= 1.0f) {
+                            best_t = t;
+                            const Point p = local_ray.at(t);
+                            
+                            // Normal calculation (purely radial on XY plane)
+                            Normal n{p.x, p.y, 0.0f};
+                            const float len2 = n.x * n.x + n.y * n.y;
+                            if (len2 > 1e-12f) {
+                                const float inv_len = 1.0f / std::sqrt(len2);
+                                best_local_normal = Normal{n.x * inv_len, n.y * inv_len, 0.0f};
+                            } else {
+                                best_local_normal = Normal{1.0f, 0.0f, 0.0f};
+                            }
+
+                            // UV Mapping for side wall
+                            float u = std::atan2(p.y, p.x) / (2.0f * std::numbers::pi_v<float>);
+                            best_u = (u >= 0.0f) ? u : (u + 1.0f);
+                            best_v = (p.z + 1.0f) * 0.5f;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Intersect with end caps (z = 1.0 and z = -1.0)
+        if (std::abs(D.z) > 1e-7f) {
+            // Top Cap (z = 1.0)
+            const float t_top = (1.0f - O.z) / D.z;
+            if (t_top > local_ray.tmin && t_top < best_t) {
+                const Point p_top = local_ray.at(t_top);
+                if (p_top.x * p_top.x + p_top.y * p_top.y <= 1.0f) {
+                    best_t = t_top;
+                    best_local_normal = Normal{0.0f, 0.0f, 1.0f};
+                    best_u = (p_top.x + 1.0f) * 0.5f;
+                    best_v = (p_top.y + 1.0f) * 0.5f;
+                }
+            }
+
+            // Bottom Cap (z = -1.0)
+            const float t_bottom = (-1.0f - O.z) / D.z;
+            if (t_bottom > local_ray.tmin && t_bottom < best_t) {
+                const Point p_bottom = local_ray.at(t_bottom);
+                if (p_bottom.x * p_bottom.x + p_bottom.y * p_bottom.y <= 1.0f) {
+                    best_t = t_bottom;
+                    best_local_normal = Normal{0.0f, 0.0f, -1.0f};
+                    best_u = (p_bottom.x + 1.0f) * 0.5f;
+                    best_v = (p_bottom.y + 1.0f) * 0.5f;
+                }
+            }
+        }
+
+        // No valid hit found within range
+        if (best_t >= local_ray.tmax) {
             return std::nullopt;
         }
 
-        // If t1 is valid, pick it (since t1 <= t2, it is the closest), otherwise fallback to t2
-        float first_hit_t = valid1 ? t1 : t2;
+        const Point local_point = local_ray.at(best_t);
 
-        Point local_point = local_ray.at(first_hit_t);
-        Normal local_normal{local_point.x, local_point.y, 0.0f};
-
-        // Branchless normal flipping to ensure it always faces against the incident ray
-        float dot = local_normal * local_ray.direction;
-        float flip = -std::copysign(1.0f, dot);
-        local_normal = Normal{local_normal.x * flip, local_normal.y * flip, 0.0f};
-
-        // UV mapping
-        // u is mapped azimuthally [0, 1] around the z-axis
-        // v is periodically tiled every 1 unit along the z-axis to support the infinite length
-        float u = std::atan2(local_point.y, local_point.x) / (2.0f * std::numbers::pi_v<float>);
-        u = (u >= 0.0f) ? u : (u + 1.0f);
-        float v = local_point.z - std::floor(local_point.z);
+        // Normal flipping to ensure it always faces against the incident ray
+        const float dot = best_local_normal * local_ray.direction;
+        const float flip = -std::copysign(1.0f, dot);
+        Normal flipped_normal{best_local_normal.x * flip, best_local_normal.y * flip, best_local_normal.z * flip};
 
         HitRecord record;
         record.ray = ray;
-        record.t = first_hit_t;
+        record.t = best_t;
         record.hit_point = trans * local_point;
-        record.hit_normal = (trans * local_normal).normalize();
-        record.surface_params = {u, v};
+        record.hit_normal = (trans * flipped_normal).normalize();
+        record.surface_params = {best_u, best_v};
         record.hitted_shape = this;
 
         return record;
     }
 
     /**
-     * @brief Computes all valid intersections between the ray and the cylinder (useful for CSG).
-     * 
+     * @brief Computes all valid intersections between the ray and the finite cylinder (essential for CSG).
      * @param ray The incident ray in world space.
-     * @return std::vector<directionalHitRecord> A collection of all intersections along the ray path.
+     * @return std::vector<directionalHitRecord> A collection of all sorted intersections along the ray path.
      */
     [[nodiscard]] std::vector<directionalHitRecord> ray_all_intersections(const Ray& ray) const override {
-        Ray local_ray = ray.transform(trans.inverse());
+        const Ray local_ray = ray.transform(trans.inverse());
+        const Vec O = local_ray.origin.to_vec();
+        const Vec D = local_ray.direction;
+
         std::vector<directionalHitRecord> intersections;
+        intersections.reserve(4);
 
-        auto roots_optional = _get_t_intersections(local_ray);
-        if (!roots_optional) return intersections;
-        auto roots = roots_optional.value();
+        // Check side wall
+        const float a = D.x * D.x + D.y * D.y;
+        if (a > 1e-7f) {
+            const float c = O.x * O.x + O.y * O.y - 1.0f;
+            const float b_half = O.x * D.x + O.y * D.y;
+            const float disc = b_half * b_half - a * c;
 
-        // Cleanly iterate over both potential roots
-        for (float t : roots) {
-            if (t > local_ray.tmin && t < local_ray.tmax) {
-                Point local_point = local_ray.at(t);
-                Normal local_normal{local_point.x, local_point.y, 0.0f};
+            if (disc >= 0.0f) {
+                const float sqrt_disc = std::sqrt(disc);
+                const float inv_a = 1.0f / a;
+                const float t1 = (-b_half - sqrt_disc) * inv_a;
+                const float t2 = (-b_half + sqrt_disc) * inv_a;
 
-                float dot = local_normal * local_ray.direction;
-                bool is_entering = (dot < 0.0f);
+                for (const float t : {t1, t2}) {
+                    if (t > local_ray.tmin && t < local_ray.tmax) {
+                        const float z = O.z + t * D.z;
+                        if (z >= -1.0f && z <= 1.0f) {
+                            const Point local_point = local_ray.at(t);
+                            
+                            Normal n{local_point.x, local_point.y, 0.0f};
+                            const float len2 = n.x * n.x + n.y * n.y;
+                            if (len2 > 1e-12f) {
+                                const float inv_len = 1.0f / std::sqrt(len2);
+                                n = Normal{n.x * inv_len, n.y * inv_len, 0.0f};
+                            } else {
+                                n = Normal{1.0f, 0.0f, 0.0f};
+                            }
 
-                // Branchless normal flipping
-                float flip = -std::copysign(1.0f, dot);
-                local_normal = Normal{local_normal.x * flip, local_normal.y * flip, 0.0f};
+                            float u = std::atan2(local_point.y, local_point.x) / (2.0f * std::numbers::pi_v<float>);
+                            u = (u >= 0.0f) ? u : (u + 1.0f);
+                            const float v = (local_point.z + 1.0f) * 0.5f;
 
-                float u = std::atan2(local_point.y, local_point.x) / (2.0f * std::numbers::pi_v<float>);
-                u = (u >= 0.0f) ? u : (u + 1.0f);
-                float v = local_point.z - std::floor(local_point.z);
+                            // Inline Record Construction: Side Wall
+                            const float dot = n * local_ray.direction;
+                            const bool is_entering = (dot < 0.0f);
+                            const float flip = -std::copysign(1.0f, dot);
+                            Normal flipped_normal{n.x * flip, n.y * flip, 0.0f};
 
-                directionalHitRecord record;
-                record.ray = ray;
-                record.t = t;
-                record.hit_point = trans * local_point;
-                record.hit_normal = (trans * local_normal).normalize();
-                record.surface_params = {u, v};
-                record.hitted_shape = this;
-                record.is_entering = is_entering;
+                            directionalHitRecord record;
+                            record.ray = ray;
+                            record.t = t;
+                            record.hit_point = trans * local_point;
+                            record.hit_normal = (trans * flipped_normal).normalize();
+                            record.surface_params = {u, v};
+                            record.hitted_shape = this;
+                            record.is_entering = is_entering;
 
-                intersections.push_back(record);
+                            intersections.push_back(record);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Check caps
+        if (std::abs(D.z) > 1e-7f) {
+            // Top Cap (z = 1.0)
+            const float t_top = (1.0f - O.z) / D.z;
+            if (t_top > local_ray.tmin && t_top < local_ray.tmax) {
+                const Point p_top = local_ray.at(t_top);
+                if (p_top.x * p_top.x + p_top.y * p_top.y <= 1.0f) {
+                    const float u = (p_top.x + 1.0f) * 0.5f;
+                    const float v = (p_top.y + 1.0f) * 0.5f;
+
+                    Normal n_top{0.0f, 0.0f, 1.0f};
+                    const float dot = n_top * local_ray.direction;
+                    const bool is_entering = (dot < 0.0f);
+                    const float flip = -std::copysign(1.0f, dot);
+                    Normal flipped_normal{0.0f, 0.0f, 1.0f * flip};
+
+                    directionalHitRecord record;
+                    record.ray = ray;
+                    record.t = t_top;
+                    record.hit_point = trans * p_top;
+                    record.hit_normal = (trans * flipped_normal).normalize();
+                    record.surface_params = {u, v};
+                    record.hitted_shape = this;
+                    record.is_entering = is_entering;
+
+                    intersections.push_back(record);
+                }
+            }
+
+            // Bottom Cap (z = -1.0)
+            const float t_bottom = (-1.0f - O.z) / D.z;
+            if (t_bottom > local_ray.tmin && t_bottom < local_ray.tmax) {
+                const Point p_bottom = local_ray.at(t_bottom);
+                if (p_bottom.x * p_bottom.x + p_bottom.y * p_bottom.y <= 1.0f) {
+                    const float u = (p_bottom.x + 1.0f) * 0.5f;
+                    const float v = (p_bottom.y + 1.0f) * 0.5f;
+
+                    Normal n_bottom{0.0f, 0.0f, -1.0f};
+                    const float dot = n_bottom * local_ray.direction;
+                    const bool is_entering = (dot < 0.0f);
+                    const float flip = -std::copysign(1.0f, dot);
+                    Normal flipped_normal{0.0f, 0.0f, -1.0f * flip};
+
+                    directionalHitRecord record;
+                    record.ray = ray;
+                    record.t = t_bottom;
+                    record.hit_point = trans * p_bottom;
+                    record.hit_normal = (trans * flipped_normal).normalize();
+                    record.surface_params = {u, v};
+                    record.hitted_shape = this;
+                    record.is_entering = is_entering;
+
+                    intersections.push_back(record);
+                }
             }
         }
 
