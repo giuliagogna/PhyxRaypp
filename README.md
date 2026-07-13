@@ -5,8 +5,7 @@ PhyxRadpp is a C++23 ray tracer and image processing utility built using `xmake`
 Scenes and rendering parameters are parsed dynamically at runtime using a custom LL(1) recursive descent parser, reading from text-based scene description files.
 
 <div align="center">
-<img src="generated_images/shapes_zoo_a1_g1_pathtracing_1000x750_AA7_r4_d5_rr3.png 
-" alt="Conversion result" width="70%">
+<img src="generated_images/shapes_zoo_a1_g1_pathtracing_1000x750_AA7_r4_d5_rr3.png" alt="Conversion result" width="70%">
 
 A shapes zoo
 </div>
