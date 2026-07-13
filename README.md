@@ -25,6 +25,38 @@ A shapes zoo
 * **HDR Image Processing:** Converts `.pfm` files to standard `.png` files, applying normalization (alpha) and gamma correction.
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
+## First Time Setup (Dependencies)
+
+### Prerequisite: xmake
+This project uses `xmake` as its build system. You must install it before compiling the project.
+* **Installation Guide:** [xmake.io/getting_started](https://xmake.io/#/getting_started)
+
+Once `xmake` is installed, follow the instructions for your specific operating system to ensure your C++23 compiler is properly configured.
+
+If you are compiling this project on a fresh machine, you need a C++23 compatible compiler. `xmake` will automatically download `doctest` and `stb`, but you must provide the compiler.
+
+### 🐧 Linux (Ubuntu)
+You need Clang 18 and libc++ for C++23 modules support. Run these commands once:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y clang-18 libc++-18-dev libc++abi-18-dev clang-tools-18
+xmake config --yes --toolchain=clang
+```
+
+### 🍎 macOS
+Install the official LLVM via Homebrew (Apple Clang lacks full module support):
+
+```bash
+brew update
+brew install llvm
+xmake config --yes
+```
+
+### 🪟 Windows
+Visual Studio 2022 (MSVC) is fully supported and detected automatically. Just run xmake.
+
+------------------------------------------------------------------------------------------------------------------------------------------------
 ## Building the Project
 
 The project requires a C++23 compatible compiler. Dependencies (`doctest` and `stb`) are handled automatically by `xmake`.
@@ -283,35 +315,3 @@ Open the main page in your browser:
 ```text
 docs/html/index.html
 ```
-
-------------------------------------------------------------------------------------------------------------------------------------------------
-## First Time Setup (Dependencies)
-
-### Prerequisite: xmake
-This project uses `xmake` as its build system. You must install it before compiling the project.
-* **Installation Guide:** [xmake.io/getting_started](https://xmake.io/#/getting_started)
-
-Once `xmake` is installed, follow the instructions for your specific operating system to ensure your C++23 compiler is properly configured.
-
-If you are compiling this project on a fresh machine, you need a C++23 compatible compiler. `xmake` will automatically download `doctest` and `stb`, but you must provide the compiler.
-
-### 🐧 Linux (Ubuntu)
-You need Clang 18 and libc++ for C++23 modules support. Run these commands once:
-
-```bash
-sudo apt-get update
-sudo apt-get install -y clang-18 libc++-18-dev libc++abi-18-dev clang-tools-18
-xmake config --yes --toolchain=clang
-```
-
-### 🍎 macOS
-Install the official LLVM via Homebrew (Apple Clang lacks full module support):
-
-```bash
-brew update
-brew install llvm
-xmake config --yes
-```
-
-### 🪟 Windows
-Visual Studio 2022 (MSVC) is fully supported and detected automatically. Just run xmake.
