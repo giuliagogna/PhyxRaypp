@@ -68,7 +68,6 @@ test_images/test_showcase_out.pfm
 # ====================================
 *.data
 *.data.old
-perf*
 report.txt
 
 

@@ -1,9 +1,15 @@
 # PhyxRadpp
 
-PhyxRadpp is a C++23 ray tracer and image processing utility built using `xmake`. It supports processing HDR images and rendering 3D scenes using mathematical primitives (spheres, planes, cubes) and OBJ meshes.
+PhyxRadpp is a C++23 ray tracer and image processing utility built using `xmake`. It supports processing HDR images and rendering 3D scenes using mathematical primitives (spheres, planes, cubes), OBJ meshes and CSG trees.
 
 Scenes and rendering parameters are parsed dynamically at runtime using a custom LL(1) recursive descent parser, reading from text-based scene description files.
 
+<div align="center">
+<img src="generated_images/shapes_zoo_a1_g1_pathtracing_1000x750_AA7_r4_d5_rr3.png 
+" alt="Conversion result" width="70%">
+
+A shapes zoo
+</div>
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 ## Features
@@ -213,6 +219,41 @@ To run tests for a specific module (e.g., `HDRImage):
 ```bash
 xmake run test_HDRImage
 ```
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+## Profiling
+To perform profiling analysis set up `xmake` mode to `profiling` to compile
+```bash
+xmake f -m profile
+xmake
+```
+then launch a raytracing job via a program like `perf` and redirect the output to a text file.
+```bash
+perf record --call-graph dwarf time xmake run PhyxRadpp ...
+perf report > report.txt
+```
+
+To help the user, there is the `bash` script `scripts/perf_report.sh` that can or cannot work on your device.
+
+*Note: after switching to profiling compilation mode, you will have to reset the mode to production*
+```bash
+xmake f -m release
+xmake
+```
+
+### Flame Graph
+<div align="center">
+<img src="flamegraph.svg" alt="Classic Cornell Box" width="70%">
+
+(Flame graph of a pathtracing job after code optimization)
+</div>
+To generate the interactive `svg` flame graph, there are two `perl` scripts that can or cannot help you: `scripts/flame_graph.pl` and `scripts/stackcollapse-perf.pl`.
+
+After generating `perf` data files, run
+```bash
+perf script | ./stackcollapse-perf.pl | ./flamegraph.pl > flamegraph.svg
+```
+and then open the output on a browser. Clicking on the rectangles lets you visually interract even with deeper functions calls.
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 ## Documentation
