@@ -820,4 +820,4 @@ export template <typename VectorType>
     };
 
     return std::make_tuple(e1, e2, e3);
-};
+}

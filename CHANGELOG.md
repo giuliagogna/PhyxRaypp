@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+- Refine xmake.lua compilation flags
+- Imrpove geometry calculations performance by rewrtiting everything, forcing inlining and exploiting registers when possible
+- Improve performance in Mesh recursive calls by passing closest hit by reference
+- Improve performance for BRDF removing trigonometric functions
+
 ### Added
 - Add BSG support to the Scene Description Language
 - Add `BSG` shape supporting union, intersection and difference operations
