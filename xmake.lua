@@ -9,6 +9,9 @@ add_requires("doctest")
 add_requires("stb")
 add_requires("tbb")
 
+-- release, debug, and profile build modes
+add_rules("mode.release", "mode.debug", "mode.profile")
+
 -- Variable to hold the found path so we only search ONCE
 local linux_std_path = nil
 
@@ -64,16 +67,25 @@ function add_linux_std_module()
     end
 end
 
--- Optimization flags for release builds
-set_optimize("fastest")    -- -O3
+-- optimization flags for different build modes
+if is_mode("release") then
+    set_optimize("fastest")      -- -O3
+    add_cxflags("-fomit-frame-pointer") 
+    set_policy("build.optimization.lto", true) -- Fix LTO
+elseif is_mode("profile") then
+    set_optimize("fastest")      
+    set_symbols("debug")         
+    add_cxflags("-fno-omit-frame-pointer", "-fno-optimize-sibling-calls") 
+    set_policy("build.optimization.lto", true) -- Fix LTO
+end
 
 if is_plat("windows") then
-    -- This will run slower on Windows
     add_vectorexts("avx", "avx2")
 else
-    -- This will run faster on macOS and Linux
-    add_vectorexts("all")
+    -- vector extensions for Linux and macOS
+    add_vectorexts("all") 
 end
+
 
 -- ==========================================
 -- 2. Principal target (production code)
