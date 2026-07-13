@@ -2,9 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [1.1.0] - 2026-07-13
 
 ### Changed
+- Optimization progress is reported in 
 - Refine xmake.lua compilation flags
 - Imrpove geometry calculations performance by rewrtiting everything, forcing inlining and exploiting registers when possible
 - Improve performance in Mesh recursive calls by passing closest hit by reference
